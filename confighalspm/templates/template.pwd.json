@@ -1,0 +1,37 @@
+{
+    "DB":{
+        "HOST" : "127.0.0.1",
+        "NAME" : "HALV3",
+        "USER" : "xxxx",
+        "PWD" : "xxxx"
+    },
+    "CAS":{
+        "HOST" : "127.0.0.1",
+        "NAME" : "CAS_users",
+        "USER": "xxxx",
+        "PWD": "xxxxx",
+	"SERVICE": "127.0.0.1:80" 
+    },
+    "THUMB":{
+        "KEY" : "xxxxxxx",
+        "IP" : ["127.0.0.1", "127.0.0.1"]
+    },
+    "PAOL":{
+        "HOST" : "xxxxxx",
+        "NAME" : "xxxx",
+        "USER" : "xxxxxx",
+        "PWD" : "xxxxxxxxxx"
+    },
+    "ARXIV":{
+        "SERVICE" : "xxxxxxxxxxx",
+        "USERAGENT" : "xxxx",
+        "USER" : "xxxx",
+        "PWD" : "xxxxxxx"
+    },
+    "ARCHIVAGE": {
+        "HOST": "example.org",
+        "PORT": 22,
+        "USER": "anon",
+        "PWD": "ymous"
+    }
+}

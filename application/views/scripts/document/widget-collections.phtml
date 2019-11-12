@@ -1,0 +1,30 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yannick
+ * Date: 26/09/2014
+ * Time: 09:42
+ *
+ * $this->document doit exister et etre un objet Hal_Document
+ *
+ */
+
+if (count($this->document->getCollections())) {
+    $hidden = Hal_Site_Settings_Collection::getNonVisibleCollections();
+    ?>
+    <div class="widget widget-collection">
+        <h3 class="widget-header"><?php echo $this->translate('Collections') ?></h3>
+        <div class="widget-content">
+            <?php
+            $collections = array();
+            foreach($this->document->getCollections() as $collection) {
+
+                /** @var Hal_Site_Collection $collection */
+                if (!empty($hidden) && in_array($collection->getShortname(), $hidden)) continue;
+                ?>
+                <?php $collections[] = '<a href="/' . $collection->getShortname() . '" target="_blank" data-toggle="tooltip" title="' . $collection->getFullname(). '">' . $collection->getShortname() . '</a>'; ?>
+            <?php } ?>
+            <p><?php echo implode(' | ', $collections);?></p>
+        </div>
+    </div>
+<?php }

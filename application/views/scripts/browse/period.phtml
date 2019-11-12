@@ -1,0 +1,247 @@
+<?php
+$this->jQuery()->addJavascriptFile('/js/browse/browse.js') ?>
+<div class="row">
+    <div class="col-md-7">
+
+
+        <?php
+
+        if (!is_array($this->facetYears)) {
+            echo $this->translate('Il n\'y a pas de données à afficher pour l\'instant.');
+            return;
+        }
+
+        // Styles pour les boutons
+        $bntStyles = [
+            'file' => 'btn btn-primary btn-xs',
+            'notice' => 'btn btn-default btn-xs',
+            'annex' => 'btn btn-info btn-xs',
+            'total' => 'btn btn-default btn-xs'
+        ];
+
+        $searchParams ['q'] = '*';
+        $searchParams ['controller'] = 'search';
+        $searchParams ['action'] = 'index';
+
+
+        $url = [];
+        $url ['controller'] = 'search';
+
+        Hal_Settings::$submitTypeIconsClass ['total'] = '';
+
+        ?>
+
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th><?php echo $this->translate('Années') ?></th>
+                <th style="width: 100px; text-align: right;"><?php echo $this->translate('Documents') ?></th>
+                <th style="width: 100px; text-align: right;"><?php echo $this->translate('Notices') ?></th>
+                <th style="width: 100px; text-align: right;"><?php echo $this->translate('Annexes') ?></th>
+                <th style="width: 100px; text-align: right;"><?php echo $this->translate('Tous') ?></th>
+            </tr>
+            </thead>
+            <tbody>
+
+
+            <?php /*liste des années */
+            $nbRanges = count($this->facetYears);
+            $rangeNumber = 1;
+
+
+            ?>
+            <?php foreach ($this->facetYears as $year => $values) :
+                if ($values['total'] == 0){
+                    continue;
+                }?>
+                <tr>
+
+                    <?php $nextRangeYear = (int)$year + (int)$this->rangeParams['facetRangeGap']; ?>
+
+                    <td>
+                        <?php
+
+                        if ($this->rangeParams['facetRangeGap'] != 1) {
+                            echo $year . '&nbsp;-&nbsp;' . $nextRangeYear;
+                        } else {
+                            echo $year;
+                        }
+                        ?>
+                    </td>
+
+                    <?php
+                    // edge type facet range : The first and last gap ranges include their edge bounds (lower for the first one, upper for the last one) even if the corresponding upper/lower option is not specified.
+
+                    if ('edge' == $this->rangeParams['facetRangeInclude']) {
+                        if (1 == $rangeNumber) {
+                            $url ['q'] = $this->rangeParams ['facetRange'] . ':' . $this->rangeParams['requestBoundChars']['firstGapLower'] . $year . ' TO ' . $nextRangeYear . $this->rangeParams['requestBoundChars']['firstGapUpper'];
+                        } elseif ($nbRanges == $rangeNumber) {
+                            $url ['q'] = $this->rangeParams ['facetRange'] . ':' . $this->rangeParams['requestBoundChars']['lastGapLower'] . $year . ' TO ' . $nextRangeYear . $this->rangeParams['requestBoundChars']['lastGapUpper'];
+                        } else {
+                            $url ['q'] = $this->rangeParams ['facetRange'] . ':' . $this->rangeParams['requestBoundChars']['allGapLower'] . $year . ' TO ' . $nextRangeYear . $this->rangeParams['requestBoundChars']['allGapUpper'];
+                        }
+                    } else {
+                        $url ['q'] = $this->rangeParams ['facetRange'] . ':' . $this->rangeParams['requestBoundChars']['allGapLower'] . $year . ' TO ' . $nextRangeYear . $this->rangeParams['requestBoundChars']['allGapUpper'];
+                    }
+
+                    ?>
+
+                    <?php foreach ($values as $type => $count) : ?>
+
+                        <?php
+
+                        if ($type == 'total') {
+                            unset ($url ['submitType_s']);
+                        } else {
+                            $url ['submitType_s'] = $type;
+                        }
+
+                        ?>
+                        <td style="width: 100px; text-align: right;">
+                            <?php
+                            if ($count != 0) {
+                                echo '<a rel="nofollow" class="' . $bntStyles [$type] . '" role="button" href="' . $this->url($url, null, TRUE) . '">';
+
+                                echo '<span class="' . Hal_Settings::$submitTypeIconsClass [$type] . '"></span> ';
+
+                                echo $count;
+                                echo '</a>';
+                            }
+                            ?>
+                        </td>
+
+                    <?php endforeach; ?>
+
+                </tr>
+                <?php $rangeNumber++; ?>
+            <?php endforeach; ?>
+
+
+            <?php /* totaux */
+
+
+            ?>
+            <?php if (isset($this->facet ['file'] ["between"])) : ?>
+                <?php $url['q'] = $this->rangeParams['facetRange'] . ':' . $this->rangeParams['requestBoundChars']['betweenGapLower'] . $this->rangeParams['facetRangeStart'] . ' TO ' . $this->facet['end'] . $this->rangeParams['requestBoundChars']['betweenGapUpper']; ?>
+
+                <tr class="active">
+                    <td><?php echo $this->translate('Total') . ' (' . $this->rangeParams['facetRangeStart'] . '&nbsp;-&nbsp;' . $this->facet['end'] . ')'; ?></td>
+                    <td style="width: 100px; text-align: right;">
+                        <?php
+                        $url ['submitType_s'] = 'file';
+                        echo '<a rel="nofollow" class="btn btn-primary btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Documents') . '" href="' . $this->url($url, null, true, true) . '">';
+                        echo '<span class="' . Hal_Settings::$submitTypeIconsClass [$url ['submitType_s']] . '"></span> ';
+                        echo $this->facet ['file'] ["between"];
+                        echo '</a>';
+                        ?>
+                    </td>
+                    <td style="width: 100px; text-align: right;">
+                        <?php
+                        $url ['submitType_s'] = 'notice';
+                        echo '<a rel="nofollow" class="btn btn-default btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Notices') . '" href="' . $this->url($url, null, true, true) . '">';
+                        echo '<span class="' . Hal_Settings::$submitTypeIconsClass [$url ['submitType_s']] . '"></span> ';
+                        echo $this->facet ['notice'] ["between"];
+                        echo '</a>';
+
+                        ?></td>
+                    <td style="width: 100px; text-align: right;"><?php
+                        $url ['submitType_s'] = 'annex';
+                        echo '<a rel="nofollow" class="btn btn-info btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Annexes') . '" href="' . $this->url($url, null, true, true) . '">';
+                        echo '<span class="' . Hal_Settings::$submitTypeIconsClass [$url ['submitType_s']] . '"></span> ';
+                        echo $this->facet ['annex'] ["between"];
+                        echo '</a>';
+
+                        ?></td>
+                    <td style="width: 100px; text-align: right;">
+
+                        <?php
+                        unset ($url ['submitType_s']);
+
+                        if (isset($this->facet ['total'])) {
+                            echo '<a rel="nofollow" class="btn btn-default btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Documents ou annexes ou notices') . '" href="' . $this->url($url, null, true, true) . '">';
+                            echo $this->facet ['total'] ["between"];
+                            echo '</a>';
+                        }
+
+                        ?></td>
+                </tr>
+
+            <?php endif; ?>
+
+            <?php /* Avant les dates sélectionnées */ ?>
+
+            <?php if (isset($this->facet['file']['before'])) : ?>
+            <tr>
+                <td style="width: 100px;"><?php echo $this->translate('Avant') . ' ' . $this->rangeParams['facetRangeStart']; ?></td>
+
+                <?php foreach ($bntStyles as $type => $style) : ?>
+                    <?php
+
+                    if ($type == 'total') {
+                        unset ($url ['submitType_s']);
+                    } else {
+                        $url ['submitType_s'] = $type;
+                    }
+
+                    $url ['q'] = $this->rangeParams ['facetRange'] . ':' . $this->rangeParams['requestBoundChars']['beforeGapLower'] . '* TO ' . $this->rangeParams ['facetRangeStart'] . $this->rangeParams['requestBoundChars']['beforeGapUpper'];
+
+                    ?>
+
+                    <td style="width: 100px; text-align: right;">
+                        <?php
+                        if ($this->facet [$type] ['before'] != 0) {
+                            echo '<a rel="nofollow" class="' . $style . '" role="button" href="' . $this->url($url, null, true, true) . '">';
+                            echo '<span class="' . Hal_Settings::$submitTypeIconsClass [$type] . '"></span> ';
+                            echo $this->facet [$type] ['before'];
+                            echo '</a>';
+                        }
+                        ?>
+                    </td>
+                <?php endforeach; ?>
+
+
+                <?php endif; ?>
+
+
+
+
+
+                <?php /* Après les dates sélectionnées */ ?>
+                <?php if (isset($this->facet['file']['after'])) : ?>
+
+                <?php $url['q'] = $this->rangeParams['facetRange'] . ':' . $this->rangeParams['requestBoundChars']['afterGapLower'] . $this->facet['end'] . ' TO *' . $this->rangeParams['requestBoundChars']['afterGapUpper']; ?>
+
+
+            <tr>
+                <td style="width: 100px;"><?php echo $this->translate('Après') . ' ' . $this->facet['end']; ?></td>
+
+
+                <?php foreach ($bntStyles as $type => $style) : ?>
+                    <?php
+
+                    if ($type == 'total') {
+                        unset ($url ['submitType_s']);
+                    } else {
+                        $url ['submitType_s'] = $type;
+                    }
+                    ?>
+
+
+                    <td style="width: 100px; text-align: right;">
+                        <?php
+                        if ($this->facet [$type] ['after'] != 0) {
+                            echo '<a rel="nofollow" class="' . $style . '" role="button" href="' . $this->url($url, null, TRUE) . '">';
+                            echo '<span class="' . Hal_Settings::$submitTypeIconsClass [$type] . '"></span> ';
+                            echo $this->facet [$type] ['after'];
+                            echo '</a>';
+                        }
+                        ?></td>
+                <?php endforeach; ?>
+
+
+                <?php endif; ?>
+
+
+        </table>
+    </div>
+</div>

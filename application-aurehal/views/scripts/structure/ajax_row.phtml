@@ -1,0 +1,51 @@
+<?php
+
+$label_valid = array (
+		'OLD'  => 'warning',
+		'INCOMING'   => 'danger',
+		'VALID'   => 'success'
+);
+
+foreach ($this->paginator as $row) {
+	reset ($this->head_columns);
+	?>
+	<tr class='<?php if ('author' != $this->controllerName) echo $label_valid[$row[$this->columns['valid']]] ?>'>
+        <td>
+        	<div style='display: none;'>
+	        	<div class='row' id='struct<?php echo $row[$this->columns['id']] ?>'>
+					<div class='col-xs-3 col-sm-3 col-md-3 col-lg-3'>
+						<div style='position: relative; top: 20px;'>
+							<?php echo $this->translate("Code") ?> <i class="glyphicon glyphicon-question-sign" title="<?php echo $this->translate("Code de la structure dans l'institution concernée. Exemple: UMR5467 pour le CNRS, EA34 pour une université,..."); ?>" alt="<?php echo $this->translate("Code de la structure dans l'institution concernée. Exemple: UMR5467 pour le CNRS, EA34 pour une université,...");?>"></i> :
+							<input type='text' name="parents[<?php echo $row[$this->columns['id']] ?>][code]" value='' />
+						</div>
+					</div>
+					<div class='col-xs-8 col-sm-8 col-md-8 col-lg-8'>
+						<?php echo (new Ccsd_Referentiels_Structure($row[$this->columns['id']]))->__toString(array("showParents" => true)); ?>
+						<input type='hidden' name="parents[<?php echo $row[$this->columns['id']] ?>][struct]" value='<?php echo $row[$this->columns['id']] ?>' /> 
+					</div>
+					<div class='col-xs-1 col-sm-1 col-md-1 col-lg-1'>
+						<a href='javascript:void(0);' onclick="$(this).closest('.row').remove();" style='position: relative; top: 20px;'>
+							<i class='glyphicon glyphicon-trash'></i>
+						</a>
+					</div>
+				</div>
+        	</div>
+		</td>
+        <td>
+        	<span class="badge" style='margin-top: 4px;'><?php echo $row[$this->columns[current($this->head_columns)]]; next($this->head_columns); ?></span>
+        </td>
+        <td>	
+        	<?php echo Ccsd_Tools::ifsetor($row[$this->columns[current($this->head_columns)]]); next($this->head_columns); ?>
+        </td>        	
+        	<?php for ($i=0; $i < count ($this->head_columns) - 3; $i++) { ?>
+        <td>
+        	<?php echo Ccsd_Tools::ifsetor($row[$this->columns[current($this->head_columns)]]); next($this->head_columns); ?>
+        </td>
+	        <?php } ?>
+        <td align='center'>
+        	<?php reset($this->head_columns); ?>
+        	<button type='button' class='do_aff btn btn-xs btn-primary' onclick=''><?php echo $this->translate('Affilier')?></button>
+		</td>
+    </tr>
+<?php 
+}

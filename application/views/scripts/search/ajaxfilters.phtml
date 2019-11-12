@@ -1,0 +1,121 @@
+<div class="col-md-9">
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <?php echo $this->translate('Type de document'); ?>
+        </div>
+        <div class="panel-body">
+
+
+            <?php
+
+
+            /* @var Hal_Website_Search $this->search */
+
+            foreach (Hal_Settings::getTypdocs() as $type) {
+                $outputCategory = true;
+                $categoryTotalDocTypes = 0;
+                $isCategoryChecked = '';
+                // no category:
+                // create fake children for compatibility
+                // do not output category
+                if ($type['type'] == 'typdoc') {
+                    $type['children'] = [$type];
+                    $outputCategory = false;
+                }
+
+
+                foreach ($type['children'] as $child) {
+                    $childsArray[] = '';
+                    $childType = '';
+                    $childCode = $child['id'];
+
+                    if (array_key_exists($childCode, $this->search->getDoctypeFacet())) {
+
+                        if (array_search($childCode, $this->search->getDoctypeChecked()) !== false) {
+                            $isChecked = 'checked="checked"';
+                            $isCategoryChecked = $isChecked;
+                        } else {
+                            $isChecked = '';
+                        }
+
+                        // count of doctypes in category
+                        $categoryTotalDocTypes = $categoryTotalDocTypes + $this->search->getDoctypeFacet()[$childCode];
+
+
+                        $childsArray[] = '<span class="facet-item"><label style="font-weight: normal;">';
+                        $childsArray[] = '<input class="childCheckBox"' . $isChecked . 'id="' . $childCode . '" type="checkbox" name="docType_s[]" value="' . $childCode . '" />&nbsp;';
+                        $childsArray[] = $this->translate($child['label']);
+                        $childsArray[] = '&nbsp;<span class="text-muted">(' . $this->search->getDoctypeFacet()[$childCode] . ')</span>';
+                        $childsArray[] = '</label></span>';
+
+
+                    }
+                }
+
+                echo '<fieldset>';
+
+                if ($outputCategory) {
+                    $category = '<label>';
+                    $category .= '<input class="checkall"' . $isCategoryChecked . 'id="' . $type['label'] . '" type="checkbox" value=""/>&nbsp;';
+                    if (array_key_exists('label', $type)) {
+                        $category .= $this->translate($type['label']);
+                    } else {
+                        // Ne doit pas arrivee mais si cela arrive, autant eviter le plantage
+                        $category .= "-";
+                        Ccsd_Tools::panicMsg(__FILE__,__LINE__,"Pas de label pour le typeDoc" . var_export($type));
+                    }
+                    $category .= '&nbsp;<span class="text-muted">(';
+                    $category .= $categoryTotalDocTypes;
+                    $category .= ')</span>';
+                    $category .= '</label>';
+                    echo $category;
+                }
+
+                echo '<ul class="list-unstyled">';
+                echo '<li>' . implode('&nbsp', $childsArray) . '</li>';
+                echo '</ul>';
+
+                echo '</fieldset>';
+                unset($childsArray);
+
+
+            }
+            ?>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="col-md-3">
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <?php echo $this->translate('Type de dépôt'); ?>
+        </div>
+
+        <div class="panel-body">
+            <?php foreach ($this->search->getSubmitTypeFacet() as $code => $value) : ?>
+
+                <?php
+                if (array_search($code, $this->search->getSubmitTypeChecked()) !== false) {
+                    $isChecked = 'checked="checked"';
+                } else {
+                    $isChecked = '';
+                }
+                ?>
+                <label class="facet-item" style="font-weight: normal;">
+                    <?php echo '<input ' . $isChecked . ' id="' . $code . '" type="checkbox" name="submitType_s[]" value="' . $code . '"/>';
+                    echo '&nbsp;' . $this->translate('submitType_' . $code); ?>
+
+                    &nbsp;
+                    <span class="text-muted">(<?php echo $value ?> )</span>
+
+                </label>
+                &nbsp;
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+</div>

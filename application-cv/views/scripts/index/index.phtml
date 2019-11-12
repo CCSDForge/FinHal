@@ -1,0 +1,185 @@
+<?php
+
+if (! isset($this->cv)) {
+
+    $this->layout()->pageTitle = 'CV HAL';
+    $this->headLink()->appendStylesheet("/css/cv.css");
+    $this->headLink()->appendStylesheet("/css/print_cv.css", 'print');
+    if (Zend_Registry::get('lang')!= null){
+        include __DIR__ . '/info-'. Zend_Registry::get('lang') .'.phtml';
+    } else {
+        include __DIR__ . '/info-en.phtml';
+    }
+
+
+} else {
+
+    $cvTitle = $this->cv->getCVTitle(Zend_Registry::get('lang'));
+
+    $this->layout()->pageTitle = ($cvTitle != '') ? 'CV HAL : '.$cvTitle[Zend_Registry::get('lang')] : 'CV HAL';
+
+    $column = $this->cv->showColumn();
+
+    $default = $this->cv->getDefaultFormAuthor();
+
+    $formAuthorids = $this->cv->getFormAuthorids();
+
+    $filters = $this->cv->getFilters();
+
+    $href = $this->cv->getUrl();
+
+    if (!empty($this->cv->getTheme())) {
+        $this->headLink()->appendStylesheet('/css/'.$this->cv->getTheme());
+    } else {
+        $this->headLink()->appendStylesheet("/css/cv.css");
+        $this->headLink()->appendStylesheet("/css/print_cv.css", 'print');
+    }
+    if (!empty($this->cv->getCss())) {
+        $this->headStyle()->appendStyle($this->cv->getCss());
+    }
+
+
+    ?>
+    <?php if ($column) { ?>
+    <div class="row">
+    <div class="column-widget col-md-3">
+        <?php foreach($this->cv->getWidgets() as $widget) {
+            if ( $widget == 'metrics' && Hal_Auth::getUid() != $this->cv->getUid() ) {
+                continue ;
+            }
+            include __DIR__ . '/widget-' . $widget . '.phtml';
+        } ?>
+
+        </div>
+        <div class="column-content col-md-9">
+        <?php } else {?>
+        <div class="col-md-12">
+        <?php }?>
+        <div class="counter-doc"<?php if (!$column) { echo ' style="top:0px"'; } ?>>
+            <?php echo $this->translate('Nombre de documents'); ?>
+            <h2 class="nbdoc"><span class="label label-primary"><?php echo $this->cv->getDocumentsNb()?></span></h2>
+        </div>
+
+        <?php if ($cvTitle != '') {
+            ?>
+            <div class="author-name">
+                <h1 style="word-wrap: break-word; max-width:85%;"><?php if (isset($cvTitle[Zend_Registry::get('lang')]) && $cvTitle[Zend_Registry::get('lang')] != ''){
+                        echo $cvTitle[Zend_Registry::get('lang')];
+                    } elseif (isset($cvTitle['en']) && $cvTitle['en'] != ''){
+                        echo $cvTitle['en'];
+                    } else {
+                        foreach($cvTitle as $lang => $title){
+                            if ($title != ''){
+                                echo $title;
+                                break;
+                            }
+                        }
+                    }?>
+                </h1>
+                <hr />
+            </div>
+        <?php } else { ?>
+            <div class="author-name">
+                <h1 style="word-wrap: break-word; max-width:85%;">CV de
+                    <?php $user = new Hal_User();
+                    $user->find($this->cv->getUid());
+                    echo $user->getFirstname() .' '. $user->getLastname();?>
+                </h1>
+                <hr />
+            </div>
+        <?php } ?>
+
+        <?php
+
+        $content = $this->cv->getCVContent();
+
+        if ( is_array($content) && array_filter($content) != [] ) { ?>
+            <p class="author-cv">
+                <?php 
+                if (isset($content[Zend_Registry::get('lang')]) && $content[Zend_Registry::get('lang')] != ''){
+                    echo $content[Zend_Registry::get('lang')];
+                } elseif (isset($content['en']) && $content['en'] != ''){
+                    echo $content['en'];
+                } else {
+                    foreach($content as $lang => $cont){
+                        if ($cont != ''){
+                            echo $cont;
+                            break;
+                        }
+                    }
+                } ?>
+            </p>
+            <hr />
+        <?php } ?>
+        <?php
+        if (count($filters)) {
+            //Filtres
+            foreach($filters as $field => $filter) {
+                foreach($filter as $id => $f) {
+                    if ($field == 'dom') {
+                        $f['value'] = Ccsd_Tools_String::getHalDomainTranslated($f['value']);
+                    }
+                    ?>
+                    <span class="label label-default"><?php echo urldecode($f['value'])?>&nbsp;
+                        <a href="<?php echo $this->cv->getUrl($field, $id);?>"><i class="glyphicon glyphicon-remove"></i></a>
+                    </span>&nbsp;
+                    <?php
+                }
+            }
+        }
+
+
+        foreach($this->cv->getDocuments() as $groupId => $docs) {
+            $nbDoc = $docs['numFound'];
+            ?>
+            <div class="doc-group">
+                <h3 class="doc-header"><?php echo $this->translate('typdoc_' . $groupId); ?><small class="doc-nb"><?php echo $nbDoc . ' ' . $this->translate($nbDoc == 1 ? 'document' : 'documents') ?></small></h3>
+                <div class="doc-list" id="<?php echo $groupId ?>">
+                    <div class="doc-overflow">
+                        <ul class="media-list">
+                            <?php foreach($docs['docs'] as $doc) { ?>
+                                <li class="media">
+                                    <?php if (isset($doc["thumbId_i"]) && $doc["thumbId_i"] != 0) { ?>
+                                        <a class="pull-left media-left" href="<?php echo $doc["uri_s"] ?>" target="_blank">
+                                            <img src="<?php echo THUMB_URL."/" . $doc["thumbId_i"] ?>/thumb" class="img-thumbnail thumbnail" />
+                                        </a>
+                                    <?php } ?>
+                                    <div class="media-body">
+                                        <?php echo $doc['citationFull_s']; ?>
+                                    </div>
+                                </li>
+                            <?php } ?>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        <?php } ?>
+        </div>
+        <?php if ($column) { ?>
+    </div>
+<?php }
+
+    ?>
+    <script type="text/javascript">
+        <!--
+        /**
+         * Fonction qui affiche un div et en masque un autre
+         * @param selector1
+         * @param selector2
+         */
+        function displayDiv(elem)
+        {
+            $(elem).closest('.widget-content').children().each(function(){
+                if ($(this).is(':visible')) {
+                    $(this).hide();
+                } else {
+                    $(this).show();
+                }
+            });
+        }
+
+        //-->
+    </script>
+
+<?php
+}

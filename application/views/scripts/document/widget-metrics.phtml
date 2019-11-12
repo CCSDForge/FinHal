@@ -1,0 +1,117 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yannick
+ * Date: 26/09/2014
+ * Time: 09:42
+ *
+ * $this->document doit exister et etre un objet Hal_Document
+ *
+ */
+/** @var Hal_Document $document */
+$document    = $this->document;
+$statConsult = $document->getNbConsult();
+$this->identifiers = $document->getIdsCopy();
+$format      = $document->getFormat();
+
+// Pas d'affichage des metriques en cas d'embargo
+$files = $document->loadFiles();
+$dateVisible = $document->getDateVisibleMainFile();
+
+if ( $statConsult || count($this->identifiers)) {
+    ?>
+    <div class="widget widget-metrics">
+        <h3 class="widget-header"><?php echo $this->translate('Métriques') ?></h3>
+
+        <div class="widget-content" style="text-align: center">
+
+        <?php if ($statConsult) { ?>
+            <div class="row">
+                <?php
+                // Calcul du nombre de colonnes" 1 ou 2 pour determiner la class Css
+                if (isset($statConsult[Hal_Document::FORMAT_NOTICE]) && (isset($statConsult[Hal_Document::FORMAT_FILE])
+                        && ($format == Hal_Document::FORMAT_FILE || $format == Hal_Document::FORMAT_ANNEX)
+                        && (!isset($dateVisible) || $dateVisible <= date('Y-m-d')))) {
+                    $classColonne = "col-md-6";
+                } else {
+                    $classColonne = "";
+                }
+
+        if (isset($statConsult[Hal_Document::FORMAT_NOTICE])) { ?>
+            <div class="<?php echo $classColonne ?>">
+                <div style="height:3em"><strong><?php echo $this->translate('Consultations de la notice'); ?></strong></div>
+                <h2 style="margin-top:10px;"><span class="label label-primary"><?php echo $statConsult[Hal_Document::FORMAT_NOTICE] ?></span></h2>
+            </div>
+              <?php
+        }
+        if (isset($statConsult[Hal_Document::FORMAT_FILE]   )
+            && ($format == Hal_Document::FORMAT_FILE || $format == Hal_Document::FORMAT_ANNEX )
+            && (!isset($dateVisible) || $dateVisible <= date('Y-m-d'))) {
+            ?>
+            <div class="<?php echo $classColonne ?>">
+                <div style="height:3em"><strong><?php echo $this->translate('Téléchargements de fichiers'); ?></strong></div>
+                <h2 style="margin-top:10px;"><span class="label label-primary"><?php echo $statConsult[Hal_Document::FORMAT_FILE] ?></span></h2>
+            </div>
+            <?php
+        }
+        if (   Hal_Auth::isHALAdministrator()
+            || Hal_Auth::isAdministrator()
+            || Hal_Auth::getUid() == $this->document->getContributor('uid')
+            || in_array(Hal_Auth::getUid(), $this->document->getOwner()) ) {
+            $statUrlPrefix = PREFIX_URL . 'stat/user/id/' . $this->document->getId();
+            $attribs = ' target="_self" type="button" class="btn btn-default" data-toggle="tooltip" ';
+            ?>
+            <div class="row text-center">
+                <div class="btn-group" role="group">
+                    <a href="<?php echo $statUrlPrefix . '/type/consultation'?>" <?php echo $attribs ?> title="<?php echo $this->translate('Consultations du document'); ?>">
+                        <i class="glyphicon glyphicon-stats"></i></a>
+                    <a href="<?php echo $statUrlPrefix . '/type/provenance'?>" <?php   echo $attribs ?> title="<?php echo $this->translate('Provenance des consultations'); ?>">
+                        <i class="glyphicon glyphicon-globe"></i></a>
+                    <a href="<?php echo $statUrlPrefix . '/type/domain'?>"  <?php      echo $attribs ?> title="<?php echo $this->translate('Domaine Internet des consultations'); ?>">
+                        <i class="glyphicon glyphicon-list"></i></a>
+                </div>
+            </div>
+        <?php } ?>
+            </div>
+    <?php }
+
+        if ($statConsult && count($this->identifiers)) {
+            ?><hr style="margin-top:20px;margin-bottom:20px;"/><?php
+        }
+
+        if ( count($this->identifiers)> 0 ) {
+            $this->jQuery()->addJavascriptFile('https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js');
+
+            $badgeOptions = ' data-badge-details="right" data-badge-type="donut" data-hide-no-mentions="false" class="altmetric-embed"  ';
+
+            if (isset($this->identifiers['doi'])
+                ||  isset($this->identifiers['arxiv'])
+                ||  isset($this->identifiers['pubmed'])
+                ||  isset($this->identifiers['handle'])) {
+                $attrib='data';
+                $value ='';
+                if       (isset($this->identifiers['doi'])) {
+                    $attrib = 'data-doi';
+                    $value = $this->identifiers['doi'];
+
+                } elseif (isset($this->identifiers['arxiv'])) {
+                    $attrib = 'data-arxiv-id';
+                    $value = $this->identifiers['arxiv'];
+
+                } elseif (isset($this->identifiers['pubmed'])) {
+                    $attrib = 'data-pmid';
+                    $value = $this->identifiers['pubmed'];
+
+                } elseif (isset($this->identifiers['handle'])) {
+                    $attrib = 'data-handle';
+                    $value = $this->identifiers['handle'];
+                }
+                ?>
+                <div <?php echo "$badgeOptions $attrib='$value'" ?> ></div>
+
+            <?php }
+        } ?>
+        </div>
+    </div>
+<?php
+}

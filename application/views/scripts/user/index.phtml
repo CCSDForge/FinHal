@@ -1,0 +1,491 @@
+<?php
+$this->layout()->pageTitle = $this->translate('Mon profil');
+?>
+<fieldset class="well well-small" id="profil_ccsd">
+    <legend style="border: none;">
+        <img src="/img/logo-ccsd.png">
+    </legend>
+    <p class="description"><?php echo $this->translate('Informations de mon profil CCSD.'); ?></p>
+    <div class="col-md-9">
+        <form class="form-horizontal">
+            <?php
+            $cols = array(
+                'uid' => 'Identifiant',
+                'username' => 'Login',
+                'civ' => 'Civilité',
+                'lastname' => 'Nom de famille',
+                'firstname' => 'Prénom',
+                'middlename' => 'Complément de nom',
+                'email' => 'Courriel'
+            );
+
+            foreach ($cols as $fieldName => $label) {
+
+                if ((array_key_exists($fieldName, $this->ccsdUser)) and ( $this->ccsdUser[$fieldName] != null)) {
+                    ?>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label"><?php echo $this->translate($label); ?></label>
+                        <div class="col-md-8">
+                            <p class="form-control-static"><?php echo $this->ccsdUser[$fieldName]; ?></p>
+                        </div>
+                    </div>
+
+
+
+                <?php
+                }
+            }
+            ?>
+            <div class="form-group">
+                <label class="col-md-3 control-label"><?php echo $this->translate('Mon espace FTP'); ?></label>
+                <div class="col-md-8">
+                    <p class="form-control-static">
+                        <a class="btn btn-default btn-sm"
+                           href="<?php echo $this->url(array('controller' => 'user', 'action' => 'ftp')); ?>"><span
+                                class="glyphicon glyphicon-briefcase"></span>&nbsp;<?php echo $this->translate('Espace FTP'); ?></a>
+                    </p>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-3">
+        <img src="<?php echo CV_URL . '/photo/' . Hal_Auth::getUid() . '/large?v=' . time(); ?>"
+             class="img-thumbnail img-responsive" />
+    </div>
+    <div class="form-actions text-center" style="clear: left;">
+        <a class="btn btn-primary"
+            href="<?php echo $this->url(array('controller' => 'user', 'action' => 'edit'), null, true); ?>"><span
+            class="glyphicon glyphicon-pencil"></span>&nbsp;<?php echo $this->translate('Modifier mon profil'); ?></a>
+    </div>
+</fieldset>
+
+
+
+<?php
+/**
+ * Profil HAL
+ *
+ */
+?>
+
+<form class="form-horizontal">
+    <fieldset class="well well-small" id="profil_hal">
+        <legend style="border: none;">
+            <img src="/img/logo-hal.png">
+        </legend>
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne">
+                    <h4 class="panel-title blue">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseProfil" aria-expanded="true" aria-controls="collapseProfil">
+                            <?php echo $this->translate('Informations de mon profil HAL'); ?>
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseProfil" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                    <div class="panel-body">
+                        <?php
+                        if ((array_key_exists('screen_name', $this->halUser)) and ( $this->halUser['screen_name'] != null)) { ?>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"><?php echo $this->translate('Votre nom dans HAL') ?> :</label>
+                                <div class="col-md-8">
+                                    <p class="form-control-static"><strong class="blue"><?php echo $this->halUser['screen_name']; ?></strong></p>
+                                </div>
+                            </div>
+                            <?php
+                        } ?>
+
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"><?php echo $this->translate('Mon IdHal'); ?> :</label>
+                            <div class="col-md-8">
+                                <p class="form-control-static">
+                                    <?php if ($this->halUser['idhal'] != false) { ?>
+                                        <strong  class="blue"><?php echo $this->halUser['idhal']; ?></strong>&nbsp;
+                                        <a class="btn btn-default btn-sm" href="<?php echo $this->url(array('controller' => 'user', 'action' => 'idhal')); ?>">
+                                            <span class="glyphicon glyphicon-pencil"></span>&nbsp;
+                                            <?php
+                                            echo $this->translate('Configurer mon IdHAL');
+                                            ?>
+                                        </a>
+                                    <?php } else { ?>
+                                        <a class="btn btn-success btn-sm" href="<?php echo $this->url(array('controller' => 'user', 'action' => 'idhal')); ?>">
+                                            <span class="glyphicon glyphicon-pencil"></span>&nbsp;
+                                            <?php
+                                            echo $this->translate('Créer mon IdHAL');
+                                            ?>
+                                        </a>
+                                    <?php } ?>
+                                    <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="right"
+                                       title="IdHAL : identifiant unique qui permet à un auteur de regrouper les différentes formes sous lesquelles son nom a pu être saisi dans les publications."
+                                       alt="IdHAL : identifiant unique qui permet à un auteur de regrouper les différentes formes sous lesquelles son nom a pu être saisi dans les publications."></i>
+                                </p>
+                            </div>
+                        </div>
+
+                        <?php
+                        if ($this->halUser['cv'] != false) {
+                            ?>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"><?php echo $this->translate('Mon CV'); ?> :</label>
+                                <div class="col-md-8">
+                                    <p class="form-control-static">
+                                        <a class="btn btn-default btn-sm" href="<?php echo CV_URL . '/' . $this->halUser['idhal']; ?>" target="_blank">
+                                            <span class="glyphicon glyphicon-globe"></span>&nbsp;
+                                            <?php
+                                            echo $this->translate('Consulter mon CV');
+                                            ?>
+                                        </a> &nbsp;
+                                        <a class="btn btn-default btn-sm" href="<?php echo $this->url(array('controller' => 'user', 'action' => 'cv')); ?>">
+                                            <span class="glyphicon glyphicon-pencil"></span>&nbsp;
+                                            <?php
+                                            echo $this->translate('Modifier mon CV');
+                                            ?>
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        <?php } ?>
+
+                        <?php
+                        if ($this->halUser['idhal'] != false && $this->halUser['cv'] == false) {
+                            ?>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"><?php echo $this->translate('Mon CV'); ?> :</label>
+                                <div class="col-md-8">
+                                    <p class="form-control-static">
+                                        <a class="btn btn-success btn-sm" href="<?php echo $this->url(array('controller' => 'user', 'action' => 'cv')); ?>">
+                                            <span class="glyphicon glyphicon-pencil"></span>&nbsp;
+                                            <?php
+                                            echo $this->translate('Créer mon CV');
+                                            ?>
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        <?php } ?>
+
+                        <?php
+                        if ($this->halUser['langueid'] != null) {
+                            ?>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"><?php echo $this->translate('Langue'); ?> :</label>
+                                <div class="col-md-8">
+                                    <p class="form-control-static"><?php echo $this->translate('lang_' . $this->halUser['langueid']); ?></p>
+                                </div>
+                            </div>
+                            <?php
+                        }
+
+                        if (is_array($this->roles) && count($this->roles) > 0) { ?>
+                            <?php
+                            $icons = array(
+                                Hal_Acl::ROLE_HALADMIN => 'glyphicon-star',
+                                Hal_Acl::ROLE_ADMIN => 'glyphicon-cog',
+                                Hal_Acl::ROLE_ADMINHALMS => 'glyphicon-star',
+                                Hal_Acl::ROLE_ADMINSTRUCT => 'glyphicon-list-alt',
+                                Hal_Acl::ROLE_VALIDATEUR => 'glyphicon-eye-close',
+                                Hal_Acl::ROLE_MODERATEUR => 'glyphicon-eye-open',
+                                Hal_Acl::ROLE_TAMPONNEUR => 'glyphicon-tag',
+                                Hal_Acl::ROLE_A_TAMPONNEUR  => 'glyphicon-tag',
+                            )
+                            ?>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"><?php echo $this->translate('Privilèges'); ?> :</label>
+                                <div class="col-md-8">
+                                    <?php  foreach ($this->roles as $rightid => $values) {
+                                        if (is_array($values)) {
+                                            if (count($values) == 0 || (count($values) == 1 && array_key_exists(0, $values) && $values[0] == '')) {
+                                                continue;
+                                            }
+                                        }
+                                        if ($rightid == Hal_Acl::ROLE_A_TAMPONNEUR) {
+                                            //Internal role: no neeed to do something
+                                            continue;
+                                        }?>
+                                        <div style="margin-bottom:10px;">
+                                            <span class="struct-label struct-label-title label label-default">
+                                            <i class="glyphicon <?php if (isset($icons[$rightid])) { echo $icons[$rightid]; } ?>"></i>&nbsp;<?php echo $this->translate($rightid); ?> :
+                                        </span>
+                                        <?php
+                                        foreach ($values as $id => $elem) {
+                                            $str = '';
+                                            if (!is_array($elem)) {
+                                                $str .= $elem . (Hal_Acl::ROLE_ADMINSTRUCT == $rightid ? " (" . $id . ")" : '');
+                                            } else {
+                                                if (isset($elem['site'])) {
+                                                    $str .= $elem['site'];
+                                                    unset($elem['site']);
+                                                }
+                                                if (count($elem)) {
+                                                    $str .= " (";
+                                                    foreach ($elem as $group => $v) {
+                                                        $str .= $group . ' : ' . implode(', ', $v) . ' ';
+                                                    }
+                                                    $str .= ") ";
+                                                }
+                                            }
+                                            ?>
+                                        <span class="struct-label label label-default"><i class="glyphicon <?php if (isset($icons[$rightid])) { echo $icons[$rightid]; }?>"></i><?php echo ' '.$str; ?></span>
+                                        <?php } ?>
+                                            <br /></div>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                        <?php } ?>
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"></label>
+                            <div class="col-md-8">
+                                <p class="form-control-static">
+                                    <a class="btn btn-primary" href="<?php echo $this->url(array('controller' => 'user', 'action' => 'edit'), null, true); ?>"><span
+                                                class="glyphicon glyphicon-pencil"></span>&nbsp;<?php echo $this->translate('Modifier mon profil'); ?></a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne">
+                    <h4 class="panel-title blue">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseSubmit" aria-expanded="false" aria-controls="collapseSubmit">
+                            <?php echo $this->translate('Préférences de dépôt'); ?>
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseSubmit" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                    <div class="panel-body">
+                        <p class="description"><?php echo $this->translate('editpref_intro'); ?></p>
+                        <?php
+                        if ($this->halUser['mode'] != null) {
+                            ?>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"><?php echo $this->translate('Formulaire de dépôt'); ?> :</label>
+                                <div class="col-md-8">
+                                    <p class="form-control-static">
+                                        <?php
+                                        if ($this->halUser['mode'] == 1) {
+                                            echo $this->translate('Vue Simple');
+                                        } else {
+                                            echo $this->translate('Vue Détaillée');
+                                        }
+                                        ?></p>
+                                </div>
+                            </div>
+                            <?php
+                        }
+
+                        if ($this->halUser['domain'] != null) {
+                            ?>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"><?php echo $this->translate('Domaines'); ?> :</label>
+                                <div class="col-md-8">
+                                    <ul>
+                                        <?php
+                                        if (isset($this->halUser['domain'])) {
+                                            foreach ($this->halUser['domain'] as $domain) {
+                                                echo '<li class="form-control-static">' . Ccsd_Tools_String::getHalDomainTranslated($domain) . '</li>';
+                                            }
+                                        }
+                                        ?>
+                                    </ul>
+                                </div>
+                            </div>
+                            <?php
+                        }
+                        ?>
+                    </div>
+                    <div class="col-md-12">
+                        <?php
+                        if ($this->halUser['default_author'] != null) {
+                            ?>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"><?php echo $this->translate("M'ajouter comme auteur"); ?> :</label>
+                                <div class="col-md-8">
+                                    <p class="form-control-static">
+                                        <?php
+                                        if ($this->halUser['default_author'] == 1) {
+                                            echo $this->translate('Oui');
+                                        } else {
+                                            echo $this->translate('Non');
+                                        }
+                                        ?></p>
+                                </div>
+                            </div>
+                            <?php
+                        }
+                        if ($this->halUser['default_author'] == 1) {
+                            if ($this->halUser['default_role'] != '') {
+                                ?>
+                                <div class="form-group" style="display:none">
+                                    <label class="col-md-3 control-label"><?php echo $this->translate("Rôle par défaut"); ?> :</label>
+                                    <div class="col-md-8">
+                                        <p class="form-control-static">
+                                            <?php
+                                            echo $this->translate('relator_'.$this->halUser['default_role']);
+                                            ?>
+                                        </p>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                            ?>
+
+                            <div class="form-group">
+                                <label class="col-md-3 control-label"><?php echo $this->translate('Affiliation(s)') ?> :</label>
+                                <div class="col-md-8">
+                                    <?php
+                                    $ajoutLabo = false;
+                                    if ((array_key_exists('laboratory', $this->halUser)) and ( $this->halUser['laboratory'] != null)) {
+                                        if (is_array($this->halUser['laboratory'])) {
+
+                                            foreach ($this->halUser['laboratory'] as $structid) {
+                                                $struct = new Hal_Document_Structure ($structid);
+                                                $type = '';
+                                                $name = $struct->getStructname();
+                                                if ($struct->getTypestruct() != '') {
+                                                    $ajoutLabo = true;
+                                                    $type = ' <small>[' . $this->translate($struct->getTypestruct()) . ']</small>';
+
+                                                    ?>
+                                                    <div>
+                                            <span class="label label-default"><?php echo $name;
+                                                echo $type; ?>
+                                                <small>(<?php echo $structid ?>)</small>
+                                                    </div>
+                                                    <?php
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (!$ajoutLabo) {
+                                        ?>
+                                        <div>
+                            <span class="label label-default"><small><?php echo $this->translate('structure_no_lab'); ?></small>
+                                        </div>
+                                        <?php
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+                            <?php
+                        }?>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label"></label>
+                        <div class="col-md-8">
+                            <a class="btn btn-primary"
+                           href="<?php echo $this->url(array('controller' => 'user', 'action' => 'editprefdepot'), null, true); ?>"><span
+                                    class="glyphicon glyphicon-pencil"></span>&nbsp;<?php echo $this->translate('Modifier mes préférences de dépôt'); ?></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne">
+                <h4 class="panel-title blue">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseMail" aria-expanded="false" aria-controls="collapseMail">
+                        <?php echo $this->translate('Préférences de réception de courriel'); ?>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseMail" class="panel-collapse collapse" role="tabpanel" aria-labelledby="collapseMail">
+                <div class="panel-body">
+                    <?php
+                    if (isset($this->halUser['aut']) && $this->halUser['aut'] != null) {
+                        ?>
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"><?php echo $this->translate('Recevoir la confirmation de vos dépôts'); ?></label>
+                            <div class="col-md-8">
+                                <p class="form-control-static">
+                                    <?php
+                                    if ($this->halUser['aut'] == 1) {
+                                        echo $this->translate('Oui');
+                                    } else {
+                                        echo $this->translate('Non');
+                                    }
+                                    ?></p>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                    if (isset($this->halUser['coaut']) && $this->halUser['coaut'] != null) {
+                        ?>
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"><?php echo $this->translate('Recevoir les notifications lorsque vous êtes identifié comme co-auteur'); ?></label>
+                            <div class="col-md-8">
+                                <p class="form-control-static">
+                                    <?php
+                                    if ($this->halUser['coaut'] == 1) {
+                                        echo $this->translate('Oui');
+                                    } else {
+                                        echo $this->translate('Non');
+                                    }
+                                    ?></p>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                    if (isset($this->halUser['refstru']) && $this->halUser['refstru'] != null) {
+                        ?>
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"><?php echo $this->translate('Recevoir les notifications en tant que référent structure'); ?></label>
+                            <div class="col-md-8">
+                                <div class="form-control-static">
+                                    <?php
+                                    if (is_array($this->halUser['refstru'])){
+                                        foreach ($this->halUser['refstru']as $structid){
+                                            if ($structid != null){
+                                                $structure = new Ccsd_Referentiels_Structure();
+                                                $structure->load($structid);
+                                                ?>
+                                                <div>
+                                                <span class="label label-primary"><small><?php echo $structure->getStructname() . " (" . $structid . ")"; ?></small>
+                                                </div>
+                                            <?php
+                                            }
+                                        }
+                                        if (!isset($structure)){
+                                            echo $this->translate('Non');
+                                        }
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                    if (Hal_Auth::isAdministrator() && isset($this->halUser['admin']) && $this->halUser['admin'] == 1) {
+                        ?>
+                        <div class="form-group">
+                            <label class="col-md-3 control-label"><?php echo $this->translate('Recevoir les notifications en tant qu\'administrateur de portail'); ?></label>
+                            <div class="col-md-8">
+                                <p class="form-control-static">
+                                    <?php
+                                    if ($this->halUser['admin'] == 1) {
+                                        echo $this->translate('Oui');
+                                    } else {
+                                        echo $this->translate('Non');
+                                    }
+                                    ?></p>
+                            </div>
+                        </div>
+                        <?php
+                    }?>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label"></label>
+                    <div class="col-md-8">
+                        <a class="btn btn-primary"
+                       href="<?php echo $this->url(array('controller' => 'user', 'action' => 'editprefmail'), null, true); ?>"><span
+                                class="glyphicon glyphicon-pencil"></span>&nbsp;<?php echo $this->translate('Modifier mes préférences de courriel'); ?></a>
+                    </div>
+                </div>
+        </div>
+
+    </fieldset>
+</form>

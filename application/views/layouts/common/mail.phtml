@@ -1,0 +1,13 @@
+<?php
+//Script d'affichage du contenu d'un mail envoyé (dans l'environnement développement)
+?>
+​<div class="alert alert-warning alert-fixed fade in">
+	<button type="button" class="close" data-dismiss="alert">×</button>
+    <strong><?php echo $this->mail->getSubjectText();?></strong>
+    <hr style="margin:10px 0px;" />
+    <strong><?php echo $this->translate("De");?> : </strong><?php echo $this->mail->getFrom();?><br />
+    <strong><?php echo $this->translate("À");?> : </strong><?php echo implode(', ', $this->mail->getRecipients());?><br />
+    <hr style="margin:10px 0px;" />
+    <p><?php echo $this->mail->getBody();?></p>
+    
+</div>

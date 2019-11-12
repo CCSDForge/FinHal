@@ -1,0 +1,97 @@
+<?php
+$this->jQuery()->addJavascriptFile('/js/browse/browse.js');
+$browseParams = array();
+$browseParams['controller'] = Zend_Controller_Front::getInstance()->getRequest()->getControllerName();
+$browseParams['action'] = Zend_Controller_Front::getInstance ()->getRequest ()->getUserParam ( 'action' );
+
+
+$browseParams['letter'] = $this->letter;
+
+
+
+
+
+/**
+ * Tri des facettes
+ */
+if (! array_key_exists ( $this->sortType, Hal_Settings_Search::$facetSortingTypeIconsClass )) {
+	$browseParams ['sort'] = Hal_Settings_Search::$defaultFacetSortingType;
+}
+
+
+if ($this->sortType == null) {
+	unset($browseParams ['sort']);
+}
+
+
+
+/**
+ * // Tri des facettes
+ */
+
+if ( (isset($browseParams ['letter']) AND ($browseParams ['letter'] == 'all')) OR ($browseParams ['letter'] == null) )  {
+	unset ( $browseParams ['letter'] );
+}
+
+?>
+
+<div class="col-md-12">
+	<div class="btn-group" data-toggle="buttons"> <?php
+
+if ($this->typeFilter != null) {
+    $arrTypeFromUrl = explode(' OR ', $this->typeFilter);
+} else {
+    $arrTypeFromUrl = array();
+}
+
+foreach (Hal_Settings::$submitTypeIconsClass as $type => $typeIcon) {
+
+    if (in_array($type, $arrTypeFromUrl)) {
+
+        $data = $arrTypeFromUrl;
+        if (($key = array_search($type, $data)) !== false) {
+            unset($data[$key]);
+        }
+
+
+        $checked = ' checked="checked" ';
+        $active = ' btn-primary ';
+    } else {
+        $data = '';
+        $data = array_merge($arrTypeFromUrl, array(
+                $type => $type
+        ));
+
+        $checked = '';
+        $active = ' btn-default ';
+    }
+
+    $browseParams['submitType_s'] = implode(' OR ', $data);
+
+    if ($browseParams['submitType_s'] == '') {
+        unset($browseParams['submitType_s']);
+    }
+
+
+
+
+    $dataTarget = $this->url($browseParams);
+
+    echo '<label class="btn ' . $active . ' btn-sm checkbox-inline">';
+    echo '<input name="type" type="checkbox" id="type_' . $type . '"
+    value="' . $type . '" ' . $checked . ' data-target="' . $dataTarget . '">';
+
+    echo '<span class="' . $typeIcon . '"></span>&nbsp;';
+
+    echo $this->translate('submitType_' . $type);
+
+    echo '</label>';
+}
+
+?>
+
+
+
+</div>
+</div>
+<br>

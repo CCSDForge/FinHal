@@ -1,0 +1,112 @@
+<div class="row">
+	<div class="col-md-10">
+
+	<?php include_once __DIR__ . '/../partials/browse_type.phtml'; ?>
+
+
+<?php
+if (! is_array ( $this->facets )) {
+
+	echo '<p class="lead">';
+	echo $this->translate ( "Pas de données pour l'instant." );
+	echo '</p>';
+	return;
+}
+
+
+$searchParams ['controller'] = 'search';
+$searchParams ['action'] = 'index';
+
+
+?>
+<ul class="list-group">
+		<?php include_once __DIR__ . '/../partials/browse_sort.phtml'; ?>
+<?php
+
+
+		if ($this->viewType != 'collection_by_category') {
+
+			foreach ( $this->facets as $code => $collection ) {
+
+				$searchParams ['q'] = 'collCode_s:' . $code;
+
+				$url = $this->url ( $searchParams, null, TRUE );
+
+
+				echo '<li class="list-group-item">';
+
+				echo '<a href="/' . $this->escape ( $code ) . '">';
+				echo '<strong>' . $this->escape ( $code ) . '</strong> - ' . $this->escape ( $collection ['label'] );
+				echo '</a>';
+
+				if (isset ( $collection ['category'] )) {
+					echo '&nbsp;<small>[' . $this->translate ( 'collection_' . $collection ['category'] ) . ']</small>';
+				}
+
+
+				echo '<a href="' . $url . '" class="btn btn-default btn-xs pull-right">' . $collection ['count'] . '</a>';
+				echo '</li>';
+			}
+		}
+
+
+		?>
+
+
+
+<?php
+if ($this->viewType == 'collection_by_category') {
+	$categories = array_keys ( $this->facets );
+	echo '<li class="list-group-item">';
+	echo '<ul class="nav nav-pills">';
+	foreach ( $categories as $cat ) {
+
+		echo '<li role="presentation"><a href="#' . $cat . '">' . $this->translate ( 'collection_' . $cat ) . '</a></li>';
+	}
+	echo '</ul>';
+	echo '</li>';
+
+	foreach ( $this->facets as $category => $collections ) {
+
+
+
+
+
+		echo '<li class="list-group-item" id="' . $category . '"><h3>';
+		echo $this->translate ( 'collection_' . $category );
+
+		$nbColl = count ( $collections );
+
+		echo '&nbsp;<small>(' . $nbColl .  ' ' . $this->translate ()->getTranslator ()->plural('collection', 'collections', $nbColl)  . ')</small>';
+		echo '</h3></li>';
+
+		foreach ( $collections as $code => $collection ) {
+
+			$searchParams ['q'] = 'collCode_s:' . $code  ;
+
+			$url = $this->url ( $searchParams, null, TRUE );
+			echo '<li class="list-group-item">';
+
+			echo '<a href="/' . $this->escape ( $code ) . '">';
+			echo '<strong>' . $this->escape ( $code ) . '</strong> - ' . $this->escape ( $collection ['label'] );
+			echo '</a>';
+
+			if (isset ( $collection ['category'] )) {
+				echo '&nbsp;<small>[' . $this->translate ( 'collection_' . $collection ['category'] ) . ']</small>';
+			}
+
+			echo '<a href="' . $url. '" class="btn btn-default btn-xs pull-right">' . $collection ['count'] . '</a>';
+			echo '</li>';
+		}
+	}
+}
+
+?>
+</ul>
+<?php if (count($this->facets) >= Ccsd_Search_Solr::SOLR_MAX_RETURNED_FACETS_RESULTS): ?>
+<div class="alert alert-info" role="alert">
+<?php echo $this->translate('Affichage limité aux ') . Ccsd_Search_Solr::SOLR_MAX_RETURNED_FACETS_RESULTS . $this->translate(' premières réponses.'); ?>
+</div>
+<?php endif; ?>
+	</div>
+</div>

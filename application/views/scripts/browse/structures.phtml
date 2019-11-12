@@ -1,0 +1,40 @@
+<?php
+/** @var Hal_View $this */
+if (count ($this->facets) !=0) {
+    echo '<p class="lead">';
+    echo $this->translate("Pas de données pour l'instant.");
+    echo '</p>';
+    return;
+}
+$searchParams['q'] = '*';
+$searchParams['controller'] = 'search';
+$searchParams['action'] = 'index';
+?>
+<div class="row">
+    <div class="col-md-7">
+        <ul class="list-group">
+            <?php
+            foreach ($this->facets as $structId => $structure) {
+                $searchParams['struct'] = trim($structId);
+                $url = $this->url($searchParams, null, TRUE);
+                echo '<li class="list-group-item">';
+                echo '<a rel="nofollow" href="' . $url . '">';
+                echo trim($structure['name']);
+                echo '</a>';
+                echo ' <span class="label label-default pull-right">' . $structure['count'] . '</span>';
+                echo '</li>';
+            }
+            ?>
+            </ul>
+        <?php if (count($this->facets) >= Ccsd_Search_Solr::SOLR_MAX_RETURNED_FACETS_RESULTS): ?>
+            <div class="alert alert-info" role="alert">
+                <?php echo $this->translate('Affichage limité aux ') . Ccsd_Search_Solr::SOLR_MAX_RETURNED_FACETS_RESULTS . $this->translate(' premières réponses.'); ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+
+
+
+

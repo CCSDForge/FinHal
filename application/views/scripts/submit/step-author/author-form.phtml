@@ -1,0 +1,49 @@
+<?php 
+if (isset($this->form) && $this->form instanceof Ccsd_Form) {
+	$form = $this->form;
+} else {
+	$form = $this->author->getForm($this->typdoc);
+	$form->populate($this->author->toArray());
+
+}
+
+$form->addElement('button', 'Enregistrer', array(
+	'class'		=>	'btn btn-primary',		
+	'onclick'	=>"submitAuthorForm('" . $this->id . "');"));
+$form->addElement('hidden', 'id', array('value'	=>	$this->id));
+$form->removeDecorator('Form');
+?>
+<div attr-popoverid="aut_<?php echo $this->id;?>">
+	<form id="author-form" class="form"><?php echo $form;?></form>
+</div>
+<script type="text/javascript">
+    <!--
+    $(function() {
+        /**
+         * Gestion du visuel "Champ obligatoire"
+         */
+        $('#organism').autocomplete({
+            minLength: 2,
+            html: true,
+            source: function(request, response){
+                $.ajax({
+                    url: "/ajax/ajaxsearchstructure",
+                    dataType: "json",
+                    data: {term: request.term, type: 'institution'},
+                    success: function(data) {
+                        response($.map(data.response.docs, function(item) {
+                            return {id: item.docid, label: item.label_html}
+                        }));
+                    }
+                });
+            },
+            focus: function() {return false;},
+            select: function( event, ui ) {
+                $('#organism').val(strip_tags(ui.item.label));
+                $('#organismid').val(ui.item.id);
+                return false;
+            }
+        });
+    });
+    //-->
+</script>

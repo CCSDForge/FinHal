@@ -1,0 +1,90 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yannick
+ * Date: 26/09/2014
+ * Time: 09:42
+ *
+ * $this->document doit exister et etre un objet Hal_Document
+ *
+ *   @var Hal_View $this
+ */
+
+if ($this->document->existFile()) {
+    if ($this->document->getTypDoc() == 'IMG') {
+        ?>
+        <div class="widget widget-preview">
+            <h3 class="widget-header"><?php echo $this->translate('Prévisualisation') ?></h3>
+
+            <div class="widget-content text-center">
+                <?php $href = '/' . $this->document->getId();
+                if (count($this->document->getDocVersions()) > 1) {
+                    $href .= 'v' . $this->document->getVersion();
+                }
+                $this->jQuery()
+                    ->addJavascriptFile(CCSDLIB . "/js/ekko-lightbox.min.js")
+                    ->addStylesheet(CCSDLIB . "/css/ekko-lightbox.min.css");
+
+                $default = $this->document->getDefaultFile();
+                $thumbid = $this->document->getThumb();
+                if ($thumbid == 0) {
+                    $imgSrc = $href . $this->document->getUrlMainFile();
+                } else {
+                    $imgSrc = THUMB_URL . '/' . $thumbid . '/large';
+                }
+                ?>
+                <a href="<?php echo $imgSrc; ?>" data-toggle="lightbox" data-type="image" class="img-thumbnail"
+                   data-width="900" data-title="<?php echo $this->document->getMainTitle() ?>"><img
+                        src="<?php echo $imgSrc; ?>" width="320"/></a>
+                <h4 class="text-left">
+                    <a href="<?php echo $href . $this->document->getUrlMainFile(); ?>" target="_blank"
+                       data-toggle="tooltip"
+                       title="<?php echo $this->translate('Plein écran avec métadonnées MédiHAL') ?>"><i
+                            class="glyphicon glyphicon-info-sign"></i></a>&nbsp;
+                </h4>
+                <script>
+                    $(document).delegate('*[data-toggle="lightbox"]', 'click', function (event) {
+                        event.preventDefault();
+                        $(this).ekkoLightbox();
+                    });
+
+                </script>
+            </div>
+        </div>
+    <?php
+    } else if ($this->document->getTypDoc() == 'VIDEO') {
+        $file = $this->document->getDefaultFile();
+        if ($file->isVideo()) {
+            $options = [
+                //'width' => 400,
+                'title' => addslashes($this->document->getMainTitle()),
+                'src' => $file->getPath(true)
+            ];
+
+            if ($file->getImagette()) {
+                $options['image'] = $file->getImagetteUrl('large');
+            }
+
+        }
+
+
+
+        /*$options = [
+            //'width' => 400,
+            'title' => $this->document->getMainTitle(),
+            /*'rtmp' => 'rtmp://ccsdvid1.in2p3.fr/hal/mp4:01/09/26/52/RPS_LEST_2014.mp4',
+            'hls' => 'http://ccsdvid1.in2p3.fr/hal/_definst_/mp4:01/09/26/52/RPS_LEST_2014.mp4',*/
+            /*'rtmp' => 'rtmp://ccsdvid1.in2p3.fr/hal/mp4:01/12/14/51/VID_cmm2.m4v',
+            'hls' => 'http://ccsdvid1.in2p3.fr/hal/_definst_/mp4:01/12/14/51/VID_cmm2.m4v',*
+            'rtmp' => 'rtmp://ccsdvid1.in2p3.fr/hal/mp4:01/15/05/79/conf_connes_juin2014_2.mp4',
+            'hls' => 'http://ccsdvid1.in2p3.fr/hal/_definst_/mp4:01/15/05/79/conf_connes_juin2014_2.mp4',
+
+
+        ];*/
+        ?>
+        <div style="margin:20px auto 0;">
+            <?php echo $this->jwplayer($options); ?>
+        </div>
+        <?php
+    }
+}

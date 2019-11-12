@@ -1,0 +1,102 @@
+<?php
+
+// $this->layout()->pageDescription = $this->translate("Merci de bien vouloir vérifier, valider, modérer les articles suivants");
+
+if (count($this->documents)) {
+    $this->jQuery()
+        ->addJavascriptFile(CCSDLIB ."/js/jquery.dataTables.min.js")
+        ->addJavascriptFile(CCSDLIB ."/js/dataTables.bootstrap.js")
+        ->addStylesheet(CCSDLIB . '/css/dataTables.bootstrap.css');
+    $user = new Hal_User();
+    $infoUsers = array();
+    ?>
+
+    
+    <form action="<?php echo $this->formAction; ?>" method="post" id="list-documents">
+        <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="moderate" width="100%">
+            <thead>
+                <tr>
+                    <th class="middle" style="width:16px"><input type="checkbox" class="select-checkbox"/></th>
+                    <th class="middle"><?php echo $this->translate('Document'); ?></th>
+                    <th class="middle"><?php echo $this->translate('Contributeur'); ?></th>
+                    <th class="middle"><?php echo $this->translate('Nombre de dépôts'); ?></th>
+                    <th class="middle"><?php echo $this->translate('Déposé le'); ?></th>
+                    <th class="middle"><?php echo $this->translate('Portail'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+               
+                foreach($this->documents as $data) {
+                    $document = Hal_Document::find($data['DOCID']);
+                    if ($document == false) {
+                    	continue;;
+                    }
+                    
+                    if (! isset($infoUsers[$data['UID']])) {
+                        $user->find($data['UID']);
+                        $infoUsers[$data['UID']] = array(
+                            'fullname'  =>  $user->getFullName(),
+                            'submissions'  =>  $user->getOnlineSubmissionsNb(),
+                        );
+                    }
+                    ?>
+                    <tr>
+                        <td class="middle"><input type="checkbox" name="docid[]" value="<?php echo $data['DOCID']; ?>" class="checkbox-docid" /></td>
+                        <td class="middle">
+                            <a href="javascript:void(0);" onclick="selectDocument(<?php echo $data['DOCID']; ?>)">
+                                
+							<?php if ($document->getFormat() == Hal_Document::FORMAT_FILE) : ?>
+							<i class="glyphicon glyphicon-file"></i>
+							<?php endif; ?>
+
+                                
+                                <?php echo strip_tags($document->getCitation('full')); ?>
+                            </a>
+                            <?php if ($document->getStatus() == Hal_Document::STATUS_TRANSARXIV) { ?>
+                                <span class="arxiv" style="float:right;"> arXiv.org </span>
+                            <?php } ?>
+                            
+                        </td>
+                        <td class="middle"><?php echo $infoUsers[$data['UID']]['fullname']; ?></td>
+                        <td class="middle text-center"><span class="label label-primary"><?php echo $infoUsers[$data['UID']]['submissions']; ?></span></td>
+                        <td class="middle"><?php echo $data['DATESUBMIT'] ?></td>
+                        <td class="middle"><?php echo $data['SITE'] ?></td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th><input type="checkbox" class="select-checkbox" /></th>
+                    <th colspan="5"><button type="submit" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-eye-open"></i>&nbsp;<?php echo $this->translate('Voir'); ?></button> </th>
+                </tr>
+            </tfoot>
+        </table>
+    </form>
+
+    <script>
+        $(document).ready(function(){
+            $('#moderate').dataTable({
+                "iDisplayLength": 500,
+                "bLengthChange":false
+            });
+        });
+        $('.select-checkbox').click(function() {
+            $('#moderate .checkbox-docid, .select-checkbox').prop('checked', $(this).is(':checked'));
+        });
+
+        /**
+         * Selection d'un document
+         * @param docid
+         */
+        function selectDocument(docid)
+        {
+            $('#moderate .checkbox-docid, .select-checkbox').prop('checked', false);
+            $('#moderate .checkbox-docid[value="' + docid + '"]').prop('checked', true);
+            $('#list-documents').submit();
+        }
+    </script>
+
+<?php } else { ?>
+    <div class="alert alert-success"><strong><?php echo $this->translate("Aucun document");?></strong></div>
+<?php } ?>

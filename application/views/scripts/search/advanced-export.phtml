@@ -1,0 +1,93 @@
+<?php
+$this->layout ()->pageTitle = 'Export de la recherche';
+$this->jQuery ()->addJavascriptFile ( CCSDLIB . "/js/jquery/jquery.multisortable.js" )->addJavascriptFile('/js/search/advanced-export.js');
+
+$this->headStyle()->captureStart() ?>
+li {
+	margin: 2px 0;
+	cursor: pointer;
+}
+li.selected {
+	border: 1px dotted #DDDDDD;
+	background-color: #337ab7;
+	color: white;
+	border-radius: .25em;
+}
+li.child {
+	margin-left: 20px;
+}
+#fl {
+	margin: 0;
+	padding: 1em;
+	border: 1px dotted #CCCCCC;
+}
+#exportableFields .panel-body {
+	height: 30em;
+	overflow: auto;
+}
+#exportableFields .well {
+	height: 27em;
+}
+<?php $this->headStyle()->captureEnd() ?>
+<?php
+$form = $this->form;
+echo $form->renderForm(false); ?>
+<div class="row">
+    <?php echo $form->uri->renderViewHelper ();?>
+    <div class="col-md-6">
+        <?php
+        echo $form->wt->renderLabel ();
+        echo $form->wt->renderViewHelper ();
+        echo $form->wt->renderDescription ();
+        ?>
+    </div>
+    <div id="messageAboutExport" class="col-md-6">
+        <div class="alert alert-info" role="alert">
+            <?php echo $this->translate("Vous pouvez réordonner les champs à l'intérieur du cadre. L'ordre personnalisé de vos champs sera conservé à l'export");?>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div id="exportableFields">
+        <div class="col-md-6">
+			<div class="panel panel-default">
+                <div class="panel-heading"><?php echo $this->translate ( 'Champs disponibles' ) ;?></div>
+                <div class="panel-body">
+
+                    <ul id="available" class="sortable list-unstyled"><?php
+                        echo $form->multisortableFields_available->renderLabel ();
+                        echo $form->multisortableFields_available->renderViewHelper ();
+                        ?>
+                    </ul>
+                </div>
+                <div class="panel-footer"><?php echo $form->multisortableFields_available->renderDescription ();?></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-success">
+  			<div class="panel-heading"><?php echo $this->translate ( "Champs sélectionnés pour l'export" ) ;?></div>
+	  			<div class="panel-body">
+					<ul id="fl" class="sortable list-unstyled">
+					<?php foreach ($this->defaultExportedFields as $field) :?>
+                        <li id="<?php echo $field ?>"><span class="glyphicon glyphicon-move" ></span>&nbsp;<?php echo $this->translate ( 'hal_' . $field ) ?></li>
+					<?php endforeach;?>
+  					</ul>
+				</div>
+				<div class="panel-footer"><span class="help-block"><?php echo $this->translate("Vous pouvez supprimer des champs en les déplaçant dans le cadre <span style=\"font-style:normal;\">Champs disponibles</span>"); ?></span></div>
+			</div>
+		</div>
+    </div>
+</div>
+<div class="row">
+	<div class="col-md-3">
+<?php echo $form->export->renderViewHelper (); ?>
+</div>
+	<div id="userExportUrl" class="col-md-3">
+		<img id="loadingmessage" style="padding: 2em; display: none;" src="/img/loading.gif"
+			alt="<?php echo $this->translate('Chargement en cours') . '&hellip;'; ?>" />
+	</div>
+	<div id="userExportFile" class="col-md-3"></div>
+</div>
+</form>
+

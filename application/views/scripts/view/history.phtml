@@ -1,0 +1,37 @@
+<?php
+/** @var Hal_View $this
+  * @see ViewController::historyAction() */
+if (is_array($this->history)) {
+    foreach ($this->history as $row) {
+        $class = 'info';
+        if (in_array($row['ACTION'], array(Hal_Document_Logger::ACTION_CREATE, Hal_Document_Logger::ACTION_ADDFILE, Hal_Document_Logger::ACTION_ONLINE))) {
+            $class = 'success';
+        } else if (in_array($row['ACTION'], array(Hal_Document_Logger::ACTION_MODIF))) {
+            $class = 'warning';
+        } else if (in_array($row['ACTION'], array(Hal_Document_Logger::ACTION_ASKMODIF, Hal_Document_Logger::ACTION_DELETE))) {
+            $class = 'danger';
+        } elseif (in_array($row['ACTION'], array(Hal_Document_Logger::ACTION_VALIDATE))) {
+        	$class = 'orange';
+        } elseif (in_array($row['ACTION'], array(Hal_Document_Logger::ACTION_MODERATE, Hal_Document_Logger::ACTION_REMODERATE))) {
+        	$class = 'violet';
+        }
+
+        ?>
+        <div class="alert alert-<?php echo $class ?> alert-fixed" role="alert" style="padding:5px; margin-bottom:10px;">
+            <h6><span class="label label-<?php echo $class ?> " style="font-size:11px;"><?php echo $row['DATE'] ?></span>
+                <?php if ( isset($this->showAll) && $this->showAll == 'moderate' ) { ?>
+                    <strong><?php echo $row['USER']['FULLNAME'] ?></strong> <small>(<?php echo $row['USER']['EMAIL'] ?> - <?php echo $row['USER']['USERNAME'] ?> - <?php echo $row['USER']['UID'] ?>)</small>
+                <?php } else if ( !in_array($row['ACTION'], [Hal_Document_Logger::ACTION_ANNOTATE, Hal_Document_Logger::ACTION_ASKMODIF, Hal_Document_Logger::ACTION_MODERATE, Hal_Document_Logger::ACTION_VALIDATE, Hal_Document_Logger::ACTION_HIDE, Hal_Document_Logger::ACTION_DELETE]) ) { ?>
+                    <strong><?php echo $row['USER']['FULLNAME'] ?></strong> <small>(<?php echo $row['USER']['EMAIL'] ?> - <?php echo $row['USER']['USERNAME'] ?> - <?php echo $row['USER']['UID'] ?>)</small>
+                <?php } else if ( Hal_Auth::isHALAdministrator() ) { ?>
+                    <strong><?php echo $row['USER']['FULLNAME'] ?></strong> <small>(<?php echo $row['USER']['EMAIL'] ?> - <?php echo $row['USER']['USERNAME'] ?> - <?php echo $row['USER']['UID'] ?>)</small>
+                <?php } ?>
+                <br/>
+            </h6>
+            <strong><?php echo $this->translate('history_' . $row['ACTION']) ?></strong>
+            <?php if ($row['COMMENT'] != '') { echo ' - ' . htmlentities($row['COMMENT']); } ?>
+        </div>
+        <?php
+    }
+
+}

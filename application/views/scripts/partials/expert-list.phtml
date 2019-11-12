@@ -1,0 +1,109 @@
+
+
+<div id="label-html" style="display: none;">
+	<span class="label label-primary"> <input class="expert-uid"
+		type="hidden" name="experts[]" value="" /> &nbsp;<a
+		href="javascript:void(0)" onclick="$(this).closest('.label').remove()"
+		style="color: #ffffff;"><i class="glyphicon glyphicon-remove"></i></a>
+	</span>&nbsp;
+</div>
+
+
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<i class="glyphicon glyphicon-eye-close"></i>&nbsp;<?php echo $this->translate(Hal_Acl::ROLE_VALIDATEUR); ?></div>
+	<div class="panel-body">
+
+		<div class="form-group">
+			<input type="text" class="form-control" id="expert"
+				placeholder="<?php echo $this->translate("Commencez à saisir le nom d'un expert ou appuyez sur espace pour tous les afficher") ?>">
+
+
+
+			<?php if (is_array($this->currentExpertList)) :?>
+			<script>
+                $(function() {
+                    <?php foreach($this->currentExpertList as $uid => $labelUserName) {?>
+                    addLabelElement("<?php echo $labelUserName ?>", "<?php echo $uid; ?>", "#expert-list");
+                    <?php }?>
+               });
+            </script>
+			<?php endif;?>
+
+		</div>
+
+
+
+	</div>
+
+	<form name="form-save-experts" action="<?php echo $this->saveExpertFormTarget; ?>" id="form-save-experts" method="post">
+		<input type="hidden" name="docid" value="<?php echo $this->docid;?>">
+		<input type="hidden" name="forwardAction" value="<?php echo $this->forwardAction;?>">
+		
+<div id="expert-list" style="margin:0 1em 1em 1em;"></div>
+		<div class="panel-footer">
+
+
+			<label for="comment-expert"><?php echo $this->translate("Commentaire pour l'historique du document : ") ?></label>
+			<textarea name="comment-expert" id="comment-expert"
+				class="form-control" rows="3"></textarea>
+<p>
+			<button id="save-expert-btn" class="btn btn-primary btn" style="margin: 1em;"><?php echo $this->translate('Enregistrer'); ?></button>
+			</p>
+		</div>
+
+
+
+	</form>
+
+
+</div>
+
+
+
+
+<style>
+.ui-autocomplete {
+	max-height: 200px;
+	overflow-y: auto;
+	/* prevent horizontal scrollbar */
+	overflow-x: hidden;
+}
+/* IE 6 doesn't support max-height
+   * we use height instead, but this forces the menu to always be this tall
+   */
+* html .ui-autocomplete {
+	height: 200px;
+}
+</style>
+
+
+<script>
+$(function() {
+
+	var experts = <?php echo $this->expertList ?>;
+	  
+    $("#expert").autocomplete({
+        minLength: 1,
+        source: experts,
+
+        select: function (event, ui) {
+        	 addLabelElement(ui.item.label, ui.item.value, '#expert-list');
+            return false;
+        }
+    
+    }).data("ui-autocomplete")._renderItem = function (ul, item) {
+    	if (item.cssClass == 'disabled') {
+    		return $("<li>").append('<span class="text-muted">' + item.label + translate(' - [indisponible]') + '</span>').appendTo(ul);
+    	}
+        return $("<li>").append('<a class="' + item.cssClass + '">' + item.label + "</a>").appendTo(ul);
+    }
+    
+});
+
+
+  </script>
+
+
+

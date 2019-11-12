@@ -1,0 +1,12 @@
+<?php foreach($this->userDocids as $i => $doc) { 
+    $document = Hal_Document::find($doc['docid']); ?>
+    <tr>
+        <td width="15px"><input type="checkbox" name="docid[]" value="<?php echo $document->getDocid() ?>" id="docid_<?php echo $document->getDocid() ?>" class="checkbox-docid" /></td>
+        <td>    
+            <?php if ($document->getTypeSubmit() == Hal_Document::FORMAT_FILE || $document->getTypeSubmit() == Hal_Document::FORMAT_ANNEX) { ?>
+                <i class="glyphicon glyphicon-file" title="<?php echo $this->translate($document->getTypeSubmit())?>"></i>&nbsp;
+            <?php } ?>
+            <?php echo $document->getCitation('full'); ?>
+        </td>
+    </tr>
+<?php } ?>

@@ -1,0 +1,27 @@
+<h3><?php echo $this->translate("Fiche d'un type de document");?></h3>
+
+<br />
+<br />
+<h5><?php echo $this->translate('typdoc_' . $this->code);?></h5>
+
+<?php if ($this->broader) {
+    $this->broader = [$this->broader];
+    ?>
+    <strong><?php echo $this->translate('broader')?></strong>
+    <ul>
+        <?php foreach ($this->broader as $code) { ?>
+            <li><a href="<?php echo $this->domain->getURI($code)?>"><?php echo $this->domain->getTranslation($code);?></a></li>
+        <?php } ?>
+    </ul>
+<?php } ?>
+
+
+<?php if (count($this->narrower)) {?>
+    <strong><?php echo $this->translate('narrower')?></strong>
+    <ul>
+        <?php foreach ($this->narrower as $code) { ?>
+            <li><a href="<?php echo $this->domain->getURI($code)?>"><?php echo $this->domain->getTranslation($code);?></a></li>
+        <?php } ?>
+    </ul>
+<?php } ?>
+

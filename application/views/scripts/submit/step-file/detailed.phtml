@@ -1,0 +1,158 @@
+
+<form action="<?php echo SubmitController::SUBMIT_PREFIXURL ?>" method="post" enctype="multipart/form-data" id="form_file" name="form_file">
+    <div class="detailed-view-transfer">
+<?php //todo formulaire <?php echo ($this->requiredLicence ? 'onsubmit="return verifLicence();"': '') ?>
+<?php if ($this->addFile) { ?>
+        <h2 id="transfer-title"><?php echo $this->translate('Transférez les fichiers');?></h2>
+        <br />
+    <div>
+        <div class="row">
+            <div class="col-md-3">
+                <span class="btn btn-default fileinput-button">
+                    <i class="glyphicon glyphicon-file"></i>
+                    <span><?php echo $this->translate("Sélectionner les fichiers")?>...</span>
+                    <input id="fileupload" type="file" name="files[]" multiple>
+                </span>
+            </div>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="download-url" placeholder="<?php echo $this->translate("Saisir l'adresse URL du fichier à récupérer")?>">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" onclick="downloadFile('/<?php echo $this->controller?>/ajaxdownloadfile');"><i class="glyphicon glyphicon-globe"></i>&nbsp;<?php echo $this->translate("Récupérer")?></button>
+                    </span>
+                </div>
+            </div>
+
+            <?php if (count($this->ftp)) { ?>
+            <div class="col-md-4">
+                <button class="btn btn-default" onclick="displayFtp('<?php echo $this->translate("Sélectionner les fichiers depuis l\'espace FTP")?>');" type="button" id="btn-ftp">
+                    <i class="glyphicon glyphicon-hdd"></i>
+                    <span><?php echo $this->translate("Sélectionner les fichiers depuis l'espace FTP")?></span>
+                </button>
+                <div id="ftp">
+                    <div id="ftp-list">
+                        <?php foreach ($this->ftp as $f) {?>
+                            <label class="checkbox">
+                                <input type="checkbox" value="<?php echo $f?>" name="ftp[]" class="ftp"/>
+                                <b><?php echo $f;?></b>
+                            </label>
+                        <?php } ?>
+                    </div>
+                    <hr />
+                    <p class="text-right">
+                        <button class="btn btn-small btn-primary" type="button" onclick="addFtpFile('/<?php echo $this->controller?>/selectftpfile')"><?php echo $this->translate("Ajouter")?></button>
+                    </p>
+                </div>
+            </div>
+            <?php } ?>
+        </div>
+        <br />
+    </div>
+        <?php } ?>
+        <?php $display =  ((isset($this->files) && is_array($this->files) && count($this->files) > 0)) ? '' : 'none'; ?>
+        <div id="div-files" style="display:<?php echo $display ?>;">
+    <div class="overflow">
+        <table class="table table-hover table-condensed" id="files">
+            <thead>
+                <tr>
+                    <th><?php echo $this->translate('Fichier')?></th>
+                    <th width="300px"><?php echo $this->translate('Origine')?></th>
+                    <th width="200px"><?php echo $this->translate('Format')?></th>
+                    <th width="235px"><?php echo $this->translate('Visibilité / Embargo')?></th>
+                    <th width="70px"><?php echo $this->translate('Actions')?></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($this->files as $i => $file) {
+
+                // todo: passer par la fonction init du Submit_Manager plutôt que dédoubler
+                $this->i = $i;
+                $this->file = $file;
+                $this->types = Hal_Settings::getFileTypes($this->typdoc, $file->getExtension());
+                $this->canChange = $this->editFile && (! isset($this->filesNotDeletable) || (! in_array($this->i, $this->filesNotDeletable)));
+                $this->iconwarning = strpos($this->file->getTypeMIME(), 'html') ? 'style="color:red;"' : 'style="display:none;"';
+
+                include __DIR__ . '/detailed-file.phtml';
+            }?>
+            </tbody>
+            <?php if ($this->editFile && ! isset($this->filesNotDeletable)) { ?>
+                <tfoot>
+                    <tr>
+                        <td colspan="<?php echo ($this->divOrigin ? '5' : '4') ?>">
+                            <div class="text-right">
+                                <a href="javascript:void(0);" onclick="deleteAllFiles();"><?php echo $this->translate("Supprimer tous les fichiers")?>&nbsp;<i class="glyphicon glyphicon-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            <?php } ?>
+        </table>
+    </div>
+    <div class="text-center compile" onclick="sendLatexRequest()">
+        <a class="btn btn-info"><i class="glyphicon glyphicon-cog glyphicon--white"></i>&nbsp;<?php echo $this->translate("Compilation LaTex")?></a>
+    </div>
+</div>
+    </div>
+    <div id="id-zone-detailed">
+        <h2><?php echo $this->translate('id_title');?></h2>
+        <span id="id-info"><?php echo $this->translate('id_info');?></span>
+        <br />
+        <br />
+        <div id="id-frame">
+            <div class="col-md-9">
+                <div class="input-group">
+                    <span class="input-group-btn btn-group" onlylang="1">
+                        <button id="identifiertype-detailed" class="btn btn-sm btn-default dropdown-toggle dropdown-toggle" data-toggle="dropdown" type="button">
+                            <?php echo $this->translate("idext_".$this->idtype);?>
+                            <span class="caret" style="margin-left:10px;"></span>
+                        </button>
+                        <ul id="idtype-menu-detailed" class="dropdown-menu idext-list" role="menu" value="<?php echo $this->idtype;?>">
+                            <?php foreach (Hal_Submit_Manager::getExtIdentifiers() as $extId => $placeholder) {?>
+                                <li value="<?php echo $extId;?>" class="idext-elem li-file" default="<?php echo $placeholder;?>"><?php echo $this->translate("idext_".$extId);?></li>
+                            <?php }?>
+                        </ul>
+                    </span>
+                        <input id="identifier-input-detailed" class=" form-control input-sm" type="text" placeholder="<?php echo $this->idplaceholder; ?>" name="<?php echo $this->currentType; ?>" value="<?php echo $this->idext; ?>" onkeypress="if(event.key == 'Enter'){$('#metaButton').click();}">
+                    </span>
+                </div>
+                <span <?php if(empty($this->idurl) || empty($this->idext)) { echo "style=\"display:none;\""; }?>><a id="idurl" href="<?php echo $this->idurl; ?>" target="_blank"><?php echo $this->idtype . ' : ' . $this->idext ?></a></span>
+            </div>
+            <div class="col-md-3">
+                <button id="metaButton" type="button" class="btn btn-sm btn-primary" onclick="addIdExt('#identifier-input-detailed', '#idtype-menu-detailed')" data-toggle="tooltip" data-original-title="<?php echo $this->translate("Récupération des métadonnées associées à l'identifiant pour remplir votre dépôt"); ?>"><?php echo $this->translate("Récupérer les métadonnées") ?></button>
+            </div>
+        </div>
+    </div>
+
+<?php if (isset($this->divLicence) && $this->divLicence) {
+//    include __DIR__ . '/licence.phtml';
+} ?>
+
+<?php /*if (isset($this->submitFulltext) && !$this->submitFulltext) { //L'utilisateur peut déposer une notice sans texte?>
+	<p class="text-center btn-notice">
+		<button class="btn btn-default"><i class="glyphicon glyphicon-arrow-right"></i>&nbsp;<?php echo $this->translate("Passer directement à l'étape suivante")?></button>
+	</p>
+<?php }*/?>
+
+<?php
+//Confirmbox
+echo $this->confirm("Confirmation", "Souhaitez-vous supprimer le fichier")
+->setTrigger('.file-delete')
+->setJsInit('$("#confirm-id").val($(this).closest("tr").find("input.id").val());')
+			->setJsCallback('deleteFile();');
+
+?>
+</form>
+
+<script type="text/javascript">
+
+    "<?php echo $this->translate('Merci de définir une licence pour ce dépôt');?>"
+    function verifLicence(msg)
+    {
+        if ($('input[name=licence]:checked').length == 0) {
+            $('input[name=licence]:first').focus();
+            message(msg, 'alert-danger');
+            return false;
+        }
+        return true;
+    }
+</script>

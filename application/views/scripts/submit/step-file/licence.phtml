@@ -1,0 +1,53 @@
+<?php
+/** @var Hal_View $this */
+if ($this->showLicence) {
+    $display = 'block';
+    $collapse = 'in';
+    $required = '';//'required="required"';
+} else {
+    $display = 'none';
+    $collapse = '';
+    $required = '';
+}
+?>
+
+<div class="file-licence alert alert-warning" style="display:<?php echo $display ?>; margin-top:20px;">
+    <h4 style="margin-bottom:0px;">
+        <?php echo $this->translate('Licence'); ?>
+        <small><?php if ( $this->document->getLicence() != '' ) { ?>
+        <?php echo $this->translate('licence_' . $this->document->getLicence()); ?>
+        <?php } ?></small>
+        <button class="btn btn-default" style="float:right; margin-top:-8px;" data-toggle="collapse" href="#collapseOne"><?php echo $this->translate('Modifier'); ?></button>
+    </h4>
+    <div id="collapseOne" class="collapse <?php echo $collapse ?>">
+        <hr />
+        <?php $current = 0; foreach ($this->licences as $licenceid) {
+            $licenceinfo = Hal_Settings::getLicenceInfos($licenceid);
+            ?>
+            <div style="line-height:30px;">
+                <input type="checkbox" name="licence" value="<?php echo $licenceid?>" id="licence<?php echo $current; ?>" <?php echo ($this->document->getLicence() == $licenceid ? 'checked="checked"' : '');?> <?php echo $required ?>/>
+                <?php if (isset($licenceinfo['url'])) { ?>
+                    <a href="<?php echo $licenceinfo['url'] ?>" target="_blank" rel="noopener">
+                <?php } ?>
+                <span for="licence<?php echo $current++; ?>">&nbsp;<?php echo $this->translate('licence_'.$licenceid); ?></span>
+                <?php if (isset($licenceinfo['url'])) { ?>
+                    </a>
+                <?php } ?>
+                <?php if (isset($licenceinfo['icon']) && is_array($licenceinfo['icon'])) {
+                    foreach ($licenceinfo['icon'] as $icon) { ?>
+                        <img src="/img/licences/<?php echo $icon; ?>.png" title="<?php echo strtoupper($icon) ?>" width="16px" height="16px" />
+                    <?php } ?>
+                <?php } ?>
+            </div>
+        <?php } ?>
+    </div>
+    <script type="text/javascript">
+        $('input[name=licence]').change(function() {
+            text = $(this).is(':checked') ? ': ' + $(this).next().text() : '';
+            $('.file-licence h4>small').text(text);
+            //On décoche les autres cases à cocher
+            $('input[name=licence]').not('#' + $(this).attr('id')).removeAttr('checked');
+        });
+
+    </script>
+</div>

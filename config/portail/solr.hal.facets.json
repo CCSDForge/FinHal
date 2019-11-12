@@ -1,0 +1,100 @@
+{
+	"0": {
+		"fieldName": "docType_s",
+		"displayName": "Type de document",
+		"searchMapping" : "docType_s",
+		"minCount": 1,
+		"hasSepInValue": false,
+		"maxReturned": 100,
+		"translated": true,
+		"translationPrefix": "typdoc_",
+		"displayFilter":false,
+		"sort": ""
+	},
+	"30": {
+		"fieldName": "authIdHalFullName_fs",
+		"displayName": "Auteur",
+		"searchMapping" : "authIdHal_s",
+		"minCount": 1,
+		"hasSepInValue": true,
+		"maxReturned": 1000,
+		"translated": false,
+		"translationPrefix": "",
+		"displayFilter":true,
+		"sort": ""
+	},
+	"10": {
+		"fieldName": "level0_domain_s",
+		"displayName": "Domaine",
+		"searchMapping" : "level0_domain_s",
+		"minCount": 1,
+		"hasSepInValue": false,
+		"maxReturned": 200,
+		"translated": true,
+		"translationPrefix": "domain_",
+		"displayFilter":false,
+		"sort": ""
+	},
+	"20": {
+		"fieldName": "labStructName_s",
+		"displayName": "Laboratoire",
+		"searchMapping" : "labStructName_t",
+		"minCount": 1,
+		"hasSepInValue": false,
+		"maxReturned": 200,
+		"translated": false,
+		"translationPrefix": "",
+		"displayFilter":true,
+		"sort": ""
+	},
+
+	"40": {
+		"fieldName": "language_s",
+		"displayName": "Langue",
+		"searchMapping" : "language_s",
+		"minCount": 1,
+		"hasSepInValue": false,
+		"maxReturned": 100,
+		"translated": true,
+		"translationPrefix": "lang_",
+		"displayFilter":false,
+		"sort": ""
+
+	},
+	"50": {
+		"fieldName": "keyword_s",
+		"displayName": "Mot-clé",
+		"searchMapping" : "keyword_t",
+		"minCount": 20,
+		"hasSepInValue": false,
+		"maxReturned": 100,
+		"translated": false,
+		"translationPrefix": "",
+		"displayFilter":true,
+		"sort": ""
+	},
+	"60": {
+		"fieldName": "submitType_s",
+		"displayName": "Type de dépôt",
+		"searchMapping" : "submitType_s",
+		"minCount": 1,
+		"hasSepInValue": false,
+		"maxReturned": 100,
+		"translated": true,
+		"translationPrefix": "submitType_",
+		"displayFilter":false,
+		"sort": ""
+	},
+	"70": {
+		"fieldName": "producedDateY_i",
+		"displayName": "Année",
+		"searchMapping" : "producedDateY_i",
+		"minCount": 1,
+		"hasSepInValue": false,
+		"maxReturned": 200,
+		"translated": true,
+		"translationPrefix": "",
+		"displayFilter":false,
+		"sort": "index"
+	}
+}

@@ -1,0 +1,326 @@
+.aut_new {
+  width:500px;
+}
+
+.authors-list {
+  height: 200px;
+  overflow:auto;
+}
+
+.add-author-label {
+  font-size:13px;
+}
+
+.add-authors-div {
+  margin:10px;
+}
+
+.add-authors-group {
+  border-radius: 0px !important;
+}
+
+.author ul {
+  margin-bottom : 0px;
+}
+
+.create-author {
+  width:400px;
+}
+
+.searchStructure {
+  width:100%;
+}
+
+#add-authors-group {
+  padding: 20px 0 0 15px;
+}
+
+.aut-error {
+  border: 2px solid #b94a48;
+}
+
+#aut-struct .author:hover .actions-hover, #aut-struct .actions-hover-forced, .new-struct-hover:hover, .struct-line:hover .struct-dropdown-button{
+  visibility: visible;
+  opacity:1;
+}
+
+.struct-selected {
+  box-shadow: 0px 0px 2px 2px lightgrey;
+  border-radius: 3px;
+  padding: 5px;
+}
+
+#aut-struct .actions-hover, .new-struct-hover, .struct-dropdown-button {
+  opacity:0.2;
+}
+
+.struct_new {
+  width:500px;
+}
+
+.popover .form label {
+  width: 100px;
+}
+
+.new-struct-form ul {
+  list-style-type: none;
+  margin-left: 0;
+  padding-left:0px;
+}
+
+.new-struct-form ul ul{
+  margin-left: 5px;
+  padding-left: 5px;
+
+}
+
+.new-struct-form ul.new-struct-parent {
+
+}
+
+.new-struct ul.new-struct-parent {
+  margin-top: 5px;
+}
+
+.new-struct-parent.list-group {
+  margin-bottom: 0px;
+}
+
+.struct-div {
+  display: inline-block;
+}
+
+.struct-block {
+  display:none;
+  margin-top:5px;
+  margin-left:30px;
+}
+
+.struct-buttons-div {
+  clear:left;
+}
+
+.struct-action-div {
+  display: inline-block;
+}
+
+.popover {
+  max-width: inherit;
+}
+
+#aut_new input {
+  vertical-align: inherit;
+}
+
+#authors div.author:hover, #authors div.author.active {
+  background: #f8f8f8;
+  border: 1px solid #dfdfdf;
+}
+
+#authors div.author .actions {
+  display: none;
+}
+
+#authors div.author:hover .actions, #authors div.author.active .actions  {
+  display: inline;
+}
+
+#authors div.author:not(:last-child):after {
+  content: ", ";
+}
+
+#authors>div sup {
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+.author-form {
+  width: 600px;
+  margin: 10px auto;
+  border: 1px solid #dfdfdf;
+  border-radius: 5px;
+}
+
+.author-form h4 {
+  background: #f8f8f8;
+  padding: 10px;
+  margin: 0px;
+  border-bottom: 1px solid #ccc;
+}
+
+.author-form  form {
+  padding: 10px;
+}
+
+.new-struct-label {
+  display:none;
+}
+
+.structure-icons {
+  float:right;
+}
+
+.struct-group {
+  clear: left;
+}
+
+#structures {
+  margin-top: 20px;
+}
+
+#structures>div {
+  margin-bottom: 5px;
+  padding: 6px;
+  border: 1px solid #fff;
+  border-radius: 2px;
+  position: relative;
+}
+
+#structures span.structure-idx {
+  background: #666;
+  color: #fff;
+  margin: 0px 4px;
+  padding: 1px 4px;
+}
+
+#structures .actions {
+  display: none;
+  position: absolute;
+  top: 8px;
+  right: 5px;
+}
+
+#structures>div {
+  background: #f8f8f8;
+  border: 1px solid #dfdfdf;
+}
+
+#structures>div .actions {
+  display: block;
+}
+.popover-content {
+  width: 500px;
+}
+.struct-parent {
+  font-weight: normal;
+  font-size: 11px;
+}
+
+.ui-helper-hidden-accessible {
+  display: none;
+}
+
+.ui-autocomplete {
+  max-height: 100px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.ui-autocomplete .ui-menu-item:first-child{
+  background: #f5f5f5;
+  border-bottom: 1px solid #e5e5e5;
+}
+.ui-autocomplete .ui-menu-item:first-child a{
+  font-style:italic;
+  font-weight: bold;
+}
+.ui-autocomplete .ui-menu-item .address{
+  font-style: italic;
+}
+.ui-autocomplete .ui-menu-item .address:not(:empty):before {
+  content: '(';
+  display: inline;
+}
+.ui-autocomplete .ui-menu-item .address:not(:empty):after {
+  content: ') ';
+}
+.ui-autocomplete .ui-menu-item .idhal:not(:empty):before {
+  display: inline;
+}
+.ui-autocomplete .ui-menu-item .url:not(:empty):before{
+  content: ' - ';
+}
+.ui-autocomplete .ui-menu-item a:hover>*{
+  color: #ffffff;
+}
+.ui-autocomplete .ui-menu-item a>.acronym {
+  padding-left: 5px;
+  font-style:italic;
+}
+.ui-autocomplete .ui-menu-item a>.acronym:not(:empty):before {
+  content: '[';
+}
+.ui-autocomplete .ui-menu-item a>.acronym:not(:empty):after {
+  content: '] ';
+}
+
+.ui-autocomplete .ui-menu-item a dl, #struct-info dl{
+  margin: 0px;
+}
+.ui-autocomplete .ui-menu-item a dt, #struct-info dt {
+  margin: 0px;
+  font-size: 10px;
+  font-weight: normal;
+  display: inline;
+  line-height: 12px;
+}
+.ui-autocomplete .ui-menu-item a dt:not(:first-child):before,  #struct-info dt:not(:first-child):before{
+  content : ' ; ';
+}
+.ui-autocomplete .ui-menu-item a dt .code:before,  #struct-info dt .code:before{
+  content: ' : ';
+}
+.ui-front {
+  z-index: 10000;
+}
+
+.ui-menu .ui-menu-item {
+  font-size: 12px;
+}
+
+.valid-struct {
+  color:#468847;
+}
+
+.old-struct {
+  color:#c09853;
+}
+
+.incoming-struct {
+  color:#b94a48;
+}
+
+#error-zone-author {
+  margin-top: 20px;
+}
+
+.struct-div {
+  cursor:grab;
+}
+
+.author-line {
+  line-height: 1.7em !important;
+}
+
+#author-table {
+  font-size:14px;
+}
+
+.author-name-and-fonction {
+  margin-bottom:4px;
+}
+
+.struct-dropdown-menu {
+  text-align: left;
+  margin:0px 0 0 !important;
+}
+
+tr.author:hover {
+  background-color:#f9f9f9;
+}
+
+.struct-line {
+  padding: 5px;
+}
+.struct-line:hover {
+  background-color:#ffffff;
+}

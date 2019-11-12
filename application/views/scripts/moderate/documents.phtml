@@ -1,0 +1,263 @@
+<?php
+/** @var Hal_View $this
+ * Parametres de la vue
+ * @var  Zend_Paginator $paginatorDocs */
+$paginatorDocs = $this->documents;
+$filterList = $this->filterList;
+$inProgress = $this->inProgress;
+/** @var ModerateController|PatrolController $mode */
+$mode = $this->mode; // controller de patrouillage ou moderation (permet l'acces a fct specifique
+?>
+<style>
+    #active {color:#428bca;}
+</style>
+<?php
+
+$orderurl = '';
+foreach($_GET as $key => $value){
+    if (isset($_GET[$key]) && $key != 'order'){
+        $orderurl .= '&'.$key.'='.$value;
+    }
+}
+
+$this->layout()->pageDescription = $this->translate($this->pageDescription);
+
+if (count($paginatorDocs)) {
+?>
+    <h5 xmlns="http://www.w3.org/1999/html"><?php echo $this->translate('Nombre de documents à vérifier'); ?> : <span class="label label-primary"><?php echo $paginatorDocs->getTotalItemCount();?></span></h5>
+    <h5><?php echo $this->translate('Nombre de documents par page'); ?> : <span class="label label-primary"><?php echo $paginatorDocs->getItemCountPerPage();?></span></h5>
+
+
+    <?php
+    $filter    = $filterList['filter'];
+    $queryid   = $filterList['queryid'];
+    $queryuid  = $filterList['queryuid'];
+    $queryuid  = $filterList['queryuid'];
+    $querytype = $filterList['querytype'];
+    $querydate = $filterList['querydate'];
+    $querynbdoc= $filterList['querynbdoc'];
+    $querypor  = $filterList['querypor'];
+    ?>
+    <form action="<?php echo $mode->getFormAction(); ?>" method="GET" id="list-documents">
+        <div class="btn-group" style="margin-bottom: 5px;">
+            <button type="submit" form="list-documents" value="Submit">Submit</button><br />
+            <?php
+            if ($this->addFilterMenu) {
+                ?>
+                <button type="button" id="filtre" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
+                    <span class="glyphicon glyphicon-filter"></span> <?php echo $this->translate('Filtres'); ?> <span
+                            class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="<?php echo '?filtre=askmodif' ?>"
+                           class="btn btn-xs<?php echo ($filter == 'askmodif') ? ' btn-primary active disabled' : "" ?>"><?php
+                            echo $this->translate('Retour de modification');
+                            ?></a></li>
+                    <li><a href="<?php echo '?filtre=arxiv' ?>"
+                           class="btn btn-xs<?php echo ($filter == 'arxiv') ? ' btn-primary active disabled' : "" ?>"><?php
+                            echo $this->translate('Arxiv');
+                            ?></a></li>
+                    <li><a href="<?php echo '?querypor=medihal' ?>"
+                           class="btn btn-xs<?php echo ($querypor == 'medihal') ? ' btn-primary active disabled' : "" ?>"><?php
+                            echo $this->translate('Medihal');
+                            ?></a></li>
+                </ul>
+                <?php
+            }
+            if ("$filter$queryid$queryuid$querytype$querytype$querydate$querynbdoc$querypor" != '') { ?>
+                <button type="button" id="removefilter" onclick="link('/moderate/documents');" class="btn btn-default btn-sm" title="Supprime les filtres">
+                    <i class="glyphicon glyphicon-remove"></i>
+                </button>
+            <?php }
+            if ($paginatorDocs->getTotalItemCount() > $paginatorDocs->getItemCountPerPage()){
+                echo $this->paginationControl ( $paginatorDocs, 'Sliding', 'partials/pagination.phtml', array (
+                ));
+            }
+            ?>
+        </div>
+        <table class="table table-striped table-bordered" id="moderate" style="padding:0;margin:0;border:0;width:100%">
+            <thead>
+            <tr>
+                <th class="middle" style="width:16px"></th>
+                <th class="middle">
+                    <div class="input-group">
+                        <input type="text" id="querytype" name="querytype" value="<?php echo $querytype;?>"
+                               class="form-control" style="border-radius: 3px;" data-toggle="tooltip"
+                               title="<?php echo $this->translate("Recherche par type de document");?>">
+                    </div>
+                </th>
+                <th class="middle">
+                    <div class="input-group">
+                        <input type="text" id="queryid" name="queryid" value="<?php echo $queryid;?>"
+                               class="form-control" style="border-radius: 3px;" data-toggle="tooltip"
+                               title="<?php echo $this->translate("Recherche par identifiant");?>">
+                    </div>
+                </th>
+                <th class="middle">
+                    <div class="input-group">
+                        <input type="text" id="queryuid" name="queryuid" value="<?php echo $queryuid;?>"
+                               class="form-control" style="border-radius: 3px;" data-toggle="tooltip"
+                               title="<?php echo $this->translate("Recherche par contributeur");?>">
+                    </div>
+                </th>
+
+                <th class="middle">
+                    <div class="input-group">
+                        <input type="text" id="querynbdoc" name="querynbdoc" value="<?php echo $querynbdoc; ?>"
+                               class="form-control" style="border-radius: 3px;" data-toggle="tooltip"
+                               title="<?php echo $this->translate("Recherche selon <br>le nombre de dépôts");?>">
+                    </div>
+                </th>
+                <th class="middle">
+                    <div class="input-group">
+                        <input type="text" id="querydate" name="querydate" value="<?php echo $querydate?>"
+                               class="form-control" style="border-radius: 3px;" data-toggle="tooltip"
+                               title="<?php echo $this->translate("Recherche par date");?>">
+                    </div>
+                </th>
+                <th class="middle">
+                    <div class="input-group">
+                        <input type="text" id="querypor" name="querypor" value="<?php echo $querypor?>"
+                               class="form-control" style="border-radius: 3px;" data-toggle="tooltip"
+                               title="<?php echo $this->translate("Recherche par portail");?>">
+                    </div>
+                </th>
+            </tr>
+            <?php $order = (isset($_GET['order'])) ?  $_GET['order'] : null; ?>
+            <tr>
+                <th class="middle" style="width:16px"><input type="checkbox" class="select-checkbox"/></th>
+                <th class="middle">
+                    <div style="display:flex;">
+                        <span style="margin-right:4px;"><?php echo $this->translate('Type de document'); ?></span>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=typeasc"; echo $orderurl;?>" style="align-self: center; margin-left:auto;"  <?php if ($order=="typeasc")  { echo 'id="active"';}?> data-toggle="tooltip" title="<?php echo $this->translate("Tri croissant");?>"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=typedesc"; echo $orderurl;?>" style="align-self: center; margin-left:2px;" <?php if ($order=="typedesc") { echo 'id="active"';}?> data-toggle="tooltip" title="<?php echo $this->translate("Tri décroissant");?>"><i class="glyphicon glyphicon-chevron-up"></i></a>
+                    </div>
+                </th>
+                <th class="middle">
+                    <div style="display:flex;">
+                        <span style="margin-right:4px;"><?php echo $this->translate('Document'); ?></span>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=docasc"; echo $orderurl;?>" style="align-self: center; margin-left:auto;" <?php if ($order=="docasc")  { echo 'id="active"';}?> data-toggle="tooltip" title="<?php echo $this->translate("Tri croissant");?>"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=docdesc"; echo $orderurl;?>" style="align-self: center; margin-left:2px;"<?php if ($order=="docdesc") { echo 'id="active"';}?> data-toggle="tooltip" title="<?php echo $this->translate("Tri décroissant");?>"><i class="glyphicon glyphicon-chevron-up"></i></a>
+                    </div>
+                </th>
+                <th class="middle">
+                    <div style="display:flex;">
+                        <span style="margin-right:4px;"><?php echo $this->translate('Contributeur'); ?></span>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=contasc"; echo $orderurl;?>" style="align-self: center; margin-left:auto;" <?php if ($order=="contasc")  { echo 'id="active"';}?> data-toggle="tooltip" title="<?php echo $this->translate("Tri croissant");?>"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=contdesc"; echo $orderurl;?>" style="align-self: center; margin-left:2px;" <?php if ($order=="contdesc") { echo 'id="active"' ;}?> data-toggle="tooltip" title="<?php echo $this->translate("Tri décroissant");?>"><i class="glyphicon glyphicon-chevron-up"></i></a>
+                    </div>
+                </th>
+                <th class="middle">
+                    <div style="display:flex;">
+                        <span style="margin-right:4px;"><?php echo $this->translate('Nombre de dépôts'); ?></span>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=nbasc"; echo $orderurl;?>" style="align-self: center; margin-left:auto;"  <?php if ($order=="nbasc")  { echo 'id="active"';}?> data-toggle="tooltip" title="<?php echo $this->translate("Tri croissant");?>"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=nbdesc"; echo $orderurl;?>" style="align-self: center; margin-left:2px;" <?php if ($order=="nbdesc") { echo 'id="active"';}?> data-toggle="tooltip" title="<?php echo $this->translate("Tri décroissant");?>"><i class="glyphicon glyphicon-chevron-up"></i></a>
+                    </div>
+                </th>
+                <th class="middle">
+                    <div style="display:flex;">
+                        <span style="margin-right:4px;"><?php echo $this->translate('Déposé le'); ?></span>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=dateasc"; echo $orderurl;?>" style="align-self: center; margin-left:auto;" <?php  if ($order=="dateasc")  { echo 'id="active"';}?> data-toggle="tooltip" title="<?php echo $this->translate("Tri croissant");?>"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=datedesc"; echo $orderurl;?>" style="align-self: center; margin-left:2px;" <?php if ($order=="datedesc") { echo 'id="active"';}?> data-toggle="tooltip" title="<?php echo $this->translate("Tri décroissant");?>"><i class="glyphicon glyphicon-chevron-up"></i></a>
+                    </div>
+                </th>
+                <th class="middle">
+                    <div style="display:flex;">
+                        <span style="margin-right:4px;"><?php echo $this->translate('Portail'); ?></span>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=porasc"; ?>" style="align-self: center; margin-left:auto;" <?php if ($order=="porasc")  { echo 'id="porasc"'; } ?> data-toggle="tooltip" title="<?php echo $this->translate("Tri croissant");?>"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                        <a href="<?php echo PREFIX_URL."moderate/documents?order=pordesc";?>" style="align-self: center; margin-left:2px;" <?php  if ($order=="pordesc") { echo 'id="active"'; } ?> data-toggle="tooltip" title="<?php echo $this->translate("Tri décroissant");?>"><i class="glyphicon glyphicon-chevron-up"></i></a>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+
+            $docidsInProgress = is_array($inProgress) ? array_keys($inProgress) : array();
+
+            foreach($paginatorDocs as $data) {
+                $docid = $data['DOCID'];
+                $logaction   = array_key_exists('LOGACTION', $data)   ? $data['LOGACTION'] : '';
+                $screen_name = array_key_exists('SCREEN_NAME', $data) ? $data['SCREEN_NAME'] : '';
+                $document = Hal_Document::find($docid);
+
+                ?>
+                <tr <?php echo (in_array($docid, $docidsInProgress) ? 'class="warning"' : '') ?>>
+                    <td class="middle"><input type="checkbox" name="docid[]" value="<?php echo $docid; ?>" class="checkbox-docid" /></td>
+                    <td class="middle">
+                        <span style="white-space: normal; display:inline-block" class="<?php echo Hal_Settings::getLabelClassName($document->getTypDoc()); ?>">
+                            <?php echo $this->translate('typdoc_' . $document->getTypDoc()); ?>
+                        </span>
+                    </td>
+                    <td class="middle">
+                        <a href="<?php echo $mode->getUrlForViewingDocument($docid); ?>"><?php
+                            if ($document->getFormat() == Hal_Document::FORMAT_FILE) {
+                                ?><i class="glyphicon glyphicon-file"></i>
+                            <?php }
+                            echo strip_tags($document->getCitation('full'));
+                            ?></a>
+                        <a href="<?php echo $mode->getUrlForViewingDocument($docid);
+                        ?>" target="_blank" data-toggle="tooltip" data-placement="bottom" title="<?php echo $this->translate('Ouvrir dans un nouvel onglet')
+                        ?>"><i class="glyphicon glyphicon-asterisk"></i></a>
+                        <?php
+                        if ($logaction == Hal_Document_Logger::ACTION_ASKMODIF) { ?>
+                            <span class="label label-info"> Retour de modification</span>
+                        <?php }
+                        if ($document->getStatus() == Hal_Document::STATUS_TRANSARXIV) { ?>
+                            <span class="arxiv" style="float:right;"> arXiv.org </span>
+                        <?php }
+                        if (in_array($docid, $docidsInProgress)) { ?>
+                            <span class="label label-warning"><i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;<?php echo $this->translate('En cours de modération par ') . ' ' . $inProgress[$docid]; ?></span>
+                        <?php } ?>
+                    </td>
+                    <td class="middle"><?php echo $screen_name ?></td>
+                    <td class="middle text-center">
+                        <span class="label label-primary"><?php echo $data['NBDOCVIS']; ?></span>
+                        <?php if ($data['NBDOCSCI'] > 0){?>
+                            <span class="label label-warning"><?php echo $data['NBDOCSCI']; ?></span>
+                            <?php
+                        }
+                        if ($data['NBDOCREF'] > 0){?>
+                            <span class="label label-danger"><?php echo $data['NBDOCREF']; ?></span>
+                        <?php }?>
+                    </td>
+                    <td class="middle"><?php echo $data['DATESUBMIT'] ?></td>
+                    <td class="middle"><?php echo $data['SITE'] ?></td>
+                </tr>
+            <?php } ?>
+            </tbody>
+            <tfoot>
+            <tr>
+                <th><input type="checkbox" class="select-checkbox" /></th>
+                <th colspan="6"><button type="submit" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-eye-open"></i>&nbsp;<?php echo $this->translate('Voir'); ?></button> </th>
+            </tr>
+            </tfoot>
+        </table>
+    </form>
+    <div class="btn-group">
+        <?php
+        if ($paginatorDocs) {
+            echo $this->paginationControl ( $paginatorDocs, 'Sliding', 'partials/pagination.phtml', array (
+            ));
+        }?>
+    </div>
+    <script type="text/javascript">
+        $('.select-checkbox').click(function() {
+            $('#moderate .checkbox-docid, .select-checkbox').prop('checked', $(this).is(':checked'));
+        });
+
+        /**
+         * Selection d'un document
+         * @param docid
+         */
+        function selectDocument(docid)
+        {
+            $('#moderate .checkbox-docid, .select-checkbox').prop('checked', false);
+            $('#moderate .checkbox-docid[value="' + docid + '"]').prop('checked', true);
+            $('#list-documents').submit();
+        }
+    </script>
+
+<?php } else { ?>
+    <div class="alert alert-success"><strong><?php echo $this->translate("Aucun dépôt ne correspond à la recherche :)");?></strong></div>
+<?php } ?>

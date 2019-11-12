@@ -1,0 +1,30 @@
+<style>
+    .mce-fullscreen {
+        z-index: 2000;
+    }
+</style>
+
+<?php
+$this->jQuery()->addJavascriptFile(CCSDLIB ."/js/tinymce/jquery.tinymce.min.js")
+    ->addJavascriptFile(CCSDLIB ."/js/tinymce/tinymce.min.js")
+    ->addJavascriptFile("/js/page/en_GB.js")
+    ->addJavascriptFile("/js/page/fr_FR.js")
+    ->addJavascriptFile("/js/page/render.js")
+    ->addJavascriptFile(CCSDLIB ."/js/tinymce_patch.js");
+?>
+
+<?php echo $this->form; ?>
+
+
+<script>
+    addWidgHalToTinyMCE(tinymce);
+
+    __initMCE ('.textarea-group:last textarea', undefined, {
+        theme: "modern",
+        plugins: "link image code fullscreen table emoticons widghal",
+        toolbar1: "bold italic underline | forecolor backcolor | styleselect | undo redo | alignleft aligncenter alignright alignjustify | table | bullist numlist | link image | widghal  | code | fullscreen",
+        menubar: false,
+        extended_valid_elements: "widget[style|data-mce-widget|data-mce-widget-in]",
+        language  : '<?php echo Zend_Registry::get('lang') == 'fr' ? 'fr_FR' : 'en_GB'; ?>'
+    });
+</script>

@@ -1,0 +1,97 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yannick
+ * Date: 26/09/2014
+ * Time: 09:42
+ *
+ * $this->document doit exister et etre un objet Hal_Document
+ *
+ */
+/** @var Hal_View $this */
+/** @var Hal_Document_File $file */
+
+$controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerName();
+
+$name = $this->file->getName();
+if ($this->file->getDefault() || ($this->file->getType() == Hal_Settings::FILE_TYPE_ANNEX && $this->file->getDefaultannex())) {
+    $name = '<strong>' . $name . '</strong>';
+}
+
+$visible = $this->file->canRead();
+if ($visible || $this->readEmbargo) {
+    if (!$this->href) {
+        $this->href = $this->document->getPortailUrl() . '/' . $this->document->getId();
+        if(count($this->document->getDocVersions()) > 1) {
+            $this->href .= 'v' . $this->document->getVersion();
+        }
+        $this->href .= '/file/' . rawurlencode(str_replace('/', '@', $file->getName()));
+    }
+    if ($controller == 'moderate' && $this->file->getDefault() && $this->document->getTypDoc() == "IMG") {
+        ?>
+        <img src="<?php echo $this->href;?>" style="height:auto; max-width:400px"/>
+        <?php
+    }
+    if ($this->file->getImagette() == 0) {
+        $icon = '<i class="glyphicon glyphicon-file"></i>';
+    } else {
+        $icon = '<img src="' . $this->file->getImagetteUrl('thumb') . '" border="0" class="img-thumbnail"/>';
+    }
+    ?>
+    <a href="<?php echo $this->href ;?>" onclick="window.open($(this).attr('href'), 'popup', 'status=no');return false;" target="_blank" data-toggle="tooltip" title="<?php echo $this->file->getSize(); ?>"><?php echo $icon ?>&nbsp;<?php echo $name; ?></a>
+    <?php
+} else {
+    ?>
+    <i class="glyphicon glyphicon-file"></i>&nbsp;<?php echo $name;
+}
+
+if (! $visible) { ?>
+    &nbsp;<span class="label label-danger">&nbsp;<i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;<?php echo $this->translate('Visible le');?> : <?php echo ( $this->file->getDateVisible() == '9999-12-31' ) ? $this->translate('jamais') : $this->file->getDateVisible();?>&nbsp;</span>
+    <?php
+}
+?>
+<?php if ($this->showType) { ?>
+    <span class="label label-primary"><?php echo $this->translate('fileType_' . $this->file->getType()); ?></span>
+<?php } ?>
+<?php if ($this->file->getType() == Hal_Settings::FILE_TYPE && $this->file->getOrigin()!= '') { ?>
+    <span class="label label-default"><?php echo $this->translate('fileSource_public_' . $this->file->getOrigin()); ?></span>
+<?php } ?>
+
+<?php if ($this->file->getType() == Hal_Settings::FILE_TYPE_ANNEX && $this->file->getFormat()!= '') { ?>
+    <span class="label label-default"><?php echo $this->translate(Hal_Referentiels_Metadata::getLabel('typeAnnex', $this->file->getFormat())); ?></span>
+<?php } ?>
+
+<?php if ($this->file->getComment()!= '') { ?>
+    &nbsp;-&nbsp;<i><u><?php echo $this->translate('Commentaire')?></u> : <?php echo $this->file->getComment(); ?></i>
+<?php } ?>
+
+<?php
+if ($controller == 'moderate' && ($this->file->getDefault() || ($this->file->getType() == Hal_Settings::FILE_TYPE_ANNEX && $this->file->getDefaultannex())) && $this->document->getStatus() == Hal_Document::STATUS_TRANSARXIV)
+{
+    $table = Hal_Document_File::get_PDF_info($this->file->getPath());
+    ?>
+    <span class="label label-warning" id="info"><?php echo $this->translate('Info Transfert ArXiv') ?></span>
+    <div id="infofile" style="display:none">
+        <table class="table table-condensed table-bordered">
+            <?php
+            foreach ($table as $key => $value) { ?>
+                <tr>
+                <td style="background:#f8f8f8; text-align:right"><?php echo $key; ?></td>
+                <td><?php
+                        if (is_array($value)) {
+                            foreach ($value as $subval) {
+                                echo $subval;
+                            }
+                        } else {
+                            echo $value;
+                        }
+                    ?>
+                </td>
+                </tr>
+            <?php } ?>
+        </table>
+    </div>
+    <script>
+        $('body').popover({selector: "#info", trigger: 'hover',content: $('#infofile').html(), html: true, container: 'body'}).show();
+    </script>
+<?php } ?>

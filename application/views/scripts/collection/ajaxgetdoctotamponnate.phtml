@@ -1,0 +1,60 @@
+<i><?php echo count($this->documents) . ' documents - ' .  $this->translate('Liste limitée à 100 documents'); ?></i>
+<hr />
+<?php
+if (count($this->documents)) {
+    ?>
+    <table class="table" id="documents">
+        <thead>
+            <tr>
+                <th><input type="checkbox" class="select-all" /></th>
+                <th><?php echo $this->translate('Documents') ?></th>
+                <th><?php echo $this->translate('Actions') ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($this->documents as $document) {
+                ?>
+                <tr class="doc-<?php echo $document['docid'] ?>">
+                    <td><input type="checkbox" value="<?php echo $document['docid'] ?>" class="doc-check"/></td>
+                    <td><?php if ($document['submitType_s'] == Hal_Document::FORMAT_FILE || $document['submitType_s'] == Hal_Document::FORMAT_ANNEX) { ?>
+                            <i class="glyphicon glyphicon-file" title="<?php echo $this->translate($document['submitType_s'])?>"></i>
+                        <?php } ?>
+
+                        <?php echo $document['citationFull_s'] ?></td>
+                    <td class="text-right" valign="middle">
+                        <a href="javascript:void(0);" onclick="addTampon(<?php echo $document['docid'] ?>, <?php echo $this->sid ?>)" data-toggle="tooltip" title="<?php echo $this->translate('Tamponner')?>"><i class="glyphicon glyphicon-tag"></i></a>
+                        <a href="javascript:void(0);" onclick="hideFromCollection(<?php echo $document['docid'] ?>, <?php echo $this->sid ?>)" data-toggle="tooltip" title="<?php echo $this->translate('Masquer de la liste')?>"><i class="glyphicon glyphicon-eye-close"></i></a>
+                    </td>
+                </tr>
+            <?php } ?>
+        </tbody>
+        <tfoot>
+        <tr>
+            <th valign="middle"><input type="checkbox" class="select-all" /></th>
+            <th><button class="btn btn-primary btn-sm" onclick="addTampon(0, <?php echo $this->sid ?>)"><i class="glyphicon glyphicon-tag"></i>&nbsp;<?php echo $this->translate('Tamponner la sélection') ?></button></th>
+            <th></th>
+        </tr>
+        </tfoot>
+    </table>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#documents').dataTable({
+                "iDisplayLength": 100,
+                "bLengthChange":false,
+                "bInfo":false,
+                "bPaginate":false
+            });
+
+            $('.select-all').click(function(){
+                $('#documents .doc-check').prop('checked', $(this).is(':checked'));
+            });
+
+        });
+    </script>
+    <?php
+} else {
+    ?>
+    <div class="alert alert-success"><?php echo $this->translate('La collection est à jour'); ?></div>
+    <?php
+}

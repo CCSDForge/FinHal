@@ -1,0 +1,40 @@
+<?php
+/** @var Hal_View $this  */
+
+$this->jQuery()->addJavascriptFile('/js/submit/domain.js')
+    ->addJavascriptFile(CCSDLIB . '/js/jquery/ui/autocomplete.html.js')
+    ->addJavascriptFile(CCSDLIB . "/js/bootstrap-typeahead.js");?>
+
+<div id="error-zone-meta" class="alert alert-danger fade in" role="alert">
+</div>
+
+<div class="col-md-12">
+    <div id="myForm" class="row">
+        <div class="render">
+            <?php
+            $doctypeIntro = '';
+            if ($this->document) {
+                $doctypeIntro = $this->document->getDoctypeIntro();
+            }
+            if ($doctypeIntro != '') { ?>
+                <div class="doctypeIntro"><?php echo $this->document->getDoctypeIntro(); ?> </div>
+                <?php
+            } ?>
+            <form id="form_meta">
+                <?php echo $this->form; ?>
+            </form>
+            <div class="text-center" style="display:none;">
+                <button id="submit-button" type="submit" class="btn btn-primary btn-lg" onclick="requestChangeMeta()"><i class="glyphicon glyphicon-refresh"></i>  <?php echo $this->translate("Valider le formulaire"); ?></button>
+            </div>
+            <div id="meta-footer-note" style="<?php if(!$this->metamode) {echo 'display:none;';}?>"> <?php echo $this->translate("submit_meta_footer");?> <a href="#" onclick="$('#change-view-button-meta').click();"><?php echo $this->translate("submit_meta_footer_link");?></a>.</div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function() {
+        initViewMeta();
+
+        // Initialisation de la vue
+        displayMeta(!<?php echo $this->metamode;?>);
+    });
+</script>

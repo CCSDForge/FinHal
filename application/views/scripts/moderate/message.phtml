@@ -1,0 +1,107 @@
+<?php $this->layout()->pageDescription = "Gestion des réponses prédéfinies utilisables pour la vérification technique";?>
+
+<div class="form-actions">
+    <button type="button" class="btn btn-default" onclick="addMessage();"><i class="glyphicon glyphicon-plus"></i>&nbsp;<?php echo $this->translate("Créer une nouvelle réponse prédéfinie")?></button>
+</div>
+
+<form action="/moderate/message" method="post">
+    <input type="hidden" name="uid" value="<?php echo $this->uid ?>" />
+    <table id="messages" class="table table-striped" width="100%" style="<?php echo count($this->messages_list) ? '' : 'display:none';?>">
+    	<thead>
+        	<tr>
+        		<th class="t_title"><?php echo $this->translate("Titre");?></th>
+        		<th class="t_message"><?php echo $this->translate("Message");?></th>
+        		<th class="t_actions"><?php echo $this->translate("Actions");?></th>
+        	</tr>
+    	</thead>
+    	<tbody>
+        <?php
+            foreach ($this->messages_list as $m) {
+                $message = $m->toArray();
+                ?>
+                <tr id="message_<?php echo $message["messageid"]; ?>" class="message">
+                	<td class="m_title"><strong><?php echo $message["title"]; ?></strong></td>
+                	<td class="m_body">
+                        <span class="content_message_<?php echo $message["messageid"]; ?>"><?php echo $message["message"]; ?></span>
+                        <?php if ($message["uid"] != 0 || $this->isAdmin) { ?>
+                            <div id="form_message_<?php echo $message["messageid"]; ?>" class="form" style="display:none;"><?php echo $m->getForm(); ?></div>
+                        <?php } ?>
+                    </td>
+                	<td style="text-align:right;">
+                		<?php if ($message["uid"] != 0) { ?>
+                        		<a class="editMessage" onclick="editMessage(<?php echo $message["messageid"]; ?>, this); return false;" href="#"><i class="glyphicon glyphicon-pencil"></i></a>
+                                <a class="delMessage" title="Supprimer" onclick="deleteMessage(<?php echo $message["messageid"]; ?>);" href="javascript:void(0)"><i class="glyphicon glyphicon-trash"></i></a>
+                        <?php } ?>
+    				</td>
+                </tr>
+                <?php
+            }
+        ?>
+    	</tbody>
+    	<tfoot style="display:none;">
+    		<tr id="message_modele" class="message new_message">
+            	<td class="m_title"></td>
+            	<td class="m_body">
+                    <div id="form_message_modele" class="form"><?php echo $this->form; ?></div>
+            	</td>
+            	<td>
+            		<div class="pull-right">
+                		<a class="delMessage" title="Supprimer" onclick="" href="javascript:void(0)"><i class="glyphicon glyphicon-trash"></i></a>
+                    </div>
+				</td>
+            </tr>
+    	</tfoot>
+    </table>
+    
+    <div class="form-actions text-center">
+        <button type="submit" class="btn btn-primary"><?php echo $this->translate('Enregistrer'); ?></button>
+    </div>
+</form>
+
+<script type="text/javascript">
+    var newMsgIdx = 0;
+
+    function editMessage(id, elem)
+    {
+        $('#form_message_'+ id ).show();
+        $('#message_' + id +'-status').val('edited');
+        $('.content_message_'+ id ).hide();
+        $(elem).hide();
+    }
+
+    function deleteMessage(id)
+    {
+        $('#message_' + id + '-status').val('deleted');
+        $('#message_' + id).attr('class', 'message deleted');
+    }
+
+    function addMessage()
+    {
+        $('#messages').show();
+        var clone = $('#messages>tfoot').clone();
+        // Mise a jour des attribut name
+        $('#message_0-messageid', clone).attr('name', 'message_tmp_' + newMsgIdx + '[messageid]');
+        $('#message_0-messageid', clone).val('tmp_' + newMsgIdx);
+        $('#message_0-uid', clone).attr('name', 'message_tmp_' + newMsgIdx + '[uid]');
+        $('#message_0-title', clone).attr('name', 'message_tmp_' + newMsgIdx + '[title]');
+        $('#message_0-status', clone).attr('name', 'message_tmp_' + newMsgIdx + '[status]');
+        $('#message_0-status', clone).val('edited');
+        $('#message_0-message', clone).attr('name', 'message_tmp_' + newMsgIdx + '[message]');
+        $('label[for="message_0-title"]', clone).attr('for', 'message_' + newMsgIdx + '-title');
+        $('label[for="message_0-message"]', clone).attr('for', 'message_' + newMsgIdx + '-message');
+        // Changement de identifiant
+        $('tr', clone).attr('id', 'message_tmp_'+ newMsgIdx);
+        $('#message_0-messageid', clone).attr('id','#message_' + newMsgIdx + '-messageid');
+        $('#message_0-uid', clone).attr('id','#message_' + newMsgIdx + '-uid');
+        $('#message_0-title', clone).attr('id','#message_' + newMsgIdx + '-title');
+        $('#message_0-status', clone).attr('id','#message_' + newMsgIdx + '-status');
+        $('#message_0-message', clone).attr('id','#message_' + newMsgIdx + '-message');
+        $('#message_0-title-element', clone).attr('id','#message_' + newMsgIdx + '-title-element');
+        $('#message_0-message-element', clone).attr('id','#message_' + newMsgIdx + '-message-element');
+        $('.delMessage', clone).attr('onclick', "deleteMessage('tmp_" + newMsgIdx + "')");
+
+        $('#messages>tbody').append($(clone).find('tr'));
+        jQuery('html,body').animate({scrollTop:jQuery("#message_tmp_" + newMsgIdx).offset().top},1000,'swing');
+        newMsgIdx += 1;
+    }
+</script>

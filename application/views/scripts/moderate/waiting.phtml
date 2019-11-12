@@ -1,0 +1,74 @@
+<?php
+
+$this->layout()->pageDescription = $this->translate("Liste des documents en attente de modification");
+
+if (count($this->documents)) {
+    $this->jQuery()
+        ->addJavascriptFile(CCSDLIB ."/js/jquery.dataTables.min.js")
+        ->addJavascriptFile(CCSDLIB ."/js/dataTables.bootstrap.js")
+        ->addStylesheet(CCSDLIB . '/css/dataTables.bootstrap.css');
+    $user = new Hal_User();
+    $infoUsers = array();
+    ?>
+
+    <h5><?php echo $this->translate('Nombre de documents en attente'); ?> : <span class="label label-primary"><?php echo count($this->documents);?></span></h5>
+    <form action="/moderate/waiting" method="post" id="list-documents">
+        <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="moderate" width="100%">
+            <thead>
+                <tr>
+                    <th class="middle" style="width:16px"><input type="checkbox" class="select-checkbox"/></th>
+                    <th class="middle"><?php echo $this->translate('Document'); ?></th>
+                    <th class="middle"><?php echo $this->translate('Contributeur'); ?></th>
+                    <th class="middle"><?php echo $this->translate('Déposé le'); ?></th>
+                    <th class="middle"><?php echo $this->translate('Portail'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($this->documents as $data) {
+                    $document = Hal_Document::find($data['DOCID']);
+                    if (! isset($infoUsers[$data['UID']])) {
+                        $user->find($data['UID']);
+                        $infoUsers[$data['UID']] = $user->getFullName();
+                    }
+                    ?>
+                    <tr>
+                        <td class="middle"><input type="checkbox" name="docid[]" value="<?php echo $data['DOCID']; ?>" class="checkbox-docid" /></td>
+                        <td class="middle"><?php echo $document->getCitation('full'); ?></td>
+                        <td class="middle"><?php echo $infoUsers[$data['UID']]; ?></td>
+                        <td class="middle"><?php echo $data['DATESUBMIT'] ?></td>
+                        <td class="middle"><?php echo $data['SITE'] ?></td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th><input type="checkbox" class="select-checkbox" /></th>
+                    <th colspan="5"><button type="submit" class="btn btn-primary btn-sm">&nbsp;<?php echo $this->translate('Remettre en modération'); ?></button> </th>
+                </tr>
+            </tfoot>
+        </table>
+    </form>
+
+    <script language="JavaScript">
+        $(document).ready(function(){
+            $('#moderate').dataTable({
+                "iDisplayLength": 500,
+                "bLengthChange":false
+            });
+        });
+        $('.select-checkbox').click(function() {
+            $('#moderate .checkbox-docid, .select-checkbox').prop('checked', $(this).is(':checked'));
+        });
+
+        /**
+         * Selection d'un document
+         * @param docid
+         */
+        function selectDocument(docid)
+        {
+            $('#moderate .checkbox-docid, .select-checkbox').prop('checked', false);
+            $('#moderate .checkbox-docid[value="' + docid + '"]').prop('checked', true);
+            $('#list-documents').submit();
+        }
+    </script>
+<?php }

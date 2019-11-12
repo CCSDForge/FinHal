@@ -1,0 +1,19 @@
+<?php $this->jQuery()->addJavascriptFile('/js/user/user.js'); ?>
+
+<div id="message"></div>
+
+<fieldset class="well well-small" id="profil_<?php echo $this->name ?>" >
+    <legend style="border: none;">
+        <img src="/img/logo-<?php echo $this->name ?>.png" />
+    </legend>
+    <p class="description"><?php echo $this->translate($this->element->getLegend()); ?></p>
+    <?php 
+    
+    $decorator = new Ccsd_Form_Decorator_FormElements();
+    $decorator->setElement($this->element);
+    
+    echo $decorator->render("");
+
+    ?>
+</fieldset>
+

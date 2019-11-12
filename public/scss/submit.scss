@@ -1,0 +1,423 @@
+@charset "utf-8";
+
+@import "submit/step-file";
+@import "submit/step-meta";
+@import "submit/step-author";
+@import "submit/step-recap";
+
+.container {
+    width:100%;
+}
+
+.accordion-icon {
+    margin-right:10px;
+}
+
+.validity-icon {
+    margin-left:10px;
+}
+
+.switch-container {
+    margin-bottom:10px;
+    height:5px;
+}
+
+.switch-view-button {
+    margin-right:10px;
+    float:right;
+    font-size:15px;
+}
+
+.panel-link, .panel-link:hover, .panel-link:focus {
+    text-decoration: none;
+}
+
+.modal-body {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+#waiting-msg {
+    color:inherit;
+}
+
+#legal-text {
+    display:none;
+}
+
+#legal-intro {
+    text-align: center;
+    width:100%;
+}
+
+#legal-title {
+    font-size: 20px;
+}
+
+.legal-subtitle {
+    font-size: 16px;
+}
+
+.legal-comment {
+    font-style: italic;
+    font-size: 12px;
+}
+
+#legal-blabla {
+    text-align: justify;width:100%;
+}
+
+#legal-end {
+    text-align:right;
+    width:100%;
+    font-size:15px;
+}
+
+
+.text-right .pagination {
+    margin: -10px 0;
+}
+.corps .form-actions {
+    margin-top: 0px;
+}
+
+
+.alert hr{
+    margin: 10px 0;
+    border-top: 1px solid #BCE8F2;
+    border-bottom: 0;
+}
+.alert-text hr {
+    border-top: 1px solid #e1e1e8;
+}
+
+.alert-warning {
+    color: #92620f !important;
+}
+
+* html .ui-autocomplete {
+    height: 100px;
+}
+.input-group-addon>button {
+    background: inherit;
+}
+
+
+/* Style the buttons that are used to open and close the accordion panel */
+
+div.panel-heading {
+    /*background-color: rgba(185, 74, 72, 0.4);*/
+    font-size: 18px;
+}
+
+#render-step .panel-default>.panel-heading{
+    background-color: #eee;
+}
+
+div.panel-heading.valid {
+    /*background-color: rgba(70, 136, 71, 0.4);*/
+}
+
+a {
+    outline: 0;
+}
+
+div.panel-default {
+    border: 0px;
+    border-radius: 0px;
+}
+
+a:focus {
+    outline: none !important;
+}
+
+/* Style the accordion panel. Note: hidden by default */
+div.panel-collapse {
+    background-color: #f5f5f5;
+    border-left: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+
+}
+
+button.accordion {
+    color: #0f192a;
+    font-size: 18px;
+}
+
+/* The "show" class is added to the accordion panel when the user clicks on one of the buttons. This will show the panel content */
+div.panel.show {
+    display: block;
+}
+
+.wizard .nav-tabs {
+    position: relative;
+    margin: 30px auto 0;
+    border-bottom-color: #31708f;
+    padding-bottom: 1px;
+}
+
+.wizard > div.wizard-inner {
+    position: relative;
+}
+
+.connecting-line {
+    height: 2px;
+    background: #e0e0e0;
+    position: absolute;
+    width: 80%;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    top: 50%;
+    z-index: 1;
+}
+
+.wizard .nav-tabs > li.active > a, .wizard .nav-tabs > li.active > a:hover, .wizard .nav-tabs > li.active > a:focus {
+    color: #555555;
+    cursor: default;
+    border: 0;
+    border-bottom-color: transparent;
+}
+
+span.round-tab {
+    width: 70px;
+    height: 70px;
+    line-height: 70px;
+    display: inline-block;
+    border-radius: 100px;
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    z-index: 2;
+    position: absolute;
+    left: 0;
+    text-align: center;
+    font-size: 25px;
+}
+span.round-tab i{
+    color:#9da0a4;
+}
+.wizard li.active span.round-tab {
+    background: #d9edf7;
+    border: 2px solid #bce8f1;
+
+}
+.wizard li.active span.round-tab i{
+    color: #31708f;
+}
+
+.wizard li.enabled span.round-tab {
+    background: #fff;
+    border: 2px solid #999;
+
+}
+.wizard li.enabled span.round-tab i{
+    color: #3c763d;
+}
+
+.wizard li.valid span.round-tab {
+    background: #dff0d8;
+    border: 2px solid #d6e9c6;
+
+}
+.wizard li.valid span.round-tab i{
+    color: #3c763d;
+}
+
+span.round-tab:hover {
+    color: #666;
+    border: 2px solid #666;
+}
+
+span.round-tab:hover i {
+    color: #666;
+}
+
+.wizard .nav-tabs > li {
+    width: 25%;
+}
+
+.wizard li:after {
+    content: " ";
+    position: absolute;
+    left: 46%;
+    opacity: 0;
+    margin: 0 auto;
+    bottom: 0px;
+    border: 5px solid transparent;
+    border-bottom-color: #31708f;
+    transition: 0.1s ease-in-out;
+}
+
+.wizard li.active:after {
+    content: " ";
+    position: absolute;
+    left: 46%;
+    opacity: 1;
+    margin: 0 auto;
+    bottom: 0px;
+    border: 10px solid transparent;
+    border-bottom-color: #31708f;
+}
+
+.wizard .nav-tabs > li a {
+    width: 70px;
+    height: 70px;
+    margin: 20px auto;
+    border-radius: 100%;
+    padding: 0;
+}
+
+.wizard .nav-tabs > li a:hover {
+    background: transparent;
+}
+
+.wizard .tab-pane {
+    position: relative;
+    padding-top: 50px;
+}
+
+.wizard h3 {
+    margin-top: 0;
+}
+
+.wizard h2, #id-zone h2 {
+    font-size: 18px;
+    color: #31708f;
+}
+
+@media( max-width : 585px ) {
+
+    .wizard {
+        width: 90%;
+        height: auto !important;
+    }
+
+    span.round-tab {
+        font-size: 12px;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+    }
+
+    .wizard .nav-tabs > li a {
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+    }
+
+    .wizard li.active:after {
+        content: " ";
+        position: absolute;
+        left: 35%;
+    }
+}
+.wizard h4 {
+    margin-left:20px;
+    font-size:14px;
+    clear: both;
+    color:#336;
+}
+#flash-messages {
+    margin-top: 10px;
+}
+
+
+.uploading {
+    background-color: #D8D8D8!important;
+}
+
+
+
+span.nav-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    border-radius: 100px;
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    z-index: 2;
+    text-align: center;
+    font-size: 15px;
+    margin-left: 16px;
+}
+
+span.nav-icon i{
+    color:#9da0a4;
+    position: relative;
+    display: inline;
+    top: 4px;
+}
+
+span.nav-icon:hover {
+    color: #666;
+    border: 2px solid #666;
+}
+
+span.nav-icon:hover i {
+    color: #666;
+}
+.nou:hover{
+    text-decoration: none;
+}
+
+.text-danger {color: #c7254e;}
+
+.input-xs {
+    height: 22px;
+}
+.btn-group-xxs>.btn {
+    padding: 5px 10px;
+    padding: 1px 5px;
+    font-size: 10px;
+    line-height: 1.3;
+    border-radius: 3px;
+}
+
+.processing {
+    display:none !important;
+}
+
+.panel {
+    overflow:visible !important;
+}
+
+#typdoc-menu {
+    position: absolute;
+    z-index: 100;
+    cursor:  pointer;
+}
+
+#typdoc-button {
+    text-align : left;
+}
+
+.disabled-option,
+.disabled-option:visited ,
+.disabled-option:active,
+.disabled-option:hover {
+    color:#aaa !important;
+    cursor:  default;
+}
+
+.progress-bar.active, .progress.active .progress-bar {
+    -webkit-animation: progress-bar-stripes 2s linear infinite;
+    -o-animation: progress-bar-stripes 2s linear infinite;
+    animation: progress-bar-stripes 2s linear infinite;
+}
+
+.progress-bar-striped, .progress-striped .progress-bar {
+    background-image: -webkit-linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    background-image: -o-linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    -webkit-background-size: 40px 40px;
+    background-size: 40px 40px;
+}
+
+.switch-view-button {
+    cursor:  pointer;
+}
+
+.btn-disabled {
+    cursor: not-allowed;
+    opacity: .65;
+}

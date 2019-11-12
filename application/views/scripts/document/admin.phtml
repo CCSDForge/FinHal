@@ -1,0 +1,334 @@
+<?php
+/**
+ * Vue d'un document en administration (étape récap ou modération ou validation)
+ * User: yannick
+ * Date: 26/05/2014
+ * Time: 11:01
+ */
+$document = $this->document;
+if (! (isset($document) && $document instanceof Hal_Document) ) {
+    exit();
+}
+?>
+<table class="meta table table-condensed table-bordered">
+    <tbody>
+    <tr>
+        <td class="meta-name" style="width:150px;"><?php echo $this->translate('Format du dépôt'); ?></td>
+        <td><span class="label label-default"><?php echo $this->translate('format_' . $document->getFormat()); ?></span></td>
+    </tr>
+    <tr>
+        <td class="meta-name" style="width:150px;"><?php echo $this->translate('Type de document'); ?></td>
+        <td><span class="<?php echo Hal_Settings::getLabelClassName($document->getTypdoc()); ?>"><?php echo $this->translate('typdoc_' . $document->getTypdoc()); ?></span></td>
+    </tr>
+    <?php
+    $title = $document->getTitle();
+    if (! is_array($title)) {
+        $title = array($title);
+    }
+
+    ?><tr><td class="meta-name"><?php echo $this->translate('Titre'); ?></td>
+        <td>
+        <?php
+        $startTag='<div class="row">' ;
+        $endTag='</div>';
+        $startItemTagPartial = "<div ";
+        $endItemTag = '</div>';
+        foreach($title as $lang => $metaObj) {
+            echo $startTag;
+            echo $startItemTagPartial . 'class="col-md-1">' ; ?>
+            <span class="label label-default"><?php echo $this->translate($lang); ?></span>
+            <?php echo $endItemTag;
+            echo $startItemTagPartial . 'class="col-md-11" style="margin-bottom: 10px">'?><h5 style="margin:0;"><?php echo $metaObj ?></h5><?php
+            echo $endItemTag;
+            echo $endTag;
+        }
+        ?></td>
+    </tr><?php
+    $subtitle = $document->getSubTitle();
+    if (! is_array($subtitle)) {
+        $subtitle = array($subtitle);
+    }
+    if ($subtitle != []) {
+    ?>
+    <tr>
+        <td class="meta-name"><?php echo $this->translate('Sous-Titre'); ?></td>
+        <td>
+            <?php
+            $startTag = '<div class="row">';
+            $endTag = '</div>';
+            $startItemTagPartial = "<div ";
+            $endItemTag = '</div>';
+            foreach ($subtitle as $lang => $metaObj) {
+                echo $startTag;
+                echo $startItemTagPartial . 'class="col-md-1">'; ?>
+                <span class="label label-default"><?php echo $this->translate($lang); ?></span>
+                <?php echo $endItemTag;
+                echo $startItemTagPartial . 'class="col-md-11" style="margin-bottom: 10px">' ?><h5 style="margin:0;"><?php echo $metaObj ?></h5><?php
+                echo $endItemTag;
+                echo $endTag;
+            } ?></td>
+    <tr><?php
+        }
+    // Auteurs
+        $corresponding = false;
+        $authors = $document->getAuthors();
+        ?>
+        <tr>
+        <td class="meta-name"><?php echo $this->translate('Auteur(s)'); ?></td>
+        <td>
+            <div class="row">
+                <div class="col-md-12">
+                <?php
+            $nb = count($authors);
+            $sep = '';
+            foreach ($authors as $i => $author) {
+                echo $sep; ?>
+                <?php $tooltip = $this->translate('relator_' . $author->getQuality()) . '<br>';
+                if ($author->getEmail() != '') {
+                    $tooltip .= $this->translate('Mail') . ': ' . $author->getEmail() . '<br>';
+                }
+                if ($author->getIdHal() != 0) {
+                    $tooltip .= $this->translate('IdHAL') . ': ' . $author->getIdhalstring() . ' (' . $author->getIdHal() .')<br>';
+                }
+                if ($author->getOrganism() != '') {
+                    $tooltip .= $this->translate("Établissement d'appartenance") . ': ' . $author->getOrganism() .'<br>';
+                }
+                ?>
+                <strong data-toggle="tooltip" title="<?php echo $tooltip ?>"><?php echo $author->getFullname(true); ?></strong>
+                <?php
+                $structids = $author->getStructidx();
+                foreach ($structids as &$idx) {
+                    $idx += 1;
+                }
+                if ($author->getQuality() =='crp') {
+                    $corresponding = true;
+                    $structids[] = '*';
+                }
+                if (count($structids)) { ?>
+                    <sup><?php echo implode(', ', $structids) ?></sup>
+                <?php }
+                $sep = ', ';
+            }
+            if ($corresponding) { ?>
+                <div class="corresponding">* : <?php echo $this->translate('Auteur correspondant'); ?></div>
+            <?php } ?>
+            <hr style="margin-top:5px;margin-bottom:5px;padding-left:5px;padding-right:5px"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                <?php foreach ($document->getStructures() as $i => $struct) { ?>
+                <div class="struct">
+                    <span class="structid label label-default"><?php echo $i + 1; ?></span>
+                    <strong>
+                        <?php if ($struct->getSigle()) {
+                            echo $struct->getSigle() . ' - ';
+                        }
+                        echo  $struct->getStructname() . ' <span class="label label-default">' . $struct->getStructid() . '</span> - '; ?>
+                    </strong>
+                    <?php if ($struct->getAddress() != '') {
+                        echo $struct->getAddress() . '&nbsp;-&nbsp';
+                    }
+                    $country = Zend_Locale::getTranslation(strtoupper($struct->getPaysid()), 'country');
+                    if ($country == '') {$country = strtoupper($struct->getPaysid());}
+                    echo $country . '<br />';
+                    $parents = array();
+                    foreach ($struct->getAllParents() as $parent) {
+                        $code = Ccsd_Tools::ifsetor($parent['code']);
+                        /** @var Ccsd_Referentiels_Structure $struct */
+                        $struct = $parent['struct'];
+                        $parents[] = $struct->getStructname() . ($code != '' ? ' : ' . $code : '') . ' <span class="label label-default">' . $parent['struct']->getStructId() . '</span>';
+                    }
+                    if (count($parents)) {
+                        ?> <span class="prec"> <?php echo implode(' ; ', $parents); ?> </span><?php
+                    }
+                    ?>
+                </div>
+            <?php } ?>
+            </div>
+            </div>
+        </td>
+    </tr>
+    <?php
+    $abstract = $document->getAbstract();
+    if (! is_array($abstract)) {
+        $abstract = array($abstract);
+    }
+    if ($abstract != []) { ?>
+
+        <tr>
+            <td class="meta-name"><?php echo $this->translate('Résumé'); ?></td>
+            <td><?php
+                $startTag = '<div class="row">';
+                $endTag = '</div>';
+                $startItemTagPartial = "<div ";
+                $endItemTag = '</div>';
+                foreach ($abstract as $lang => $metaObj) {
+                    echo $startTag;
+                    echo $startItemTagPartial . 'class="col-md-1">'; ?>
+                    <span class="label label-default"><?php echo $this->translate($lang); ?></span>
+                    <?php echo $endItemTag;
+                    echo $startItemTagPartial . 'class="col-md-11" style="margin-bottom: 10px" class="linkify" style="text-align:justify;">' . $metaObj;
+                    echo $endItemTag;
+                    echo $endTag;
+                } ?>
+            </td>
+        </tr>
+        <?php
+    }
+
+    $identifiants = $document->getIdsCopyUrl();
+    $nb = count($identifiants);
+    if ($nb > 0) {
+        foreach ($identifiants as $server => $metaObj) { ?>
+            <tr>
+                <td class="meta-name"><?php echo $this->translate($server); ?></td>
+                <td>
+                    <a href="<?php echo $metaObj['link'] ?>" target="_blank"><?php echo $metaObj['id'] ?></a>
+                </td>
+            </tr>
+            <?php
+        }
+    }
+
+    $metaslabels = Hal_Settings::getMeta($document->getTypdoc());
+    $metasSpec = $metaslabels['elements'];
+
+    uasort($metasSpec, function($a,$b) {
+        $val4a = 0;
+        if (array_key_exists('options', $a)) {
+            if (array_key_exists('display_order', $a['options'])) {
+                $val4a = $a['options']['display_order'];
+            } else if (array_key_exists('order', $a['options'])) {
+                $val4a = $a['options']['order'];
+            }
+        }
+        $val4b = 100;
+        if (array_key_exists('options', $b)) {
+            if (array_key_exists('display_order', $b['options'])) {
+                $val4b = $b['options']['display_order'];
+            } else if (array_key_exists('order', $b['options'])) {
+                $val4b = $b['options']['order'];
+            }
+        }
+        return ($val4a > $val4b);
+    });
+    $metasList = Hal_Referentiels_Metadata::metaList();
+    $metas = $document->getHalMeta();
+    //foreach($metas as $meta => $metaObj) {
+    foreach($metasSpec as $meta => $data)  {
+        if (!$metas->exists($meta)) {
+            continue;
+        }
+        $metaObj = $metas->getHalMeta($meta);
+        /** @var Hal_Document_Meta_Abstract $metaObj */
+        if (in_array($meta, array('title', 'subTitle', 'abstract', 'identifier', 'inPress', 'watermark'))) {
+            // Pas d'affichage dans le tableau pour celle-ci (deja traite ou ridicule d'afficher (ex watertmark))
+            continue;
+        }
+        if (!in_array($meta, array_keys($metaslabels['elements']))) {
+            // Pas une meta du type de doc, next one
+            continue;
+        }
+
+        $metalabel = $metaslabels['elements'][$meta]['options']['label'];
+
+
+        $linkify = in_array($meta, array('seeAlso'));
+        ?>
+        <tr>
+            <td class="meta-name"><?php
+                echo $this->translate($metalabel);
+                ?></td><?php
+            $i = 0;
+            $startTagDone = false; ?>
+            <td><?php
+                /**
+                 * @var string $key
+                 * @var Hal_Document_Meta_Abstract $metaO */
+
+                $v = $metaObj->getValue();
+                if (!file_exists($displayFile = __DIR__ . "/" . $metaObj->getDisplayView())) {
+                    $displayFile = "displayMeta.phtml";
+                }
+                if ($metaObj->isMultiValued()) {
+                    if (Hal_Settings::isMultiLanguageMetas($meta)) {
+                        $startTag = '<div class="row">';
+                        $endTag = '</div>';
+                        $startItemTagPartial = "<div ";
+                        $endItemTag = '</div>';
+                        foreach ($v as $lang => $value) {
+                            echo $startTag;
+                            echo $startItemTagPartial . ' class="col-md-1" >';
+                            ?><span class="label label-default"><?php echo $this->translate($lang); ?></span>
+                            <?php echo $endItemTag;
+                            echo $startItemTagPartial . ' class="col-md-11" style="margin-bottom: 10px"' . ($linkify ? 'class="linkify"' : '') . '>';
+                            include $displayFile;
+                            echo $endItemTag;
+                            echo $endTag;
+                        }
+                    } else {
+                        $endItemTag = '</span>';
+                        $startItemTagPartial = '<span ';
+                        foreach ($v as $group => $value) {
+                            echo $startItemTagPartial . ($linkify ? 'class="linkify"' : '') . '>';
+                            include $displayFile;
+                            echo $endItemTag;
+                        }
+                    }
+                } else {
+                    $value = $v;
+                    include $displayFile;
+                }
+                ?></td>
+        </tr>
+        <?php
+    }
+    if (!$this->hideFiles) {
+        $files = $document->getFiles();
+        if (count($files)) {
+            $i = 0;
+            $this->showType = true;
+            $this->readEmbargo = true;
+            foreach ($files as $id => $file) {
+                $this->file = $file;
+                $this->href = (isset($this->filesInTmpDir) && $this->filesInTmpDir) ? '/file/tmp/fid/' . $id : '/file/index/docid/' . $document->getDocid() . '/filename/' . rawurlencode($file->getName());
+
+                ?>
+                <tr>
+                    <?php if ($i == 0) { ?>
+                        <td <?php echo count($files) > 1 ? 'rowspan="' . count($files) . '"' : '' ?>
+                                class="meta-name"><?php echo $this->translate('Fichier(s)'); ?></td>
+                    <?php } ?>
+                    <td>
+                        <?php include 'row-file.phtml'; ?>
+                    </td>
+                </tr>
+                <?php
+                $i++;
+            }
+        }
+    }
+    ?>
+    </tbody>
+</table>
+<?php if ($this->showHistory) { ?>
+    <div class="panel panel-default" id="history-<?php echo $document->getDocid() ?>">
+        <div class="panel-heading" role="tab" id="headingOne">
+            <div class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" onclick="getDocHistory('<?php echo $document->getDocid() ?>', '#history-<?php echo $document->getDocid() ?>')">
+                    <i class="glyphicon glyphicon-calendar"></i>&nbsp;<?php echo $this->translate('Historique du dépôt'); ?>
+                </a>
+            </div>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse <?php echo ($this->moderate ? 'in': '') ?>" role="tabpanel" aria-labelledby="headingOne">
+            <div class="panel-body result">
+            </div>
+        </div>
+    </div>
+    <?php if (($this->moderate) OR ($this->validate)) { ?>
+        <script type="text/javascript">
+            $(function() {getDocHistory('<?php echo $document->getDocid() ?>', '#history-<?php echo $document->getDocid() ?>');});
+        </script>
+    <?php } ?>
+<?php } ?>

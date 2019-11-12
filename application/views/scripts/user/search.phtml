@@ -1,0 +1,247 @@
+<?php
+$this->layout()->pageDescription = $this->translate("Vous trouvez ici les recherches que vous avez précédemment sauvegardées. Chaque recherche peut être transformée en une alerte par courriel.");
+
+$searchSaved = $this->my_search->getMysearch();
+
+if (count($searchSaved) == 0) {
+
+    echo '<div class="alert alert-info" role="alert">';
+    echo $this->translate("Vous n'avez pas de recherches enregistrées.");
+    echo '</div>';
+
+    return;
+}
+
+$newsletterData['none'] = '<span class="glyphicon glyphicon-ban-circle pull-left"></span>&nbsp;' . $this->translate('Aucune');
+$newsletterData['day'] = '<span class="glyphicon glyphicon-calendar pull-left"></span>&nbsp;' . $this->translate('Jour');
+$newsletterData['week'] = '<span class="glyphicon glyphicon-calendar pull-left"></span>&nbsp;' . $this->translate('Semaine');
+$newsletterData['month'] = '<span class="glyphicon glyphicon-calendar pull-left"></span>&nbsp;' . $this->translate('Mois');
+$newsletterData['push'] = '<span class="glyphicon glyphicon-refresh pull-left"></span>&nbsp;' . $this->translate('Push');
+
+?>
+<style>
+.label-critere {
+	background-color: #ffffff;
+	border: 1px solid #cccccc;
+	color: #428bca;
+	margin-right: 5px;
+	font-size: 11px;
+	line-height: 22px;
+}
+
+.label-critere .critere {
+	font-weight: normal;
+	color: #666666;
+}
+
+#tableHeader tbody td .query { /* display:none;*/
+
+}
+
+#tableHeader tbody td:hover .query {
+	display: block;
+}
+</style>
+
+<table class="table table-striped table-hover table-mysearch" id="tableHeader">
+	<thead>
+		<tr>
+			<th style="width: 85%"><?php echo $this->translate("Requêtes"); ?></th>
+			<th style="width: 10%"><?php echo $this->translate("Instance"); ?></th>
+			<th style="width: 5%"><?php echo $this->translate("Actions"); ?></th>
+		</tr>
+	</thead>
+	<tbody>
+
+        <?php
+        foreach ($searchSaved as $s) {
+            ?>
+                <tr id="search_<?php echo $s->searchid; ?>">
+			<td>
+				<div>
+					<strong><?php echo $s->lib; ?></strong> <small><?php echo $s->update_date; ?></small>
+					<?php //echo $newsletterData[$s->freq]; ?>
+				</div>
+				<div class="query">
+        					<?php
+            foreach ($s->args as $key => $value) {
+                if ($key == 'submit_advanced' || $key == 'submit' || ! $value) {
+                    continue;
+                }
+                ?>
+                                    <span class="label label-critere">
+                                        <span class="critere"><?php echo $this->translate('hal_' . $key); ?> : </span>
+                                        <?php
+                if (is_array($value)) {
+                    foreach ($value as $field => $val) {
+
+                        if (is_array($val)) {
+
+                            echo $this->translate('hal_' . $field);
+                            echo '&nbsp;:&nbsp;';
+                            echo $this->escape('(' . implode(' AND ', $val) . ')');
+                        } else {
+                            echo $this->escape(urldecode($val)).'&nbsp;';
+                        }
+                    }
+                } else {
+                    echo $this->escape(urldecode($value));
+                }
+                ?>
+                                    </span> <br>
+
+
+                                    <?php
+            }
+            ?>
+        				</div>
+			</td>
+			<td>
+			<?php if ($s->getSidUrl() !='') : ?>
+			<a href="<?php echo $this->escape($s->getSidUrl()); ?>"><?php echo $this->escape($s->getSidName()); ?></a>
+			<?php else: ?>
+			<?php echo $this->escape($s->getSidName()); ?>
+            <?php endif; ?>
+
+			</td>
+			<td>
+				<div class="actions pull-right">
+					<a id="optionsElement<?php echo $s->searchid; ?>"
+						class="btn btn-default btn-sm optionsElement" href="javascript:void(0)"
+						title="<?php echo $this->translate("Alerte par courriel"); ?>"
+						onClick="openPopover($(this));"><span class="glyphicon glyphicon-bell popover-link"></span></a>
+					<a class="btn btn-default btn-sm searchElement" href="<?php echo $s->url; ?>"
+						title="<?php echo $this->translate("Lancer la recherche"); ?>"><i
+						class="glyphicon glyphicon-search"></i></a> <a
+						class="btn btn-default btn-sm deleteElement" searchid="<?php echo $s->searchid; ?>"
+						href="javascript:void(0)" title="<?php echo $this->translate("Supprimer"); ?>"><i
+						class="glyphicon glyphicon-trash"></i></a> <input type="hidden" name="searchid"
+						value="<?php echo $s->searchid; ?>" />
+					<div class="options popover fade in">
+						<p>
+							<small><?php echo $this->translate("Fréquence d'abonnement à la recherche"); ?></small>
+						</p>
+						<div class="btn-group-vertical">
+                                <?php
+
+
+            foreach ($newsletterData as $key => $data) {
+                $isActive = '';
+                if ($key == $s->getFreq()) {
+                    $isActive = ' btn-primary active disabled';
+                }
+                ?>
+                                        <a href="#"
+								class="freq-btn freq-<?php echo $key; ?> btn btn-default btn-sm<?php echo $isActive; ?>"
+								onClick="updateFreq(<?php echo $s->searchid; ?>, '<?php echo $key; ?>'); return false;">
+                                        	<?php echo $data; ?>
+                                        </a>
+                                        <?php
+            }
+
+            ?>
+                                </div>
+						<br>
+						<hr>
+						<div class="text-right">
+							<button
+								onclick="$(this).parents('.actions').find('.optionsElement').popover('hide')"
+								type="button" class="btn btn-default btn-sm"><?php echo $this->translate("Fermer"); ?></button>
+						</div>
+					</div>
+				</div>
+			</td>
+		</tr>
+                <?php
+        }
+        ?>
+
+	</tbody>
+</table>
+<?php
+echo $this->confirm("Suppression", "Souhaitez-vous supprimer cette recherche ?")
+    ->setId('modalDelete')
+    ->setTrigger('.deleteElement')
+    ->setJsInit('$("#confirm-id").val($(this).next().val());')
+    ->setJsCallback('deleteElement();');
+?>
+<script type="text/javascript">
+
+    $(document).ready(function(){
+    	$('.deleteElement').click(function() {
+    		confirmDelete($(this).attr('searchid'));
+    	});
+
+
+    	$('.optionsElement').popover({
+				html : true,
+				placement : 'left',
+				trigger : 'manual',
+				content : function() {
+					return $(this).parent().find('.options').html();
+				}
+    	});
+    });
+
+    function openPopover(elem) {
+        if (elem.siblings('.popover').is(':visible')) {
+        	elem.popover('hide');
+        } else {
+			$('.optionsElement').each(function () {
+				if ($(this).is(elem)) {
+					$(this).popover('show');
+				} else {
+					$(this).popover('hide');
+				}
+			});
+        }
+
+    }
+
+    function updateFreq (searchid, freq) {
+
+    	$.ajax({
+			type: "post",
+            url: "/user/ajaxupdatefreq",
+			data: { searchid : searchid, freq : freq}
+		}).done(function( msg ) {
+			if (msg == 'ok') {
+    			$('#search_'+searchid+' .actions .freq-btn').removeClass('btn-primary active disabled');
+    			$('#search_'+searchid+' .actions .freq-'+freq).addClass('btn-primary active disabled');
+    			$('#flash-messages').html('');
+                message("<?php echo $this->translate("Fréquence d'alerte modifiée.");?>", 'alert-success');
+			} else {
+				alert('Error !\n['+msg+']');
+			}
+		});
+    }
+
+    function confirmDelete(id)
+    {
+    	$('#searchDelete').val(id);
+    	$('#modalDelete').modal({'keyboard' : true});
+    }
+
+    function deleteElement()
+    {
+		var searchid = $('#confirm-id').val();
+
+    	$.ajax({
+			type: "post",
+            url: "/user/ajaxdelsearch",
+			data: { searchid : searchid}
+		}).done(function( msg ) {
+			if (msg = 'ok') {
+
+    			$('#search_'+searchid).fadeOut('slow');
+    			//$('#search_'+searchid).remove();
+    	    	$('#modalDelete').modal('hide');
+			} else {
+				alert('nope !');
+			}
+		});
+
+    	$('#search_'+$('#searchDelete').val()).remove();
+    	$('#modalDelete').modal('hide');
+    }
+</script>

@@ -1,0 +1,46 @@
+<?php 
+if (isset($this->form) && $this->form instanceof Ccsd_Form) {
+	$form = $this->form;
+} else {
+	$form = $this->author->getFunctionForm($this->typdoc);
+	$form->populate($this->author->toArray());
+
+}
+
+$form->addElement('button', 'Enregistrer', array(
+	'class'		=>	'btn btn-primary',		
+	'onclick'	=>"submitAuthorFunctionForm('" . $this->id . "');"));
+$form->addElement('hidden', 'id', array('value'	=>	$this->id));
+$form->removeDecorator('Form');
+?>
+<div attr-popoverid="aut_<?php echo $this->id;?>">
+	<form id="author-form" class="form"><?php echo $form;?></form>
+</div>
+<script type="text/javascript">
+    <!--
+    $(function() {
+        /**
+         * Gestion du visuel "Champ obligatoire"
+         */
+        $('#quality').change(function() {
+            if ('crp' == $(this).val()) {
+                $('#email-element').show();
+                var removeClass = 'optional';
+                var addClass = 'required';
+            } else {
+                var removeClass = 'required';
+                var addClass = 'optional';
+                $('#email-element').hide();
+            }
+
+            $('#email-element label').removeClass(removeClass).addClass(addClass);
+        });
+
+        if ('crp' != $('#quality').val()) {
+            $('#email-element').hide();
+        } else {
+            $('#email-element label').removeClass('optional').addClass('required');
+        }
+    });
+    //-->
+</script>

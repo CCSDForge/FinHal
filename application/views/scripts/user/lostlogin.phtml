@@ -1,0 +1,15 @@
+<?php
+$this->layout()->pageTitle = $this->translate("Login oublié ?");
+
+if ($this->form) {
+	$this->layout()->pageDescription = $this->translate("Saisissez votre adresse de courriel. Nous vous enverrons un courriel avec votre nom d'utilisateur.");
+    echo $this->form;
+} else {
+	echo $this->DisplayFlashMessages('success', false);
+}
+
+
+
+
+
+

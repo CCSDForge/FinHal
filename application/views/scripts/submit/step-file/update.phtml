@@ -1,0 +1,14 @@
+<div>
+    <h4>
+        <?php echo $this->translate('Vous ne pouvez pas modifier les fichiers déposés.');?>
+    </h4>
+    <ul>
+        <?php foreach ($this->files as $i => $file) { ?>
+        <li>
+            <?php echo $file->getName();?>
+        </li>
+        <?php }?>
+    </ul>
+</div>
+
+

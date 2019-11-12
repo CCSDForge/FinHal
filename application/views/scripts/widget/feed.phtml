@@ -1,0 +1,49 @@
+<?php if ($this->feeds) {
+    $id = uniqid('widget-feeds');
+    ?>
+    <div class="widget-feeds" id="<?php echo $id ?>">
+    <?php
+    $date = new Zend_Date();
+    foreach ($this->feeds as $i => $feed) {
+        $date->set($feed['date']);
+        $icon = $i == 0 ? 'glyphicon glyphicon-minus' : 'glyphicon glyphicon-plus' ;
+        ?>
+        <div class="feed item">
+            <span class="title">
+                <?php if ($feed['link'] && ! $this->displayBtn) {?>
+                    <a href="<?php echo $feed['link'];?>" target="_blank" rel="noopener">
+                <?php } ?>
+                <?php echo $feed['title'];?>
+                <?php if ($feed['link'] && ! $this->displayBtn) {?>
+                    </a>
+                <?php } ?>
+            </span>&nbsp;<span class="date">(<?php echo $date->get(Zend_Date::DATE_SHORT);?>)</span>
+            &nbsp;<a href="javascript:void(0);" class="display" style="float:right;"><i class="<?php echo $icon;?>"></i></a>
+            <div class="description" style="display:<?php echo ($i == 0 ? 'block' : 'none');?>">
+                <?php echo $feed['description'];?>
+                <?php if ($feed['link'] && $this->displayBtn) {?>
+                    <p class="link right"><a href="<?php echo $feed['link'];?>" target="_blank" class="btn-link"><?php echo $this->translate("Lire le billet");?></a></p>
+                <?php }?>
+            </div>
+            <?php if ($i != (count($this->feeds) - 1)) {?>
+                <hr />
+            <?php }?>
+        </div>
+    <?php
+    }
+    ?>
+    </div>
+    <script type="text/javascript">
+        <!--
+        $('#<?php echo $id ?> a.display').on('click', function () {
+            if ($(this).closest('.feed').find('.description').is(':visible')) {
+                $(this).closest('.feed').find('.description').hide();
+                $(this).find('i').attr('class', 'glyphicon glyphicon-plus');
+            } else {
+                $(this).closest('.feed').find('.description').show();
+                $(this).find('i').attr('class', 'glyphicon glyphicon-minus');
+            }
+        });
+        //-->
+    </script>
+<?php } ?>

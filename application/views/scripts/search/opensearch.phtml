@@ -1,0 +1,17 @@
+<?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+   <ShortName><?php echo $this->ShortName; ?></ShortName>
+   <Description><?php echo $this->translate('Recherche sur : ') . $this->Description; ?></Description>
+   <Url type="text/html" method="GET" template="<?php echo $this->siteUrl; ?>/search/?q={searchTerms}" rel="results" />
+   <Query role="example" searchTerms="test" />
+   <Developer>CCSD : http://ccsd.cnrs.fr/</Developer>
+   <Image height="32" width="32" type="image/png">https://hal.archives-ouvertes.fr/img/favicon.png</Image>
+   <Url type="application/opensearchdescription+xml" rel="self" template="<?php echo $this->siteUrl; ?>/search/opensearch" />
+   <Attribution>HAL  : https://hal.archives-ouvertes.fr/</Attribution>
+   <SyndicationRight>open</SyndicationRight>
+   <AdultContent>false</AdultContent>
+   <Language>*</Language>
+   <OutputEncoding>UTF-8</OutputEncoding>
+   <InputEncoding>UTF-8</InputEncoding>
+ </OpenSearchDescription>
+

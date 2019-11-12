@@ -1,0 +1,56 @@
+<form method='post' action='<?php echo URL . "/" .$this->controllerName . "/transfer" ?>'>
+
+    <input type='hidden' value="<?php echo $this->params['dest'] ?>" name="dest" />
+    <input type='hidden' value="<?php echo $this->params['row'] ?>" name="row" />
+
+    <div class='col-md-12'>
+    <?php if ($this->trouve < 0) { ?>
+       <div class="alert alert-danger">
+        <strong>
+            <i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;<?php echo $this->translate("Remplacement impossible"); ?>
+        </strong>
+    </div>
+    <?php } ?>
+
+	<div class="panel panel-success">
+		<div class="panel-heading">
+        	<h5 class="panel-title"><?php echo $this->translate($this->name . " conservé(e) :") ?></h5>
+	      	</div>
+      		<div class="panel-body">
+	       	    <?php echo $this->newstruct ?>
+		</div>
+	</div>
+</div>
+
+<?php
+if (isset ($this->oldstruct) && $this->oldstruct) { ?>
+<div class='col-md-12'>
+	<div class="panel panel-danger">
+		<div class="panel-heading">
+        	<h5 class="panel-title"><?php echo $this->translate($this->name . "(s) remplacé(es) :") ?></h5>
+	      	</div>
+      		<div class="panel-body">
+      		<?php
+				echo $this->oldstruct;
+	       	?>
+		</div>
+	</div>
+</div>
+<?php }?>
+
+    <div class='row'>
+        <div class='col-md-6'>
+            <div class='panel-footer text-center'>
+                <a class='btn btn-default'  href='/<?php echo $this->controllerName ?>/browse'><?php echo $this->translate('Annuler la modification') ?></a>
+                <button class='btn btn-default'  name='dest' type='submit' value=''><?php echo $this->translate('Retour') ?></button>
+            </div>
+        </div>
+        <?php if ($this->trouve >= 0) { ?>
+        <div class='col-md-6'>
+            <div class='panel-footer text-center'>
+                <button class='btn btn-primary' name='to_transfer' type='submit' value='1'><?php echo $this->translate('Effectuer la modification') ?></button>
+            </div>
+        </div>
+        <?php } ?>
+    </div>
+</form>

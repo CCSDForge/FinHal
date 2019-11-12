@@ -1,0 +1,6 @@
+<div class="well" id="doc-<?php echo $this->document->getDocid();?>">
+    <input type="hidden" name="docid[]" value="<?php echo $this->document->getDocid();?>" />
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <h4><?php echo $this->document->getId() .  ', ' . $this->translate('version') . ' ' . $this->document->getVersion() ?></h4>
+    <?php include __DIR__ . '/../document/admin.phtml';?>
+</div>

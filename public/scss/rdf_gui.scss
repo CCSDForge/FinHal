@@ -1,0 +1,408 @@
+@import "compass/css3";
+
+// Colors
+$color-silver:#F5F5F5;
+$color-gray:#565656;
+$color-yellow:#FFD074;
+$color-clouds:#ecf0f1;
+$color-asphalt:#647387;
+$color-green:#2ABB9B;
+$color-orange:#E87E04;
+$color-red:#c0392b;
+
+
+$color-blue:#52c8f6;
+$color-gray-light:#eaeaea; // change nam
+
+// Fonts
+$default-font-family:Arial Black,Arial Bold,Gadget,sans-serif;
+$default-font-size:14px;
+$font-bold:bold;
+
+// Padding, margins, borders
+$padding-heading:10px;
+$padding-body:5px;
+$border-less:none;
+
+// Mixin cut element
+@mixin angle($pseudo, $flip: false, $angle: 1.5deg) {
+  // Possible values for $pseudo are: before, after, both
+  @if $pseudo == 'before' or $pseudo == 'after' or $pseudo == 'both' {
+    position: relative;
+    z-index: 1;
+    $selector: if($pseudo == 'both', '&:before,&:after', '&:#{$pseudo}');
+
+    #{$selector} {
+      background: inherit;
+      content: '';
+      display: block;
+      height: 50%;
+      left: 0;
+      position: absolute;
+      right: 0;
+      z-index: -1;
+      -webkit-backface-visibility: hidden; // for Chrome Windows
+    }
+
+    @if $pseudo == 'before' {
+      #{$selector} {
+        top: 0;
+
+        @if $flip {
+          transform: skewY($angle * -1);
+          transform-origin: 0 0;
+        } @else {
+          transform: skewY($angle);
+          transform-origin: 100% 0;
+        }
+      }
+    }
+
+    @if $pseudo == 'after' {
+      #{$selector} {
+        bottom: 0;
+
+        @if $flip {
+          transform: skewY($angle);
+          transform-origin: 0 100%;
+        } @else {
+          transform: skewY($angle * -1);
+          transform-origin: 100%;
+          border-bottom: 1px solid #647387;
+        }
+      }
+    }
+
+    @if $pseudo == 'both' {
+      &:before {
+        top: 0;
+
+        @if $flip {
+          transform: skewY($angle * -1);
+          transform-origin: 0 0;
+        } @else {
+          transform: skewY($angle);
+          transform-origin: 100% 0;
+        }
+      }
+
+      &:after {
+        bottom: 0;
+
+        @if $flip {
+          transform: skewY($angle);
+          transform-origin: 0 0;
+        } @else {
+          transform: skewY($angle * -1);
+          transform-origin: 100%;
+        }
+      }
+    }
+  }
+}
+
+@keyframes flipInX {
+  from {
+    transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  40% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -20deg);
+    animation-timing-function: ease-in;
+  }
+  60% {
+    transform: perspective(400px) rotate3d(1, 0, 0, 10deg);
+    opacity: 1;
+  }
+  80% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -5deg);
+  }
+  to {
+    transform: perspective(400px);
+  }
+}
+
+@keyframes flipInY {
+  from {
+    transform: perspective(400px) rotate3d(0, 1, 0, 90deg);
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+
+  40% {
+    transform: perspective(400px) rotate3d(0, 1, 0, -20deg);
+    animation-timing-function: ease-in;
+  }
+
+  60% {
+    transform: perspective(400px) rotate3d(0, 1, 0, 10deg);
+    opacity: 1;
+  }
+
+  80% {
+    transform: perspective(400px) rotate3d(0, 1, 0, -5deg);
+  }
+
+  to {
+    transform: perspective(400px);
+  }
+}
+
+// Heading
+@for $i from 6 through 1 {
+  h#{$i} {
+    font-size:$i*8px;
+    font-weight:$font-bold;
+    //padding:$padding-heading;
+    text-transform: uppercase;
+  }
+}
+
+// Body
+body {
+  font-family:$default-font-family;
+  font-size:$default-font-size;
+  background-color:$color-gray-light;
+}
+
+// Url
+a {
+  color:$color-yellow;
+  &:hover,
+  &:focus,
+  &:active {
+    color:$color-blue;
+  }
+}
+
+// interface
+.interface {
+  // Main svg
+  .main {
+    z-index: -10;
+    margin-top:100px;
+    height: 88%;
+    viewBox: -10 -10 68 68;
+    preserveAspectRatio: none;
+  }
+
+  // Interface Header
+  .interface-header {
+    position:fixed;
+    top:auto;
+    left:auto;
+    width:100%;
+    z-index: 50;
+    color: $color-gray;
+    background-color: $color-gray-light;
+    border-bottom: 2px solid $color-gray;
+    .subTitle-interface-header {
+      padding: 0 10px 10px 10px;
+      font-weight: bold;
+    }
+  }
+
+  // Interface tools
+  .tools {
+    z-index: 200;
+    position:fixed;
+    top:auto;
+    left:auto;
+    right:15px;
+    margin-top:100px;
+    width:30%;
+    @include border-radius(0px);
+    border: $border-less;
+  }
+
+  // Interface Description
+  .description {
+    z-index: 100;
+    position:fixed;
+    top:auto;
+    left:auto;
+    right:15px;
+    margin-top:330px;
+    width:30%;
+    @include border-radius(0px);
+    border: $border-less;
+  }
+
+  // Tools Header, Description Header
+  .tools .title,
+  .description .title {
+    background-color: $color-yellow;
+    color: $color-gray;
+    padding:$padding-heading;
+    margin: 0;
+    //border-bottom: 1px solid $color-clouds;
+    @include border-radius(0px);
+  }
+
+  // Tools Body, Description Body
+  .tools .body,
+  .description .body {
+    padding: $padding-body;
+    background-color: $color-gray;
+    .node-name-label,
+    .node-value-label,
+    .node-attributes-label,
+    .help {
+      display: none;
+      font-weight: $font-bold;
+      margin-bottom: 2px;
+      color: $color-clouds;
+    }
+    .node-name,
+    .node-value,
+    .node-attributes {
+      font-weight: normal;
+      color: $color-yellow;
+    }
+    #node-gui {
+      display: none;
+      text-align: center;
+    }
+    #author-list {
+      margin-left: 0;
+    }
+  }
+  .description .body {
+    overflow-y: auto;
+    max-height: 130px;
+  }
+
+  // All buttons
+  button, .button {
+    margin: 5px;
+    text-align: center;
+    border:$border-less;
+    color:$color-gray;
+    font-weight: $font-bold;
+    //@include background-image(linear-gradient(top, #606c88, #3f4c6b));
+    //@include background-image(linear-gradient(to right, #43cea2, $color-gray-light));
+    background-color: lighten($color-blue, 10%);
+    @include transition(border 0.25s linear, color 0.25s linear, background-color 0.25s linear);
+    @include border-radius(5px);
+    &:hover {
+      //@include background-image(linear-gradient(to right, #ffd200, $color-yellow));
+      background-color: $color-blue;
+      border-color:#cacfd2;
+      color:$color-gray;
+    }
+    &:focus,
+    &:active {
+      background-color: darken($color-blue, 15%);
+      border-color:#cacfd2;
+      color:$color-gray;
+    }
+    .caret {
+      border-top-color:$color-gray;
+    }
+  }
+
+  // export button
+  .export {
+    .dropdown-menu {
+      border: $border-less;
+      background-color: lighten($color-blue, 10%);;
+      @include border-radius(5px);
+    }
+    #export-png,
+    #export-xml,
+    #export-svg {
+      color:$color-gray;
+      font-weight: $font-bold;
+      &:hover,
+      &:focus,
+      &:active {
+        background-color: $color-blue;
+        color:$color-gray;
+      }
+    }
+  }
+
+  // input search
+  #search-zone {
+    margin-top:4px;
+    @include border-radius(3px);
+  }
+}
+
+// Links
+.link {
+  fill: none;
+  stroke: $color-gray;
+  stroke-width: 1px;
+}
+
+// Tooltip
+.d3-tip {
+  max-width: 600px;
+  font-weight: $font-bold;
+  padding: 10px;
+  color: $color-clouds;
+  background-color: rgba($color-green, 0.9);
+  @include border-radius(0px);
+  pointer-events: none;
+}
+
+// Tooltip url
+.d3-tip-url {
+  max-width: 600px;
+  font-weight: $font-bold;
+  padding: 5px;
+  color: darken($color-blue, 15%);
+  text-decoration-line: underline;
+  @include border-radius(0px);
+  pointer-events: none;
+}
+.animate {
+  @include animation(flipInX 1s 1);
+}
+
+// Work List
+.list {
+  // Main title
+  .title {
+    font-family: $default-font-family;
+    background-color: $color-gray;
+    color: $color-yellow;
+    @include border-radius(0px);
+    padding: 20px;
+  }
+  // Main list
+  .main {
+    width: 100%;
+    height: auto;
+  }
+  // List part head
+  .list-part-head {
+    font-weight: $font-bold;
+    padding: 10px;
+    background-color: $color-asphalt;
+    color: $color-silver;
+    @include border-radius(0px);
+  }
+  // List part body
+  .list-part-body {
+    background-color: $color-clouds;
+    margin: 10px 0 10px 0;
+    padding: 10px;
+    color: $color-asphalt;
+  }
+  // url
+  .list-part-body .uri {
+    padding: 5px 15px 5px 15px;
+    background-color: $color-yellow;
+    line-height: 40px;
+    color: $color-asphalt;
+    @include angle(after);
+    @include animation(flipInY 1s 1);
+    &:hover {
+      background-color: $color-asphalt;
+      color: $color-silver;
+    }
+  }
+}

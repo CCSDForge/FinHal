@@ -1,0 +1,107 @@
+<?php echo $this->doctype(); ?>
+<html lang="en">
+    <head>
+        <title>HALMS : <?php echo $this->translate("Plateforme de gestion des dépôts de HAL vers PubMed Central"); ?></title>
+        <meta charset="utf-8">
+
+        <?php
+
+        /*if ($this->headTitle()->getContainer() == '') {
+            $active = $this->nav()->findActive($this->nav()->getContainer());
+            $this->headTitle($active ? $this->translate($active['page']->getLabel()) : Zend_Registry::get('website')->getSiteName());
+        } elseif ($this->layout()->pageTitle != '') {
+            $this->headTitle($this->layout()->pageTitle);
+        }
+
+        echo $this->headScript()->appendScript("var lang = '" . Zend_Registry::get('Zend_Locale')->getLanguage() . "';");*/
+
+        ?>
+        <?php echo $this->headTitle()?>
+        <?php echo $this->headMeta()
+            ->appendHttpEquiv('Content-Type', 'text/html; charset=UTF-8'); //$this->headMeta()->appendHttpEquiv('Content-Language', 'fr-FR');?>
+        <link rel="icon" type="type/png" href="<?php echo (file_exists(SPACE . 'public/favicon.png') ? SPACE_URL . 'favicon.png' : '/img/favicon.png');?>" />
+        <?php 
+
+        $this->jQuery()
+        			->addJavascriptFile(CCSDLIB ."/v3/js/bootstrap.min.js")
+			        ->addJavascriptFile(CCSDLIB ."/js/form.js")
+			        //->addJavascriptFile(CCSDLIB ."/js/datepicker/datepicker-" .Zend_Registry::get('Zend_Locale')->getLanguage()  . ".js")
+			        //->addJavascriptFile(CCSDLIB ."/js/datepicker.js")
+			        ->addJavascriptFile("/js/utile.js")
+                    ->addStylesheet(CCSDLIB . '/css/custom-theme/jquery-ui-1.10.0.custom.css')
+                    ->addStylesheet(CCSDLIB . '/v3/css/bootstrap.css')
+                    ->addStylesheet(CCSDLIB . '/css/ccsd.css')
+                    ->addStylesheet("/css/hal.css")
+                    ->addStylesheet("/css/halms.css");
+
+        //CSS spécifique au site
+        if ($this->cssFile) {
+            $this->jQuery()->addStylesheet($this->cssFile);
+        }
+
+        echo $this->jQuery()->setLocalPath(CCSDLIB . '/js/jquery/min.1.9.1.js')->enable()->setUiLocalPath(CCSDLIB . '/js/jquery/ui/min.1.10.3.js')->UiEnable();
+        ?>
+        <style>
+html {
+	position: relative;
+	min-height: 100%;
+}
+
+
+.footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	/* Set the fixed height of the footer here */
+	height: 140px;
+}
+<?php if (APPLICATION_ENV == ENV_DEV) { ?>
+    .logo .jumbotron {
+        background-color: #f9f2f4;
+    }
+    .logo .jumbotron .container h1 {
+        color: #d9534f;
+    }
+<?php } ?>
+</style>
+    </head>
+
+    <body>
+        <?php $this->navbar(true, array('languages' =>  Zend_Registry::get('languages'), 'lang' => Zend_Registry::get('lang')), true, array('isLogged' => Hal_Auth::isLogged())); ?>
+
+        <div class="logo">
+            <?php echo $this->render('common/logo.phtml'); ?>
+        </div>
+        <div id="container" class="container" style="margin-top:10px;">
+    		<div class="row">
+    			<div class="col-md-12">
+                    <?php echo $this->render('common/sidebar.phtml'); ?>
+    				<?php if ($this->layout()->title != '') { ?>
+    				<h3><?php echo $this->translate($this->layout()->title)?></h3>
+    				<?php } ?>
+    				<div class="corps">
+						<?php if ($this->layout()->description != '') {?>
+							<blockquote><?php echo $this->translate($this->layout()->description) ?></blockquote>
+							<hr />
+						<?php }?>
+
+                        <div id="flash-messages">
+                            <?php
+                            echo $this->DisplayFlashMessages('danger', true);
+                            echo $this->DisplayFlashMessages('warning', true);
+                            echo $this->DisplayFlashMessages('success', true);
+                            echo $this->DisplayFlashMessages('info', true);
+                            ?>
+                        </div>
+
+						<?php
+						echo $this->layout()->content ;
+						?>
+                	</div>
+                </div>
+    		</div>
+        </div>
+
+        <?php echo $this->render('common/footer.phtml'); ?>
+    </body>
+</html>

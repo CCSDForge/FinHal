@@ -1,0 +1,144 @@
+<style>
+    #active {color:#428bca;}
+</style>
+<?php
+
+$orderurl = '';
+foreach($_GET as $key => $value){
+    if (isset($_GET[$key]) && $key != 'order'){
+        $orderurl .= '&'.$key.'='.$value;
+    }
+}
+
+$this->layout()->pageDescription = $this->translate("Liste des documents en attente de modification");
+
+if (count($this->documents)) {
+    $user = new Hal_User();
+    $infoUsers = array();
+    ?>
+
+    <h5><?php echo $this->translate('Nombre de documents en attente'); ?> : <span class="label label-primary"><?php echo $this->documents->getTotalItemCount();?></span></h5>
+    <h5><?php echo $this->translate('Nombre de documents par page'); ?> : <span class="label label-primary"><?php echo $this->documents->getItemCountPerPage();?></span></h5>
+
+    <div class="btn-group">
+    <?php
+    if ($this->documents) {
+        echo $this->paginationControl ( $this->documents, 'Sliding', 'partials/pagination.phtml', array (
+        ));
+    }
+    if ($this->documents->getTotalItemCount() > $this->documents->getItemCountPerPage()){
+    ?>
+    <?php }?>
+    </div>
+    <form action="/administrate/pending-modification" method="post">
+    <input type="hidden" name="method" class="method"/>
+    <input type="hidden" name="docid" class="docid"/>
+        <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="moderate" width="100%">
+            <thead>
+            <tr>
+                <th class="middle">
+                    <div class="input-group">
+                        <input type="text" id="id" value="<?php if (isset($_GET['queryid'])) {echo $_GET['queryid'];}?>" class="form-control" style="border-radius: 3px;" data-toggle="tooltip" title="<?php echo $this->translate("Recherche par identifiant");?>">
+                    </div>
+                </th>
+                <th class="middle">
+                </th>
+                <th class="middle">
+                    <div class="input-group">
+                        <input type="text" id="uid" value="<?php if (isset($_GET['queryuid'])) {echo $_GET['queryuid'];}?>" class="form-control" style="border-radius: 3px;" data-toggle="tooltip" title="<?php echo $this->translate("Recherche par contributeur");?>">
+                    </div>
+                </th>
+                <th class="middle">
+                    <div class="input-group">
+                        <input type="text" id="date" value="<?php if (isset($_GET['querydate'])) {echo $_GET['querydate'];}?>" class="form-control" style="border-radius: 3px;" data-toggle="tooltip" title="<?php echo $this->translate("Recherche par date");?>">
+                    </div>
+                </th>
+                <th class="middle">
+                    <div class="input-group">
+                        <input type="text" id="por" value="<?php if (isset($_GET['querypor'])) {echo $_GET['querypor'];}?>" class="form-control" style="border-radius: 3px;" data-toggle="tooltip" title="<?php echo $this->translate("Recherche par portail");?>">
+                    </div>
+                </th>
+            </tr>
+            <tr>
+                <th class="middle">
+                    <div style="display:flex;">
+                        <span style="margin-right:4px;"><?php echo $this->translate('Document'); ?></span>
+                        <a href="<?php echo PREFIX_URL."administrate/pending-modification?order=docasc"; echo $orderurl;?>" style="align-self: center; margin-left:auto;" id="<?php if (isset ($_GET['order']) && $_GET['order']=="docasc") { echo "active";}?>" data-toggle="tooltip" title="<?php echo $this->translate("Tri croissant");?>"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                        <a href="<?php echo PREFIX_URL."administrate/pending-modification?order=docdesc"; echo $orderurl;?>" style="align-self: center; margin-left:2px;" id="<?php if (isset ($_GET['order']) && $_GET['order']=="docdesc") { echo "active";}?>" data-toggle="tooltip" title="<?php echo $this->translate("Tri décroissant");?>"><i class="glyphicon glyphicon-chevron-up"></i></a>
+                    </div>
+                </th>
+                <th class="middle">
+                </th>
+                <th class="middle">
+                    <div style="display:flex;">
+                        <span style="margin-right:4px;"><?php echo $this->translate('Contributeur'); ?></span>
+                        <a href="<?php echo PREFIX_URL."administrate/pending-modification?order=contasc"; echo $orderurl;?>" style="align-self: center; margin-left:auto;" id="<?php if (isset ($_GET['order']) && $_GET['order']=="contasc") { echo "active";}?>" data-toggle="tooltip" title="<?php echo $this->translate("Tri croissant");?>"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                        <a href="<?php echo PREFIX_URL."administrate/pending-modification?order=contdesc"; echo $orderurl;?>" style="align-self: center; margin-left:2px;" id="<?php if (isset ($_GET['order']) && $_GET['order']=="contdesc") { echo "active";}?>" data-toggle="tooltip" title="<?php echo $this->translate("Tri décroissant");?>"><i class="glyphicon glyphicon-chevron-up"></i></a>
+                    </div>
+                </th>
+                <th class="middle">
+                    <div style="display:flex;">
+                        <span style="margin-right:4px;"><?php echo $this->translate('Déposé le'); ?></span>
+                        <a href="<?php echo PREFIX_URL."administrate/pending-modification?order=dateasc"; echo $orderurl;?>" style="align-self: center; margin-left:auto;" id="<?php if (isset ($_GET['order']) && $_GET['order']=="dateasc") { echo "active";}?>" data-toggle="tooltip" title="<?php echo $this->translate("Tri croissant");?>"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                        <a href="<?php echo PREFIX_URL."administrate/pending-modification?order=datedesc"; echo $orderurl;?>" style="align-self: center; margin-left:2px;" id="<?php if (!isset ($_GET['order']) || (isset ($_GET['order']) && $_GET['order']=="datedesc")) { echo "active";}?>" data-toggle="tooltip" title="<?php echo $this->translate("Tri décroissant");?>"><i class="glyphicon glyphicon-chevron-up"></i></a>
+                    </div>
+                </th>
+                <th class="middle">
+                    <div style="display:flex;">
+                        <span style="margin-right:4px;"><?php echo $this->translate('Portail'); ?></span>
+                        <a href="<?php echo PREFIX_URL."administrate/pending-modification?order=porasc"; if (isset($_GET['page'])) : echo '&page='.$_GET['page'];endif; if (isset($_GET['rows'])) : echo '&rows='.$_GET['rows'];endif;?>" style="align-self: center; margin-left:auto;" id="<?php if (isset ($_GET['order']) && $_GET['order']=="porasc") { echo "active";}?>" data-toggle="tooltip" title="<?php echo $this->translate("Tri croissant");?>"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                        <a href="<?php echo PREFIX_URL."administrate/pending-modification?order=pordesc"; if (isset($_GET['page'])) : echo '&page='.$_GET['page'];endif; if (isset($_GET['rows'])) : echo '&rows='.$_GET['rows'];endif;?>" style="align-self: center; margin-left:2px;" id="<?php if (isset ($_GET['order']) && $_GET['order']=="pordesc") { echo "active";}?>" data-toggle="tooltip" title="<?php echo $this->translate("Tri décroissant");?>"><i class="glyphicon glyphicon-chevron-up"></i></a>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+                <?php foreach($this->documents as $data) {
+                    $document = Hal_Document::find($data['DOCID']);
+                    if (! isset($infoUsers[$data['UID']])) {
+                        $user->find($data['UID']);
+                        $infoUsers[$data['UID']] = $user->getEmail();
+                    }
+                    ?>
+                    <tr>
+                        <td class="middle"><?php echo $document->getCitation('full'); ?>
+                            <div class="alert alert-warning alert-fixed"><?php echo Hal_Document_Logger::getLastComment($data['DOCID'], Hal_Document_Logger::ACTION_ASKMODIF);?></div>
+                        </td>
+                        <td class="middle" style="text-align:center">
+                            <div style="display:flex;">
+                                <a href="javascript:void(0);" style="margin-right:4px;" title="<?php echo $this->translate('Editer');?>" onclick="$(this).closest('form').find('input.docid').val('<?php echo $data['DOCID']?>');$(this).closest('form').find('input.method').val('update');$(this).closest('form').submit();">
+                                <i class="glyphicon glyphicon-pencil active"></i>
+                                <a href="javascript:void(0);" title="<?php echo $this->translate('Répondre');?>" onclick="$(this).closest('form').find('input.docid').val('<?php echo $data['DOCID']?>');$(this).closest('form').find('input.method').val('reply');$(this).closest('form').submit();">
+                                <i class="glyphicon glyphicon-comment active"></i>
+                            </div>
+                        </td>
+                        <td class="middle"><a href="mailto:<?php echo $infoUsers[$data['UID']]?>"><?php echo $data['SCREEN_NAME'] ?></a></td>
+                        <td class="middle"><?php echo $data['DATESUBMIT'] ?></td>
+                        <td class="middle"><?php echo $data['SITE'] ?></td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </form>
+    <div class="btn-group">
+    <?php
+    if ($this->documents) {
+    echo $this->paginationControl ( $this->documents, 'Sliding', 'partials/pagination.phtml', array (
+    ));
+    }
+    ?>
+    </div>
+    <script language="JavaScript">
+        $('input').on("focus", function() {
+            $(this).keyup(function (e) {
+                if (e.keyCode == 13 && $(this).val() != '') {
+                    window.location.replace("<?php echo PREFIX_URL."administrate/pending-modification?query"?>" + $(this).attr("id") + "=" + $(this).val());
+                } else if (e.keyCode == 13){
+                    window.location.replace("<?php echo PREFIX_URL."administrate/pending-modification"?>");
+                }
+            });
+        });
+    </script>
+<?php } else { ?>
+    <div class="alert alert-success"><strong><?php echo $this->translate("Aucun dépôt ne correspond à la recherche :)");?></strong></div>
+<?php } ?>

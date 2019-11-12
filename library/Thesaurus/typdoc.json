@@ -1,0 +1,115 @@
+{"typdoc_1": {
+    "id": "typdoc_1",
+    "type": "category",
+    "label": "typdoc_typdoc_1",
+    "children": {
+        "ART": {
+            "id": "ART",
+            "type": "typdoc",
+            "label": "typdoc_ART"
+        },
+        "COMM": {
+            "id": "COMM",
+            "type": "typdoc",
+            "label": "typdoc_COMM"
+        },
+        "POSTER": {
+            "id": "POSTER",
+            "type": "typdoc",
+            "label": "typdoc_POSTER"
+        },
+        "OUV": {
+            "id": "OUV",
+            "type": "typdoc",
+            "label": "typdoc_OUV"
+        },
+        "COUV": {
+            "id": "COUV",
+            "type": "typdoc",
+            "label": "typdoc_COUV"
+        },
+        "DOUV": {
+            "id": "DOUV",
+            "type": "typdoc",
+            "label": "typdoc_DOUV"
+        },
+        "PATENT": {
+            "id": "PATENT",
+            "type": "typdoc",
+            "label": "typdoc_PATENT"
+        },
+        "OTHER": {
+            "id": "OTHER",
+            "type": "typdoc",
+            "label": "typdoc_OTHER"
+        }
+    }
+}, "typdoc_2": {
+    "id": "typdoc_2",
+    "type": "category",
+    "label": "typdoc_typdoc_2",
+    "children": {
+        "UNDEFINED": {
+            "id": "UNDEFINED",
+            "type": "typdoc",
+            "label": "typdoc_UNDEFINED"
+        },
+        "REPORT": {
+            "id": "REPORT",
+            "type": "typdoc",
+            "label": "typdoc_REPORT"
+        }
+    }
+}, "typdoc_3": {
+    "id": "typdoc_3",
+    "type": "category",
+    "label": "typdoc_typdoc_3",
+    "children": {
+        "THESE": {
+            "id": "THESE",
+            "type": "typdoc",
+            "label": "typdoc_THESE"
+        },
+        "HDR": {
+            "id": "HDR",
+            "type": "typdoc",
+            "label": "typdoc_HDR"
+        },
+        "LECTURE": {
+            "id": "LECTURE",
+            "type": "typdoc",
+            "label": "typdoc_LECTURE"
+        }
+    }
+}, "typdoc_4": {
+    "id": "typdoc_4",
+    "type": "category",
+    "label": "typdoc_typdoc_4",
+    "children": {
+        "IMG": {
+            "id": "IMG",
+            "type": "typdoc",
+            "label": "typdoc_IMG"
+        },
+        "VIDEO": {
+            "id": "VIDEO",
+            "type": "typdoc",
+            "label": "typdoc_VIDEO"
+        },
+        "SON": {
+            "id": "SON",
+            "type": "typdoc",
+            "label": "typdoc_SON"
+        },
+        "MAP": {
+            "id": "MAP",
+            "type": "typdoc",
+            "label": "typdoc_MAP"
+        },
+        "SOFTWARE":{
+            "id":"SOFTWARE",
+            "type":"typdoc",
+            "label":"typdoc_SOFTWARE"}
+    }
+}
+}

@@ -1,0 +1,29 @@
+<h1 style="margin-top: 40px"><?php echo $this->translate('[Client Web] API SWORD') ;?></h1>
+
+<?php
+
+echo $this->form;
+
+if ( isset($this->identifiant) ) {
+    ?>
+    <div class='alert alert-success' style="margin-top:20px;">Dépôt archivé dans HAL : <strong><a href="<?php echo $this->url ?>" target="_blank"><?php echo $this->identifiant ?></a></strong></div>
+    <?php
+}
+if ( isset($this->error) ) {
+    ?>
+    <div class='alert alert-danger' style="margin-top:20px;">Erreur de dépôt :
+        <strong>
+            <?php Zend_Debug::dump($this->error); ?>
+        </strong>
+    </div>
+    <?php
+}
+
+if ($this->return) {
+    ?>
+    <strong>Retour SWORD</strong>
+    <pre>
+        <?php echo trim(htmlentities($this->return)); ?>
+    </pre>
+    <?php
+}

@@ -1,0 +1,17 @@
+<?php
+$this->jQuery()->addJavascriptFile(CCSDLIB . "/js/bootstrap-typeahead.js")->addJavascriptFile(CCSDLIB . '/js/jquery/ui/autocomplete.html.js');
+$this->layout()->pageTitle = $this->translate("Modification de votre compte");
+$this->layout()->pageDescription = $this->translate("Vous pouvez modifier ici vos préférences de courriel");
+
+if (Ccsd_User_Models_User::ACCOUNT_EDIT_FAILURE == $this->resultMessage) {
+    echo '<div class="alert alert-failure">';
+    echo $this->translate('La modification du compte a échoué. Merci de ré-essayer.');
+    echo '</div>';
+}
+
+
+if ($this->form) {
+    echo $this->form;
+}
+
+?>

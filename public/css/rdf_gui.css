@@ -1,0 +1,383 @@
+@keyframes flipInX {
+  from {
+    transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  40% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -20deg);
+    animation-timing-function: ease-in;
+  }
+  60% {
+    transform: perspective(400px) rotate3d(1, 0, 0, 10deg);
+    opacity: 1;
+  }
+  80% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -5deg);
+  }
+  to {
+    transform: perspective(400px);
+  }
+}
+@keyframes flipInY {
+  from {
+    transform: perspective(400px) rotate3d(0, 1, 0, 90deg);
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  40% {
+    transform: perspective(400px) rotate3d(0, 1, 0, -20deg);
+    animation-timing-function: ease-in;
+  }
+  60% {
+    transform: perspective(400px) rotate3d(0, 1, 0, 10deg);
+    opacity: 1;
+  }
+  80% {
+    transform: perspective(400px) rotate3d(0, 1, 0, -5deg);
+  }
+  to {
+    transform: perspective(400px);
+  }
+}
+/* line 154, ../scss/rdf_gui.scss */
+h6 {
+  font-size: 48px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* line 154, ../scss/rdf_gui.scss */
+h5 {
+  font-size: 40px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* line 154, ../scss/rdf_gui.scss */
+h4 {
+  font-size: 32px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* line 154, ../scss/rdf_gui.scss */
+h3 {
+  font-size: 24px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* line 154, ../scss/rdf_gui.scss */
+h2 {
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* line 154, ../scss/rdf_gui.scss */
+h1 {
+  font-size: 8px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* line 163, ../scss/rdf_gui.scss */
+body {
+  font-family: Arial Black, Arial Bold, Gadget, sans-serif;
+  font-size: 14px;
+  background-color: #eaeaea;
+}
+
+/* line 170, ../scss/rdf_gui.scss */
+a {
+  color: #FFD074;
+}
+/* line 172, ../scss/rdf_gui.scss */
+a:hover, a:focus, a:active {
+  color: #52c8f6;
+}
+
+/* line 182, ../scss/rdf_gui.scss */
+.interface .main {
+  z-index: -10;
+  margin-top: 100px;
+  height: 88%;
+  viewBox: -10 -10 68 68;
+  preserveAspectRatio: none;
+}
+/* line 191, ../scss/rdf_gui.scss */
+.interface .interface-header {
+  position: fixed;
+  top: auto;
+  left: auto;
+  width: 100%;
+  z-index: 50;
+  color: #565656;
+  background-color: #eaeaea;
+  border-bottom: 2px solid #565656;
+}
+/* line 200, ../scss/rdf_gui.scss */
+.interface .interface-header .subTitle-interface-header {
+  padding: 0 10px 10px 10px;
+  font-weight: bold;
+}
+/* line 207, ../scss/rdf_gui.scss */
+.interface .tools {
+  z-index: 200;
+  position: fixed;
+  top: auto;
+  left: auto;
+  right: 15px;
+  margin-top: 100px;
+  width: 30%;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+  border: none;
+}
+/* line 220, ../scss/rdf_gui.scss */
+.interface .description {
+  z-index: 100;
+  position: fixed;
+  top: auto;
+  left: auto;
+  right: 15px;
+  margin-top: 330px;
+  width: 30%;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+  border: none;
+}
+/* line 233, ../scss/rdf_gui.scss */
+.interface .tools .title,
+.interface .description .title {
+  background-color: #FFD074;
+  color: #565656;
+  padding: 10px;
+  margin: 0;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+/* line 244, ../scss/rdf_gui.scss */
+.interface .tools .body,
+.interface .description .body {
+  padding: 5px;
+  background-color: #565656;
+}
+/* line 248, ../scss/rdf_gui.scss */
+.interface .tools .body .node-name-label,
+.interface .tools .body .node-value-label,
+.interface .tools .body .node-attributes-label,
+.interface .tools .body .help,
+.interface .description .body .node-name-label,
+.interface .description .body .node-value-label,
+.interface .description .body .node-attributes-label,
+.interface .description .body .help {
+  display: none;
+  font-weight: bold;
+  margin-bottom: 2px;
+  color: #ecf0f1;
+}
+/* line 257, ../scss/rdf_gui.scss */
+.interface .tools .body .node-name,
+.interface .tools .body .node-value,
+.interface .tools .body .node-attributes,
+.interface .description .body .node-name,
+.interface .description .body .node-value,
+.interface .description .body .node-attributes {
+  font-weight: normal;
+  color: #FFD074;
+}
+/* line 263, ../scss/rdf_gui.scss */
+.interface .tools .body #node-gui,
+.interface .description .body #node-gui {
+  display: none;
+  text-align: center;
+}
+/* line 267, ../scss/rdf_gui.scss */
+.interface .tools .body #author-list,
+.interface .description .body #author-list {
+  margin-left: 0;
+}
+/* line 271, ../scss/rdf_gui.scss */
+.interface .description .body {
+  overflow-y: auto;
+  max-height: 130px;
+}
+/* line 277, ../scss/rdf_gui.scss */
+.interface button, .interface .button {
+  margin: 5px;
+  text-align: center;
+  border: none;
+  color: #565656;
+  font-weight: bold;
+  background-color: #82d7f9;
+  -moz-transition: border 0.25s linear, color 0.25s linear, background-color 0.25s linear;
+  -o-transition: border 0.25s linear, color 0.25s linear, background-color 0.25s linear;
+  -webkit-transition: border 0.25s linear, color 0.25s linear, background-color 0.25s linear;
+  transition: border 0.25s linear, color 0.25s linear, background-color 0.25s linear;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+/* line 288, ../scss/rdf_gui.scss */
+.interface button:hover, .interface .button:hover {
+  background-color: #52c8f6;
+  border-color: #cacfd2;
+  color: #565656;
+}
+/* line 294, ../scss/rdf_gui.scss */
+.interface button:focus, .interface button:active, .interface .button:focus, .interface .button:active {
+  background-color: #0cafef;
+  border-color: #cacfd2;
+  color: #565656;
+}
+/* line 300, ../scss/rdf_gui.scss */
+.interface button .caret, .interface .button .caret {
+  border-top-color: #565656;
+}
+/* line 307, ../scss/rdf_gui.scss */
+.interface .export .dropdown-menu {
+  border: none;
+  background-color: #82d7f9;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+/* line 312, ../scss/rdf_gui.scss */
+.interface .export #export-png,
+.interface .export #export-xml,
+.interface .export #export-svg {
+  color: #565656;
+  font-weight: bold;
+}
+/* line 317, ../scss/rdf_gui.scss */
+.interface .export #export-png:hover, .interface .export #export-png:focus, .interface .export #export-png:active,
+.interface .export #export-xml:hover,
+.interface .export #export-xml:focus,
+.interface .export #export-xml:active,
+.interface .export #export-svg:hover,
+.interface .export #export-svg:focus,
+.interface .export #export-svg:active {
+  background-color: #52c8f6;
+  color: #565656;
+}
+/* line 327, ../scss/rdf_gui.scss */
+.interface #search-zone {
+  margin-top: 4px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+
+/* line 334, ../scss/rdf_gui.scss */
+.link {
+  fill: none;
+  stroke: #565656;
+  stroke-width: 1px;
+}
+
+/* line 341, ../scss/rdf_gui.scss */
+.d3-tip {
+  max-width: 600px;
+  font-weight: bold;
+  padding: 10px;
+  color: #ecf0f1;
+  background-color: rgba(42, 187, 155, 0.9);
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+  pointer-events: none;
+}
+
+/* line 352, ../scss/rdf_gui.scss */
+.d3-tip-url {
+  max-width: 600px;
+  font-weight: bold;
+  padding: 5px;
+  color: #0cafef;
+  text-decoration-line: underline;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+  pointer-events: none;
+}
+
+/* line 361, ../scss/rdf_gui.scss */
+.animate {
+  -moz-animation: flipInX 1s 1;
+  -webkit-animation: flipInX 1s 1;
+  animation: flipInX 1s 1;
+}
+
+/* line 368, ../scss/rdf_gui.scss */
+.list .title {
+  font-family: Arial Black, Arial Bold, Gadget, sans-serif;
+  background-color: #565656;
+  color: #FFD074;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+  padding: 20px;
+}
+/* line 376, ../scss/rdf_gui.scss */
+.list .main {
+  width: 100%;
+  height: auto;
+}
+/* line 381, ../scss/rdf_gui.scss */
+.list .list-part-head {
+  font-weight: bold;
+  padding: 10px;
+  background-color: #647387;
+  color: #F5F5F5;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+/* line 389, ../scss/rdf_gui.scss */
+.list .list-part-body {
+  background-color: #ecf0f1;
+  margin: 10px 0 10px 0;
+  padding: 10px;
+  color: #647387;
+}
+/* line 396, ../scss/rdf_gui.scss */
+.list .list-part-body .uri {
+  padding: 5px 15px 5px 15px;
+  background-color: #FFD074;
+  line-height: 40px;
+  color: #647387;
+  position: relative;
+  z-index: 1;
+  -moz-animation: flipInY 1s 1;
+  -webkit-animation: flipInY 1s 1;
+  animation: flipInY 1s 1;
+}
+/* line 35, ../scss/rdf_gui.scss */
+.list .list-part-body .uri:after {
+  background: inherit;
+  content: '';
+  display: block;
+  height: 50%;
+  left: 0;
+  position: absolute;
+  right: 0;
+  z-index: -1;
+  -webkit-backface-visibility: hidden;
+}
+/* line 62, ../scss/rdf_gui.scss */
+.list .list-part-body .uri:after {
+  bottom: 0;
+  transform: skewY(-1.5deg);
+  transform-origin: 100%;
+  border-bottom: 1px solid #647387;
+}
+/* line 403, ../scss/rdf_gui.scss */
+.list .list-part-body .uri:hover {
+  background-color: #647387;
+  color: #F5F5F5;
+}

@@ -1,0 +1,17 @@
+<div class="list-group">
+    <ul class="nav nav-pills" role="tablist">
+    <?php foreach ($this->nav()->getPages() as $page) {
+        if (!$this->nav()->accept($page)) continue;
+        $active = $page->isActive(true) || $page->getController() == Zend_Controller_Front::getInstance()->getRequest()->getControllerName();
+
+        ?>
+        <li class="<?php echo $active ? 'active' : '';?>">
+            <a href="<?php echo $this->pagelink($page)?>">
+                <?php if (isset($page->icon)) { ?>
+                    <i class="<?php echo $page->icon; ?>"></i>&nbsp;
+                <?php } ?>
+                <?php echo $this->translate($page->getLabel())?></a>
+        </li>
+    <?php } ?>
+    </ul>
+</div>

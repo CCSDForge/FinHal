@@ -1,0 +1,136 @@
+<div>
+    <div id="authors">
+        <table id="author-table" class="table" width="100%" >
+            <tbody>
+            <?php foreach ($this->authors as $id => $author) {
+                $this->id = $id;
+                $this->author = $author;
+                include __DIR__ . '/author.phtml';
+            }?>
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <div class="input-group add-authors-div" id="aut_new">
+            <span class="input-group-addon add-author-label"><?php echo $this->translate('Ajouter un auteur')?> : </span>
+            <input id="searchAuthor" type="text" class="form-control" placeholder="Jean Dupont">
+        </div>
+
+            <div class="input-group add-authors-div view-author-detailed" <?php if ($this->authormode) { echo "style='display:none'"; } ?>>
+                <span class="input-group-addon add-author-label"><?php echo $this->translate('Ajouter ')?> : </span>
+                <div class="btn-group" role="group">
+                    <span class="btn btn-default add-authors-group" onclick="getAuthorsListForm()"><?php echo $this->translate("Une liste d'auteurs")?></span>
+                    <span class="btn btn-default add-authors-group" onclick="getAuthorsFromStructureForm()"><?php echo $this->translate("Les auteurs d'une structure")?></span>
+                    <span class="btn btn-default add-authors-group" onclick="getMyAuthorsForm()"><?php echo $this->translate('Mes auteurs')?></span>
+                </div>
+            </div>
+    </div>
+</div>
+<script type="text/javascript">
+<!--
+$(function() {
+    //Autocompletion sur les auteurs
+    $( "#searchAuthor" ).autocomplete({
+        minLength: 2,
+        html: true,
+        source: function(request, response){
+            $.ajax({
+                url: "/<?php echo $this->controller?>/ajaxsearchauthor",
+                dataType: "json",
+                data: {term: request.term},
+                success: function(data) {
+                    response($.merge(
+                        [{'id' : 0, 'label' : "<?php echo $this->translate('Ajouter un nouvel auteur')?>"}],
+                        $.map(data.response.docs, function(item) {
+                            return {id: item.docid, label: item.label_html}
+                        })
+                    ));
+                }
+            });
+        },
+        focus: function( event, ui ) {
+            return false;
+        },
+        select: function( event, ui ) {
+            if (ui.item.id == 0) { //nouvel auteur
+                getAuthorForm('new', $( "#searchAuthor" ).val());
+            } else { //Auteur du référentiel
+                var callback = function( data ) {$('#aut-struct').html(data.autstruct);}
+                ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxaddauthor', data: {authorid: ui.item.id}, success: callback, dataType: 'json',
+                    error: function(msg) {
+                        $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+                    }
+                }, 'loadAff');
+            }
+            return false;
+        }
+    });
+
+	//Tri des auteurs
+	$( "#authors" ).sortable({
+		items: "tr.author",
+		handle: ".handle",
+        //placeholder: "ui-state-highlight",
+		update: function( event, ui ) {
+            ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxsortauthors', data: $("#authors").sortable('serialize'),
+                error: function(msg) {
+                    $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+                }
+            });
+		}
+	});
+
+    //Tooltip
+    $('a[data-toggle="tooltip"], span[data-toggle="tooltip"]').tooltip();
+
+    //Selection d'une structure / d'un auteur
+    $('#structures>div, #structures>div, #authors div.author').click(function(e) {
+        if ($(this).hasClass("active")) {
+            $(this).removeClass("active");
+        } else {
+            $(this).addClass("active");
+        }
+    });
+
+    //Autocompletion sur les structures
+    $( ".searchStructure" ).autocomplete({
+        minLength: 2,
+        html: true,
+        source: function(request, response){
+            $.ajax({
+                url: "/ajax/ajaxsearchstructure",
+                dataType: "json",
+                data: {term: request.term},
+                success: function(data) {
+                    response($.merge(
+                        [{'id' : 0, 'label' : "<?php echo $this->translate('Ajouter une nouvelle structure')?>"}],
+                        $.map(data.response.docs, function(item) {
+                            return {id: item.docid, label: item.label_html}
+                        })
+                    ));
+                }
+            });
+        },
+        focus: function() {return false;},
+        select: function( event, ui ) {
+            id = $(this).closest('tr.author').attr('id').replace('aut_', '');
+            if (ui.item.id == 0) { //nouvelle structure
+                getPopoverForm('new', id, $(this).val());
+            } else { //Structure du référentiel
+                ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxaddstructure', data: {authid: id, structureid: ui.item.id}, success: function(data) { $('#aut-struct').html(data.autstruct); },dataType: 'json',
+                    error: function(msg) {
+                        $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+                    }
+                });
+            }
+            return false;
+        }
+    });
+
+    $('.searchStructure').focus(function() {
+        $('#authors .new-struct-hover-forced').removeClass('new-struct-hover-forced').addClass('new-struct-hover');
+        $(this).closest('tr.author').find('.new-struct-hover').removeClass('new-struct-hover').addClass('new-struct-hover-forced');
+    });
+});
+//-->
+</script>

@@ -1,0 +1,39 @@
+<?php
+
+$structures = $this->cv->getFacetStructures();
+if (count($structures)) {
+    $structids   = isset($filters['structId_i']) && is_array($filters['structId_i']) ? array_keys($filters['structId_i']) : array();
+    $listPrinc = $listSec = '';
+    $count = 0;
+    foreach ($structures as $structure) {
+        $link = $href;
+        if (isset($structure['structId_i']) && in_array($structure['structId_i'], $structids)) {
+            $filters['structId_i'][$structure['structId_i']]['value'] = $structure['name'];
+        } else {
+            if ( strpos($structure['structId_i'], ' OR ') !== false ) {
+                $link .= '/structId_i/(' . urlencode($structure['structId_i']) .')';
+            } else {
+                $link .= '/structId_i/' . (int)$structure['structId_i'];
+            }
+        }
+        $elem = '<li><a href="' . $link . '" >' . $structure['name'] . ' <span class="badge badge-default">' . $structure['nbdoc'] . '</span></a></li>';
+        if ($count < 10) {
+            $listPrinc .= $elem;
+        } else {
+            $listSec   .= $elem;
+        }
+        $count ++;
+    }
+    $content = '<div class="structures">';
+    $content .= '   <ul style="list-style-type: none; margin-left:0;">' . $listPrinc . '</ul>';
+    if ($listSec != '') {
+        $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste complète") . '</a></div>';
+        $content .= '</div>';
+        $content .= '<div class="structures-list" style="display:none;"><div class="overflow">';
+        $content .= '   <ul style="list-style-type: none; margin-left:0;">' . $listPrinc . $listSec . '</ul>';
+        $content .= '   </div><div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste principale") . '</a></div>';
+    }
+    $content .= '</div>';
+
+    echo $this->widget(array('title' => $this->translate('cv_widget_structures'), 'content' => $content, 'class' => 'widget-'.'structures'));
+}

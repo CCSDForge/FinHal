@@ -1,0 +1,132 @@
+<?php
+$op = '';
+$this->declareVars(['parsedSearchParams' => []]);
+$formAction = $this->url(['controller' => 'search', 'action' => 'index'], null, true);
+?>
+
+<!-- Simple Search -->
+
+<style> #search-form .popover {
+        width: 300px;
+    } </style>
+
+<form
+    <?php if ($this->searchType == 'advanced') : ?>
+        style="display:none;"
+    <?php endif; ?>
+        id="search-simple-form"
+        action="<?php echo $this->escape($formAction); ?>"
+        name="search-simple"
+        method="get"
+        class="form"
+>
+
+
+    <div class="input-group">
+
+        <input
+                data-src="default"
+                accesskey="4"
+                id="q"
+                name="q"
+                class="form-control"
+                type="text"
+                pattern=".{0,300}"
+                title="300 caractères max."
+                placeholder="<?php echo $this->translate('Termes de recherche'); ?>"
+                x-webkit-speech
+                style="min-width: 200px;"
+                tabindex="1"
+                value="<?php if (array_key_exists('q', $this->parsedSearchParams)) {
+                    echo $this->escape($this->parsedSearchParams['q']);
+                } ?>"
+        />
+
+
+        <div class="input-group-btn">
+
+            <button
+                    name="submit"
+                    type="submit"
+                    class="btn btn-primary"
+            >
+                <span class="glyphicon glyphicon-search"></span>&nbsp;<?php echo $this->translate('Rechercher'); ?>
+            </button>
+
+            <a href="//doc.archives-ouvertes.fr/rechercher-simple-avancee/" class="btn btn-default"
+               target="_blank" rel="noopener"><span class="glyphicon glyphicon-question-sign"></span></a>
+
+        </div>
+    </div>
+
+
+    <?php
+
+    /**
+     * Ajout des filtres en cours au formulaire de recherche
+     *
+     */
+
+    $parsedSearchParams = $this->parsedSearchParams;
+    if (is_array($parsedSearchParams)) {
+        unset($parsedSearchParams['controller'], $parsedSearchParams['action'], $parsedSearchParams['q'], $parsedSearchParams['qa']);
+        foreach ($parsedSearchParams as $elementName => $elementValue) {
+            echo PHP_EOL . '<input type="hidden" name="' . $this->escape($elementName) . '" value="' . $this->escape($elementValue) . '">';
+        }
+    }
+
+    /**
+     * // Ajout des filtres en cours au formulaire de recherche
+     *
+     */
+
+
+    ?>
+
+
+
+    <?php if (!array_key_exists('q', $this->parsedSearchParams)) : ?>
+
+
+        <script>
+            //<!--
+            $(document).ready(function () {
+                $("#pre-filters").load("<?php echo PREFIX_URL; ?>search/ajaxfilters");
+            });
+            //-->
+        </script>
+
+
+        <div id="pre-filters" style="padding: 1em;">
+            <img style="padding: 2em;" src="/img/loading.gif"
+                 alt="<?php echo $this->translate('Chargement en cours') . '&hellip;'; ?>"/>
+        </div>
+
+    <?php endif; ?>
+
+</form>
+
+<!-- //Simple Search -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

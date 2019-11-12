@@ -1,0 +1,34 @@
+
+<div class="btn-group">
+	<button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
+        <span class="glyphicon glyphicon-list"></span> <?php echo $this->translate('Nombre'); ?>  <span class="caret"></span>
+	</button>
+	<ul class="dropdown-menu" role="menu">
+    <?php
+    $urlParams = $this->parsedSearchParams;
+
+    foreach (Hal_Settings_Search::$_numberSearchResultsArray as $paginatorNumberOfResults) {
+        $isActive = '';
+
+        if (isset($this->parsedSearchParams['rows']) and ($this->parsedSearchParams['rows'] == $paginatorNumberOfResults)) {
+            // valeur en cours
+            $isActive = ' btn-primary active disabled';
+        }
+
+        if (! isset($this->parsedSearchParams['rows']) and $paginatorNumberOfResults == Hal_Settings_Search::DEFAULT_NUMBER_SEARCH_RESULTS) {
+            // valeur par défaut
+            $isActive = ' btn-primary active disabled';
+        }
+
+        $urlParams['rows'] = $paginatorNumberOfResults;
+        echo '<li>';
+        echo '<a rel="nofollow" href="' . $this->escape($this->searchUrl($urlParams, null, TRUE, true, $this->searchType)) . '" class="btn btn-xs' . $isActive . '">';
+        echo $this->escape($paginatorNumberOfResults) . ' ' . $this->translate('résultats par page');
+        echo '</a>';
+
+        echo '</li>';
+    }
+
+    ?>
+                </ul>
+</div>

@@ -1,0 +1,34 @@
+<?php
+
+$words = $this->cv->getFacetKeywords();
+if (count($words)) {
+    $content = '<div class="keywords">';
+    //Récupération des 20 premiers mots pour le nuage
+
+    $filterKeyword = isset($filters['keyword_s']) && is_array($filters['keyword_s']) ? array_keys($filters['keyword_s']) : array();
+
+    foreach (Ccsd_Tools::prepareWordCloud(array_slice($words, 0, 20)) as $word => $coef) {
+        $link = $href;
+        if (! in_array($word, $filterKeyword)) {
+            $link .= '/keyword_s/' . urlencode('"'.$word.'"');
+        }
+        $content .= '<a href="' . $link . '" class="keyword keyword-' . $coef . '">' . $word . '</a> ';
+    }
+    $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste complète") . '</a></div>';
+    $content .= '</div>';
+    $content .= '<div class="keywords-list" style="display:none;">';
+    $content .= '   <div class="overflow"><ul>';
+    foreach ($words as $word => $nbDoc) {
+        $link = $href;
+        if (! in_array($word, $filterKeyword)) {
+            $link .= '/keyword_s/' . urlencode('"'.$word.'"');
+        }
+        $content .= '       <li><a href="' . $link . '" >' . $word . ' <span class="badge badge-default">' . $nbDoc . '</span></a></li>';
+    }
+    $content .= '   </ul></div>';
+    $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Nuage de mots") . '</a></div>';
+    $content .= '</div>';
+
+    echo $this->widget(array('title' => $this->translate('cv_widget_keywords'), 'content' => $content, 'class' => 'widget-'.'keywords'));
+}
+

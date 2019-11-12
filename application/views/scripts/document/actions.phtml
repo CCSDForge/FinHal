@@ -1,0 +1,432 @@
+<?php
+/** @var Hal_View $this  */
+/**
+ * Actions disponibles pour un document
+ */
+
+if (Hal_Auth::isLogged() ) {
+    //L'utilisateur est connecté et le document est visible en ligne
+    $actionsDoc = $actionsUser = $actionsDoc2 = array();
+
+    $bPortalWithSubmit = $this->submitAllowed;
+    $bCanUpdate = Hal_Document_Acl::canUpdate($this->document,'', $bPortalWithSubmit);
+
+    if ($bCanUpdate) {
+        //L'utilisateur peut modifier les métadonnées
+        $actionsDoc[Hal_Settings_Submissions::ACTION_METADATA] = array(
+            'href'  =>  '/submit/update/docid/' . $this->document->getDocid()
+        );
+        //L'utilisateur peut ajouter un fichier
+        if (!$this->document->uniqueFileLimited()) {
+            $actionsDoc[($this->document->getFormat() == Hal_Document::FORMAT_FILE) ? Hal_Settings_Submissions::ACTION_FILE : Hal_Settings_Submissions::ACTION_ADDFILE] = array(
+                'href' => '/submit/addfile/docid/' . $this->document->getDocid()
+            );
+        }
+    }
+
+    if (Hal_Document_Acl::canReplace($this->document, '', $bPortalWithSubmit)) {
+        //L'utilisateur peut déposer une nouvelle version
+        $actionsDoc2[Hal_Settings_Submissions::ACTION_VERSION] = array(
+            'href'  =>  '/submit/replace/docid/' . $this->document->getDocid()
+        );
+    }
+
+    if ($bCanUpdate) {
+    // L'utilisateur peut partager la propriété
+        $actionsUser[Hal_Settings_Submissions::ACTION_TRANSFERT] = array(
+            'href'  =>  '/user/docowner/docid/' . $this->document->getDocid()
+        );
+    }
+    
+    if (Hal_Auth::isAdministrator()) {
+        //L'administrateur peut raffraichir le document
+        $actionsDoc[Hal_Settings_Submissions::ACTION_REFRESH] = array(
+            'onclick'  =>  "refresh('/" . $this->document->getId() . 'v' . $this->document->getVersion() . "/reload')"
+        );
+    }
+    if (Hal_Auth::is(Hal_Acl::ROLE_ADMIN) || Hal_Auth::isTamponneur(SITEID) || Hal_Document_Acl::isOwner($this->document) || Hal_Auth::isAdminStruct($this->document->getStructids())) {
+        //L'utilisateur peut accéder à l'historique du dépôt
+        $actionsDoc[Hal_Settings_Submissions::ACTION_HISTORY] = array(
+            'onclick'  =>  "docHistory('" . $this->document->getId() . "');"
+        );
+    }
+    if (Hal_Document_Acl::canDelete($this->document, $bPortalWithSubmit)) {
+        //L'utilisateur peut supprimer le dépôt
+        $actionsDoc[Hal_Settings_Submissions::ACTION_DELETE] = array(
+            'onclick'  =>  "$('#confirmModal').modal('show');"
+        );
+    }
+
+    if (Hal_Auth::isModerateur() && $this->document->getStatus() == Hal_Document::STATUS_VISIBLE) {
+        //Le modérateur peut remettre en modération un document en ligne
+        $actionsDoc2[Hal_Settings_Submissions::ACTION_MODERATE] = array(
+            'onclick'  =>  "moderate(" . $this->document->getDocid() . ", ". Hal_Auth::getUid().")"
+        );
+    }
+
+    if ($bPortalWithSubmit) {
+        //Utiliser comme modèle
+        $actionsDoc2[Hal_Settings_Submissions::ACTION_COPY] = array(
+            'onclick' => "copy(" . $this->document->getDocid() . ")"
+        );
+    }
+
+    // TODO : Better to use the A_TAMPONNEUR role than the TAMPONNEUR role
+    if (Hal_Auth::isTamponneur()) {
+        //L'utilisateur peut tamponner/détamponner le document
+        $actionsUser[Hal_Settings_Submissions::ACTION_TAMPONNER] = array();
+        $actionsUser[Hal_Settings_Submissions::ACTION_DETAMPONNER] = array();
+        $docCollections = $this->document->getCollectionIds();
+        foreach(Hal_Auth::getDetailsRoles(Hal_Acl::ROLE_TAMPONNEUR) as $sid => $tampid) {
+            $actionsUser[Hal_Settings_Submissions::ACTION_TAMPONNER][$sid] = array(
+                'label'     =>  $tampid,
+                'disabled'  =>  in_array($sid, $docCollections),
+                'onclick'   =>  "addCollection(" . $this->document->getDocid() . ", " . $sid . ")");
+            $actionsUser[Hal_Settings_Submissions::ACTION_DETAMPONNER][$sid] = array(
+                'label'     =>  $tampid,
+                'disabled'  =>  !in_array($sid, $docCollections),
+                'onclick'   =>  "delCollection(" . $this->document->getDocid() . ", " . $sid . ")");
+        }
+    }
+
+    // Si l'utilisateur pas contributeur et pas propriétaire, et n'a pas deja demandé la propriété 
+    if (!Hal_Document_Acl::isOwner($this->document) && $bPortalWithSubmit) {
+        $docOwner = new Hal_Document_Owner ();
+        if (!$docOwner->hasRequestedOwnership(Hal_Auth::getUid(), $this->document->getId())) {
+            //L'utilisateur peut Demander la propriété du dépôt
+            $actionsDoc[Hal_Settings_Submissions::ACTION_CLAIM] = array(
+                'onclick'  =>  "$('#claimOwnershipModal').show();"
+            );
+        }
+    }
+    
+    //L'utilisateur peut ranger ce document dans sa bibliothèque
+    $actionsUser[Hal_Settings_Submissions::ACTION_LIBRARY] = array(
+        array(
+            'label' =>  $this->translate('Créer une étagère'),
+            'new'   =>  true,
+            'disabled'  =>  false,
+            'idli' => "newShelf",
+            'onclick'   =>  "addInLibrary('" . $this->document->getId() . "', " . 0 . ')'
+        )
+    );
+    $shelves = Hal_Auth::getShelves();
+    $docShelves = Hal_User_Library::getShelfIds($this->document->getId(), Hal_Auth::getUid());
+
+    foreach($shelves as $shelf) {
+        $actionsUser[Hal_Settings_Submissions::ACTION_LIBRARY][$shelf['LIBSHELFID']] = array(
+            'label' =>  $shelf['LIB'],
+            'disabled'  =>  in_array($shelf['LIBSHELFID'], $docShelves),
+            'onclick'   =>  "addInLibrary('" . $this->document->getId() . "', " . $shelf['LIBSHELFID'] . ')');
+    }
+
+    ?>
+
+    <style>
+        .dropdown-height-limit  {
+            overflow: auto;
+            max-height: 200px;
+        }
+    </style>
+    <?php include_once 'claimOwnershipModal.phtml'; ?>
+    <div class="form-actions text-center">
+        <div class="btn-group">
+            <?php foreach ($actionsDoc as $action => $info) { ?>
+                    <a href="<?php echo isset($info['href']) ? $info['href'] : 'javascript:void(0)';  ?>" <?php echo isset($info['onclick']) ? 'onclick="' . $info['onclick'] . '"' : '';  ?> class="btn btn-default">
+                        <i class="<?php echo Hal_Settings_Submissions::getIcon($action); ?>"></i>&nbsp;<?php echo $this->translate('action_' . $action) ?>
+                    </a>
+            <?php } ?>
+        </div>
+        <p></p>
+        <?php if (count($actionsDoc2)) { ?>
+            <div class="btn-group">
+                <?php foreach ($actionsDoc2 as $action => $info) { ?>
+                    <a href="<?php echo isset($info['href']) ? $info['href'] : 'javascript:void(0)';  ?>" <?php echo isset($info['onclick']) ? 'onclick="' . $info['onclick'] . '"' : '';  ?> class="btn btn-default">
+                        <i class="<?php echo Hal_Settings_Submissions::getIcon($action); ?>"></i>&nbsp;<?php echo $this->translate('action_' . $action) ?>
+                    </a>
+                <?php } ?>
+            </div>
+            <p></p>
+        <?php } ?>
+        <div class="btn-group">
+            <?php foreach ($actionsUser as $action => $info) {
+                $dropdown = !isset($info['href']);?>
+                <?php if ($dropdown) { ?>
+                    <div class="btn-group">
+                <?php } ?>
+                <a href="<?php echo $dropdown ? '#' : $info['href']  ?>" class="btn btn-default <?php echo $dropdown ? 'dropdown-toggle" data-toggle="dropdown"' : '"'?>>
+                        <i class="<?php echo Hal_Settings_Submissions::getIcon($action); ?>"></i>&nbsp;<?php echo $this->translate('action_' . $action) ?>
+                <?php if ($dropdown) { ?>
+                    <span class="caret"></span>
+                <?php } ?>
+                </a>
+                <?php if ($dropdown) { ?>
+                    <!--ul class="dropdown-menu dropdown-height-limit <?php echo $action?>"-->
+                    <ul class="dropdown-menu dropdown-height-limit library">
+                        <?php foreach($info as $id => $elem) { ?>
+                            <?php if (isset($elem['new']) && $elem['new']) { ?>
+                                <li <?php echo $elem['disabled'] ? 'class="disabled"' : ''; ?> attr-id="<?php echo $id ?>" id="<?php echo isset($elem['idli']) ? $elem['idli'] : $elem['idinput']; ?>">
+                                    <div class="input-group input-group-sm" style="margin-left:5px;margin-right:5px;">
+                                        <?php if (isset($elem['idinput'])) { ?>
+                                            <input type="hidden" name="method" value="share" />
+                                            <input type="hidden" id="uid" name="uid" value="" />
+                                            <input type="text" class="form-control" id="usershare" placeholder="<?php echo $this->translate($elem['label']) ?>" />
+                                            <script language="JavaScript" type="text/javascript">
+                                            $(document).ready(function(){
+                                                $('#usershare').autocomplete({
+                                                    minLength: 2,
+                                                    html: true,
+                                                    data: {'term': $(this).val()},
+                                                    source: "/administrate/ajaxsearchuser",
+                                                    select: function( event, ui ) {
+                                                        $('#share-doc input[name="uid"]').val(ui.item.id);
+                                                        addOwnership(ui.item.id, "<?php echo $this->document->getDocid() ?>");
+                                                        return false;
+                                                    }
+                                                });
+                                            });
+                                            </script>
+                                        <?php } else { ?>
+                                            <input type="text" class="form-control" placeholder="<?php echo $this->translate($elem['label']) ?>" />
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button" onclick="<?php echo $elem['onclick'] ?>"><i class="glyphicon glyphicon-ok"></i></button>
+                                            </span>
+                                        <?php } ?>
+                                    </div>
+                                </li>
+                            <?php } else { ?>
+                                <!-- Todo : better use of data-* attr name for Html5 in place of attr-*  -->
+                                <li <?php echo $elem['disabled'] ? 'class="disabled"' : ''; ?> attr-id="<?php echo $id ?>" >
+                                    <a href="javascript:void(0);" onclick="<?php echo $elem['disabled'] ? '' : $elem['onclick'] ?>"><?php echo $elem['label'] ?></a>
+                                </li>
+                            <?php } ?>
+                        <?php } ?>
+                    </ul>
+                    </div>
+                <?php } ?>
+            <?php } ?>
+        </div>
+    </div>
+
+    <div class="panel panel-default" id="history" style="display:none;">
+        <div class="panel-heading" role="tab" id="headingOne">
+            <div class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    <i class="glyphicon glyphicon-calendar"></i>&nbsp;<?php echo $this->translate('Historique du dépôt'); ?>
+                </a>
+            </div>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+            <div class="panel-body result">
+            </div>
+        </div>
+    </div>
+
+
+    <?php if (isset($actionsDoc[Hal_Settings_Submissions::ACTION_DELETE])) { ?>
+        <?php echo $this->confirm("Confirmation", $this->translate("Souhaitez-vous supprimer le dépôt") . " <strong>" . $this->document->getId() . 'v' . $this->document->getVersion() . "</strong>")
+             ->setJsCallback('deleteDocument(' . $this->document->getDocid() . ');');?>
+    <?php } ?>
+
+    <script language="JavaScript" type="text/javascript">
+        <?php if (isset($actionsDoc[Hal_Settings_Submissions::ACTION_HISTORY])) { ?>
+            function docHistory(id)
+            {
+                $.ajax({
+                    type: "post",
+                    url: '/view/history',
+                    data: {id:id, limit:"view"}
+                }).done(function( msg ) {
+                    $('#history .result').html(msg);
+                    $('#history').show();
+                });
+            }
+        <?php } ?>
+
+        <?php if (isset($actionsDoc2[Hal_Settings_Submissions::ACTION_MODERATE])) { ?>
+            function moderate(docid, uid)
+            {
+                $.ajax({
+                    type: "post",
+                    url: '/administrate/ajaxmoderate',
+                    data: {docid: docid, uid: uid}
+                }).done(function(msg) {
+                    if ($msg != '') {
+                        // oops erreur, donc pas de redirection (ex: pas la derniere version d'un doc
+                    } else {
+                        window.location.replace("/moderate/documents/docid/"+docid);
+                    }
+                });
+            }
+        <?php } ?>
+
+        <?php if (isset($actionsDoc2[Hal_Settings_Submissions::ACTION_COPY])) { ?>
+        function copy(docid)
+        {
+            link('/submit/copy/docid/' + docid);
+        }
+        <?php } ?>
+
+        <?php if (isset($actionsDoc[Hal_Settings_Submissions::ACTION_REFRESH])) { ?>
+            function refresh(url)
+            {
+                $.ajax({
+                    type: "get",
+                    url: url
+                }).done(function( msg ) {
+                    if (msg == '1') {
+                        location.reload(true);
+                    }
+                });
+            }
+        <?php } ?>
+
+        <?php if (isset($actionsDoc[Hal_Settings_Submissions::ACTION_DELETE])) { ?>
+            function deleteDocument(docid)
+            {
+                $.ajax({
+                    type: "post",
+                    url: '/user/deletedocument',
+                    data: { docid: docid},
+                    error: function(msg) {
+                        message(msg.responseText, 'alert-danger');
+                        $('html, body').animate({
+                            scrollTop: 0
+                        }, 0);
+                    }
+                }).done(function( msg ) {
+                    if (msg == '1') {
+                        message("<?php echo $this->translate("Le document a été supprimé");?>", 'alert-success');
+                        setTimeout("link('/')",5000);
+                    }
+                });
+            }
+        <?php } ?>
+
+        <?php if (isset($actionsUser[Hal_Settings_Submissions::ACTION_TAMPONNER])) { ?>
+            function addCollection(docid, sid)
+            {
+                tampid = $('.tamponner li[attr-id=' + sid + '] a').text();
+                $.ajax({
+                    type: "post",
+                    url: "/collection/add",
+                    data: { docid: docid, sid: sid }
+                }).done(function( msg ) {
+                    if (msg == '1') {
+                        $('.tamponner li[attr-id=' + sid + ']').addClass('disabled');
+                        $('.detamponner li[attr-id=' + sid + ']').removeClass('disabled');
+                        message("<?php echo $this->translate("Le document a été ajouté à la collection");?> <strong>" + tampid + "</strong>", 'alert-success');
+                    }
+                });
+            }
+            function delCollection(docid, sid)
+            {
+                tampid = $('.detamponner li[attr-id=' + sid + '] a').text();
+                $.ajax({
+                    type: "post",
+                    url: "/collection/del",
+                    data: { docid: docid, sid: sid }
+                }).done(function( msg ) {
+                    if (msg == '1') {
+                        $('.detamponner li[attr-id=' + sid + ']').addClass('disabled');
+                        $('.tamponner li[attr-id=' + sid + ']').removeClass('disabled');
+                        message("<?php echo $this->translate("Le document a été retiré de la collection");?> <strong>" + tampid + "</strong>", 'alert-success');
+                    }
+                });
+            }
+        <?php } ?>
+
+        <?php if (isset($actionsUser[Hal_Settings_Submissions::ACTION_LIBRARY])) { ?>
+            function addInLibrary(id, shelfid)
+            {
+                data = { 'identifiant': id, 'shelfid': shelfid };
+                $('#newShelf input:text').removeClass('error');
+                if (shelfid == 0) {
+                    text = $('#newShelf input:text').val();
+                    if (text == '') {
+                        $('#newShelf input:text').addClass('error');
+                        return false;
+                    }
+                    data.name = text;
+                }
+                $.ajax({
+                    type: "post",
+                    url: "/user/addinlibrary",
+                    dataType: "json",
+                    data: data
+                }).done(function( msg ) {
+                    listShelves = $('#newShelf').closest('ul');
+                    if (msg.doc >= 1) {
+                        if (shelfid == 0) { //Nouvelle étagère
+                            listShelves.append('<li class="disabled"><a href="#">' + text + '</a></li>');
+                            $('#newShelf input:text').val('');
+                        } else {
+                            text = $('li[attr-id=' + shelfid + '] a').text();
+                            $('li[attr-id=' + shelfid + ']').addClass('disabled');
+                        }
+                        message("<?php echo $this->translate("Le document a été ajouté à l'étagère");?> <strong>" + text + "</strong>", 'alert-success');
+                    } else {
+                        $('#newShelf input:text').val('');
+                        message("<?php echo $this->translate("Ce document est déjà dans cette étagère !"); ?>", 'alert-danger');
+                    }
+                    listShelves.closest('.btn-group').removeClass('open');
+                    $('html, body').animate({scrollTop:0}, 0);
+                });
+            }
+            $('#newShelf').bind('click', function (e) { e.stopPropagation() })
+        <?php } ?>
+
+        <?php if (isset($actionsDoc[Hal_Settings_Submissions::ACTION_CLAIM])) { ?>
+
+            function claimOwnership(id)
+            {
+                var content = $('#msg-content').val();
+
+                if (content.length == 0) {
+                    $('#msg-content').addClass("error");
+                } else {
+
+                    $("#claimOwnershipModal").hide();
+
+                    $('#user input:text').removeClass('error');
+                    $.ajax({
+                        url: '/user/docowner',
+                        type: 'post',
+                        data: {'identifiant': id, 'method': 'request', 'message':content},
+                        dataType: "json"
+                    }).done(function (msg) {
+                        if (msg.res == 1) {
+                            message("<?php echo $this->translate("La demande de partage de propriété a été effectuée");?>", 'alert-success');
+                        } else if (msg.res == 2) {
+                            message("<?php echo $this->translate("Impossible de demander la propriété des documents déposés par STAR");?>", 'alert-danger');
+                        } else if (msg.res == 4) {
+                            message("<?php echo $this->translate("Le document n'existe pas !");?>", 'alert-danger');
+                        } else if (msg.res == 3) {
+                            message("<?php echo $this->translate("Vous êtes déjà propriétaire du document !");?>", 'alert-danger');
+                        } else if (msg.res == 5) {
+                            message("<?php echo $this->translate("La propriété du document a déjà été demandée !");?>", 'alert-danger');
+                        } else {
+                            message("<?php echo $this->translate("Problème technique, merci de renouveler la demande");?>", 'alert-danger');
+                        }
+                    });
+                }
+            } 
+            $('#user').bind('click', function (e) { e.stopPropagation() });
+        <?php } ?>
+    
+        <?php if (isset($actionsUser[Hal_Settings_Submissions::ACTION_TRANSFERT])) { ?>
+             
+            function addOwnership(uid, id)
+            {
+                $.ajax({
+                    url: '/user/docowner',
+                    type: 'post',
+                    data: { 'uid': uid, 'docid': id, 'method': 'share' }
+                }).done(function( msg ) {
+                        message("<?php echo $this->translate("Le partage de propriété a été effectué");?>", 'alert-success');
+                });
+            }
+            $('#user').bind('click', function (e) { e.stopPropagation() });
+        <?php } ?>
+    </script>
+<?php } ?>

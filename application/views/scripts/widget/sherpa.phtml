@@ -1,0 +1,80 @@
+<form action="http://www.sherpa.ac.uk/romeo/search.php" method="post" target="_blank" rel="noopener">
+    <div id="sherpa">
+        <div class="text-center">
+            <a href="http://www.sherpa.ac.uk/romeo/" target="_blank" rel="noopener"><img src="/img/sherpa-romeo.gif" border="0" width="200"/></a>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="radio" name="type" value="journal" checked="checked" > <?php echo $this->translate('Titre du journal') ?>
+            </label>
+            &nbsp;
+            <label>
+                <input type="radio" name="type" value="publisher"> <?php echo $this->translate('Editeur') ?>
+            </label>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="input-group">
+                      <input type="text" class="form-control" name="search">
+                      <span class="input-group-btn">
+                        <button class="btn btn-success" type="submit">
+                            <i class="glyphicon glyphicon-search"></i></button>
+                      </span>
+                </div>
+            </div>
+        </div>
+        <div id="sherpa-rules">
+            <div id="sherpa-journal">
+                <div class="checkbox">
+                    <label>
+                        <input type="radio" name="jrule" value="EXACT" checked="checked"> <?php echo $this->translate('Est exactement') ?>
+                    </label>
+                    &nbsp;
+                    <label>
+                        <input type="radio" name="jrule" value="STARTS"> <?php echo $this->translate('Commence par') ?>
+                    </label>
+                    &nbsp;
+                    <label>
+                        <input type="radio" name="jrule" value="CONTAINS"> <?php echo $this->translate('Contient') ?>
+                    </label>
+                    &nbsp;
+                    <label>
+                        <input type="radio" name="jrule" value="ISSN"> <?php echo $this->translate('ISSN') ?>
+                    </label>
+                </div>
+            </div>
+            <div id="sherpa-publisher" style="display:none;">
+                <div class="checkbox">
+                    <label>
+                        <input type="radio" name="prule" value="EXACT"> <?php echo $this->translate('Est exactement') ?>
+                    </label>
+                    &nbsp;
+                    <label>
+                        <input type="radio" name="prule" value="ALL" checked="checked"> <?php echo $this->translate('Tous les mots-clés') ?>
+                    </label>
+                    &nbsp;
+                    <label>
+                        <input type="radio" name="prule" value="ANY"> <?php echo $this->translate('Contient') ?>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<hr />
+<div id="heloise">
+    <div class="text-center">
+        <?php echo $this->translate('Consulter la politique des éditeurs également sur'); ?><br /><a href="//heloise.ccsd.cnrs.fr/" target="_blank" rel="noopener"><img src="/img/heloise.gif" border="0" height="50"/></a>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function() {
+        $('#sherpa input[name="type"]').click(function() {
+            selector = '#sherpa-' + $('#sherpa input[name="type"]:checked').val();
+            $('#sherpa-rules>div').hide();
+            $(selector).show();
+        });
+    });
+
+
+</script>

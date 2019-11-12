@@ -1,0 +1,26 @@
+
+<?php if ( $this->document ) { ?>
+    <div class="doc-<?php echo $this->document['docid'] ?>">
+        <hr />
+        <div class="row">
+            <div class="col-md-10">
+                <?php echo $this->document['citationFull_s']; ?>
+            </div>
+            <div class="col-md-2 text-right">
+                <?php if (isset($this->document['collId_i']) && is_array($this->document['collId_i']) && in_array($this->sid, $this->document['collId_i'])) {
+                    //Le document est déja tamponné
+                    ?>
+                    <button type="button" id="btn-del" onclick="delTampon(<?php echo $this->document['docid'] ?>, <?php echo $this->sid ?>)" class="btn btn-default"><i class="glyphicon glyphicon-remove"></i>&nbsp;<?php echo $this->translate('Détamponner') ?></button>
+                <?php
+                } else {
+                    //Le document n'est pas tamponné
+                    ?>
+                    <button type="button" id="btn-add" class="btn btn-primary" onclick="addTampon(<?php echo $this->document['docid'] ?>, <?php echo $this->sid ?>)"><i class="glyphicon glyphicon-tag"></i>&nbsp;<?php echo $this->translate('Tamponner') ?></button>
+                <?php
+                } ?>
+            </div>
+        </div>
+    </div>
+<?php } else { ?>
+    <hr /><div class="alert alert-danger"><?php echo $this->translate('Document non trouvé'); ?></div>
+<?php } ?>

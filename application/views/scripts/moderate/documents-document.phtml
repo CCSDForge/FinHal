@@ -1,0 +1,57 @@
+<?php
+/** @var Hal_View $this */
+$this->jQuery()->addStylesheet(CCSDLIB . '/css/bootstrap-editable.css');
+$document = $this->document;
+$uid = $document->getContributor()['uid'];
+$user = new Hal_User();
+$user->find($uid);
+?>
+<script type="text/javascript" src="<?php echo CCSDLIB;?>/js/jquery.jeditable.js"></script>
+<script type="text/javascript" src="<?php echo CCSDLIB;?>/js/bootstrap-editable.min.js"></script>
+<script>var administrate = "moderate";</script>
+<script type="text/javascript" src="/js/document/doublon.js"></script>
+<div class="well" id="doc-<?php echo $document->getDocid();?>">
+    <input type="hidden" name="docid[]" value="<?php echo $document->getDocid();?>" />
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <h4>
+
+        <?php // Identifiant de l'article  ?>
+        <?php if ($document->getId()) { ?>
+            <div class="btn-group dropdown">
+                <button type="button" class="btn btn-danger"><?php echo $document->getId(); ?>, <?php echo $this->translate('version') . ' ' . $document->getVersion(); ?></button>
+                <?php if (MODULE != SPACE_COLLECTION && is_array($document->getDocVersions()) && count($document->getDocVersions()) > 1) { ?>
+                    <?php // liens vers les autres versions  ?>
+                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu pull-right" role="menu">
+                        <?php
+                        foreach (array_keys($document->getDocVersions()) as $version) {
+                            if ($version == $document->getVersion()) continue; ?>
+                            <li><a target='_blank' href="<?php echo PREFIX_URL . $document->getId() . 'v' . $version ?>"><?php echo $this->translate('version') . ' ' . $version; ?></a></li>
+                        <?php } ?>
+                    </ul>
+                <?php } ?>
+            </div>
+        <?php }
+        if ($document->gotoSWH()) {
+            if (($transfert = Hal_Transfert_SoftwareHeritage::transfert($document)) !== false) {
+                $url = $transfert -> getPendingUrl();
+                ?>
+                <a href="<?php echo $url ?>" ><img src="/img/softwareheritage.png" width="125" /></a>
+            <?php } else { ?>
+                <img src="/img/softwareheritage.png" width="125" />
+            <?php } ?>
+        <?php } ?>
+
+        <small class="pull-right">docid: <?php echo $document->getDocid(); ?>, <?php echo $user->getScreen_name();?>
+          <span class="label label-primary lb-sm" data-toggle="tooltip" title="Nombre de documents déposés"><?php echo $user->getNbdocvis(); ?></span>
+          <?php if ($user->getNbdocsci() > 0){?>
+          <span class="label label-warning" data-toggle="tooltip" title="Nombre de documents en expertise scientifique"><?php echo $user->getNbdocsci(); ?></span>
+          <?php } if ($user->getNbdocref() > 0){?>
+          <span class="label label-danger" data-toggle="tooltip" title="Nombre de documents refusés"><?php echo $user->getNbdocref(); ?></span>
+          <?php }?>
+        </small>
+    </h4>
+    <?php include __DIR__ . '/../document/document.phtml';?>
+</div>

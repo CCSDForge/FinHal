@@ -1,0 +1,306 @@
+/******** Body du CV ********/
+
+#container {
+    overflow: hidden;
+    min-height: 100%;
+    background: #ffffff;
+    box-shadow: 1px 1px 12px #ccc;
+}
+
+h1, h2, h3, h4 {
+    color: #444440;
+}
+
+a {
+    color: #373741;
+}
+
+a:hover {
+    color: #bcb5ad;
+    text-decoration: none;
+}
+
+/***************************/
+
+/******** Widgets ********/
+.column-widget {
+    float:right;
+    background-color: #e1d8cf;
+    margin-bottom: -9999px;
+    padding-bottom: 9999px;
+}
+
+.widget {
+    margin: 10px 0;
+    padding: 0px;
+    background-color: #e1d8cf;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+.widget-header {
+    padding: 8px 14px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 14px;
+    background-color: #444440;
+    text-transform: uppercase;
+    color: #ffffff;
+    -webkit-border-radius: 10px 10px 0 0;
+    -moz-border-radius: 10px 10px 0 0;
+    border-radius: 10px 10px 0 0;
+}
+.widget-content {
+    padding: 10px;
+    background: #fbfbfb;
+}
+.widget-footer {
+    text-align:right;
+
+}
+.widget-footer a{
+    color: #999999;
+    padding: 2px;
+    font-size: 9px;
+}
+.widget-content ul{
+    list-style-type: square;
+    padding-left: 10px;
+    margin-left:10px;
+}
+.widget-content ul li{
+    font-size:12px;
+
+}
+.widget-content a .badge {
+    font-size: 10px;
+    font-weight: normal;
+    margin-left: 10px;
+    background: #444440;
+}
+.widget-content a:hover .badge{
+    background: #928c86;
+
+}
+.widget-content .overflow {
+    overflow:auto;
+    max-height:250px;
+}
+
+/* Nuage de mots */
+.widget-keywords {
+
+}
+.keywords {
+    text-align: justify;
+}
+.keyword-1 {
+    font-size: 9px;
+}
+.keyword-2 {
+    font-size: 10px;
+}
+.keyword-3 {
+    font-size: 12px;
+}
+.keyword-4 {
+    font-size: 14px;
+}
+.keyword-5 {
+    font-size: 16px;
+}
+.keyword-6 {
+    font-size: 18px;
+}
+.widget-mesh {
+
+}
+
+/* Domaines */
+.widget-domain {
+
+}
+.domains {
+
+}
+
+/* Co-Auteurs */
+.widget-coauthors {
+
+}
+.coauthors {
+
+}
+.coauthors-list {
+
+}
+
+/* Export */
+.widget-export {
+
+}
+
+/* Widget Extérieur */
+.widget-ext {
+
+}
+
+/* Identifiants Chercheur */
+.widget-idext {
+
+}
+
+/* Mesh */
+.widget-mesh {
+
+}
+
+/* Consultation du CV */
+.widget-metrics {
+
+}
+
+/* Photo */
+.widget-photo {
+
+}
+
+/* Revues */
+.widget-revues {
+
+}
+.revues {
+
+}
+.revues-list {
+
+}
+
+/* Projet ANR */
+.widget-anr {
+
+}
+.anr {
+
+}
+.anr-list {
+
+}
+
+/* Projet Européen */
+.widget-europ {
+
+}
+.europ {
+
+}
+.europ-list {
+
+}
+
+/* Structures */
+.widget-structures {
+
+}
+.structures {
+
+}
+.structures-list {
+
+}
+
+/* Année de production */
+.widget-years {
+
+}
+.years {
+
+}
+.years-list {
+
+}
+
+/* Réseaux sociaux */
+.widget-socialurl {
+
+}
+/***************************/
+
+
+/******** Documents ********/
+.column-content {
+    margin-bottom: -9999px;
+    padding-bottom: 9999px;
+}
+.author-name {
+}
+.author-cv {
+    text-align:justify;
+}
+.counter-doc {
+    text-align:right;
+    position:absolute;
+    right:10px;top:15px;
+    font-size: 10px;
+}
+h2.nbdoc {
+    margin-top:0px;
+}
+h2.nbdoc span.label-primary {
+    background: #444440;
+}
+.doc-group {
+    margin: 10px 0;
+    padding: 0px;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+.doc-group .doc-header {
+    padding: 10px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 16px;
+    background-color: #f7f7f7;
+    text-transform: uppercase;
+    -webkit-border-radius: 4px 4px 0 0;
+    -moz-border-radius: 4px 4px 0 0;
+    border-radius: 4px 4px 0 0;
+    border-bottom: 1px solid #ebebeb;
+}
+.doc-group .doc-list {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.doc-nb {
+    float:right;
+    color:#999999;
+    font-weight:normal;
+    text-transform: lowercase;
+    font-size: 12px;
+}
+.doc-overflow {
+    overflow: auto;
+    padding-left: 20px;
+    height : 350px;
+}
+.doc-hr {
+    margin: 5px 0;
+}
+.media {
+
+}
+.media-list {
+
+}
+.thumbnail {
+    width: 50px;
+}
+
+html,body {
+    height:100%;
+}

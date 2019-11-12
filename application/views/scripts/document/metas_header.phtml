@@ -1,0 +1,177 @@
+<?php
+/** @var Hal_View $this */
+$this->headLink(['rel' => 'schema.DC', 'href' => 'http://purl.org/dc/elements/1.1/']);
+/** @var Hal_Document $document */
+$document = $this->document;
+$language = $document->getMeta('language');
+$this->headMeta()->appendName('citation_language', $language);
+$this->headMeta()->appendName('DC.language', $language);
+
+$typeDC = ['UNDEFINED' => 'document', 'ART' => 'journal', 'OUV' => 'book', 'COUV' => 'incollection', 'COMM' => 'proceedings', 'POSTER' => 'poster', 'REPORT' => 'report', 'THESE' => 'phdthesis', 'HDR' => 'thesis', 'ETABTHESE' => 'thesis', 'LECTURE' => 'lecture', 'IMG' => 'image', 'VIDEO' => 'video', 'PATENT' => 'patent', 'DOUV' => 'book', 'SON' => 'sound'];
+$this->headMeta()->appendName('DC.type', array_key_exists($document->getTypDoc(), $typeDC) ? $typeDC[$document->getTypDoc()] : 'other');
+$this->headMeta()->appendProperty('og:type', array_key_exists($document->getTypDoc(), $typeDC) ? $typeDC[$document->getTypDoc()] : 'other');
+
+$title = trim($document->getMainTitle());
+$this->headTitle($title);
+$this->headMeta()->appendName('citation_title', $title);
+$this->headMeta()->appendName('DC.title', $title);
+$this->headMeta()->appendProperty('og:title', $title);
+
+$this->headMeta()->appendName('DC.identifier', $document->getUri());
+$this->headMeta()->appendName('DC.identifier', $document->getId());
+$this->headMeta()->appendProperty('og:url', $document->getUri());
+
+$authors = $document->getAuthors();
+$structures = $document->getStructures();
+
+if (count($authors)) {
+    foreach ($authors as $author) {
+
+        $fullName = $author->getFullname();
+
+        $this->headMeta()->appendName('citation_author', $fullName);
+
+        // extIds
+        if ($author->getAuthorExtId('ORCID')) {
+            $this->headMeta()->appendName('citation_author_orcid', $author->getAuthorExtId('ORCID'));
+        }
+
+        // Hal ID Google Scholar undocumented feature
+        if ($author->getIdhalstring()!= '') {
+            $this->headMeta()->appendName('citation_author_hal_id', $author->getIdhalstring());
+        }
+
+
+        // affiliations
+        foreach ($author->getStructid() as $autStructure) {
+            foreach ($structures as $structure) {
+                if ($structure->getStructid() === $autStructure) {
+                    $this->headMeta()->appendName('citation_author_institution', $structure->getStructname());
+                }
+            }
+        }
+
+        $this->headMeta()->appendName('DC.creator', $fullName);
+    }
+}
+
+$abstract = $document->getAbstract($language);
+if ($abstract == '' || is_array($abstract)) {
+    $abstract = $document->getAbstract();
+    if (count($abstract)) {
+        $abstract = array_values($abstract)[0];
+    } else {
+        $abstract = '';
+    }
+}
+if ($abstract) {
+    $abstract = trim($abstract);
+    $this->headMeta()->appendName('citation_abstract', $abstract);
+    $this->headMeta()->appendName('DC.description', $abstract);
+    $this->headMeta()->appendName('description', $abstract);
+    $this->headMeta()->appendProperty('og:description', $abstract);
+}
+
+$keywords = $document->getKeywords();
+if (count($keywords)) {
+    foreach ($keywords as $lang => $words) {
+        if (!is_array($words)) {
+            $words = [
+                $words
+            ];
+        }
+        $keywordList = trim(implode(' ; ', $words));
+        $this->headMeta()->appendName('citation_keywords', $keywordList);
+        $this->headMeta()->appendName('DC.subject', $keywordList);
+        $this->headMeta()->appendName('keywords', $keywordList);
+    }
+}
+
+$default = $document->getDefaultFile();
+if ($default != false && $default != null && $default->canRead()) {
+    $url = $document->getUri() . '/document';
+    $this->headMeta()->appendName('citation_pdf_url', $url);
+    $this->headMeta()->appendName('DC.identifier', $url);
+    $this->headMeta()->appendProperty('og:url', $url);
+}
+
+$this->headMeta()->appendName('citation_online_date', $document->getSubmittedDate('yyyy/MM/dd'));
+$l = strlen($document->getProducedDate());
+$format = 'yyyy';
+if ($l > 8) {
+    $format = 'yyyy/MM/dd';
+} else if ($l > 5) {
+    $format = 'yyyy/MM';
+}
+$this->headMeta()->appendName('citation_publication_date', $document->getProducedDate($format));
+$this->headMeta()->appendName('DC.date', $document->getProducedDate($format));
+$this->headMeta()->appendName('DC.issued', $document->getProducedDate($format));
+/**
+ * @var Hal_Document_Meta_Abstract $metaO
+ */
+foreach ($document->getHalMeta() as $meta => $metaO) {
+    $value=$metaO->getValue();
+    if ((is_array($value) && count($value) == 0) || $value == '') continue;
+    switch ($meta) {
+        case 'journal':
+            $this->headMeta()->appendName('citation_journal_title', $value->JNAME);
+            $this->headMeta()->appendName('DC.relation.ispartof', $value->JNAME);
+            break;
+
+        case 'bookTitle':
+            $this->headMeta()->appendName('DC.relation.ispartof', $value);
+            break;
+
+        case 'identifier':
+            foreach ($value as $i => $v) {
+                if ($i == 'doi') {
+                    $this->headMeta()->appendName('citation_doi', $v);
+                } else if ($i == 'pubmed') {
+                    $this->headMeta()->appendName('citation_pmid', $v);
+                } else {
+                    $this->headMeta()->appendName('citation_id', $v);
+                }
+            }
+            break;
+
+        case 'page':
+            $this->headMeta()->appendName('citation_firstpage', $value);
+            break;
+
+        case 'conferenceTitle':
+            $this->headMeta()->appendName('citation_conference_title', $value);
+            $this->headMeta()->appendName('DC.relation.ispartof', $value);
+            break;
+
+        case 'volume':
+            $this->headMeta()->appendName('citation_volume', $value);
+            $this->headMeta()->appendName('DC.citation.volume', $value);
+            break;
+
+        case 'issue':
+            $this->headMeta()->appendName('citation_issue', $value);
+            $this->headMeta()->appendName('DC.citation.issue', $value);
+            break;
+
+        case 'issn':
+            $this->headMeta()->appendName('citation_issn', $value);
+            break;
+
+        case 'eissn':
+            $this->headMeta()->appendName('citation_issn', $value);
+            break;
+
+        case 'isbn':
+            $this->headMeta()->appendName('citation_isbn', $value);
+            break;
+
+        case 'publisher':
+            $this->headMeta()->appendName('DC.publisher', is_array($value) ? implode(' ; ', $value) : $value);
+            break;
+
+        case 'authorityInstitution':
+            $this->headMeta()->appendName('citation_dissertation_institution', is_array($value) ? implode(' ; ', $value) : $value);
+            $this->headMeta()->appendName('DC.publisher', is_array($value) ? implode(' ; ', $value) : $value);
+            break;
+    }
+}

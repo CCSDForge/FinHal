@@ -1,0 +1,92 @@
+<div class="row">
+
+<?php
+$searchParams ['controller'] = 'search';
+$searchParams ['action'] = 'index';
+
+if (count($this->facets) == 0) {
+	echo '<div class="col-md-7">';
+	echo '<p class="lead">';
+	echo $this->translate ( "Pas de données pour l'instant." );
+	echo '</p>';
+	echo '</div>';
+
+	return;
+}
+
+// how many authors will fit in a column
+$authorsPerColumn = round(count($this->facets) / 3);
+$authorsCount = 0;
+$needToCloseDiv = false;
+
+
+$st = Zend_Controller_Front::getInstance ()->getRequest ()->getParam ( 'submitType_s' );
+if ($st != null) {
+	$searchParams ['submitType_s'] = $st;
+}
+
+if ($this->structures != null){
+    $searchParams ['structId_i'] = $this->structures;
+}
+
+if ($this->infostructures != null) {
+    echo '<div class="col-md-12">';
+    echo '<ul class="list-unstyled">';
+    echo '<li><strong>' . $this->translate("Filtres") .'</strong></li>';
+    foreach ($this->infostructures as $structid => $name) {
+        echo '<li><span class="label label-primary">';
+        echo $name;
+        echo ' (' . $structid . ')';
+        echo '</span></li>';
+    }
+    echo '</ul></div>';
+}
+
+include_once __DIR__ . '/../partials/browse_alphabet.phtml';
+include_once __DIR__ . '/../partials/browse_type.phtml';
+
+foreach ( $this->facets as $itemId => $facet ) {
+
+    if (($authorsCount == 0) || ($authorsCount > $authorsPerColumn)) {
+        echo PHP_EOL . '<div class="col-xs-12 col-sm-6 col-md-4">';
+        echo '<ul class="list-group">';
+        $needToCloseDiv = true;
+    }
+
+
+	echo '<li class="list-group-item">';
+
+	if (isset ( $facet ['idHal'] ) and ($facet ['idHal'] != '')) {
+		$searchParams ['q'] = 'authIdHal_s:"' . $facet ['idHal'] . '"';
+		echo '<span class="glyphicon glyphicon-user" data-toggle="tooltip" data-placement="auto" data-original-title="' . $this->translate ( "IdHal de l'auteur" ) . '"></span>&nbsp;';
+	} else {
+		$searchParams ['q'] = $this->urlFilterName . ':"' . $facet ['name'] . '"';
+	}
+
+	$url = $this->url ( $searchParams, null, TRUE );
+
+    echo '<a rel="nofollow" href="' . $this->escape($url) . '">';
+	echo $this->escape ( $facet ['name'] );
+	echo '</a>';
+
+	echo '</li>';
+
+    if ($authorsCount >= $authorsPerColumn) {
+        echo '</ul>';
+        echo '</div>';
+        $authorsCount = 0;
+    } else {
+        $authorsCount++;
+    }
+}
+
+?>
+</ul>
+
+<?php if (count($this->facets) >= Ccsd_Search_Solr::SOLR_MAX_RETURNED_FACETS_RESULTS): ?>
+<div class="alert alert-info" role="alert">
+<?php echo $this->translate('Affichage limité aux ') . Ccsd_Search_Solr::SOLR_MAX_RETURNED_FACETS_RESULTS . $this->translate(' premières réponses.'); ?>
+</div>
+<?php endif; ?>
+	</div>
+</div>

@@ -1,0 +1,15 @@
+*~
+*.save
+*.new
+*.old
+\#*
+CAS
+CAS.php
+Ccsd
+pdfbox
+public
+scripts
+Solarium
+ZendX
+Zend
+Symfony

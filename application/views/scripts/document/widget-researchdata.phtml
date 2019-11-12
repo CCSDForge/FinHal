@@ -1,0 +1,30 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bblondelle
+ * Date: 10/01/19
+ * Time: 14:27
+ */
+?>
+<?php
+$content = '';
+/** @var Hal_Document $doc */
+$doc = $this->document;
+/** @var Hal_Document_Meta_Researchdatagroup $researchdata */
+$researchdatagroup = $doc->getMetaObj('researchdata');
+/** TODO : Afficher la Citation sous la forme Titre, Date, Publisher, Doi */
+foreach ($researchdatagroup -> getValuesObj() as $researchdata) {
+    /** @var Hal_ResearchData $researchdataObj */
+    $content .=  $researchdata->getCitation();
+}
+if ($content !=  '' ) {
+    ?>
+<div class="widget widget-researchdata">
+    <h3 class="widget-header"><?php echo $this->translate('Données de recherche') ?></h3>
+    <div class="widget-content">
+        <span>
+            <? echo $content; ?>
+        </span>
+    </div>
+</div>
+<?php } ?>

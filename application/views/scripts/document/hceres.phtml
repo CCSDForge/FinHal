@@ -1,0 +1,212 @@
+<?php
+/**
+ * Vue par défaut d'un document
+ * @var Hal_View $this
+ */
+if (! (isset($this->document) && $this->document instanceof Hal_Document) ) {
+    exit();
+}
+?>
+
+<div class="row" id="document">
+    <div class="col-md-8">
+        <?php // Identifiant de l'article  ?>
+        <?php if ($this->document->getId()) { ?>
+            <div class="btn-group dropdown">
+                <button type="button" class="btn btn-danger"><?php echo $this->document->getId(); ?>, <?php echo $this->translate('version') . ' ' . $this->document->getVersion(); ?></button>
+                <?php if (is_array($this->document->getDocVersions()) && count($this->document->getDocVersions()) > 1) {
+                    if (MODULE != SPACE_COLLECTION) {
+                        $url = PREFIX_URL;
+                    } else {
+                        $site = Hal_Site::getCurrentPortail();
+                        $url  = $site->getUrl() .'/';
+                    }?>
+                    <?php // liens vers les autres versions  ?>
+                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu pull-right" style="margin:0" role="menu">
+                        <?php
+                        foreach ($this->document->getDocVersions() as $version) {
+                            if ($version['VERSION'] == $this->document->getVersion()) { continue; }
+                            if ($version['DOCSTATUS'] != 11 && $version['DOCSTATUS'] != 111) {
+                                if (!Hal_Document_Acl::canView($this->document)) {
+                                    continue;
+                                } else {
+                                    ?>
+                                    <li title="<?php echo $this->document->statusToString($version['DOCSTATUS']);?>"><a style="font-style:italic; color: grey;" href="<?php echo $url . $this->document->getId() . 'v' . $version['VERSION'] ?>"><?php echo $this->translate('version') . ' ' . $version['VERSION']; ?></a>
+                                    </li>
+                                    <?php
+                                }
+                            } else {
+                                ?>
+                                <li><a href="<?php echo $url . $this->document->getId() . 'v' . $version['VERSION'] ?>"><?php echo $this->translate('version') . ' ' . $version['VERSION']; ?></a></li>
+                                <?php
+                            }
+                        } ?>
+                    </ul>
+                    <?php
+                } ?>
+            </div>
+        <?php }
+        // Titre : Sous titre du document
+        $file = $this->document->getDefaultFile();
+        ?>
+        <h1 class="title"><?php echo $this->document->getMainTitle(); ?></h1>
+        <h3><?php  echo $this->translate('hceresCampagne_' . $this->document->getMeta('hceres_campagne_local')); ?></h3>
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            <?php if ($file !== false) { ?>
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            <i class="glyphicon glyphicon-eye-open"></i>&nbsp;<?php echo $this->translate('Aperçu') ?>
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                    <iframe width="100%" height="500px" src="<?php echo $this->document->getUri(true).$this->document->getUrlMainFile();?>"></iframe>
+                </div>
+            </div>
+            <?php } ?>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div style="background:#f7f7f7;padding:10px;border:1px solid #dee0e2;margin-top:50px;">
+	    <div><?php echo $this->translate('Type de rapport') ?></div>
+            <div style="margin-left:20px;margin-bottom:20px;">
+                <div class="<?php echo Hal_Settings::getLabelClassName($this->document->getTypdoc()); ?>"><?php echo $this->translate('typdoc_' . $this->document->getTypdoc()); ?></div>
+            </div>
+            <?php
+            $metasList = Hal_Referentiels_Metadata::metaList();
+            // Ajout de ces 2 metas à la liste car elles sont définies dans un thesaurus
+            // et nécessitent un traitement particulier pour leur traduction
+            $metasList[] = 'domhceres';
+            $metasList[] = 'erc';
+            $meta = 'hceres_campagne_local';
+            $metaList = 'hceresCampagne';
+            $value = $this->document->getMeta($meta);
+            if ($value != '' && $value != array()) { ?>
+            <div>
+                <?php echo $this->translate($metaList); ?>
+            </div>
+            <div style="margin-left:20px;margin-bottom:20px;">
+                <strong>
+                    <?php
+                    if (!is_array($value)) {
+                        $value = [$value];
+                    }
+                    foreach ($value as $i => $v) {
+                        if (is_string($v)) {
+                            if (in_array($metaList, $metasList)) {
+                                echo $this->translate(Hal_Referentiels_Metadata::getLabel($metaList, $v));
+                            } else {
+                                echo $this->translate($v);
+                            }
+                        } else {
+                            echo $v;
+                        }
+                        if (count($value) > 1) {
+                            echo '<br />';
+                        }
+                    }
+                    //}?>
+                </strong>
+            </div>
+            <?php } ?>
+            <div><?php echo $this->translate('Date de publication') ?></div>
+	        <div style="margin-left:20px;margin-bottom:20px;"><strong><?php echo $this->document->getMeta('date'); ?></strong></div>
+	    <?php
+
+        if (in_array($this->document->getTypdoc(), ['REPORT_ETAB', 'REPORT_COOR']) && (($etab = $this->document->getMeta('hceres_entite_local')) instanceof Ccsd_Referentiels_Hceres) ) { ?>
+		<div><?php echo $this->translate('Etablissement') ?></div>
+                <div style="margin-left:20px;margin-bottom:20px;"><strong><?php echo $etab->NOM;?></strong></div>
+	    <?php }  ?>
+
+	    <?php
+        $etablissements = [];
+        if (($group = $this->document->getHalMeta()->getHalMeta('hceres_etabsupport_local')) instanceof Hal_Document_Meta_Hceresentitygroup) {
+            foreach($group->getValue() as $etab) {
+                $etablissements = array_merge([$etab->NOM], $etablissements);
+            }
+        }
+        asort($etablissements);
+        if (count($etablissements)) {
+		?>
+		<div><?php echo $this->translate('Etablissement(s)') ?></div>
+            	<div style="margin-left:20px;margin-bottom:20px;"><strong><?php echo implode(', ', $etablissements);?></strong></div>
+		<?php
+	    } ?>
+
+	    <?php
+	    $metastoDisplay = ['hceres_domsci_local' => 'hceresDomSci',
+                           'hceres_domapp_local' => 'hceresDomApp',
+                           //'hceres_campagne_local' => 'hceresCampagne',
+                           'hceres_dom_local' => 'domhceres',
+                           'hceres_erc_local' => 'erc',
+                           'hceres_specialities_local' => 'hceresrSpecialities',
+                           'hceres_domform_local' => 'hceresDomForm',
+                           'hceres_mention_local' => 'hceresMention',
+                           'hceres_labo_local' => 'hceresLabo',
+                           'hceres_team_local' => 'hceresTeam',
+                           'hceres_diplome_local' => 'hceresDiplome',
+                           'hceres_formeval_local' => 'hceresFormeval',
+                           'hceres_formprop_local' => 'hceresFormprop'
+            ];
+
+        foreach ($metastoDisplay as $meta => $metaList ) {
+            $value = $this->document->getMeta($meta);
+            if ($value != '' && $value != array()) {
+                ?>
+                <div><?php echo $this->translate($metaList); ?></div>
+                <div style="margin-left:20px;margin-bottom:20px;">
+                    <strong>
+                        <?php
+                        //if ($value != '') {
+                        if (!is_array($value)) {
+                            $value = [$value];
+                        }
+                        foreach ($value as $i => $v) {
+                            if (is_string($v)) {
+                                if (in_array($metaList, $metasList)) {
+                                    echo $this->translate(Hal_Referentiels_Metadata::getLabel($metaList, $v));
+                                } else {
+                                    echo $this->translate($v);
+                                }
+                            } else {
+                                echo $v;
+                            }
+                            if (count($value) > 1) {
+                                echo '<br />';
+                            }
+                        }
+                        //}?>
+                    </strong>
+                </div>
+                <?php
+            }
+        }
+        ?>
+            <?php $keywords = $this->document->getKeywords(); ?>
+            <?php if (count($keywords)) {
+                ?>
+                <div><?php echo $this->translate('keyword') ?></div>
+                <div style="margin-left:20px;margin-bottom:20px;">
+                    <?php foreach ($keywords as $kwords) {
+                        foreach ($kwords as $keyword) {
+                            ?>
+                            <a rel="nofollow"
+                               href="<?php echo PREFIX_URL ?>search/index/q/*/keyword_t/<?php echo $keyword; ?>/"
+                               target="_blank" class="btn btn-default btn-xs"><?php echo $keyword ?></a>
+                            <?php
+                        }
+                    } ?>
+                </div>
+            <?php } ?>
+
+            <div><?php echo $this->translate('Langue de rédaction du rapport') ?></div>
+            <div style="margin-left:20px;margin-bottom:20px;"><strong><?php echo $this->translate($this->document->getMeta('language')); ?></strong></div>
+        </div>
+        <?php include 'widget-share.phtml'; ?>
+    </div>
+</div>

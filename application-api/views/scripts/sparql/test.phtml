@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html lang="en">
+<head>
+    <title>Page de test pour Hal SparQl</title>
+    <script src="<?php echo CCSDLIB . '/js/d3.min.js' ?>"></script>
+    <script src="<?php echo CCSDLIB . '/js/d3sparql.js' ?>"></script>
+    <script>
+        myjson = '{ "head": { "link": [], "vars": ["g"] },"results": { "distinct": false, "ordered": true, "bindings": [{ "g": { "type": "uri", "value": "http://www.openlinksw.com/schemas/virtrdf#" }},{ "g": { "type": "uri", "value": "http://localhost:8890/sparql" }},{ "g": { "type": "uri", "value": "http://localhost:8890/DAV/" }},{ "g": { "type": "uri", "value": "http://www.w3.org/2002/07/owl#" }},{ "g": { "type": "uri", "value": "https://aurehal.archives-ouvertes.fr/revue" }},{ "g": { "type": "uri", "value": "https://aurehal.archives-ouvertes.fr/subject" }},{ "g": { "type": "uri", "value": "https://aurehal.archives-ouvertes.fr/anrproject" }},{ "g": { "type": "uri", "value": "https://aurehal.archives-ouvertes.fr/author" }},{ "g": { "type": "uri", "value": "https://aurehal.archives-ouvertes.fr/europeanproject" }},{ "g": { "type": "uri", "value": "https://aurehal.archives-ouvertes.fr/journal" }},{ "g": { "type": "uri", "value": "https://aurehal.archives-ouvertes.fr/structure" }} ] } }';
+
+            d3json =  JSON.parse( myjson );
+        function exec() {
+            var endpoint = 'http://api-local.ccsd.cnrs.fr/sparql';
+            var sparql = 'select distinct * where {<https://aurehal.archives-ouvertes.fr/subject/shs> ?c ?p}';
+            d3sparql.query(endpoint, sparql, render)
+        }
+        function render(json) {
+            var config = {
+                "charge": -500,
+                "distance": 50,
+                "width": 1000,
+                "height": 750,
+                "selector": "#result"
+            };
+            d3sparql.forcegraph(json, config)
+        }
+    </script>
+    <!-- customize CSS -->
+    <style>
+
+    </style>
+</head>
+<body onload="render(d3json)">
+<div id="result"></div>
+</body>
+</html>

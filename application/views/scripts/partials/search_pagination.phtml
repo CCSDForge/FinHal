@@ -1,0 +1,85 @@
+<!-- Pagination -->
+
+<?php ?>
+
+<?php if ($this->pageCount > 1): ?>
+<ul class="pagination pagination-sm">
+
+<!-- first -->
+<?php
+    if ($this->first != $this->current) :
+        $pageUrlParam['page'] = $this->first;
+        $urlParams = array_merge($this->parsedSearchParams, $pageUrlParam);
+        ?>
+  <li><a href="<?php echo $this->escape($this->searchUrl($urlParams, null, true, true, $this->searchType)); ?>"><span class="glyphicon glyphicon-fast-backward"></span></a></li>
+<?php endif; ?>
+<!-- // first -->
+
+
+
+
+
+	<!-- Previous page link -->
+<?php
+
+    if (isset($this->previous)) :
+    unset ($urlParams);
+
+        $pageUrlParam['page'] = $this->previous;
+
+        $urlParams = array_merge($this->parsedSearchParams, $pageUrlParam);
+
+        ?>
+
+  <li><a
+		href="<?php echo $this->escape($this->searchUrl($urlParams, null, true, true, $this->searchType)); ?>"><span class="glyphicon glyphicon-step-backward"></span></a></li>
+
+<?php endif; ?>
+
+<!-- Numbered page links -->
+<?php foreach ($this->pagesInRange as $page): ?>
+  <?php
+
+        if ($page != $this->current) :
+            unset($urlParams);
+
+            $pageUrlParam['page'] = $page;
+            $urlParams = array_merge($this->parsedSearchParams, $pageUrlParam);
+            ?>
+    <li><a
+		href="<?php echo  $this->escape($this->searchUrl($urlParams, null, true, true, $this->searchType)); ?>"><?php echo $this->escape($page); ?></a></li>
+  <?php else: ?>
+    <li class="active"><span><?php echo $this->escape($page); ?></span></li>
+  <?php endif; ?>
+<?php endforeach; ?>
+
+<!-- Next page link -->
+<?php
+
+    if (isset($this->next)) :
+        unset($urlParams);
+        $pageUrlParam['page'] = $this->next;
+        $urlParams = array_merge($this->parsedSearchParams, $pageUrlParam);
+        ?>
+  <li><a
+		href="<?php echo $this->escape($this->searchUrl($urlParams, null, true, true, $this->searchType)); ?>"><span class="glyphicon glyphicon-step-forward"></span></a></li>
+
+<?php endif; ?>
+
+<!-- last -->
+<?php
+    if ($this->last != $this->current) :
+        $pageUrlParam['page'] = $this->last;
+        $urlParams = array_merge($this->parsedSearchParams, $pageUrlParam);
+        ?>
+  <li><a href="<?php echo $this->escape($this->searchUrl($urlParams, null, true, true, $this->searchType)); ?>"><span class="glyphicon glyphicon-fast-forward"></span></a></li>
+<?php endif; ?>
+<!-- // last -->
+
+</ul>
+<?php endif; ?>
+
+
+
+
+<!-- // Pagination -->

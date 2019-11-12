@@ -1,0 +1,73 @@
+#! /bin/sh
+usage="$0 
+  -v  : verbose
+  -d  : debug
+"
+# A lancer sur la machine de sauvegarde desw DB (ou machine de DB)
+
+dbBackupDir=/data/mysql-backup/dbname4
+
+hostdbstat=dbname1
+portdbstat=3306
+
+DBSTATOPTS="-h $hostdbstat -P $portdbstat -p"
+DBSTAT=hal_stat
+
+verb=1      # Verbosity
+debug=0     # no debug
+
+while getopts "vdh" opt; do
+  case $opt in
+      v) verb=1
+	 ;;
+      d) debug=1;debugcmd=echo
+	 ;;
+      h) echo "$usage"
+	 exit 0;;
+      \?)  echo "Invalid option: -$OPTARG" >&2
+	   exit 1
+	   ;;
+  esac
+done
+
+
+verb() {
+    local echoopt=''
+    if [ "$1" == "-n" ] ; then
+	echoopt=-n
+	shift
+    fi
+    [ $verb -eq 1 ] && echo $echoopt "$1"
+}
+
+export debug
+debug() {
+    local echoopt=''
+    if [ "$1" == "-n" ] ; then
+	echoopt=-n
+	shift
+    fi
+    [ $debug -eq 1 ] && echo $echoopt "$1"
+}
+
+	 
+[ -d $dbBackupDir ] || {
+    echo "Vous devez etre sur une machine ayant $dbBackupDir";
+    exit 1;
+    }
+
+loadMysql() {
+    echo "DEBUG=$debug"
+    # Pour les ecritures Mysql, en debug, elles ne sont pas effectuees
+    # $1 fichier sql
+    case $debug in
+	1) debug "mysql $DBSTATOPTS $DBSTAT < $1.sql" ;;
+	0) mysql $DBSTATOPTS $DBSTAT < $1.sql;;
+    esac
+}
+
+
+cd $dbBackupDir/HALV3
+
+loadMysql  "DOCUMENT"
+

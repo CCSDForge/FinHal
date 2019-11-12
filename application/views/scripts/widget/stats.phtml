@@ -1,0 +1,23 @@
+<?php $id = 'graph-' . rand(0,1000); ?>
+
+    <div id="<?php echo $id ?>" style="width:300px;" class="text-center"></div>
+
+<?php
+
+if ($this->data) {
+    $i = 0;
+    $graphData = array();
+    foreach ($this->data as $key => $row) {
+        $i++;
+
+        if ($key === '') continue;
+
+        if (!is_array($row)) {
+            $row = array((string)$key, ($i==1) ? (string)$row : (int)$row);
+        }
+        $graphData[] = $row;
+    }
+    echo $this->chart(array('container' => $id, 'content' => $graphData, 'options' => array('legend' => array('position' => 'none'))), $this->chart, true);
+}
+
+

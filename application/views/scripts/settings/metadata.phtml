@@ -1,0 +1,170 @@
+<?php $this->layout()->pageDescription = $this->translate('Gestion des métadonnées de type "liste"')?>
+
+<?php if (count($this->referentials) == 0) {
+
+    echo $this->translate('Pas de métadonnées de type "liste" pour votre portail');
+
+ } else { //référentiels présents
+    $correspMeta = array();
+
+    ?>
+
+    <form action="/settings/metadata" method="post" id="form-meta">
+        <div class="form-actions">
+            <select name="metaname" id="metaname" class="form-control">
+                <option value=""></option>
+                <optgroup label="<?php echo $this->translate('Sélectionnez un référentiel') ?>">
+                    <?php foreach ($this->referentials as $referential) { ?>
+                        <option value="<?php echo $referential ?>"
+                            <?php
+                            if (isset($this->referential) && $this->referential == $referential) {
+                                echo 'selected="selected"';
+                            }
+
+                            $label = $this->translate($referential);
+                            if ($this->displaySid) {
+                                if (! isset($correspMeta[$referential])) {
+                                    $sid = Hal_Referentiels_Metadata::getSid($referential);
+                                    $site = Hal_Site::loadSiteFromId($sid == 0 ? 1 : $sid);
+                                    $correspMeta[$referential] = array(
+                                        'SID'   =>  $sid,
+                                        'SITE'   => $site->getSite(),
+                                    );
+                                }
+                                $label .= ' (' . $correspMeta[$referential]['SITE'] . ' - sid:' . $correspMeta[$referential]['SID'] . ')';
+                            }
+                            ?>
+                            ><?php echo $label ?></option>
+                    <?php } ?>
+                </optgroup>
+            </select>
+        </div>
+    </form>
+    <?php
+    if (isset($this->data)) {
+        ?>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th width="10%"><?php echo $this->translate('Code'); ?></th>
+                    <th ><?php echo $this->translate('Valeur'); ?></th>
+                    <th width="10%" align="right"><?php  echo $this->translate('Action(s)'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($this->data as $key => $value) { ?>
+                    <tr>
+                        <td>
+                        	<?php echo $key ?>
+                        </td>
+                        <td class='value'><?php echo $this->translate($value); ?></td>
+                        <td align="right">
+                        	<a href="javascript:void(0);" onclick="edit_metadata(this, '<?php echo $key ?>');">
+                        		<i class="glyphicon glyphicon-edit"></i>
+                        	</a>
+                        	<a href="javascript:void(0);" onclick="delete_metadata(this, '<?php echo $key ?>');">
+                        		<i class="glyphicon glyphicon-trash"></i>
+                        	</a>
+                        </td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+            <tfoot>
+            	<tr>
+            		<td></td>
+            		<td colspan="2">
+            		<button type='button' class='btn btn-primary' onclick="add_metadata(this);"><?php echo $this->translate("Ajouter des valeurs") ?></button>
+            		</td>
+            	</tr>
+            </tfoot>
+        </table>
+
+        <?php
+    }
+    ?>
+
+    <script type="text/javascript">
+
+		function delete_metadata (e, value)
+		{
+			$.ajax({
+				url : "/settings/metadata/method/delete/metaname/" + $(e).closest('.corps').find('#metaname').val() + "/value/" + value,
+				type : "GET",
+				async : false,
+				success : function (msg) {
+					if (msg == '1') {
+                        $(e).closest('tr').remove();
+                    } else {
+                        message("<?php echo $this->translate('Cette valeur ne peut être supprimée car elle est associée à des dépôts')?>", 'alert-danger')
+                    }
+				}
+			});
+		}
+
+		function edit_metadata(e, value)
+		{
+			$.ajax({
+				url : "/settings/metadata/method/edit/metaname/" + $(e).closest('.corps').find('#metaname').val() + "/value/" + value,
+				type : "GET",
+				async : false,
+				success : function (msg) {
+					$(e).closest('tr').find('.value').html(msg);
+					$(e).closest('tr').find('.value').find('button:last').attr('type', 'button');  
+					$(e).closest('tr').find('.value').find('button:last').click(function () {
+						post_edit_metadata(e, value, $(this).closest('form').serializeArray()); 
+					});
+				}
+			});
+		}
+
+		function post_edit_metadata(e, value, data)
+		{
+			$.ajax({
+				url : "/settings/metadata/method/edit/metaname/" + $(e).closest('.corps').find('#metaname').val() + "/value/" + value,
+				type : "POST",
+				data : data,
+				async : false,
+				success : function (msg) {
+					$(e).closest('tr').find('.value').html(msg);
+				}
+			});
+		}
+
+		function add_metadata (e)
+		{
+			$.ajax({
+				url : "/settings/metadata/method/add/metaname/" + $(e).closest('.corps').find('#metaname').val(),
+				type : "GET",
+				async : false,
+				success : function (msg) {
+                    $("<tr><td></td><td colspan='2'>" + msg + "</td></tr>").insertAfter($(e).closest('table').find('tbody tr:last'));
+					$(e).closest('table').find('tbody tr:last button:last').attr('type', 'button');
+					$(e).closest('table').find('tbody tr:last button:last').click(function () {
+						post_add_metadata(this, $(this).closest('form').serializeArray()); 
+					});
+					$(e).closest('tfoot').hide();
+				}
+			});
+		}
+
+		function post_add_metadata (e, data)
+		{
+			$.ajax({
+				url : "/settings/metadata/method/add/metaname/" + $(e).closest('.corps').find('#metaname').val(),
+				type : "POST",
+				data : data,
+				async : false,
+				success : function (msg) {
+					$(e).closest('table').find('tfoot').show();
+					$(e).closest('tr').html(msg);
+				}
+			});
+		}
+    
+        $('#metaname').change(function() {
+            $('#form-meta').submit();
+        });
+
+    </script>
+
+<?php } ?>

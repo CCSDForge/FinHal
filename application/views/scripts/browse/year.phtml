@@ -1,0 +1,80 @@
+<?php
+/** @var Hal_View $this */
+?>
+<div class="row">
+	<div class="col-md-7">
+		<ul class="list-group">
+            <?php
+            $searchParams['controller'] = 'search';
+            $searchParams['action'] = 'index';
+            $searchParams['q'] = 'producedDateY_i:[' . $this->rangeLastYear . ' TO *]';
+
+            $url = $this->url($searchParams, null, TRUE);
+
+            echo '<li class="list-group-item">';
+            echo '<a rel="nofollow" href="' . $url . '">';
+            echo $this->translate('Publications à venir');
+            echo '</a>';
+
+            echo '<a rel="nofollow" href="' . $this->escape($url) . '" class="btn btn-default btn-xs pull-right">' . $this->yearsAfter . '</a>';
+
+            echo '</li>';
+
+
+            // uniquement pour trier les années en ordre inverse
+            foreach ($this->yearArray as $year => $count) {
+                $yearsToSort[$year] = $count;
+            }
+            krsort($yearsToSort);
+            // uniquement pour trier les années en ordre inverse
+
+            foreach ($yearsToSort as $year => $count) {
+
+                if ($count != 0) {
+                    $endOfRange = $year + $this->rangeOffset;
+
+                    $searchParams['q'] = 'producedDateY_i:[' . $year . ' TO ' . $endOfRange . ']';
+
+                    $url = $this->url($searchParams, null, TRUE);
+                    echo '<li class="list-group-item">';
+
+
+                    echo '<a rel="nofollow" href="' . $url . '">';
+                    echo $this->escape($year);
+
+                    echo $this->translate(' à ');
+
+                    if ($endOfRange > date('Y')) {
+                        echo $this->translate("aujourd'hui");
+                    } else {
+                        echo $endOfRange;
+                    }
+                    echo '</a>';
+
+
+                    echo '<a rel="nofollow" href="' . $this->escape($url) . '" class="btn btn-default btn-xs pull-right">' . $count . '</a>';
+
+
+                    echo '</li>';
+                }
+            }
+            $searchParams['q'] = 'producedDateY_i:[* TO ' . $this->rangeFirstYear . ']';
+
+            $url = $this->url($searchParams, null, TRUE);
+
+            echo '<li class="list-group-item">';
+            echo '<a rel="nofollow" href="' . $url . '">';
+            echo $this->translate('Avant');
+            echo '&nbsp;';
+            echo $this->escape($this->rangeFirstYear);
+            echo '</a>';
+
+            echo '<a rel="nofollow" href="' . $this->escape($url) . '" class="btn btn-default btn-xs pull-right">' . $this->yearsBefore . '</a>';
+
+            echo '</li>';
+
+
+            ?>
+        </ul>
+	</div>
+</div>

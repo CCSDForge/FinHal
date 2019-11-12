@@ -1,0 +1,15 @@
+<?php
+$this->layout()->pageTitle = $this->translate("Connexion");
+
+if ($this->form) {
+	$this->layout()->pageDescription = $this->translate("Saisissez votre nom de connexion et votre mot de passe.");
+    echo $this->form;
+} else {
+	echo $this->DisplayFlashMessages('success', false);
+}
+
+
+
+
+
+

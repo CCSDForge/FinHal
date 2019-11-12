@@ -1,0 +1,72 @@
+<div id="error-zone-recap" class="alert alert-danger fade in" role="alert" style="<?php if (empty($this->error)) { echo "display:none;";}?>">
+    <?php echo $this->translate($this->error); ?>
+</div>
+<form action="<?php echo SubmitController::SUBMIT_PREFIXURL; ?>submitsteprecap" method="post" enctype="multipart/form-data" id="form_recap" name="form_recap" onsubmit="return submitRecap();">
+
+    <?php if (!empty($this->doublonID) && $this->type == Hal_Settings::SUBMIT_INIT) { ?>
+        <div id="doublon-msg" class="alert alert-danger" role="alert">
+            <h4><i class="glyphicon glyphicon-alert"></i> <?php echo $this->translate("Ce document est peut-être déjà présent dans HAL."); ?></h4>
+            <a href=<?php echo PREFIX_URL.$this->translate($this->doublonID); ?> target="_blank"><?php echo $this->doublonCit; ?></a>
+        </div>
+    <?php  } ?>
+
+    <?php if ($this->valid) { ?>
+        <div id="recap-citation" class="alert alert-success" role="alert">
+            <h4><i class="glyphicon glyphicon-alert"></i> <?php echo $this->translate($this->typdocLabel);?></h4>
+            <?php echo $this->citation; ?>
+        </div>
+    <?php } ?>
+
+    <!-- Transfert ARXIV -->
+    <?php if ($this->valid &&  $this->submitArxiv) {
+        include __DIR__ . "/submit-arxiv.phtml";
+    } ?>
+
+    <!-- Transfert PMC -->
+    <?php if ($this->valid && $this->submitPMC) {
+        include __DIR__ . "/submit-pmc.phtml";
+    } ?>
+
+    <!-- Transfert Software Heritage -->
+    <?php if ($this->valid && $this->submitSWH) {
+        include __DIR__ . "/submit-swh.phtml";
+    } ?>
+
+    <!-- Possibilité d'envoyer un message au modérateur -->
+    <?php if (!empty($this->moderationMsg)) {
+        include __DIR__ . "/moderation-msg.phtml";
+    }?>
+
+    <!-- Conditions de dépot -->
+    <?php if ($this->valid && (($this->type == Hal_Settings::SUBMIT_INIT && $this->format != Hal_Document::FORMAT_NOTICE) || ($this->type == Hal_Settings::SUBMIT_ADDFILE && $this->docstatus == Hal_Document::STATUS_VISIBLE))) { ?>
+    <div id="recap-conditions" class="alert alert-warning margin-20">
+        <h4><?php echo $this->translate('Conditions'); ?></h4>
+        <hr />
+        <p>
+        <?php if (isset($this->cgu)) {
+            echo $this->cgu;
+        } else { ?>
+        <?php echo $this->translate("En déposant ce document, le contributeur (je) accorde la licence suivante à HAL :") ?>
+        <ul>
+            <li><?php echo $this->translate("J'autorise HAL à mettre en ligne et à distribuer cet article ;"); ?></li>
+            <li><?php echo $this->translate("Je reconnais avoir pris connaissance que les dépôts ne peuvent pas être supprimés, une fois acceptés ;"); ?></li>
+            <li><?php echo $this->translate("Je comprends que HAL se réserve le droit de reclasser ou de rejeter tout dépôt."); ?></li>
+        </ul>
+        <?php } ?>
+        <br />
+        <input type="checkbox" name="accept_licence" id="accept_licence" value="1" required="required" oninvalid="this.setCustomValidity('<?php echo $this->translate('Veuillez cocher cette case si vous souhaitez continuer.');?>')" onchange="this.setCustomValidity('')">
+        <label for="accept_licence"><?php echo $this->translate("J'accepte ces conditions"); ?></label>
+        </p>
+    </div>
+    <?php } ?>
+    <div id="recap-buttons" class="form-actions text-center">
+        <a href="/submit/reset"><button type="button" class="btn btn-default btn-sm"><?php echo $this->translate("Annuler")?></button></a>
+
+        <?php if ($this->valid) { ?>
+            <button type="submit" id="submit-button" class="btn btn-primary btn-lg" ><i class="glyphicon glyphicon-save"></i><?php echo $this->translate($this->btnLabel);?></button>
+        <?php } ?>
+    </div>
+</form>
+
+
+

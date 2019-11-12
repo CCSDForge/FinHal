@@ -1,0 +1,49 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yannick
+ * Date: 26/09/2014
+ * Time: 09:42
+ *
+ * $this->document doit exister et etre un objet Hal_Document
+ *
+ */
+
+?>
+<div class="widget widget-share">
+    <h3 class="widget-header"><?php echo $this->translate('Partager') ?></h3>
+    <div class="widget-content" >
+        <?php if ($this->document->getTypDoc() == 'IMG') { ?>
+            <div style="margin-bottom:20px;">
+                <div class="input-group">
+                    <span class="input-group-addon" id="basic-addon1"><?php echo $this->translate('Lien'); ?></span>
+                    <input type="text" class="form-control" value="<?php echo $this->document->getUri(true)?>/thumb" aria-describedby="basic-addon1">
+                </div>
+            </div>
+        <?php } else if ($this->document->getTypDoc() == 'VIDEO') { ?>
+            <div class="row" style="margin-bottom:20px;">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon" id="basic-addon1"><?php echo $this->translate('Lien'); ?></span>
+                        <input type="text" class="form-control" value="<?php echo $this->document->getUri(true)?>" aria-describedby="basic-addon1">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon" id="basic-addon1"><?php echo $this->translate('Intégrer la vidéo'); ?></span>
+                        <input type="text" class="form-control" value='<iframe src="<?php echo $this->document->getUri(true)?>/player" width="600" height="350" frameborder="0" style="border:0"></iframe>' aria-describedby="basic-addon1">
+                    </div>
+                </div>
+            </div>
+        <?php } ?>
+        <!-- AddToAny BEGIN -->
+        <div class="a2a_kit a2a_kit_size_32 a2a_default_style">
+            <a class="a2a_button_facebook"></a>
+            <a class="a2a_button_twitter"></a>
+            <a class="a2a_button_email"></a>
+            <a class="a2a_dd" href="https://www.addtoany.com/share"></a>
+        </div>
+        <script async src="https://static.addtoany.com/menu/page.js"></script>
+        <!-- AddToAny END -->
+    </div>
+</div>

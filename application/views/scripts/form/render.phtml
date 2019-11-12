@@ -1,0 +1,65 @@
+<form action="<?php echo $this->escape($this->element->getAction()) ?>"
+    enctype="<?php echo $this->escape($this->element->getEnctype()) ?>"
+    method="<?php echo $this->escape($this->element->getMethod()) ?>" 
+    <?php 
+          foreach ($this->element->getAttribs() as $name => $value) { 
+              echo " " . $name. '="' . $this->escape($value) . '" ';
+          } 
+    ?>
+    >
+    <dl class="dl-horizontal">
+    <?php foreach($this->element as $element){ 
+        if($element->getType() == 'Zend_Form_Element_Hidden') {
+            $element->removeDecorator( 'HtmlTag' );
+            $element->removeDecorator( 'Label' );
+            $element->removeDecorator( 'Description' );
+            $element->removeDecorator( 'Error' );
+            echo $this->{$element->helper}(
+                            $element->getName(),
+                            $element->getValue(),
+                            $element->getAttribs());
+ 
+        } else if ($element->getType() == 'Zend_Form_Element_Hash') {
+            echo $element;
+        } else if ($element->getType() == 'Zend_Form_Element_Submit'){
+            if ($element->getValue() != '') {
+            	$element->setLabel($element->getValue());
+            }
+            ?>
+            <dt></dt>
+            <dd><?php echo $element;?></dd>
+            <?php	
+        } else {   	
+		    if ($element->getLabel() != '') {?>
+		        <dt class="middle"><?php echo $this->translate($element->getLabel()); echo $element->isRequired()? "&nbsp;*" : ""?></dt>
+		    <?php }?>		    
+		    <dd>
+    		    <?php if($element->getDescription() && $element->getDescription() != '' ) {?>
+		            <p class="muted"><?php echo $this->translate($element->getDescription()) ?></p>
+		        <?php } ?>
+    		    
+    		    <!--  CODE RETOUR d'erreur -->
+    		    <?php if ( $element->getErrors()) { ?>
+    		        <p class="text-error">
+    		        <?php foreach ($element->getMessages() as $message) { ?>
+    		            -&nbsp;<?php echo $message; ?><br />
+    		        <?php }?>
+    		        </p>
+    		    <?php } ?>
+		    		    
+    		    <!-- CHAMP de formulaire -->
+    		    <?php
+    		    $element->setAttrib('class', $element->getAttrib('class') . ' texte_trebuchet_12_normal_grisfonce form_input');
+    		    echo $this->{$element->helper}(
+    		                    $element->getName(),
+    		                    in_array($element->getType(), array('Zend_Form_Element_Submit', 'Zend_Form_Element_Button')) ? $this->translate($element->getValue()) : $element->getValue(),
+    		                    $element->getAttribs(),
+    		                    (method_exists($element,'getMultiOptions')) ? $element->getMultiOptions() : array());
+    		    ?>
+		    </dd>
+		    <?php 
+        } //endif  
+    } //endforeach 
+    ?>
+    </dl>
+</form>

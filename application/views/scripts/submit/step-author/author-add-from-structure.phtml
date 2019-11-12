@@ -1,0 +1,80 @@
+<?php
+/** @var Hal_View $this */
+$form = new Ccsd_Form();
+$form->addElement('text', 'authors-from-struct-search', array(
+    'label'	=>	"Rechercher une structure"));
+$form->removeDecorator('Form');
+?>
+<div class="aut_new" attr-popoverid="aut_new">
+	<?php echo $form ?>
+    <div id="struct-info"></div>
+    <input type="hidden" id="authors-from-structid" value="" />
+    <div id="authors-from-struct" class="authors-list">
+    </div>
+    <div class="text-center">
+        <input type="button" onclick="addAuthorsFromStruct()" value="<?php echo $this->translate('Ajouter les auteurs sélectionnés') ?>" class="btn btn-primary btn-add-auth" />
+    </div>
+</div>
+<script type="text/javascript">
+    <!--
+        $(function() {
+            $('.btn-add-auth').hide();
+            $("#authorsfromstructsearch").focus();
+            $('#authorsfromstructsearch').autocomplete({
+                minLength: 2,
+                html: true,
+                source: function(request, response){
+                    $.ajax({
+                        url: "/ajax/ajaxsearchstructure",
+                        dataType: "json",
+                        data: {term: request.term},
+                        success: function(data) {
+                            console.log(data);
+                            response($.map(data.response.docs, function(item) {
+                                return {id: item.docid, label: item.label_html}
+                            }));
+                        }
+                    });
+                },
+                select: function( event, ui ) {
+                    $('#struct-info').html(ui.item.label);
+                    $('#authors-from-structid').val(ui.item.id);
+                    $('#authors-from-struct').html(getLoader(translate('Recherche des auteurs associés en cours...')));
+                    $.ajax({
+                        url: "/submit/ajaxgetauthorsfromstructure",
+                        method: 'post',
+                        data: {structid: ui.item.id},
+                        success: function(data) {
+                            if (data === '') {
+                                $('#authors-from-struct').html(getMessageHtml(translate('Aucun auteur trouvé en association avec cette structure.'), 'alert-danger'));
+                            } else {
+                                $('#authors-from-struct').html(data);
+                                $('.btn-add-auth').show();
+                            }
+                        }
+                    });
+                    return false;
+                }
+            });
+        });
+
+        function addAuthorsFromStruct()
+        {
+            var authorids = [];
+            $('#authors-from-struct input:checkbox[name="authorid"]:checked').each(function() {
+               authorids.push($(this).val());
+            });
+            if (authorids) {
+                popoverDestroy();
+                ajaxrequestsubmit({url: "/submit/ajaxsubmitauthorslist", data: {structid: $('#authors-from-structid').val(), authorids: authorids},
+                    success: function (data) {
+                        $('#aut-struct').html(data.autstruct);
+                    }, dataType: 'json',
+                    error: function(msg) {
+                        $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+                    }
+                });
+            }
+        }
+    //-->
+</script>

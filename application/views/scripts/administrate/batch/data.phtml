@@ -1,0 +1,18 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Valeur</th>
+            <th>Nombre de documents</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($this->data as $value => $nb) { ?>
+            <tr>
+                <td></td>
+                <td><?php echo $value ?></td>
+                <td><?php echo $nb ?></td>
+            </tr>
+        <?php } ?>
+    </tbody>
+</table>

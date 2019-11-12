@@ -1,0 +1,176 @@
+<?php $this->jQuery()->addJavascriptFile(CCSDLIB ."/js/tinymce/jquery.tinymce.min.js")
+    ->addJavascriptFile(CCSDLIB ."/js/tinymce/tinymce.min.js")
+    ->addJavascriptFile(CCSDLIB ."/js/tinymce_patch.js"); ?>
+
+<?php if (! $this->cv->exist()) {
+    //L'IdHAL n'existe pas
+    ?>
+    <div class="alert alert-danger">
+        <h4><?php echo $this->translate("IdHAL inexistant");?></h4>
+        <p><?php echo $this->translate("Vous devez créer votre IdHAL avant d'éditer votre page chercheur");?></p>
+        <p>
+            <a class="btn btn-danger" href="/user/idhal"><?php echo $this->translate("Créer l'IdHAL");?></a>
+        </p>
+    </div>
+<?php } else { ?>
+    <style>
+        .label-unselected, .label-selected{
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            color: #666666;
+            font-weight: normal;
+        }
+        .label-selected{
+            background-color: #f5f5f5;
+        }
+
+    </style>
+
+    <div class="form-actions">
+        <?php if ($this->cv->getUri() != '') {?>
+            <a class="btn btn-default" target="_blank" href="<?php echo CV_URL . '/' .$this->cv->getUri()?>"><i class="glyphicon glyphicon-globe"></i>&nbsp;<?php echo $this->translate('Consulter mon CV'); ?></a>
+        <?php } ?>
+        <button class="btn btn-default" id="delete-cache" onclick="deleteCache()"><i class="glyphicon glyphicon-refresh"></i>&nbsp;<?php echo $this->translate("Rafraîchir le CV");?></button>
+    </div>
+
+    <form class="form" action="/user/cv" method="post" id="cv-form" enctype="multipart/form-data">
+        <input type="hidden" name="idhal" id="idhal" value="<?php echo $this->cv->getIdHal();?>" />
+        <h3><?php echo $this->translate('Mon CV'); ?>
+            <a href="<?php echo PREFIX_URL?>page/mon-cv" target="_blank" data-toggle="tooltip" title="<?php echo $this->translate('Aide'); ?>" alt="<?php echo $this->translate('Aide'); ?>">
+                <small><i class="glyphicon glyphicon-question-sign"></i></small>
+            </a>
+        </h3>
+
+        <?php
+        $this->form->populate($this->cv->toArray());
+        $this->form->removeDecorator('Form');
+        echo $this->form;?>
+
+        <h3><?php echo $this->translate('Types de documents affichés'); ?></h3>
+        <blockquote>
+            <?php echo $this->translate('Cochez les types de documents qui seront affichés dans le CV.'); ?>
+        </blockquote>
+        <?php
+        $typdocs = array();
+        foreach(Hal_Settings::getTypdocs() as $typdoc) {
+            if (isset($typdoc['children']) && is_array($typdoc['children'])) {
+                foreach($typdoc['children'] as $stypdoc) {
+                    $typdocs[] = $stypdoc['id'];
+                }
+            } else {
+                $typdocs[] = $typdoc['id'];
+            }
+        }
+        ?>
+        <h4 id="typdocs">
+            <?php if (count($this->cv->getTypdocs()) > 0) {
+                $class = "label-unselected";
+                $checked = false;
+                foreach($this->cv->getTypdocs() as $typdoc){
+                    ?>
+                    <span class="label label-selected" style="line-height:30px;margin-right:4px;"><i class="glyphicon glyphicon-move"></i>&nbsp;<input type="checkbox" name="typdoc[]" value="<?php echo $typdoc; ?>" checked="checked"/>&nbsp;<?php echo $this->translate('typdoc_' . $typdoc); ?></span>
+                <?php
+                }
+            } else {
+                $class = "label-selected";
+                $checked = true;
+            }
+            $typdocs = array_diff($typdocs, $this->cv->getTypdocs());
+            foreach($typdocs as $typdoc ){ ?>
+                <span class="label <?php echo $class ?>" style="line-height:30px;margin-right:4px;"><i class="glyphicon glyphicon-move"></i>&nbsp;<input type="checkbox" name="typdoc[]" value="<?php echo $typdoc; ?>" <?php echo $checked ? 'checked="checked"' : ''; ?>/>&nbsp;<?php echo $this->translate('typdoc_' . $typdoc); ?></span>
+            <?php } ?>
+        </h4>
+        <h3><?php echo $this->translate('Widgets affichés'); ?></h3>
+        <blockquote>
+            <?php echo $this->translate("Cochez les widgets que vous souhaitez voir apparaitre dans le CV. Les widgets seront affichés dans une colonne à gauche de l'écran."); ?>
+        </blockquote>
+        <?php
+        $widgets = $this->cv->getListWidgets();
+        ?>
+        <h4 id="widgets">
+            <?php
+            $class = "label-unselected";
+            $checked = false;
+            foreach($this->cv->getWidgets() as $widget){
+                ?>
+                <span class="label label-selected" style="line-height:30px;margin-right:4px;" data-toggle="tooltip" title="<?php echo $this->translate('cv_widget_' . $widget . '_desc'); ?>"><i class="glyphicon glyphicon-move"></i>&nbsp;<input type="checkbox" name="widget[]" value="<?php echo $widget; ?>" checked="checked"/>&nbsp;<?php echo $this->translate('cv_widget_' . $widget); ?></span>
+            <?php
+            }
+            $widgets = array_diff($widgets, $this->cv->getWidgets());
+            foreach($widgets as $widget){ ?>
+                <span class="label <?php echo $class ?>" style="line-height:30px;margin-right:4px;" data-toggle="tooltip" title="<?php echo $this->translate('cv_widget_' . $widget . '_desc'); ?>"><i class="glyphicon glyphicon-move"></i>&nbsp;<input type="checkbox" name="widget[]" value="<?php echo $widget; ?>" <?php echo $checked ? 'checked="checked"' : ''; ?>/>&nbsp;<?php echo $this->translate('cv_widget_' . $widget); ?></span>
+            <?php } ?>
+        </h4>
+        <div id="widget-ext">
+            <hr />
+            <?php
+            $form = new Ccsd_Form();
+            $form->addElement('textarea', 'widget_ext', array(
+                'label' =>  'Code HTML du widget extérieur',
+                'rows' =>  '3',
+            ));
+            $form->populate($this->cv->toArray());
+            $form->removeDecorator('Form');
+            echo $form;
+            ?>
+        </div>
+
+        <div class="form-actions">
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary"><?php echo $this->translate('Enregistrer')?></button>
+            </div>
+        </div>
+    </form>
+<?php } ?>
+
+<script type="text/javascript">
+    <!--
+        $(function() {
+            $('input:checkbox').change(function(){
+                if ($(this).is(':checked')) {
+                    $(this).parent().attr('class', 'label label-selected');
+                } else {
+                    $(this).parent().attr('class', 'label label-unselected');
+                }
+            });
+            $('#widgets input:checkbox[value="ext"]').change(function(){
+                if ($(this).is(':checked')) {
+                    $('#widget-ext').show();
+                } else {
+                    $('#widget-ext').hide();
+                }
+            });
+            $('#widgets input:checkbox[value="ext"]').change();
+            $( "#typdocs, #widgets" ).sortable({
+                items: "> span",
+                handle: ".glyphicon-move",
+                placeholder: "ui-state-highlight"
+            });
+
+            __initMCE ('.textarea-group:last textarea', undefined, {
+                theme: "modern",
+                plugins: "link image code fullscreen table emoticons",
+                toolbar1: "bold italic underline | forecolor backcolor | styleselect | undo redo | alignleft aligncenter alignright alignjustify | bullist numlist | link image  | code | fullscreen",
+                menubar: false,
+                extended_valid_elements: "widget[style|data-mce-widget|data-mce-widget-in]",
+                language  : '<?php echo Zend_Registry::get('lang') == 'fr' ? 'fr_FR' : 'en_GB'; ?>'
+            });
+        });
+    //-->
+
+    function deleteCache()
+    {
+        var idhal = $('#idhal').val();
+
+        $.ajax({
+            type: "post",
+            url: "/user/ajaxdeletecache",
+            data: { idhal : idhal},
+            success: function(data){
+                if (data=='true') {
+                    message("<?php echo $this->translate("Le cache a été vidée");?>", 'alert-success');
+                }
+            }
+        });
+    }
+</script>

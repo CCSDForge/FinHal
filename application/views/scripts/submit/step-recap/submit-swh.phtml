@@ -1,0 +1,51 @@
+<?php
+if (!defined('DOSWH') || (DOSWH===true)) {
+    ?>
+    <div id="recap-SH" class="alert alert-text margin-top-5">
+        <h4 class="margin-0">
+            <input type="checkbox" name="swh" id="swh" value="1"
+                   title="<?php echo $this->translate("Choisir le transfert vers SoftwareHeritage"); ?>"
+                <?php
+                if (!empty($this->swhErrors)) {
+                    echo "disabled=\"true\" data-toggle=\"tooltip\" data-original-title=\"Votre dépôt ne remplit pas les conditions de transfert vers Software Heritage\"";
+                } else if ($this->goToSWH) {
+                    echo "checked=\"true\"";
+                } ?>
+            >
+            <label for="softwareheritage" class="margin-0"><img src="/img/softwareheritage.png" height="40px"/></label>
+            <button type="button" onclick="$('#transfertshdetails').toggle()"
+                    class="btn btn-default btn-sm pull-right"><?php echo $this->translate("Voir les conditions pour le transfert"); ?></button>
+        </h4>
+        <div class="collapse" id="transfertshdetails">
+            <hr/>
+            <p>
+                <?php echo $this->translate("swh_descriptif_intro"); ?>
+            </p>
+            <?php echo $this->translate("swh_descriptif_conditions"); ?>
+            <br/>
+            <ul>
+                <li class="<?php if (in_array(Hal_Transfert_SoftwareHeritage::ERROR_FILEFORMAT, $this->swhErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Les fichiers déposés doivent être sous une licence libre."); ?>
+                </li>
+                <li class="<?php if (in_array(Hal_Transfert_SoftwareHeritage::ERROR_EMBARGO, $this->swhErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Les fichiers ne peuvent pas être sous embargo."); ?>
+                </li>
+            </ul>
+            <p>
+                <?php echo $this->translate("swh_descriptif_condition_conclusion"); ?>
+            </p>
+        </div>
+    </div>
+    <?php
+}
+?>
+
+

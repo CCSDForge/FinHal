@@ -1,0 +1,249 @@
+<?php
+/**
+ * Liste des champs des schémas
+ */
+?>
+<div id="table-fields" class="table-responsive">
+	<table class="table table-striped table-hover table-bordered">
+		<thead>
+			<tr>
+				<th><?php echo $this->translate('Nom'); ?></th>
+				<th><?php echo $this->translate('Description'); ?></th>
+				<th><?php echo $this->translate('Exemple'); ?></th>
+				<th><?php echo $this->translate('Type'); ?></th>
+				<th data-toggle="tooltip"
+					title="<?php echo $this->translate('Peut servir à la recherche ou pour générer des facettes'); ?>"><?php echo $this->translate('Indexé'); ?></th>
+				<th data-toggle="tooltip"
+					title="<?php echo $this->translate("La valeur du champ peut servir pour l'affichage"); ?>"><?php echo $this->translate('Stocké'); ?></th>
+				<th data-toggle="tooltip"
+					title="<?php echo $this->translate('Peut contenir plusieurs valeurs'); ?>"><?php echo $this->translate('Multi-valué'); ?></th>
+			</tr>
+		</thead>
+		<tbody>
+
+
+<?php
+
+ksort ( $this->schemaFields );
+foreach ( $this->schemaFields as $field ) {
+
+	if ($field->name != '_version_' && strpos($field->name, 'hceres') === false) {
+
+		?>
+
+<tr id="go_<?php echo $field->name; ?>">
+				<td>
+
+			<?php
+
+		/**
+		 * // XXX
+		 * Génère un tableau avec les chaines à traduire
+		 * $doc[$this->resourceName .
+		 *
+		 * '_' . $field->name] = '';
+		 * $doc[$this->resourceName . '_' . 'sample_'. $field->name] = '';
+		 * exemple à garder pour générer fichiers de traduction PHP des champs
+		 * des référentiels
+		 */
+
+		if (isset ( $field->name )) {
+
+			echo '<code>';
+			echo $field->name;
+			echo '</code>';
+
+			if (isset ( $field->fieldList )) {
+
+				echo '<br>';
+				echo '<small><i>';
+				echo $this->translate ()->getTranslator ()->plural ( 'Génère ce nom de champ : ', 'Génère ces noms de champs : ', count ( $field->fieldList ) );
+
+				echo '</i></small>';
+				echo '<ul>';
+
+				foreach ( $field->fieldList as $generatedField ) {
+                    if (strpos($generatedField, 'hceres') === false) {
+
+                        echo '<li>';
+                        echo '<code>';
+
+                        echo $generatedField;
+
+                        echo '</code>';
+                        echo '</li>';
+
+                    }
+                }
+				echo '</ul>';
+			}
+
+			if ((isset ( $field->uniqueKey )) and ($field->uniqueKey == 1)) {
+				?>
+            &nbsp;<span class="label label-warning"><?php echo $this->translate('clé unique'); ?></span>
+	<?php
+			}
+
+			if ((isset ( $field->required )) and ($field->required == 1)) {
+				?>
+        &nbsp;<span class="label label-info"><?php echo $this->translate('Non vide'); ?></span>
+        	<?php
+			}
+		}
+		?>
+
+			</td>
+				<td>
+					<!--  desc -->
+			<?php
+
+		echo $this->translate ( $this->resourceName . '_' . $field->name );
+
+		if (is_array ( $this->schemaCopyFields )) {
+			if (array_key_exists ( $field->name, $this->schemaCopyFields )) {
+				echo '<br>';
+				echo '<small><i>';
+				echo $this->translate ()->getTranslator ()->plural ( 'Contient une copie de ce champ : ', 'Permet de chercher en même temps dans les champs : ', count ( $this->schemaCopyFields [$field->name] ) );
+
+				echo '</i></small>';
+
+				echo '<ul>';
+				foreach ( $this->schemaCopyFields [$field->name] as $nameOfdestField ) {
+					echo '<li>';
+					echo '<code>';
+					echo '<a href="#go_' . $nameOfdestField . '">';
+					echo $nameOfdestField;
+					echo '</a>';
+					echo '</code>';
+					echo '</li>';
+				}
+				echo '</ul>';
+			}
+		}
+		?>
+			</td>
+				<td>
+					<!-- exemples -->
+					<?php
+
+		$translatedSample = $this->translate ( $this->resourceName . '_' . 'sample_' . $field->name );
+
+		if (($translatedSample != $this->resourceName . '_' . 'sample_' . $field->name) and ($translatedSample != '')) {
+			echo '<code>';
+			echo $translatedSample;
+			echo '</code>';
+			echo '<a class="btn btn-default btn-xs" target="_blank" href="' . $this->apiUrl . '?q=*%3A*&rows=0&wt=xml&indent=true&facet=true&facet.field=' . urlencode ( $field->name ) . '">';
+			echo '<span class="glyphicon glyphicon-plus-sign"></span>&nbsp;';
+			echo $this->translate ( "plus d'exemples..." );
+			echo '</a>';
+		} elseif (is_array ( $field->sample )) {
+			echo '<ul>';
+			foreach ( $field->sample as $sample ) {
+				echo '<li><em>';
+				$sampleTruncated = Ccsd_Tools::truncate ( $this->escape ( $sample ), 30 );
+				$sample = $this->escape ( $sample );
+				if ($sample !== $sampleTruncated) {
+					echo '<a title="' . $sample . '" data-toggle="tooltip" target="_blank" href="' . $this->apiUrl . '?wt=xml&q=' . urlencode ( $field->name ) . ':' . urlencode ( '"' . $sample . '"' ) . '">';
+				} else {
+					echo '<a target="_blank" href="' . $this->apiUrl . '?wt=xml&q=' . urlencode ( $field->name ) . ':' . urlencode ( '"' . $sample . '"' ) . '">';
+				}
+				echo $sampleTruncated;
+				echo '</a>';
+				echo '</em></li>';
+			}
+
+			echo '</ul>';
+			echo '<a class="btn btn-default btn-xs" target="_blank" href="' . $this->apiUrl . '?q=*%3A*&rows=0&wt=xml&indent=true&facet=true&facet.field=' . urlencode ( $field->name ) . '">';
+			echo '<span class="glyphicon glyphicon-plus-sign"></span>&nbsp;';
+			echo $this->translate ( "plus d'exemples..." );
+			echo '</a>';
+		}
+		?>
+
+				</td>
+				<td><?php
+
+		if (isset ( $field->type )) {
+
+			echo $field->type;
+			echo '&nbsp;<small><span class="text-muted">' . $this->translate ( 'type_' . $field->type ) . '</span></small>';
+		}
+		?></td>
+
+		<?php
+		if ((isset ( $field->indexed )) and ($field->indexed == 1)) {
+			?>
+            <td data-toggle="tooltip"
+					title="<?php echo $this->translate('Peut servir à la recherche ou pour générer des facettes'); ?>"
+					class="success"><small><span class="glyphicon glyphicon-search"></span> <?php echo $this->translate('Oui'); ?></small>
+            <?php
+		} else {
+			?>
+
+
+				<td>
+
+            <?php
+		}
+		?></td>
+
+				<?php
+		if ((isset ( $field->stored )) and ($field->stored == 1)) {
+			?>
+<td data-toggle="tooltip"
+					title="<?php echo $this->translate("La valeur du champ peut servir pour l'affichage"); ?>"
+					class="success"><small><span class="glyphicon glyphicon-hdd"></span> <?php echo $this->translate('Oui'); ?>
+
+				</small>
+            <?php
+		} else {
+			?>
+
+
+
+
+				<td>
+
+            <?php
+		}
+		?></td>
+				<!-- multi -->
+        <?php
+		if ((isset ( $field->multiValued )) and ($field->multiValued == 1)) {
+			?>
+<td data-toggle="tooltip" title="<?php echo $this->translate('Peut contenir plusieurs valeurs'); ?>"
+					class="success">
+					<!-- multi --> <small><span class="glyphicon glyphicon-repeat"></span> <?php echo $this->translate('Oui'); ?></small>
+            <?php
+		} else {
+			?>
+
+
+
+				<td>
+					<!-- multi -->
+
+            <?php
+		}
+		?></td>
+			</tr>
+<?php
+	}
+}
+
+// file_put_contents('/tmp/doc.php', var_export($doc,true), FILE_APPEND) ;
+
+?>
+
+  </tbody>
+	</table>
+</div>
+<?php
+
+/**
+ * XXX tableau des chaines à traduire pour la doc
+ * echo var_export($doc);
+ */
+
+?>
+

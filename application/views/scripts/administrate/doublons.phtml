@@ -1,0 +1,95 @@
+<?php
+/** @var Hal_View $this */
+if (isset($this->documents)) {
+    $this->jQuery()->addStylesheet(CCSDLIB . '/css/bootstrap-editable.css');
+?>
+    <script type="text/javascript" src="<?php echo CCSDLIB;?>/js/jquery.jeditable.js"></script>
+    <script type="text/javascript" src="<?php echo CCSDLIB;?>/js/bootstrap-editable.min.js"></script>
+    <script>var administrate = "doublon";</script>
+    <script type="text/javascript" src="/js/document/doublon.js"></script>
+
+    <form enctype="multipart/form-data" method="post" class="form-horizontal" action="">
+        <input type="hidden" id="choix" name="method" value="fusion" />
+        <blockquote><?php echo $this->translate("Sélectionnez le document à conserver"); ?></blockquote>
+        <div class="form-actions text-center">
+            <button type="button" id="fusion" class="input-btn btn btn-primary">Fusionner</button>
+            <button type="button" id="hierarchiser" class="input-btn btn btn-default">Hiérarchiser</button>
+        </div>
+        <div class="row" style="margin-left:0; margin-right:0;">
+            <div class="radio col-md-6">
+                <label class="btn btn-success" style="display:block; margin-bottom:10px;">
+                    <input type="radio" class="input-radio" name="save" id="save2" value="<?php echo $this->documents[0]->getDocid() ?>" checked style="margin-left:0px;">
+                    <?php echo $this->translate("Conserver") . ' ' . $this->documents[0]->getId();echo ($this->documents[0]->getId() == $this->documents[1]->getId()) ? ' (docid '.$this->documents[0]->getDocid().' )' : ''; ?>
+                </label>
+            </div>
+            <div class="radio col-md-6">
+                <label class="btn btn-default" style="display:block; margin-bottom:10px;">
+                    <input type="radio" class="input-radio" name="save" id="save3" value="<?php echo $this->documents[1]->getDocid() ?>" style="margin-left:0px;">
+                    <?php echo $this->translate("Conserver") . ' ' . $this->documents[1]->getId();echo ($this->documents[0]->getId() == $this->documents[1]->getId()) ? ' (docid '.$this->documents[1]->getDocid().' )' : ''; ?>
+                </label>
+            </div>
+        </div>
+        <div class="row" style="margin-left:0; margin-right:0;">
+            <script type="text/javascript">
+                if (administrate == "doublon"){
+                    var metadata = new Array();
+                } </script>
+            <?php foreach(array(0,1) as $id) { ?>
+            <?php $this->document = $this->documents[$id];
+                ?>
+            <div class="col-md-6 alert <?php echo ($id==0 ? 'alert-success' : '')?> doc-radio" attr-id="<?php echo $this->document->getDocid() ?>">
+                    <h3 style="text-align: center"><span class="label label-info"><?php echo $this->documents[$id]->getId() . ' v' . $this->documents[$id]->getVersion();?></span></h3>
+                    <input type="hidden" name="id<?php echo ($id+1); ?>" value="<?php echo ($this->documents[0]->getId() == $this->documents[1]->getId()) ? $this->documents[$id]->getDocid() : $this->documents[$id]->getId() ?>" />
+                    <?php include __DIR__ . '/../document/document.phtml'; ?>
+                    <small>
+                        <?php echo $this->document->getUri() ?><br />
+                        <?php echo $this->translate('Contributeur')?> : <a href="<?php echo PREFIX_URL ?>search/index/q/*/contributorId_i/<?php echo $this->document->getContributor('uid');?>/" target="_blank"><?php echo $this->document->getContributor('fullname') ?></a> &lt;<?php echo Hal_Tools::encryptMail($this->document->getContributor('email'));?>&gt;<br />
+                        <?php echo $this->translate('Soumis le') . ' : ' . $this->document->getSubmittedDate(Zend_Date::DATE_FULL . ' - ' . Zend_Date::TIMES) ?><br />
+                        <?php echo $this->translate('Dernière modification le') . ' : ' . $this->document->getLastModifiedDate(Zend_Date::DATE_FULL . ' - ' . Zend_Date::TIMES) ?><br />
+                    </small>
+            </div>
+            <?php } ?>
+        </div>
+        <div class="row" style="margin-left:0; margin-right:0;">
+            <div class="radio col-md-6">
+                <label class="btn btn-success" style="display:block; margin-bottom:10px;">
+                    <input type="radio" class="input-radio" name="save2" id="save0" value="<?php echo $this->documents[0]->getDocid() ?>" checked style="margin-left:0px;">
+                    <?php echo $this->translate("Conserver") . ' ' . $this->documents[0]->getId() ;echo ($this->documents[0]->getId() == $this->documents[1]->getId()) ? ' (docid '.$this->documents[0]->getDocid().' )' : ''; ?>
+                </label>
+            </div>
+            <div class="radio col-md-6">
+                <label class="btn btn-default" style="display:block; margin-bottom:10px;">
+                    <input type="radio" class="input-radio" name="save2" id="save1" value="<?php echo $this->documents[1]->getDocid() ?>" style="margin-left:0px;">
+                    <?php echo $this->translate("Conserver") . ' ' . $this->documents[1]->getId() ;echo ($this->documents[0]->getId() == $this->documents[1]->getId()) ? ' (docid '.$this->documents[1]->getDocid().' )' : ''; ?>
+                </label>
+            </div>
+        </div>
+        <div class="form-actions text-center">
+            <a href="<?php echo PREFIX_URL?>administrate/doublons"><button type="button" class="btn btn-defaut"><?php echo $this->translate("Annuler");?></button></a>
+            <button class="btn btn-primary" type="submit"><?php echo $this->translate("Valider"); ?></button>
+        </div>
+    </form>
+<?php } else {?>
+
+<form enctype="multipart/form-data" method="post" class="form-horizontal" action="">
+    <blockquote><?php echo $this->translate("Indiquez les identifiants des documents à fusionner"); ?></blockquote>
+    <div class="row" style="margin-left:0; margin-right:0;">
+        <div class="col-md-5">
+            <div class="form-group">
+                <label for="id1"><?php echo $this->translate("Identifiant du premier document"); ?></label>
+                <input type="text" class="form-control" id="id1" name="id1" placeholder="<?php echo $this->translate("Identifiant du document"); ?>">
+            </div>
+        </div>
+        <div class="col-md-5 col-md-offset-2">
+            <div class="form-group">
+                <label for="id2"><?php echo $this->translate("Identifiant du second document"); ?></label>
+                <input type="text" class="form-control" id="id2" name="id2" placeholder="<?php echo $this->translate("Identifiant du document"); ?>">
+            </div>
+        </div>
+    </div>
+    <div class="form-actions text-center">
+        <button class="btn btn-primary" type="submit"><?php echo $this->translate("Rechercher"); ?></button>
+    </div>
+</form>
+
+<?php } ?>

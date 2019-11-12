@@ -1,0 +1,98 @@
+<div class="history">
+	<h4><?php echo $this->translate('Historique') ?></h4>
+	<div class='row'>
+		<div class='col-md-12'>
+			<?php 
+			$tabHistory = Ccsd_Referentiels_Logs::getlogs($this->id, $this->core);
+			if (count($tabHistory)) { //Toujours une valeur : date de création
+			?>
+			<table class="table table-condensed">
+				<thead>
+					<tr>
+						<th>
+						<?php echo $this->translate('Événements') ?>
+						</th>
+						<th align="right">
+						<?php echo $this->translate('Action(s)') ?>
+						</th>
+					</tr>
+		 		</thead>
+				<tbody>
+				<?php 
+    			$halUser = new Hal_User();
+    			foreach ($tabHistory as $ligne)
+    			{
+    			    $oDate = new Zend_Date($ligne['DATE_ACTION'], Zend_Date::ISO_8601);
+    			    $halUser->find($ligne['UID']);
+
+    			    ?>
+    			    <tr>
+    			    	<td>
+    			    		<i>
+    			    		<?php 
+	    			    			echo 	$this->translate($ligne['ACTION']) . " " .
+	    			    					$this->translate('le') . " " . 
+	    			    					$oDate->toString(Zend_Date::DATE_LONG) . " " . 
+	    			    					$this->translate('à') . " " . 
+	    			    					$oDate->toString(Zend_Date::TIMES) . " " .
+	    			    					$this->translate('par') . " " .
+	    			    					$halUser->getFullName();    			    			
+							?>
+    			    		</i>
+    			    	</td>
+    			    	<td align="right">
+    			    		<?php if (!in_array ($ligne['ACTION'], array ('CREATED'))) { ?>
+    			    		<a href="#modal"  
+	    			    	   role="button" 
+	    			    	   data-toggle="modal" 
+	    			    	   data-target="#modal"
+	    			    	   data-show="false"
+	    			    	   data-load-remote="/<?php echo Zend_Controller_Front::getInstance()->getRequest()->getControllerName()?>/history/id/<?php echo $ligne['ID'] ?>" 
+	    			    	   data-remote-target="#modal .modal-body"
+	    			    	   data-restore-target="#modal .modal-footer .restore"
+	    			    	   data-restore-id="<?php echo $ligne['ID'] ?>">
+	    			    	   <?php 
+	    			    	   if ($ligne['ACTION'] == 'REPLACE') { 
+    			    			   echo $this->translate("Voir l'élément remplacé"); 
+    			    		   } else if (in_array ($ligne['ACTION'], array ('BOUNDED', 'UNBOUNDED'))) {
+    			    		   	   echo $this->translate("Voir les documents");
+    			    		   } else {
+	    			    	       echo $this->translate('Voir son état précédent');
+	    			    	   }
+	    			    	   ?>
+	    			    	</a>
+	    			    	<?php } 
+    			    /* $classe = get_class($this->objet);
+    			     $tab = Zend_Json::decode($ligne['PREV_VALUES']);
+    			    if ( is_array($tab) )
+    			    {
+    			       // j'instancie la classe et j'utilise un set avant le echo
+    			       $monObjet = new $classe ();
+    			       $monObjet->set($tab);
+    			       cho $monObjet;
+    			    } else { 
+                        //j'instancie la classe avec l'id et echo
+                        if ($ligne['ACTION'] == 'REPLACE') {
+                            
+                            echo "<a href=\"". $ligne['PREV_VALUES'] . "\">(id = " . $ligne['PREV_VALUES']. ")</a>";
+                        } else {
+    			           // echo new $classe($ligne['PREV_VALUES']);
+    			        }    
+    			     }   */
+    			    ?>
+    			    
+    			    
+    			    
+    			    	</td>
+    			    </tr>
+    			<?php
+    			}
+    		?>
+				</tbody>
+			</table>
+			<?php 
+			} 
+			?>
+		</div>
+	</div>
+</div>         		

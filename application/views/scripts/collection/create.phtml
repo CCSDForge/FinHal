@@ -1,0 +1,238 @@
+<?php $this->layout()->pageDescription = $this->translate("Création / Modification de collections") ?>
+<style>
+    .form-btn, #nbdoc-result {
+        margin-left: 26%;
+        margin-bottom: 10px;
+    }
+
+</style>
+<?php
+$this->form->setActions(true)->createCancelButton('Annuler', array(
+    'onclick' => 'link("/collection/reset");',
+    'class' => 'btn btn-default',
+    'style' => 'margin-top: 15px;'));
+$this->form->setActions(true)->createSubmitButton();
+echo $this->form;
+?>
+
+<div class="btn-group" id="list-fields">
+    <button class="btn btn-default btn-xs dropdown-toggle" type="button" data-toggle="dropdown">
+        <?php echo $this->translate('Champs'); ?> <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu" style="overflow: auto;height:200px">
+        <?php foreach ($this->fields as $field => $label) { ?>
+            <li><a href="javascript:void(0);"
+                   onclick="$('#critere').focus().val($('#critere').val() + ' <?php echo $field; ?>:')"><?php echo $this->translate($label); ?></a>
+            </li>
+        <?php } ?>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#critere-element .help-block').append('&nbsp;');
+        $('#list-fields').appendTo('#critere-element .help-block');
+        getFullCritere();
+        $.each($('#tamponneur').val().split(','), function (index, value) {
+            if (value != '') {
+                $.ajax({
+                    url: "/administrate/ajaxsearchuser",
+                    data: {'term': value},
+                    dataType: 'json',
+                    success: function (data) {
+                        addTamponneur(value, data[0].label);
+                    }
+                });
+            }
+        });
+        $('#tamponneur').val('');
+
+        $.each($('#parents').val().split(','), function (index, value) {
+            if (value != '') {
+                $.ajax({
+                    url: "/administrate/ajaxsearchcollection",
+                    data: {'term': value},
+                    dataType: 'json',
+                    success: function (data) {
+                        addTamponSup(value, data[0].label);
+                    }
+                });
+            }
+        });
+        $('#parents').val('');
+
+        $('#code').blur(function () {
+            $('#code').val(formatTampid($('#code').val()));
+            $.ajax({
+                url: "/collection/ajaxexist",
+                data: {site: $(this).val()},
+                success: function (data) {
+                    $('#code').closest('.form-group').removeClass('has-error').find('span.has-error').remove();
+                    if (data == '1') {
+                        $('#code').closest('.form-group').addClass('has-error');
+                        $('<span class="help-block has-error">' + $('#code').val() + ' : <?php echo $this->translate('Cet identifiant de collection (TAMPID) est déjà attribué');?></span>').insertAfter('#code');
+                        $('#code').focus();
+                    }
+                }
+            });
+        });
+
+        //asker
+        $('#asker').autocomplete({
+            minLength: 2,
+            html: true,
+            data: {'term': $(this).val()},
+            source: function (request, response) {
+                $.ajax({
+                    url: "/administrate/ajaxsearchuser",
+                    dataType: "json",
+                    data: {
+                        term: request.term,
+                        valid: 1
+                    },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            select: function (event, ui) {
+            }
+        });
+
+        $('#tamponneur').autocomplete({
+            minLength: 2,
+            html: true,
+            source: function (request, response) {
+                $.ajax({
+                    url: "/administrate/ajaxsearchuser",
+                    dataType: "json",
+                    data: {
+                        term: request.term,
+                        valid: 1
+                    },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            }, select: function (event, ui) {
+                addTamponneur(ui.item.id, ui.item.label);
+                $('#tamponneur').val('');
+                return false;
+            }
+        });
+
+        $('#parents').autocomplete({
+            minLength: 2,
+            html: true,
+            data: {'term': $(this).val()},
+            source: "/administrate/ajaxsearchcollection",
+            select: function (event, ui) {
+                addParents(ui.item);
+                $('#parents').val('');
+                return false;
+            }
+        });
+
+        $('#critere').blur(function () {
+            getFullCritere();
+        });
+
+        $('#nbdoc').click(function () {
+            setTimeout(function () {
+                $.ajax({
+                    url: "/collection/ajaxnbdoc",
+                    method: "post",
+                    data: {'critere': $('#fullcritere').val()},
+                    success: function (data) {
+                        if ($('#nbdoc-result').length == 0) {
+                            $('#nbdoc').after('<div id="nbdoc-result"></div>');
+                        }
+                        $('#nbdoc-result').html(data);
+                    }
+                });
+            }, 800);
+
+        });
+
+
+    });
+
+    function formatTampid(str) {
+        str = str.toUpperCase();
+        var from = "àáäâèéëêìíïîòóöôùúüûñç·,:;";
+        var to = "aaaaeeeeiiiioooouuuunc----";
+        for (var i = 0, l = from.length; i < l; i++) {
+            str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+        }
+        str = str.replace(/\s/g, '-');
+        str = str.replace(/[^a-zA-Z0-9_\-]/g, '');
+        str = str.toUpperCase();
+        str = str.replace(/-+/g, '-');
+        str = str.replace(/(^-)|(-$)/g, '');
+        return str;
+    }
+
+    function addTamponneur(id, label) {
+        $('#tamponneur').after('<span class="label label-primary">' + label + '<input type="hidden" name="tamponneurs[]" value="' + id + '" />&nbsp;<i class="glyphicon glyphicon-remove" onclick="removeElem(this)"></i></span> ');
+    }
+
+    function addTamponSup(id, label) {
+        $('#parents').after('<span class="label label-primary">' + label + '<input type="hidden" class="parentid" name="parentids[]" value="' + id + '" />&nbsp;<i class="glyphicon glyphicon-remove" onclick="removeElem(this)"></i></span> ');
+        getFullCritere();
+    }
+
+    function removeElem(elem, type) {
+        $(elem).closest('.label').remove();
+        if ($(elem).prev().hasClass('parentid')) {
+            getFullCritere();
+        }
+    }
+
+    function getFullCritere() {
+        parentids = [];
+        $('.parentid').each(function () {
+            parentids.push($(this).val());
+        });
+
+        $.ajax({
+            url: "/collection/ajaxgetfullcritere",
+            method: 'post',
+            data: {parentids: parentids},
+            success: function (data) {
+                critere = $('#critere').val();
+                if (critere !== '') {
+                    critere = '(' + critere + ')';
+                }
+                if (! data.match(/^\s*$/)) {
+                    if (critere !== '') {
+                        critere += ' AND ';
+                    }
+                    critere += data;
+                }
+                $('#fullcritere').val(critere);
+            }
+        });
+    }
+
+    /**
+     * Ajout d'un parent avec vérification
+     * Si la collection courante a un lien avec la collection sélectionnée => error
+     * Sinon => addTamponSup
+     */
+    function addParents(item) {
+        $.ajax({
+            url: "/collection/ajaxverifcoll",
+            method: 'post',
+            data: {sid: item.id},
+            success: function () {
+                $('#parents').closest('.form-group').removeClass('has-error').find('span.has-error').remove();
+                addTamponSup(item.id, item.label);
+            },
+            error: function(){
+                $('#parents').closest('.form-group').addClass('has-error');
+                $('<span class="help-block has-error">' + item.label + ' <?php echo $this->translate('a déjà un lien avec la collection actuelle');?></span>').insertAfter('#parents');
+                $('#parents').focus();
+            }
+        });
+    }
+</script>

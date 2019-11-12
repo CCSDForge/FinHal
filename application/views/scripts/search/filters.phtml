@@ -1,0 +1,14 @@
+<?php
+$this->layout ()->pageTitle = $this->translate ( 'Filtres de recherche par défaut' );
+
+$this->layout ()->pageDescription = $this->translate ( 'Liste des filtres appliqués aux pages consultation/recherche' );
+
+if ($this->filters) {
+	echo '<pre><ol>';
+	foreach ( $this->filters as $filter ) {
+		echo '<li>' . $filter . '</li>';
+	}
+	echo '</ol></pre>';
+} else {
+	echo '<div class="alert alert-info" role="alert">Pas de filtres</div>';
+}

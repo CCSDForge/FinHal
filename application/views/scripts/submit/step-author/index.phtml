@@ -1,0 +1,393 @@
+<?php $this->jQuery()->addJavascriptFile(CCSDLIB . '/js/jquery/ui/autocomplete.html.js');?>
+<style>
+    .ui-front {
+        z-index: 10000;
+    }
+    .ui-state-highlight {
+        height: 20px;
+        width: 10px;
+        margin-bottom: -2px;
+        display: inline-block;
+    }
+    .popover {
+        width: 533px;
+    }
+    .aut-idhal {
+        color: #286090;
+    }
+</style>
+<?php if (isset($this->errors) && count($this->errors)) {?>
+<div id="error-zone-author" class="alert alert-danger fade in" role="alert">
+    <?php include __DIR__ . '/../errors.phtml';?>
+</div>
+<?php } ?>
+
+<form action="<?php echo SubmitController::SUBMIT_PREFIXURL ?>" method="post" enctype="multipart/form-data" id="form_author" name="form_author">
+    <div id="aut-struct">
+        <?php include __DIR__ . '/authors-structures.phtml';?>
+    </div>
+</form>
+
+<script type="text/javascript">
+    <!--
+    /**
+     * Affichage du formulaire d'édition des informations d'un auteur
+     * appelé pour créer un nouvel auteur ou pour modifier un auteur donné
+     * @param string authoridx = 'new' pour un nouvel auteur, index de l'auteur autrement
+     * @param string text contenu du champ de recherche
+     */
+    function getAuthorForm(authoridx, text)
+    {
+        var callback = function( data ) {
+            $( "#searchAuthor" ).val('');
+            popoverAuthor(authoridx, data);
+            //Initialisation du formulaire
+            if (text != undefined) {
+                var words = text.replace(/[\s]+/g, ' ').split(' ');
+                $.each( ['firstname', 'lastname'], function(i, selector){
+                    if (undefined != words[i]) {
+                        $('#' + selector, '.popover').val(words[i]);
+                    }
+                });
+            }
+        }
+        popoverDestroy();
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxgetauthorform', data: {id: authoridx}, success: callback});
+    }
+
+    /**
+     * Soumission du formulaire auteur
+     * @param string authoridx = 'new' pour un nouvel auteur, index de l'auteur autrement
+     */
+    function submitAuthorForm(authoridx)
+    {
+        var callback = function( data ) {
+            data = data.autstruct;
+            popoverDestroy();
+            if ($('#authors', data).length) { //Ajout d'une liste d'auteurs
+                $('#aut-struct').html(data);
+            } else if ($('#author-form', data).length) { //Erreur dans la saisie
+                popoverAuthor(authoridx, data);
+            } else if (authoridx == 'new') { //Nouvel auteur
+                $('#authors'). append(data);
+            } else { //Modification d'un auteur
+                $('#aut_' + authoridx).replaceWith(data);
+            }
+        }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxsubmitauthorform', data: $('#author-form').serialize(), success: callback, dataType: 'json',
+            error: function(msg) {
+                $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+            }
+        });
+    }
+
+    /**
+     * Affichage du formulaire de modification de la fonction de l'auteur
+     * @param string authoridx = 'new' pour un nouvel auteur, index de l'auteur autrement
+     * @param string text contenu du champ de recherche
+     */
+    function getAuthorFunctionForm(authoridx)
+    {
+        var callback = function( data ) {
+            popoverAuthor(authoridx, data);
+        };
+        popoverDestroy();
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxgetauthorfunctionform', data: {id: authoridx},success: callback});
+    }
+
+    /**
+     * Soumission du formulaire auteur
+     * @param string authoridx = 'new' pour un nouvel auteur, index de l'auteur autrement
+     */
+    function submitAuthorFunctionForm(authoridx)
+    {
+        var callback = function( data ) {
+            popoverDestroy();
+            $('#aut_func_' + authoridx).text(data);
+        };
+
+        var errorCallback = function (data) {
+            popoverDestroy();
+            popoverAuthor(authoridx, data.responseText);
+        };
+
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxsubmitauthorfunctionform', data: $('#author-form').serialize(), success: callback, dataType: 'json', error: errorCallback});
+    }
+
+    /**
+     * Suppression d'un auteur
+     * @param int authoridx index de l'auteur
+     */
+    function deleteAuthor(authoridx)
+    {
+        var callback = function( data ) {
+            popoverDestroy();
+            $('#aut_' + authoridx).remove(); }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxdeleteauthor', data: {id: authoridx}, success: callback,
+            error: function(msg) {
+                $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+            }
+        });
+    }
+
+
+    /**
+     * Affichage du formulaire de gestion des affiliations de l'auteur
+     * @param int authoridx index de l'auteur
+     */
+    function getAssociationForm(authoridx)
+    {
+        var callback = function( data ) {popoverAuthor(authoridx, data); }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxgetassociateform', data: {id: authoridx}, success: callback});
+    }
+
+    function seeStructDetails(authoridx, structidx)
+    {
+        var callback = function( data ) {
+            popoverStructure(structidx, authoridx, data);
+        }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxseestructdetails', data: {structid: structidx}, success: callback});
+    }
+    
+    /**
+     * Retire une affiliation à un auteur
+     * @param int authoridx index de l'auteur
+     * @param int structidx index de l'auteur
+     */
+    function removeAffiliation(authoridx, structidx)
+    {
+        var callback = function( data ) {
+            $('.tooltip').hide();
+            $('#aut_' + authoridx + '_struct_' + structidx).remove();
+        }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxremoveaffiliation', data: {authorid: authoridx, structid: structidx}, success: callback,
+            error: function(msg) {
+                $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+            }
+        });
+    }
+
+    /**
+     * Associe tous les auteurs à une structure donnée
+     * @param int structidx identifiant de la structure
+     */
+    function associateAllAuthors(structidx)
+    {
+        var callback = function( data ) { $('#aut-struct').html(data.autstruct); }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxassociateallauthors', data: {id: structidx}, success: callback, dataType: 'json',
+            error: function(msg) {
+                $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+            }
+        });
+    }
+
+    /**
+     * Suppression d'une structure. Rechargement de la page entière
+     * @param int structidx identifiant de la structure
+     */
+    function deleteStructure(structidx)
+    {
+        var callback = function( data ) { $('#aut-struct').html(data.autstruct); }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxdeletestructure', data: {id: structidx}, success: callback, dataType: 'json',
+            error: function(msg) {
+                $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+            }});
+    }
+
+
+    /**
+     * Affichage du formulaire de modification des informations d'une structure
+     * @param int structidx identifiant de la structure
+     * @param int authoridx identifiant de l'auteur. Permet de savoir ou ouvrir la popup
+     * @param string text contenu du champ de recherche
+     */
+    function getPopoverForm(structidx, authoridx, text)
+    {
+        //console.log('structidx :' + structidx);
+        //console.log('authoridx :' + authoridx);
+        var callback = function( data ) {
+            if (undefined != authoridx && undefined != structidx) {
+                popoverStructure(structidx, authoridx, data);
+            } else {
+                popoverAuthor(authoridx, data);
+            }
+            //Initialisation du formulaire
+            if (undefined != text) {
+                $('#STRUCTNAME', '.popover').val(text);
+                $('#TYPESTRUCT', '.popover').val('institution');
+            }
+
+        }
+        var data = {id: structidx};
+        if (!(undefined == authoridx)) {
+            data.authorid = authoridx;
+        }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxgetstructureform', data: data, success: callback});
+    }
+
+    /**
+     * Enregistrement des modifications des infos d'une structure
+     * @param int structidx identifiant de la structure
+     * @param int authoridx identifiant de l'auteur. Permet de savoir ou ouvrir la popup
+     */
+    function submitStructureForm(structidx, authoridx)
+    {
+        var callback = function( data ) {
+            data = data.autstruct;
+            if ($('#structure-form', data).length) {
+                //Erreur dans le formulaire
+                if (undefined != authoridx && undefined != structidx ) {
+                    popoverStructure(structidx, authoridx, data);
+                } else {
+                    popoverAuthor(authoridx, data);
+                }
+            } else if (data != '') {
+                popoverDestroy();
+                $('#aut-struct').html(data);
+            }
+        }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxsubmitstructureform', data: $('#structure-form').serialize(), success: callback, dataType: 'json',
+            error: function(msg) {
+                $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+            }
+        });
+    }
+
+    /**
+     * Récupération du formulaire d'ajout d'une liste d'auteurs
+     */
+    function getAuthorsListForm()
+    {
+        var callback = function( data ) {popoverAuthor("<?php echo $this->translate("Ajouter une liste d'auteurs");?>", data); }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxgetauthorslistform', success: callback});
+    }
+
+    /**
+     * Récupération du formulaire d'ajout d'auteurs à partir d'une structure
+     */
+    function getAuthorsFromStructureForm()
+    {
+        var callback = function( data ) {popoverAuthor("<?php echo $this->translate("Ajouter les auteurs d'une structure de recherche");?>", data); }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxgetauthorsfromstructureform', success: callback});
+    }
+
+    /**
+     * Récupération du formulaire de mes auteurs
+     */
+    function getMyAuthorsForm()
+    {
+        var callback = function( data ) {popoverAuthor("<?php echo $this->translate("Ajouter depuis mes auteurs");?>", data); }
+        ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxgetmyauthorsform', success: callback});
+    }
+
+    /**
+     * Popup pour l'édition des informations d'un auteur
+     * @param int authoridx index de la structure
+     * @param text data contenu de la popup
+     */
+    function popoverAuthor(authoridx, data)
+    {
+        if (isNaN(authoridx)) {
+            title = "<?php echo $this->translate("Ajouter un nouvel auteur");?>";
+            authoridx = 'new';
+        } else {
+            title = $('#aut_' + authoridx + ' .fullname').text();
+        }
+        popover('#aut_' + authoridx, title, data);
+    }
+
+    /**
+     * Popup d'édition des informations d'une structure
+     * @param int structidx index de la structure
+     * @param text data contenu de la popup
+     */
+    function popoverStructure(structidx, authoridx, data)
+    {
+        popover('#aut_' + authoridx + '_struct_' + structidx, structidx == 'new' ? 'Nouvelle structure' : $('#aut_' + authoridx + '_struct_' + structidx + ' .structname').text(), data);
+    }
+
+    /**
+     * Popup d'édition d'infos (auteur ou structure)
+     * @param string selector
+     * @param string title
+     * @param string content
+     */
+    function popover(selector, title, content)
+    {
+        $(selector).popover('destroy');
+
+        title += "<span style=\"float:right\">";
+        title += "  <a href=\"javascript:void(0);\" onclick=\"$('" + selector + "').popover('destroy')\">";
+        title += "    <i class=\"glyphicon glyphicon-remove\"></i>";
+        title += "  </a>";
+        title += "</span>";
+
+        $(selector).popover({
+            content: content,
+            title: title,
+            placement: 'bottom',
+            trigger: 'manual',
+            container: 'body',
+            html: true
+        }).popover('show');
+    }
+
+    /**
+     * Suppression / destruction d'une popup
+     */
+    function popoverDestroy()
+    {
+        $('.popover').each(function() {
+            popoverid = $(this).find('.popover-content>div').attr('attr-popoverid');
+            if (undefined != popoverid) {
+                $('#' + popoverid).popover('destroy');
+            }
+        });
+    }
+
+
+    /**
+     * Associe une nouvelle structure à une déja existante
+     */
+    function linkStructure(id)
+    {
+        $.ajax({
+            url: "/<?php echo $this->controller?>/ajaxstructureformsubmit",
+            type: "post",
+            data: $('#structure-form').serialize(),
+            success: function( data ) {
+                if ($('#structure-form', data).length) {
+                    //Erreur dans le form
+                    popoverAuthor(authorid, data);
+                } else if (data != '') {
+                    $('#aut_' + authorid).popover('destroy');
+                    $('#aut-struct').html(data);
+                }
+            }
+        });
+    }
+
+    /**
+     * Affichage des affiliations d'une structure
+     * @param id
+     */
+    function structureDetails(authorid, structid)
+    {
+        $('#aut_' + authorid + '_struct_' + structid).find('blockquote').toggle();
+    }
+
+    //TMP
+    $(function() {
+        //getPopoverForm(0)
+        //getStructureForm('new', 5, 'test');
+
+        // On montre la première affiliation à remplir s'il y a une erreur
+        <?php if (isset($this->errors) && count($this->errors)) {?>
+            $('#aut_0_struct_new').removeClass("new-struct-hover");
+            $('#aut_0_struct_new').addClass("new-struct-hover-forced");
+        <?php }?>
+
+
+    });
+    //-->
+</script>

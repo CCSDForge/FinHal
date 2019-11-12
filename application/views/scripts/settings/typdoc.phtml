@@ -1,0 +1,344 @@
+<?php $this->jQuery()->addJavascriptFile(CCSDLIB . "/js/jquery/ui/nestedSortable.js"); ?>
+<?php $this->layout()->pageDescription = $this->translate("description description") ?>
+
+<style>
+
+    #clone {
+        display : none;	
+    }
+
+    #list_typdoc, #list_typdoc ul {
+        list-style-type : none;	
+    }
+
+    .sortable > li {
+        border-top: 1px solid #DDDDDD;
+        padding: 5px 10px;
+    }
+    .sortable ul  li {
+        border-top: 1px dotted #dddddd;
+    }
+    .sortable>li:hover{
+        background: #f5f5f5;
+    }
+
+    .sortable > li ul {
+        border-left: 1px solid #DDDDDD;
+        padding-left: 10px;
+    }
+
+    li {
+        line-height: 20px;
+    }
+
+    .typdoc_table td {
+        vertical-align : top;
+        padding-top : 2px;
+    }
+
+    .typdoc_table td.typdoc_name {
+        padding-top : 0px;
+    }
+
+    .cat_typdoc_render {
+        font-weight : bold;	
+    }
+
+    .typdoc input[type="checkbox"] {
+        margin-top : -4px;	
+    }
+
+    .typdoc_input {	
+        display : none;
+        background-color: #F5F5F5;
+        padding : 10px;
+    }	
+
+    .typdoc_render {
+        padding : 2px 7px;
+    }	
+
+    .typdoc_input input {
+        margin : 0px;
+    }
+    .placeholder {
+        margin: 5px 0px;
+        height: 20px;
+        background-color: #dff0d8;
+        border: 1px solid #d6e9c6;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+        -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+    }
+</style>
+
+<div class="form-actions center">
+    <div class="row">
+        <div class="col-md-5">
+            <select name="type_select" id="type_select"class="form-control">
+                <option value="perso"><?php echo $this->translate("typdoc personnalisé"); ?></option>
+                <?php
+                foreach ($this->list_default_typdoc as $typdoc) {
+                    $label = 'typdoc_' . $typdoc;
+
+                    $disabled = '';
+                    if (Ccsd_Tools::in_array_r($typdoc, $this->using_keys)) {
+                        $disabled = 'disabled="disabled"';
+                    }
+                    ?>
+                    <option value="<?php echo $typdoc; ?>" <?php echo $disabled; ?>><?php echo $this->translate($label); ?> (<?php echo $typdoc; ?>)</option>
+                    <?php
+                }
+                ?>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <button type="button" class="btn btn-default" onclick="addTypdoc()"><i class="glyphicon glyphicon-file"></i>&nbsp;<?php echo $this->translate("Ajouter un Type de document"); ?></button>
+            &nbsp;<?php echo $this->translate("ou") ?>&nbsp;
+            <button type="button" class="btn btn-default" onclick="addTypdocCat()"><i class="glyphicon glyphicon-folder-open"></i>&nbsp;<?php echo $this->translate("Ajouter une Catégorie"); ?></button>
+        </div>
+    </div>
+
+</div>
+
+<form class="form_typdoc" action="/settings/typdoc" method="post">
+    <ul id="list_typdoc" class="sortable ui-sortable">
+        <?php
+        $i = 1;
+        foreach ($this->typdoc_list as $key => $typdoc) {
+            $element = $typdoc;
+            $element->parentid = 'root';
+            ?>
+
+            <li id="<?php echo $element->getId(); ?>" class="typdoc <?php echo $element->getType() == 'typdoc' ? 'no-nest' : 'typdoc_cat'; ?>" typdocid="<?php echo $element->getId(); ?>">
+                <?php include("typdoc-element.phtml"); ?>
+                <?php
+                if ($element->haveChildren()) {
+                    ?>
+                    <ul>
+                        <?php
+                        foreach ($element->children as $child) {
+                            $element = $child;
+                            //$element->getId() = $i++;
+                            $element->parentid = $typdoc->getId();
+                            ?>
+                            <li id="<?php echo $child->getId(); ?>" class="typdoc no-nest" typdocid="<?php echo $child->getId(); ?>">
+                            <?php include("typdoc-element.phtml"); ?>
+                            </li>
+                                <?php
+                            }
+                            ?>
+                    </ul>
+                        <?php
+                    }
+                    ?>
+            </li>
+                <?php
+            }
+            ?>
+    </ul>
+
+    <div class="form-error alert alert-error">
+        <?php echo $this->translate("Des champs obligatoires n'ont pas été remplis."); ?>
+    </div>
+
+    <div class="form-actions text-center">
+        <input type="hidden" name='typdoc-src' id="typdoc-src" value="" />
+        <button type="button" class="btn btn-default btn-sm" onclick="initDefault();"><?php echo $this->translate('Récupérer les types de documents par défaut'); ?></button>
+        <button type="submit" class="btn btn-primary"><?php echo $this->translate('Enregistrer'); ?></button>
+    </div>
+</form>
+
+<ul id="clone">
+    <li id="" class="typdoc no-nest" typdocid="">
+<?php
+unset($element);
+//include("typdoc-element.phtml");
+?>
+    </li>
+</ul>
+
+<div id="modalDelete" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3><?php echo $this->translate("Suppression"); ?></h3>
+    </div>
+    <div class="modal-body">
+        <p><?php echo $this->translate("Souhaitez-vous enlever ce type de document de la liste"); ?> ?</p>
+        <input type="hidden" id="messageDelete" value="" />
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true"><?php echo $this->translate("Non"); ?></button>
+        <button class="btn btn-primary" onclick="deleteElement();"><?php echo $this->translate("Supprimer"); ?></button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var increment = 0;
+
+    $(document).ready(function () {
+        //Tri des pages
+        $('ul.sortable').nestedSortable({
+            disableNesting: 'no-nest',
+            listType: 'ul',
+            handle: '.glyphicon-move',
+            items: 'li',
+            maxLevels: 2,
+            opacity: .6,
+            placeholder: 'placeholder',
+            stop: function (event, ui) {
+                $('#list_typdoc > li').each(function () {
+                    var id = $(this).attr('typdocid');
+                    $(this).find('.parentid').val('root');
+
+                    if ($(this).find("ul").length > 0) {
+                        $(this).find("ul > li > .ids .parentid").val(id);
+                    }
+                });
+            }
+        });
+
+        //Edition des informations sur une page
+        editButtonAction('li.typdoc');
+
+
+
+    });
+
+    function cleanCode(value) {
+        value = value.replace(/[ÀÁÂÃÄÅàáâãäå]/, "A");
+        value = value.replace(/[Çç]/, "C");
+        value = value.replace(/[ÈÉÊËèéêë]/, "E");
+        value = value.replace(/[ÌÎÏìîï]/, "I");
+        value = value.replace(/[ÒÔÕÖòôõö]/, "O");
+        value = value.replace(/[ÙÛÜùûü]/, "U");
+        value = value.replace(/[ÿ]/, "Y");
+        value = value.replace(/[§µ£!;=^¨~&\/\\#,+()$~%.'":*?<>{}0-9\s-.]/g, '');
+        value = value.toUpperCase();
+
+        return value;
+    }
+
+    function editButtonAction(selector) {
+        $(selector).each(function () {
+            var id = $(this).attr('id');
+            var editButton = $(this).find('.editElement:first');
+
+            editButton.click(function () {
+                var elem = $('#' + id);
+                var render = elem.find('.typdoc_name:first .typdoc_render');
+                var input = elem.find('.typdoc_name:first .typdoc_input');
+
+                if (!input.is(":visible")) {
+                    closeAll(elem);
+                } else {
+                    sync(input, render);
+                    input.css('display', 'none');
+                }
+            });
+        });
+    }
+
+    function closeAll(exception) {
+
+        $('.typdoc').each(function () {
+
+            var render = $(this).find('.typdoc_name:first .typdoc_render');
+            var input = $(this).find('.typdoc_name:first .typdoc_input');
+            var id = $(this).attr('id');
+
+            if ($(this).is(exception)) {
+                input.css('display', 'block');
+            } else {
+                sync(input, render);
+                input.css('display', 'none');
+            }
+        });
+    }
+    function slideElement(elem1, elem2) {
+        elem2.css('display', 'none');
+        elem1.css('display', 'block');
+    }
+
+    function sync(input, renderer) {
+        //var value = input.find('input[lang="en"]').val();
+        var name = input.find('input[name$="\[' + lang + '\]"]:last').val();
+        var id = input.find('input[name$="\[id\]"]:last').val();
+        renderer.find('.render_name').html(name);
+        renderer.find('.render_id').html('(' + id + ')');
+    }
+
+    function confirmDelete(id)
+    {
+        $('#messageDelete').val(id);
+        $('#modalDelete').modal({'keyboard': true});
+    }
+
+    function deleteElement()
+    {
+        $('#' + $('#messageDelete').val()).remove();
+        $('#modalDelete').modal('hide');
+        $('#type_select [value="' + $('#messageDelete').val() + '"]').attr('disabled', false);
+    }
+
+    function addTypdoc()
+    {
+        addElement();
+    }
+
+    function addTypdocCat()
+    {
+        addElement("category");
+    }
+
+    function addElement(type)
+    {
+        var i = increment++;
+        var id;
+
+        if (type == undefined) {
+            type = 'typdoc';
+        }
+
+        if ($('#type_select').val() == 'perso' || type == 'category') {
+            id = 'tmp_' + i;
+        } else {
+            id = $('#type_select').val();
+            if (id == null) {
+                return false;
+            }
+            $('#type_select [value="' + id + '"]').attr('disabled', true);
+        }
+
+        $.ajax({
+            type: "post",
+            url: "/settings/typdocelement",
+            data: {id: id, type: type}
+        }).done(function (msg) {
+            var typdoc = '<li id="' + id + '" class="typdoc ' + (type == 'category' ? 'typdoc_cat' : 'no-nest') + '" typdocid="' + id + '">';
+            typdoc += msg;
+            typdoc += '</li>';
+            $('#list_typdoc').append(typdoc);
+
+            editButtonAction('#' + id);
+
+            $('#' + id + ' .typdocid').keyup(function () {
+                $(this).val(cleanCode($(this).val()));
+            });
+
+            jQuery('html,body').animate({scrollTop: (jQuery("#" + id).offset().top - 50)}, 1000, 'swing');
+            $("#" + id).find('.typdoc_input input').focus();
+        });
+    }
+
+    function initDefault()
+    {
+        $('#typdoc-src').val('default');
+        $('.form_typdoc').submit();
+    }
+
+
+</script>

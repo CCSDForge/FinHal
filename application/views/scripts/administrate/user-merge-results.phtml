@@ -1,0 +1,46 @@
+<?php
+$this->layout()->pageTitle = $this->translate('Fusion des profils utilisateurs HAL');
+$this->layout()->pageDescription = $this->translate("Résultat de la fusion des profils utilisateurs HAL");
+
+$url = $this->url(array('controller' => 'administrate', 'action' => 'users'));
+?>
+
+
+<?php if (empty($this->mergeResults)) : ?>
+
+        <div class="alert alert-info" role="alert"><?php echo $this->translate("Aucune donnée modifiée dans les tables de l'application"); ?></div>
+    <p><a class="btn btn-warning" href="<?php echo $url; ?>"><?php echo $this->translate("Retour administration des utilisateurs"); ?></a></p>
+
+<?php else: ?>
+
+    <p><a class="btn btn-success" href="<?php echo $url; ?>"><?php echo $this->translate("Retour administration des utilisateurs"); ?></a></p>
+
+    <div class="alert alert-info" role="alert"><?php echo $this->translate("La fusion a été journalisée"); ?></div>
+
+
+
+        <div class="panel-footer">
+            <p class="text-danger"><i class="icon glyphicon glyphicon-warning-sign"></i>&nbsp;<?php echo $this->translate("Nombre d'occurences modifiées par table :"); ?></p>
+            <ul class="list-group">
+                <?php foreach ($this->mergeResults as $table => $res) : ?>
+
+                    <?php if (isset($res['ok'])) : ?>
+                        <li class="list-group-item">
+                            <span class="badge"><?php echo $res['ok'] ?></span> <?php echo $table ?>
+                        </li>
+                    <?php else: ?>
+                        <li class="list-group-item">
+                            <span class="badge"><?php echo $res['error'] ?></span> <?php echo $table ?>
+                        </li>
+                    <?php endif; ?>
+
+                        <?php endforeach;
+                        ?>
+                </ul>
+        </div>
+
+<?php endif;
+
+
+
+

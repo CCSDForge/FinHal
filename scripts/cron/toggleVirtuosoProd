@@ -1,0 +1,29 @@
+#! /bin/sh
+
+VIRTUOSOSTATUSFILE=/cache/hal/production/rdf/virtuoso-production-host
+LOGFILE=/cache/hal/production/rdf/toggle.log
+
+productionHost=`cat $VIRTUOSOSTATUSFILE 2>/dev/null`
+hostname=`/bin/hostname`
+
+iptablesActual=`/sbin/iptables -L | grep 'dpt:8890 ' | grep REJECT`
+
+if  [ X$hostname = X$productionHost ] ; then
+     : "Deja machine de production"
+     : "Rien a faire"
+     exit 0
+else
+     # Je ne suis plus la machine de prod
+     # Mais j'ecoute peut etre encore sur 8890!
+     # Si oui, il faut arreter
+
+     case "X$iptablesActual" in
+        X) #  Pas de regle de filtrage, je reponds au requete ,  il faut arreter
+             /sbin/iptables -i eth0 -I INPUT  -m tcp -p tcp --dport 8890 -j REJECT
+             date=`date`
+             echo "$date: Stop $hostname" > $LOGFILE
+        ;;
+        *) # Je ne reponds pas au requete, c'est bien
+        ;;
+     esac
+fi

@@ -1,0 +1,124 @@
+<?php
+
+$parametresRequete = array();
+// Recherche specifique recherche simple
+if ( isset($this->critere) ){
+    $parametresRequete['critere'] = urldecode($this->critere);
+}
+if ( isset($this->category) ){
+	$parametresRequete['category'] = urldecode($this->category);
+}
+if ( isset($this->solR) ){
+    $parametresRequete['solR'] = $this->solR;
+}
+if ( isset($this->page) ){
+    $parametresRequete['page'] = $this->page;
+}
+if ( isset($this->nbResultPerPage) ){
+    $parametresRequete['nbResultPerPage'] = $this->nbResultPerPage;
+}
+if ( isset($this->tri) ){
+    $parametresRequete['tri'] = $this->tri;
+}
+
+if ($this->pageCount> 1 ) { ?>
+
+<ul class="pagination pagination-sm">
+
+	<?php 
+	if ( $this->first != $this->current && $this->firstPageInRange != $this->first) {
+		$parametresRequete['page'] = $this->first; 
+	?>
+	 
+		<li>
+			<a href="javascript:void();" style="padding:0;">
+				<label for="page_1" style="padding: 5px 10px!important; margin-bottom: 0;">
+				<?php echo $this->translate('Première') ?>
+				</label>
+			</a>
+			<input type='radio' value="<?php echo $parametresRequete['page'] ?>" id="page_1" name="page" style="display: none;" />
+		</li>
+	
+	<?php 
+	}
+	?>
+     
+	<?php
+	if (isset($this->previous)) {	
+		$parametresRequete['page'] = $this->previous; 
+	?>
+	
+		<li <?php if (!isset ($this->previous)) echo "class='disabled'"; ?>>
+			<a href="javascript:void();" style="padding:0;">
+				<label for='prev' style="padding: 5px 10px!important; margin-bottom: 0;">
+				<?php echo $this->translate('Précédent') ?>
+				</label>
+			</a>
+			<input type='radio' value="<?php echo $parametresRequete['page'] ?>" id="prev" name="page" style="display: none;" />
+		</li>	
+	
+	<?php 
+	} 
+	?>
+
+	<?php 
+	foreach ($this->pagesInRange as $page) {
+		$parametresRequete['page'] = $page;
+	?>
+	
+		<li <?php if ($page == $this->current) { ?>class="active" <?php } ?>>
+			<a href="javascript:void();" style="padding:0;">
+				<label <?php if ($page != $this->current) echo "for='page_$page'"; ?> style="padding: 5px 10px!important; margin-bottom: 0; min-width: 14px;">
+					<?php echo $page; ?>
+				</label>
+			</a>
+			<input type='radio' value="<?php echo $parametresRequete['page'] ?>" id="page_<?php echo $page ?>" name="page" style="display: none;" />
+		</li>
+		
+	<?php 
+  	}
+  	?> 
+
+	<?php
+	if (isset($this->next)) {	
+		$parametresRequete['page'] = $this->next; 
+	?>
+	
+		<li <?php if (!isset ($this->next)) echo "class='disabled'"; ?>>
+			<a href="javascript:void();" style="padding:0;">
+				<label for='next' style="padding: 5px 10px!important; margin-bottom: 0;">
+				<?php echo $this->translate('Suivant') ?>
+				</label>
+			</a>
+			<input type='radio' value="<?php echo $parametresRequete['page'] ?>" id="next" name="page" style="display: none;" />
+		</li>	
+	
+	<?php 
+	} 
+	?>
+
+	<?php 
+	if ( $this->last != $this->current && $this->lastPageInRange != $this->last) {
+		$parametresRequete['page'] = $this->last;
+	?>
+	 
+		<li>
+			<a href="javascript:void(0);" style="padding:0;">
+				<label for="page_<?php echo $this->pageCount; ?>" style="padding: 5px 10px!important; margin-bottom: 0;">
+				<?php echo $this->translate('Dernière') ?>
+				</label>
+			</a>
+			
+			<input type='radio' value="<?php echo $parametresRequete['page'] ?>" id="page_<?php echo $this->pageCount; ?>" name="page" style="display: none;" />
+		</li>
+	
+	<?php 
+	}
+	?>
+	  
+</ul>
+
+
+<?php 
+} 
+?>

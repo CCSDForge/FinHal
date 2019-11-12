@@ -1,0 +1,27 @@
+<?php
+
+if ($this->exception->getCode() != 404) {
+    if (ENV_PROD != APPLICATION_ENV && ENV_PREPROD != APPLICATION_ENV) {
+        echo '<h2 style="margin-top: 40px;">' . $this->exception->getMessage() . '</h2>';
+        echo '<p><u>Request Parameters:</u><br />';
+        Zend_Debug::dump($this->request->getParams());
+        echo '</p><p><u>Stack trace:</u><br /><ol>';
+        echo preg_replace('/#([0-9])/', '<li>', $this->exception->getTraceAsString());
+        echo '</ol></p>';
+    } else {
+
+        $text = $this->exception->getMessage();
+        $text .= Zend_Debug::dump($this->request->getParams(), null, false);
+        $text .= $this->exception->getTraceAsString();
+
+        if (is_dir(EXCEPTIONS_LOG_PATH)) {
+            $logFilename = EXCEPTIONS_LOG_PATH . "api_exceptions.log";
+            error_log($text, 3, $logFilename);
+            error_log($this->exception->getMessage(), 3, $logFilename);
+        } else {
+            error_log('PANIC: unable to log an exception into file ' . EXCEPTIONS_LOG_PATH . "api_exceptions");
+        }
+    }
+} else {
+    echo '<h2 style="margin-top: 40px;">' . $this->exception->getMessage() . '</h2>';
+}

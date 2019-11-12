@@ -1,0 +1,218 @@
+<?php $this->layout()->pageDescription = $this->translate("Vous trouvez ici vos sélections de dépôts."); ?>
+
+<?php $this->jQuery()
+    ->addJavascriptFile(CCSDLIB ."/js/moment.min.js")
+    ->addJavascriptFile(CCSDLIB ."/js/bootstrap-editable.min.js")
+    ->addStylesheet(CCSDLIB . '/css/bootstrap-editable.css');?>
+<style>
+    .panel-title > a {
+        color: #666666;
+    }
+    .panel-heading .deleteShelf {
+        display:none;
+    }
+    .panel-heading:hover .deleteShelf {
+        display:block;
+    }
+    #mylibrary {
+        margin-bottom: 50px;
+    }
+
+</style>
+<div id="mylibrary">
+
+    <div id="formAddShelf" class="form-group form-actions">
+        <div class="input-group">
+            <input type="text" class="form-control required" name="newShelf" placeholder="<?php echo $this->translate("Nom de l'étagère"); ?>" value=""/>
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default " onclick="addShelf();"><i class="glyphicon glyphicon-file"></i>&nbsp;<?php echo $this->translate("Ajouter une étagère")?></button>
+            </span>
+        </div>
+    </div>
+
+    <div id="shelfList">
+        <div class="panel-group" id="accordion">
+        <?php
+            foreach ($this->myLibrary as $libShelfId => $shelf) {
+                ?>
+                <div class="panel panel-default myShelf" id="myShelf-<?php echo $libShelfId ;?>">
+                    <div class="panel-heading">
+                        <span class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse<?php echo $libShelfId; ?>"><i class="glyphicon glyphicon-folder-close"></i></a>
+                            &nbsp;&nbsp;
+                            <a href="#" class="editable" id="shelf-<?php echo $libShelfId; ?>" data-type="text" data-pk="<?php echo $libShelfId; ?>" data-url="/user/ajaxeditshelf"><?php echo $shelf['lib']; ?></a>
+                            <button type="button" class="btn btn-default btn-xs deleteShelf" style="float:right;" attr-id="<?php echo $libShelfId; ?>"><i class="glyphicon glyphicon-trash"></i>&nbsp;<?php echo $this->translate("Supprimer l'étagère"); ?></button>
+                            &nbsp;<span id="count-shelf-<?php echo $libShelfId; ?>" style="font-size:80%">(<?php echo count($shelf['documents']); ?>&nbsp;<?php echo $this->translate(count($shelf['documents'])>1?"documents":"document"); ?>)</span>
+                        </span>
+                    </div>
+                    <div id="collapse<?php echo $libShelfId; ?>" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <div class="documents">
+                                <table id="tableHeader" class="table table-condensed table-hover table-mylibrary">
+                                    <thead <?php echo count($shelf['documents']) == 0 ? 'style="display : none;"' : ''; ?>>
+                                    <tr>
+                                        <th><?php echo $this->translate('Document'); ?></th>
+                                        <th width="50" class="text-right"><?php echo $this->translate('Actions'); ?></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody <?php echo count($shelf['documents']) == 0 ? 'style="display : none;"' : ''; ?>>
+
+                                    <?php
+                                    $i = 0;
+                                    foreach ($shelf['documents'] as $libDocId => $doc) {
+
+                                        ?>
+                                        <tr id="myDocument-<?php echo $libShelfId."-".$libDocId ;?>" class="myDocument">
+                                            <td><?php echo $doc['document']; ?></td>
+                                            <td width="50">
+                                                <div class="pull-right">
+                                                    <input type="hidden" name="libId" value="<?php echo $libShelfId.'-'.$libDocId; ?>" />
+                                                    <a class="deleteElement" title="<?php echo $this->translate('Supprimer'); ?>" href="javascript:void(0)"><i class="glyphicon glyphicon-trash"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <?php
+                                        $i++;
+                                    }
+                                    ?>
+                                    </tbody>
+                                    <tfoot <?php echo count($shelf['documents']) > 0 ? 'style="display : none;"' : ''; ?>>
+                                    <tr>
+                                        <td class="noRow" colspan="3"><em class="text-muted"><?php echo $this->translate("Aucun article"); ?></em></td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php
+            }
+        ?>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default cloneShelf" id="myShelf-" class="myShelf" style="display:none;">
+    <div class="panel-heading">
+        <span class="panel-title">
+            <a ><i class="glyphicon glyphicon-folder-close"></i></a>
+            &nbsp;&nbsp;
+            <a href="#" class="editable" id="shelf-" data-type="text" data-pk="" data-url="/user/ajaxeditshelf"></a>
+            <button type="button" class="btn btn-default btn-xs deleteShelf" style="float:right;"><i class="glyphicon glyphicon-trash"></i>&nbsp;<?php echo $this->translate("Supprimer l'étagère"); ?></button>
+        </span>
+    </div>
+</div>
+
+
+<?php
+/*    echo $this->confirm("Suppression de l'article", "Souhaitez-vous enlever ce document de cette étagère ?")
+			  ->setId('confirmDeleteDocument')
+			  ->setTrigger('.deleteElement')
+			  ->setJsInit('$("#confirm-id").val($(this).prev().val());')
+			  ->setJsCallback('deleteElement();');
+ */
+	
+    echo $this->confirm("Suppression de l'étagère", "Souhaitez-vous supprimer cette étagère et enlever les documents qui s'y trouvent ?")
+			  ->setId('confirmDeleteShelf')
+			  ->setTrigger('.deleteShelf')
+			  ->setJsInit('$("#confirm-id").val($(this).attr("attr-id"));')
+			  ->setJsCallback('deleteElement();');
+
+?>
+
+<script type="text/javascript">
+    $( ".deleteElement" ).click(function() {    
+        deleteElement($("#confirm-id").val($(this).prev().val()));
+    });    
+
+	$(document).ready(function () {
+		$.fn.editable.defaults.mode = 'inline';
+        $('.editable').editable({
+            success: function(response) {
+                if ( !response ) {
+                    return "<?php echo $this->translate("Ce nom d'étagère existe déjà !"); ?>";
+                }
+            }
+        });
+
+        $('#accordion').on('hide.bs.collapse', function () {
+            $(this).find('.in').closest('.panel-default').find('.glyphicon-folder-open').attr('class', 'glyphicon glyphicon-folder-close');
+        }).on('shown.bs.collapse', function () {
+            $(this).find('.in').closest('.panel-default').find('.glyphicon-folder-close').attr('class', 'glyphicon glyphicon-folder-open');
+        });
+	});
+
+    function deleteElement()
+    {
+		var id = $('#confirm-id').val();
+        var url;
+		var selector;
+		var tmp = id.split('-')
+
+		if (tmp.length == 1) {
+			selector = 'myShelf';
+		} else {
+			selector = 'myDocument';
+		}
+
+    	$.ajax({
+			type: "post",
+            url: '/user/ajaxdeletelibraryelement',
+			data: { id : id }
+		}).done(function( msg ) {
+			if (msg != 'deleteShelfProblem' && msg != 'deleteDocumentProblem' && msg != 'noAjax' && msg != 'noId') {
+				if (selector == 'myDocument') {
+					// mise à jour nb doc restant
+                    if ( msg > 1 ) {
+                        $('#count-shelf-' + tmp[0]).text('(' + msg + ' <?php echo $this->translate('documents'); ?>)');
+                    } else {
+                        $('#count-shelf-' + tmp[0]).text('(' + msg + ' <?php echo $this->translate('document'); ?>)');
+                    }
+                    var myDoc = $('#myDocument-' + id);
+					var shelf = myDoc.closest('.myShelf');
+                    myDoc.remove();
+                    if (shelf.find('.myDocument').length == 0) {
+						shelf.find('.panel-heading i.glyphicon').attr('class', 'glyphicon glyphicon-folder-close');
+                        shelf.find('.panel-collapse').hide();
+					}
+                } else {
+					$('#myShelf-' + id).remove();
+				}
+			} else {
+				message("<?php echo $this->translate("Problème lors de la suppression !"); ?> (code : " + msg + ")", "alert-danger");
+			}
+		});
+
+
+    }
+
+    function addShelf () {
+		var elem = $('.cloneShelf').clone();
+		var nameNewShelf = $('[name="newShelf"]').val();
+
+		if (validForm($('#formAddShelf'))) {
+			$('#formAddShelf .error').removeClass('error');
+    		$.ajax({
+    			type: "post",
+                url: '/user/ajaxaddshelf',
+    			data: { name : nameNewShelf }
+    		}).done(function( id ) {
+                if ( id ) {
+                    elem.css('display', 'block');
+                    elem.removeClass('cloneShelf').attr('id', 'myShelf-' + id);
+                    elem.find('.editable').attr('id', 'shelf-' + id).attr('data-pk', id).text(nameNewShelf);
+                    elem.find('.deleteShelf').attr('attr-id', id);
+                    elem.find('.editable').editable();
+                    $('#accordion').append(elem);
+                } else {
+                    message("<?php echo $this->translate("Ce nom d'étagère existe déjà !"); ?>", "alert-danger");
+                }
+                $('[name="newShelf"]').val('');
+    		});
+		}
+
+
+    }
+
+</script>

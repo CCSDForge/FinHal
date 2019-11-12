@@ -1,0 +1,58 @@
+<?php 
+$tabAlias = Ccsd_Referentiels_Alias::getAllAlias($this->id, $this->core);
+if (count($tabAlias)) { 
+?>
+<div class="history">
+    <h4><?php echo $this->translate('Alias') ?></h4>
+    <div class='row'>
+	<div class='col-md-12'>
+			
+	    <table class="table table-condensed">
+		<thead>
+		<tr>
+		    <th>
+		    <?php 
+                    if (count($tabAlias) > 1) {
+                        echo $this->translate('Anciens identifiants') ;
+                    }
+                    else {
+                        echo $this->translate('Ancien identifiant') ;
+                    }
+                    ?>
+		    </th>
+		</tr>
+		</thead>
+		<tbody>
+		<?php 
+  			//$halUser = new Hal_User();
+		foreach ($tabAlias as $ligne)
+		{
+    		    $oDate = new Zend_Date($ligne['DATEMODIF']);
+    		    
+    		?>
+    		<tr>
+    		    <td>
+    		        <i>
+    			<?php 
+	    		echo 	$this->translate("A fusionné avec l'élément numéro ") . " " .
+                                                $ligne['OLDREFID'] . " " .
+	    					$this->translate('le') . " " . 
+	    			    		$oDate->toString(Zend_Date::DATE_LONG) . " " . 
+	    			    		$this->translate('à') . " " . 
+	    			    		$oDate->toString(Zend_Date::TIMES);    			    			
+			?>
+    			</i>
+    		    </td>
+    		</tr>
+    		<?php
+    		}
+    		?>
+		</tbody>
+	    </table>
+			
+	</div>
+    </div>
+</div>       
+<?php 
+} 
+?>

@@ -1,0 +1,34 @@
+<?php echo $this->layout()->submenu; ?>
+
+
+
+<?php if (count($this->pages)) {
+    ?>
+    <ol class="breadcrumb">
+        <?php foreach($this->pages as $i => $page) {
+            $active = $page->isActive() && $this->layout()->breadcrumbs == '';
+            ?>
+            <li class="<?php echo $active ? 'active' : ''?>">
+                <?php if ($active) { ?>
+                    <?php echo $this->translate($page->getLabel())?>
+                <?php } else { ?>
+                    <a href="<?php echo PREFIX_URL . $page->getController() . '/' . $page->getAction();?>"><?php echo $this->translate($page->getLabel())?></a>
+                <?php } ?>
+            </li>
+            <?php if ($page->getController() == 'submit' && isset($this->layout()->submitTypdoc)) {
+                ?>
+                <li class="active"><?php echo $this->layout()->submitTypdoc ?></li>
+                <?php
+            }
+        }
+        if ($this->layout()->breadcrumbs != ''){
+            ?>
+            <li class="active"><?php echo $this->layout()->breadcrumbs ?></li>
+        <?php
+        }
+        ?>
+        <?php if(!empty($this->layout()->docLink)) { ?>
+            <a href="<?php echo $this->layout()->docLink; ?>" target="_blank" rel="noopener"><span class="glyphicon glyphicon-question-sign" style="float:right; font-size:22px;" data-toggle="tooltip" data-original-title="Documentation"></span></a>
+        <?php }?>
+    </ol>
+<?php } ?>

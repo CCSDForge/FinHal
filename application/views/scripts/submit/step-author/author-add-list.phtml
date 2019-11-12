@@ -1,0 +1,37 @@
+<?php
+$form = new Ccsd_Form();
+$form->addElement('textarea', 'list', array(
+    'label'	=>	"Liste d'auteurs",
+    'rows'  =>  5,
+    'value' =>  "", //"R. Aaij, B. Adeva, M. Adinolfi, C. Adrover, A. Affolder, Z J Ajaltouni, J. Albrecht, F. Alessio, M. Alexander, S. Ali",
+    'required' => true));
+$form->addElement('select', 'form', array(
+    'label'	=>	"Forme",
+    'required' => true,
+    'multiOptions' => array(
+        'lf'	=>	'Nom prénom',
+        'fl'	=>	'Prénom Nom',
+    )));
+$form->addElement('text', 'separator', array(
+    'label'	=>	"Séparateur",
+    'required' => true,
+    'value' => ','));
+$form->addElement('select', 'struct', array(
+    'label'	=>	"Rechercher une affiliation pour chaque auteur",
+    'required' => true,
+    'multiOptions' => array(
+        '0'	=>	'Non',
+        '1'	=>	'Oui',
+    )));
+$form->addElement('button', 'Ajouter', array(
+    'class'		=>	'btn btn-primary',
+    'onclick'	=>"submitAuthorForm('new');"));
+
+$form->removeDecorator('Form');
+?>
+
+<div class="aut_new" attr-popoverid="aut_new">
+	<form id="author-form" class="form">
+        <?php echo $form; ?>
+	</form>
+</div>

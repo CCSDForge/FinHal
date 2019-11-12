@@ -1,0 +1,14 @@
+--  -*- sql -*-
+-- Initialisation de la table pour SoftwareHeritage
+
+-- Suis globalement le meme schema que DOC_IDARXIV
+
+DROP TABLE IF EXISTS `DOC_SWH`;
+CREATE TABLE `DOC_SWH` (
+  `DOCID`    int(10) unsigned NOT NULL,
+  `REMOTEID` varchar(50) DEFAULT NULL,
+  `PENDING`  varchar(255) DEFAULT NULL,
+  `MODIFIED` date DEFAULT NULL,
+  PRIMARY KEY (`DOCID`),
+  KEY `RemoteIDidx` (`REMOTEID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

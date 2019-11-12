@@ -1,0 +1,114 @@
+<?php
+
+$parametresRequete = array();
+
+if ( isset($this->critere) ){
+    $parametresRequete['critere'] = urldecode($this->critere);
+}
+if ( isset($this->category) ){
+	$parametresRequete['category'] = urldecode($this->category);
+}
+if ( isset($this->solR) ){
+    $parametresRequete['solR'] = $this->solR;
+}
+if ( isset($this->page) ){
+    $parametresRequete['page'] = $this->page;
+}
+if ( isset($this->nbResultPerPage) ){
+    $parametresRequete['nbResultPerPage'] = $this->nbResultPerPage;
+}
+if ( isset($this->tri) ){
+    $parametresRequete['tri'] = $this->tri;
+}
+
+if ($this->pageCount > 1 ) { ?>
+<ul class="pagination pagination-sm">
+	<?php 
+	if ( $this->first != $this->current && $this->firstPageInRange != $this->first) {
+		$parametresRequete['page'] = $this->first; 
+	?>
+		<li>
+			<a href="<?php echo URL . $this->url($parametresRequete, $this->route_browse); ?>">
+		    <?php echo $this->translate('Première') ?>
+			</a>
+		</li>
+	<?php 
+	}
+	?>  
+	
+	<?php 
+	if ( $this->previous) {
+		$parametresRequete['page'] = $this->previous; 
+	?>
+		<li>
+			<a href="<?php echo URL . $this->url($parametresRequete, $this->route_browse); ?>">
+		    <?php echo $this->translate('Précédent') ?>
+			</a>
+		</li>
+	<?php
+	}
+	?>   
+	
+	<?php 
+	foreach ($this->pagesInRange as $page) {
+	    $parametresRequete['page'] = $page; 
+	?>
+		<li <?php if ($page == $this->current) { ?>class="active" <?php } ?>> 
+	    	<a href="<?php if ($page != $this->current) { echo URL . $this->url($parametresRequete, $this->route_browse); } else { echo "#"; } ?>">
+	    	<?php echo $page; ?>
+	  		</a>
+		</li>
+	<?php
+	}
+	?>
+	
+	<?php 
+	if ( $this->next ) {
+		$parametresRequete['page'] = $this->next;
+	?>
+		<li>
+			<a href="<?php echo URL . $this->url($parametresRequete, $this->route_browse); ?>">
+			<?php echo $this->translate('Suivant') ?>
+			</a>
+		</li>
+	<?php
+	}
+	?>   
+	
+	<?php 
+	if ( $this->last != $this->current && $this->lastPageInRange != $this->last) {
+		$parametresRequete['page'] = $this->last; 
+	?>
+		<li>
+			<a href="<?php echo URL . $this->url($parametresRequete, $this->route_browse) ?>">
+	    	<?php echo $this->translate('Dernière') ?>
+			</a>
+		</li>
+	<?php 
+	}
+	?>   
+</ul>
+<?php 
+} 
+?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

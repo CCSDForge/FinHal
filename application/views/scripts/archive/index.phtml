@@ -1,0 +1,177 @@
+<style>
+    .well h4, .modal .panel h4 {
+        color: inherit;
+    }
+    .list-group-item-header {
+        font-size: 12px;
+        font-weight: 700;
+        color: #959595;
+        text-transform: uppercase;
+    }
+    .list-group-item-elem {
+        margin-top:5px;
+        margin-bottom:20px;
+    }
+    .modal-title {
+        font-size: 14px;
+    }
+    .ok {
+        color: #3c763d;
+    }
+    .ko {
+        color: #a94442;
+    }
+
+</style>
+
+
+<div class="well">
+    <h4 style="margin-bottom:20px;"><?php echo $this->translate('Sélection des documents'); ?></h4>
+    <form action="/archive/index" method="post">
+        <div class="row">
+            <div class="col-md-1">
+                <span class="list-group-item-header"><?php echo $this->translate('docid') ?></span>
+                <input type="text" name="docid" value="<?php echo $this->docid ?>" class="form-control list-group-item-elem" />
+            </div>
+            <div class="col-md-2">
+                <span class="list-group-item-header"><?php echo $this->translate('ID') ?></span>
+                <input type="text" name="halId" value="<?php echo $this->docid ?>" class="form-control list-group-item-elem" />
+            </div>
+            <div class="col-md-5">
+                <div class="row">
+                    <div class="col-md-6">
+                        <span class="list-group-item-header"><?php echo $this->translate('De') ?></span>
+                        <div class="input-group input-group-sm list-group-item-elem">
+                            <span class="input-group-addon" id="basic-addon1"><i class="glyphicon glyphicon-calendar"></i></span>
+                            <input type="text" name="start" value="<?php echo $this->start ?>" id="date_cons_start" attr-changemonth="1" attr-changeyear="1" class="datepicker form-control" />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="list-group-item-header"><?php echo $this->translate('A') ?></span>
+                        <div class="input-group input-group-sm list-group-item-elem">
+                            <span class="input-group-addon" id="basic-addon1"><i class="glyphicon glyphicon-calendar"></i></span>
+                            <input type="text" name="end" value="<?php echo $this->end ?>" id="date_cons_end" attr-changemonth="1" attr-changeyear="1" class="datepicker form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <span class="list-group-item-header"><?php echo $this->translate('Statut') ?></span>
+                <select name="status[]" class="form-control input-sm list-group-item-elem" multiple style="height:110px;">
+                    <?php foreach ($this->listStatus as $code) { ?>
+                        <option value="<?php echo $code?>" <?php echo (is_array($this->status) && in_array($code, $this->status) ? 'selected' : ''); ?> ><?php echo $this->translate('archive-status-' . $code) . ' (' . $code . ')'; ?></option>
+                    <?php } ?>
+                </select>
+            </div>
+        </div>
+        <div class="text-center">
+            <button class="form-control btn btn-primary" type="submit" style="width:200px"> <i class="glyphicon glyphicon-search"></i>&nbsp;<?php echo $this->translate('Rechercher') ?></button>
+        </div>
+    </form>
+</div>
+
+<?php if (isset($this->docids))  : ?>
+
+<?php  $nbDocs = count($this->docids); ?>
+
+	<?php if ($nbDocs == 0) :?>
+	        <div class="panel panel-default">
+	            <div class="panel-body">
+	                <div class="alert alert-danger">
+	                    <strong><i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;<?php echo $this->translate('Aucune donnée à afficher'); ?></strong>
+	                </div>
+	            </div>
+	        </div>
+	        <?php return;?>
+	    <?php endif; ?>
+
+
+
+    <div class="well" style="background:#fff;">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th><?php echo $this->translate('DOCID'); ?></th>
+                    <th><?php echo $this->translate('Référence'); ?></th>
+                    <th><?php echo $this->translate('État'); ?></th>
+                    <th class="text-right" style="width:100px;"><?php echo $this->translate('Actions'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($this->docids as $docid) {
+                    $archive = new Ccsd_Archive($docid);
+                    $status = $archive->getSTATUT();
+
+                    if ($status == Ccsd_Archive::ARCHIVE_ACCEPTEE) {
+                        $class = 'success';
+                    } else if ($status == Ccsd_Archive::ARCHIVE_PRISE_EN_CHARGE) {
+                        $class = 'warning';
+                    } else {
+                        $class = 'danger';
+                    }
+                    ?>
+                    <tr>
+                        <td><span class="label label-<?php echo $class ?>"><?php echo $docid ?></span></td>
+
+                        <td>
+                        <a href="<?php echo PREFIX_URL .  $archive->getDocument()->getId() . 'v' .  $archive->getDocument()->getVersion() ?>"><?php  echo $archive->getDocument()->getId(). ' ' . $this->translate('version') . ' ' . $archive->getDocument()->getVersion(); ?></a>
+                        <br>
+                        <?php echo $archive->getDocument()->getCitation('full') ?></td>
+                        <td class="<?php echo $class ?>"><strong><?php echo $this->translate('archive-status-' . $status)  ?></strong> -
+                            <small><?php echo $this->translate('archive-status-' . $status . '-desc')  ?></small></td>
+                        <td class="text-right">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <?php if ($status != Ccsd_Archive::ARCHIVE_ACCEPTEE) { ?>
+                                    <a href="javascript:void(0);" onclick="archiveDocument(<?php echo $docid?>);" class="btn btn-primary" data-toggle="tooltip" title="<?php echo $this->translate("Envoyer à l'archivage"); ?>">
+                                        <i class="glyphicon glyphicon-send"></i>
+                                    </a>
+                                <?php } ?>
+                                <a href="javascript:void(0);" onclick="showDetails(<?php echo $docid?>);" class="btn btn-default" data-toggle="tooltip" title="<?php echo $this->translate("Détails"); ?>">
+                                    <i class="glyphicon glyphicon-eye-open"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+    <div id="popup_dialog"></div>
+    <script type="text/javascript">
+        function showDetails (docid)
+        {
+            $.ajax({
+                url: '/archive/ajaxdetails',
+                type : "post",
+                data: {'docid': docid},
+                success : function (content) {
+                    $("#popup_dialog").html(content);
+                    $("#popup_dialog>.modal").modal('show');
+                }
+            });
+        }
+
+        function archiveDocument (docid)
+        {
+            $.ajax({
+                url: '/archive/ajaxarchivedoc',
+                type : "post",
+                data : {"docid" : docid },
+                //dataType : 'html',
+
+
+                success : function(response, status){
+                    var returnedData = JSON.parse(response);
+
+                    message(returnedData['message'], returnedData['style']);
+                },
+
+                error : function(resultat, statut, erreur){
+
+                }
+
+                });
+        }
+    </script>
+
+<?php endif; ?>

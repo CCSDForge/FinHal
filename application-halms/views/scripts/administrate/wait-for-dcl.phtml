@@ -1,0 +1,31 @@
+<?php
+/**
+ * Vue pour un document dans l'état initial
+ */
+?>
+<div id="document" class="well halms-well">
+    <h2 class="no-margin"><?php echo $this->document->getId(true)?>
+        <small>| <?php echo $this->translate('status_' . $this->docStatus);?> (<?php echo $this->translate('déposé le') . ' ' . $this->document->getSubmittedDate(Zend_Date::DAY_SHORT.' '.Zend_Date::MONTH_NAME_SHORT.' '.Zend_Date::YEAR) . ' ' . $this->translate('par') . ' ' . $this->document->getContributor('fullname')?>)</small>
+        <?php include __DIR__ . '/history.phtml';?>
+    </h2>
+    <hr/>
+    <div class="well"><?php echo $this->document->getCitation('full');?></div>
+    <hr/>
+    <h4><?php echo $this->translate('Document en attente de traitement pr DCL'); ?></h4>
+
+    <form action="/administrate/index" method="post" id="form">
+        <input type="hidden" name="docid" value="<?php echo $this->document->getDocid();?>" />
+        <input type="hidden" name="newstatus" id="status" value="<?php echo Halms_Document::STATUS_INITIAL_READY?>" />
+        <div class="well text-center" style="background-color: #f5f5f5;">
+            <textarea name="comment" class="form-control" rows="2" cols="20" placeholder="<?php echo $this->translate('Commentaire'); ?>" style="width:600px;margin:0 auto 20px;"></textarea>
+            <div class="btn-group btn-group">
+                <button type="submit" class="btn btn-primary btn-action" id="btn-submit">
+                    <i class="glyphicon glyphicon-pencil"></i>&nbsp;<?php echo $this->translate('Modifier le package'); ?>
+                </button>
+                <a  class="btn btn-default btn-action" href="/administrate">
+                    <i class="glyphicon glyphicon-chevron-left"></i>&nbsp;<?php echo $this->translate('Retour'); ?>
+                </a>
+            </div>
+        </div>
+    </form>
+</div>

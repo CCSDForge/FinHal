@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
+  <skos:Concept rdf:about="https://data.archives-ouvertes.fr/subject/phys">
+    <dc:identifier>phys</dc:identifier>
+    <dcterms:identifier>physics</dcterms:identifier>
+    <skos:prefLabel xml:lang="en">Physics</skos:prefLabel>
+    <skos:prefLabel xml:lang="fr">Physique</skos:prefLabel>
+    <skos:inScheme rdf:resource="https://data.archives-ouvertes.fr/subject"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.astr"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.cond"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.grqc"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.hexp"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.hist"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.hlat"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.hphe"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.hthe"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.meca"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.mphy"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.nexp"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.nucl"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.phys"/>
+    <skos:narrower rdf:resource="https://data.archives-ouvertes.fr/subject/phys.qphy"/>
+  </skos:Concept>
+</rdf:RDF>

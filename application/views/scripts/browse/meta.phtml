@@ -1,0 +1,41 @@
+<?php
+include_once __DIR__ . '/../partials/browse_type.phtml';
+
+if (isset($this->letter)) {
+    include_once __DIR__ . '/../partials/browse_alphabet.phtml';
+}
+
+if (count($this->facets) == 0) {
+    echo '<div class="col-md-7">';
+    echo '<p class="lead">';
+    echo $this->translate("Pas de données pour l'instant.");
+    echo '</p>';
+    echo '</div>';
+
+    return;
+}
+?>
+<div class="row">
+    <div class="col-md-7">
+        <ul class="list-group">
+            <?php include_once __DIR__ . '/../partials/browse_sort.phtml'; ?>
+            <?php foreach ($this->facets as $label => $value) : ?>
+
+                <?php $href = PREFIX_URL . 'search/index/q/*/' . $this->fieldSolr . '/' . urlencode($value['code']); ?>
+                <li class="list-group-item">
+                    <a rel="nofollow" href="<?php echo $href ?>"
+                       target="_blank"><?php echo $this->escape($label); ?></a>
+                    <a rel="nofollow" href="<?php echo $href ?>"
+                       class="btn btn-default btn-xs pull-right"><?php echo $value['count']; ?></a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+
+        <?php if (count($this->facets) >= Ccsd_Search_Solr::SOLR_MAX_RETURNED_FACETS_RESULTS): ?>
+            <div class="alert alert-info" role="alert">
+                <?php echo $this->translate('Affichage limité aux ') . Ccsd_Search_Solr::SOLR_MAX_RETURNED_FACETS_RESULTS . $this->translate(' premières réponses.'); ?>
+            </div>
+        <?php endif; ?>
+
+    </div>
+</div>

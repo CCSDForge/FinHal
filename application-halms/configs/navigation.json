@@ -1,0 +1,22 @@
+[  {
+  "label" : "Accueil",
+  "controller" : "index",
+  "action" : "index",
+  "resource" : "index-index",
+  "icon" : "glyphicon glyphicon-home",
+  "privilege": "guest"
+},{
+  "label" : "Mes articles",
+  "controller" : "submissions",
+  "action" : "index",
+  "resource" : "submissions-index",
+  "icon" : "glyphicon glyphicon-file",
+  "privilege": "member"
+},{
+    "label" : "Tableau de bord",
+    "controller" : "administrate",
+    "action" : "index",
+    "resource" : "administrate-index",
+    "icon" : "glyphicon glyphicon-tasks",
+    "privilege": "halmsadmin"
+}]

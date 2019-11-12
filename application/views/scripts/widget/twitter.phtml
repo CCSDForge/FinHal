@@ -1,0 +1,11 @@
+<?php
+
+if ($this->format == 'timeline'){?>
+    <a class="twitter-timeline" href="https://twitter.com/<?php echo $this->twitter;?>" data-tweet-limit="3" data-width="520" data-height="400">Tweets by <?php echo $this->twitter;?></a>
+<?php } else if ($this->format == 'follow'){?>
+    <a href="https://twitter.com/<?php echo $this->twitter;?>" class="twitter-follow-button" data-show-count="false">Follow @<?php echo $this->twitter;?></a>
+<?php } else if ($this->format == 'tweet'){?>
+    <a href="https://twitter.com/intent/tweet?screen_name=<?php echo $this->twitter;?>" class="twitter-mention-button" data-show-count="false">Tweet to @<?php echo $this->twitter;?></a>
+<?php }?>
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>

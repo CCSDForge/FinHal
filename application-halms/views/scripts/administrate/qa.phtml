@@ -1,0 +1,91 @@
+<?php include __DIR__ . '/../common/document-header.phtml';?>
+
+<?php if (isset($this->msgAuthor) && $this->msgAuthor != '') { ?>
+    <div class="alert alert-info">
+        <strong><i class="glyphicon glyphicon-info-sign"></i>&nbsp;<?php echo $this->translate("Remarques de l'auteur"); ?></strong> : <?php echo $this->msgAuthor ?>
+    </div>
+<?php } ?>
+
+
+<div class="row">
+    <div class="col-md-6">
+        <h4><?php echo $this->translate('Document source'); ?></h4>
+        <table class="table table-hover">
+            <tbody class="listfiles">
+            <tr style="height:40px;">
+                <td>
+                    <a href="<?php echo $this->document->getUri();?>" target="_blank"><i class="glyphicon glyphicon-link"></i>&nbsp;<?php echo $this->translate('Lien vers le dépôt dans HAL'); ?></a>
+                </td>
+            </tr>
+            <tr style="height:40px;">
+                <td>
+                    <a href="<?php echo $this->document->getUri();?>/document" target="_blank"><i class="glyphicon glyphicon-file"></i>&nbsp;<?php echo $this->translate('Fichier PDF'); ?></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <h4><?php echo $this->translate('Document transformé'); ?></h4>
+        <table class="table table-hover">
+            <tbody class="listfiles">
+            <?php foreach($this->outputFiles as $type => $file) { ?>
+                <tr style="height:40px;">
+                    <td>
+                        <a href="/file/dcl/docid/<?php echo $this->document->getDocid();?>/filename/<?php echo $file;?>?<?php echo rand(0,9999);?>" target="_blank"><i class="glyphicon glyphicon-file"></i>&nbsp;<?php echo $type . ' - ' . $file; ?></a>
+                        <?php if ($type == 'XML') { ?>
+                            <form action="/administrate/index" method="post" enctype="multipart/form-data" class="form-inline" style="float:right;">
+                                <input type="hidden" name="docid" value="<?php echo $this->document->getDocid();?>" />
+                                <input type="hidden" name="oldfile" value="<?php echo $file;?>" />
+                                <input type="file" name="file" style="display:none;"/>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default btn-xs select-files"><i class="glyphicon glyphicon-folder-open"></i>&nbsp;<?php echo $this->translate('Remplacer par...'); ?></button>
+                                </div>
+                            </form>
+                        <?php } ?>
+                    </td>
+                </tr>
+            <?php } ?>
+            <tr style="height:40px;">
+                <td>
+                    <a href="javascript:void(0)" onclick="openDir(this);"><i class="glyphicon glyphicon-folder-close"></i>&nbsp;<?php echo $this->translate('Contenu du répertoire DCL'); ?></a>
+                    <div class="list-files">
+                        <ul class="">
+                            <?php
+                            foreach($this->files as $file) {
+                                ?>
+                                <li><a href="/file/dcl/docid/<?php echo $this->document->getDocid();?>/filename/<?php echo $file;?>?<?php echo rand(0,9999);?>" target="_blank"><i class="glyphicon glyphicon-file"></i>&nbsp;<?php echo $file ?></a></li>
+                                <?php
+                            } ?>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<?php include __DIR__ . '/../common/document-actions.phtml'; ?>
+
+<script type="text/javascript">
+    $(function() {
+        $('.select-files').click(function() {
+            $(this).closest('form').find('input[type="file"]').click();
+        });
+        $('input[type="file"]').change(function() {
+            $(this).closest('form').submit();
+        });
+        $('.list-files').hide();
+    });
+    function openDir(elem)
+    {
+        if ($('.list-files').is(':visible')) {
+            $(elem).find('i').attr('class', 'glyphicon glyphicon-folder-close');
+            $('.list-files').hide();
+        } else {
+            $(elem).find('i').attr('class', 'glyphicon glyphicon-folder-open');
+            $('.list-files').show();
+        }
+    }
+</script>

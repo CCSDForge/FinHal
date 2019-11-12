@@ -1,0 +1,332 @@
+<?php
+/** @var Hal_View $this */
+if ($this->numFound == 0) {
+    return null;
+}
+
+// Nombre de docs exportables
+if ($this->numFound >= Hal_Search_Solr_Api::MAX_EXPORT_ROWS) {
+    $nbExportableDocs = Hal_Search_Solr_Api::MAX_EXPORT_ROWS;
+} else {
+    $nbExportableDocs = $this->numFound;
+}
+$uniqShelfId = uniqid();
+?>
+
+<?php include_once 'claimOwnershipModal.phtml'; ?>
+
+<div class="btn-group" style="float: right; margin-right: 10px;">
+	<button id="btn-tools" type="button" class="btn btn-sm btn-default dropdown-toggle"
+		data-toggle="dropdown">
+		<i class="glyphicon glyphicon-wrench"></i>&nbsp;<?php echo $this->translate('Outils'); ?>&nbsp;<span
+			class="caret"></span>
+	</button>
+	<ul class="dropdown-menu pull-right" role="menu" aria-labelledby="btn-tools">
+		<!--li class="dropdown-header doc-nb text-center"><?php echo $this->translate()->getTranslator()->plural("Pour ce document", "Pour les %s documents", $nbExportableDocs);  ?></li-->
+		<li class="dropdown-header doc-nb text-center"><?php echo $this->translate(array("Pour ce document", "Pour les %s documents", $nbExportableDocs), $nbExportableDocs);  ?></li>
+		<li class="divider"></li>
+        <?php if (Hal_Auth::isTamponneur()) { ?>
+            <li class="dropdown-submenu"><a href="javascript:void(0)"><i
+				class="glyphicon glyphicon-tags"></i>&nbsp;<?php echo $this->translate('Tamponner')?></a>
+			<ul class="dropdown-menu pull-right"
+				style="max-height: 100px; height: 100px; overflow: auto; width: 100%; left: -95%;">
+                <?php foreach(Hal_Auth::getDetailsRoles(Hal_Acl::ROLE_TAMPONNEUR) as $sid => $tampid) { ?>
+                    <li><a href="javascript:void(0)"
+					onclick="addTampon(<?php echo $sid;?>, '<?php echo $tampid ?>')"><?php echo $tampid ?></a></li>
+                <?php } ?>
+                </ul></li>
+            <li class="dropdown-submenu"><a href="javascript:void(0)"><i
+                        class="glyphicon glyphicon-tag"></i>&nbsp;<?php echo $this->translate('Détamponner')?></a>
+                <ul class="dropdown-menu pull-right"
+                    style="max-height: 100px; height: 100px; overflow: auto; width: 100%; left: -95%;">
+                    <?php foreach(Hal_Auth::getDetailsRoles(Hal_Acl::ROLE_TAMPONNEUR) as $sid => $tampid) { ?>
+                        <li><a href="javascript:void(0)"
+                               onclick="delTampon(<?php echo $sid;?>, '<?php echo $tampid ?>')"><?php echo $tampid ?></a></li>
+                    <?php } ?>
+                </ul></li>
+
+
+        <?php } ?>
+
+        <?php if (Hal_Auth::isLogged() ) { ?>
+            <li class="dropdown-submenu"><a href="javascript:void(0)"><i
+				class="glyphicon glyphicon-book"></i>&nbsp;<?php echo $this->translate('Ajouter à ma bibliothèque')?></a>
+			<ul class="dropdown-menu pull-right"
+				style="max-height: 100px; height: 200px; overflow: auto; width: 100%; left: -95%;">
+				<li id="newShelf<?php echo $uniqShelfId;?>">
+					<div class="input-group input-group-sm" style="margin-left: 5px; margin-right: 5px;">
+						<input type="text" class="form-control"
+							placeholder="<?php echo $this->translate('Nouvelle étagère') ?>"> <span
+							class="input-group-btn">
+							<button class="btn btn-default" type="button" onclick="addInLibrary(0, this);">
+								<i class="glyphicon glyphicon-ok"></i>
+							</button>
+						</span>
+					</div>
+				</li>
+                    <?php foreach(Hal_Auth::getShelves() as $shelf) { ?>
+                        <li attr-id="<?php echo $shelf['LIBSHELFID'] ?>"><a
+					href="javascript:void(0);" onclick="addInLibrary(<?php echo $shelf['LIBSHELFID']?>, this);"><?php echo $shelf['LIB'] ?></a></li>
+                    <?php } ?>
+                </ul></li>
+        <?php } ?>
+
+        <li class="dropdown-submenu"><a href="#"><i class="glyphicon glyphicon-export"></i>&nbsp;<?php echo $this->translate('Exporter')?></a>
+			<ul class="dropdown-menu pull-right" style="width: 100%; left: -95%;">
+				<li><a href="javascript:void(0)" onclick="exportResult('xml-tei')">XML-TEI</a></li>
+				<li><a href="javascript:void(0)" onclick="exportResult('bibtex')">BibTeX</a></li>
+				<li><a href="javascript:void(0)" onclick="exportResult('endnote')">EndNote</a></li>
+				<li><a href="javascript:void(0)" onclick="exportResult('csv')">CSV</a></li>
+				<li><a href="javascript:void(0)" onclick="exportResult('pdf')">PDF</a></li>
+                <li><a href="javascript:void(0)" onclick="exportResult('rtf')">RTF</a></li>
+			</ul></li>
+
+	    <li class=""><a href="javascript:void(0)"  onclick="exportResult('advanced')"><i
+				class="glyphicon glyphicon-export"></i>&nbsp;<?php echo $this->translate('Export avancé...')?></a>
+        </li>
+
+        <li class="dropdown-submenu"><a href="#"><i class="glyphicon glyphicon-export"></i>&nbsp;<?php echo $this->translate('Syndication')?></a>
+			<ul class="dropdown-menu pull-right" style="width: 100%; left: -95%;">
+                <li><a rel="nofollow" target="_blank" href="<?php echo $this->exportUriList['rss']; ?>">RSS</a></li>
+                <li><a rel="nofollow" target="_blank" href="<?php echo $this->exportUriList['atom']; ?>">ATOM</a></li>
+
+			</ul>
+        </li>
+        <?php if (Hal_Auth::isLogged() ) { ?>
+        <li class=""><a href="javascript:void(0)" onclick="$('#claimOwnershipModal').show();">
+               <i class="glyphicon glyphicon-send"></i>&nbsp;<?php echo $this->translate('Demander la propriété')?></a>
+        </li>
+        <li class=""><a href="javascript:void(0)" onclick="return addOwnership();">
+            <i class="glyphicon glyphicon-user"></i>&nbsp;<?php echo $this->translate('Partager la propriété...')?></a>
+        </li>
+        <li class=""><a href="javascript:void(0)" onclick="return copyDoc();">
+            <i class="glyphicon glyphicon-file active"></i>&nbsp;<?php echo $this->translate('Utiliser comme modèle')?></a>
+        </li>
+        <?php } ?>
+
+    </ul>
+</div>
+<form id="list-docs" action="/user/docowner" method="post">
+    <input type="hidden" name="method" value="share" />
+    <input type="hidden" id="docid" name="docid" value="" />
+</form>
+
+
+<script>
+   //<![CDATA[
+    $(document).ready(function(){
+        $('.checkbox-docid').click(function() {
+            nb = $('input[name="docid[]"]:checked').length;
+            if (nb == 0) {
+//                text = '<?php echo $this->translate()->getTranslator()->plural("Pour ce document", "Pour les %s documents", $nbExportableDocs) ?>';
+                text = '<?php echo $this->translate(array("Pour ce document", "Pour les %s documents", $nbExportableDocs), $nbExportableDocs) ?>';
+                
+            } else if (nb == 1) {
+                text = '<?php echo $this->translate('Pour le document sélectionné') ?>';
+            } else {
+                text = '<?php echo $this->translate('Pour les ') ?><strong>' + nb + '</strong> <?php echo $this->translate('documents sélectionnés') ?>';
+            }
+            $('.doc-nb').html(text);
+        });
+        $('#newShelf<?php echo $uniqShelfId;?>').bind('click', function (e) { e.stopPropagation() });
+    });
+
+    function exportResult(format)
+    {
+        var docid = [];
+        var url;
+        $.each($(".checkbox-docid:checked"), function() {
+            docid.push($(this).val());
+        });
+
+        if (docid.length === 0) {
+            switch (format) {
+                case 'xml-tei':
+                    url = '<?php echo $this->exportUriList['xmltei']; ?>';
+                    break;
+
+                case 'pdf':
+                    url = '<?php echo $this->exportUriList['pdf']; ?>';
+                    break;
+
+                case 'bibtex':
+                    url = '<?php echo $this->exportUriList['bibtex']; ?>';
+                    break;
+
+                case 'endnote':
+                    url = '<?php echo $this->exportUriList['endnote']; ?>';
+                    break;
+
+                case 'csv':
+                    url = '<?php echo $this->exportUriList['csv']; ?>';
+                    break;
+
+                case 'rtf':
+                    url = '<?php echo $this->exportUriList['rtf']; ?>';
+                    break;
+
+                case 'advanced':
+                    url = '<?php echo $this->exportUriList['advanced']; ?>';
+                    break;
+            }
+            window.open(url);
+            return;
+        }
+		console.log('/search/export/docid/' + docid + '/format/' + format);
+        link('/search/export/docid/' + docid + '/format/' + format);
+    }
+
+    function addTampon(sid, tampid)
+    {
+        $('#flash-messages').html(getLoader("<?php echo $this->translate("Tamponnage des documents en cours");?>"));
+        $.ajax({
+            url: "/collection/add",
+            method: "post",
+            data: getData({sid:sid}),
+            success: function(data) {
+                if (data) {
+                    $('#flash-messages').html('');
+                    message("<?php echo $this->translate("Les documents ont été ajoutés à la collection");?> <strong>" + tampid + "</strong>", 'alert-success');
+                }
+            }
+        });
+    }
+
+    function delTampon(sid, tampid)
+    {
+        $('#flash-messages').html(getLoader("<?php echo $this->translate("Détamponnage des documents en cours");?>"));
+        $.ajax({
+            url: "/collection/del",
+            method: "post",
+            data: getData({sid:sid}),
+            success: function(data) {
+                if (data) {
+                    $('#flash-messages').html('');
+                    message("<?php echo $this->translate("Les documents ont été retirés à la collection");?> <strong>" + tampid + "</strong>", 'alert-success');
+                }
+            }
+        });
+    }
+
+    function addInLibrary(shelfid, elem)
+    {
+        var data = getData({shelfid: shelfid});
+        var newShelf = $(elem).closest('div').find('input:text');
+        newShelf.removeClass('error');
+        if (shelfid == 0) {
+            var newShelfName = newShelf.val();
+            if (newShelfName == '') {
+                newShelf.addClass('error');
+                return false;
+            }
+            data.name = newShelfName;
+        }
+        $('#flash-messages').html(getLoader("<?php echo $this->translate("Ajout à la bibliothèque en cours");?>"));
+        $.ajax({
+            url: "/user/addinlibrary",
+            method: "post",
+            dataType: "json",
+            data: data,
+            success: function(output) {
+                if (output.doc>0) {
+                    if (shelfid == 0) { //Nouvelle étagère
+                        listShelves = $(elem).closest('ul');
+                        listShelves.append('<li attr-id="' + output.shelfid + '"><a href="javascript:void(0);" onclick="addInLibrary(' + output.shelfid + ', this);">' + newShelfName + '</a></li>');
+                        listShelves.closest('.btn-group').removeClass('open');
+                    }
+                    $('#flash-messages').html('');
+                    message("<?php echo $this->translate("Le(s) document(s) est(ont été) ajouté(s) à la bibliothèque ");?> <strong>" + newShelfName + "</strong>", 'alert-success');
+                } else {
+                    message("<?php echo $this->translate("Pas de document à ajouter à cette étagère"); ?>", 'alert-danger');
+                }
+                if (shelfid == 0) {
+                    newShelf.val('');
+                }
+                $('html, body').animate({scrollTop:0}, 0);
+            }
+        });
+    }
+
+    function getData(data)
+    {
+        data.docid = [];
+        $.each($("tbody .checkbox-docid:checked"), function() {
+            data.docid.push($(this).val());
+        });
+        if (data.docid.length == 0) {
+            data.query = '<?php echo $this->exportUriList['phps']; ?>';
+        }
+        return data;
+    }
+
+    //function claimOwnership(docid, elem)
+    function claimOwnership()
+    {
+        var content = $('#msg-content').val();
+
+        if (content.length == 0) {
+            $('#msg-content').addClass("error");
+        } else {
+
+            $("#claimOwnershipModal").hide();
+
+            //var data = getData({docid: docid});
+            var data = getData({});
+            data.method = 'request';
+            data.message = content;
+
+            //$('#flash-messages').html(getLoader("Demande du partage de propriété en cours"));
+            $.ajax({
+                url: "/user/docowner",
+                type: "post",
+                data: data,
+                dataType: "json",
+            }).done(function (msg) {
+                if (msg.res == 1) {
+                    message("<?php echo $this->translate("La demande de partage de propriété a été effectuée");?>", 'alert-success');
+                } else if (msg.res == 2) {
+                    message("<?php echo $this->translate("Impossible de demander la propriété des documents déposés par STAR");?>", 'alert-danger');
+                } else if (msg.res == 4) {
+                    message("<?php echo $this->translate("Le document n'existe pas !");?>", 'alert-danger');
+                } else if (msg.res == 3) {
+                    message("<?php echo $this->translate("Vous êtes déjà propriétaire du document !");?>", 'alert-danger');
+                } else if (msg.res == 5) {
+                    message("<?php echo $this->translate("La propriété du document a déjà été demandée !");?>", 'alert-danger');
+                } else {
+                    message("<?php echo $this->translate("Problème technique, merci de renouveler la demande");?>", 'alert-danger');
+                }
+            });
+        }
+    }
+    
+    function addOwnership()
+    {
+        var data = getData({});
+        $.each(data.docid, function() {
+            $('#list-docs').append('<input type="hidden" name="docid[]" value="' + this + '" />');
+        });
+        $('#list-docs').submit();
+    }
+
+    function copyDoc()
+    {
+        var nbDocs = $("tbody .checkbox-docid:checked").length;
+
+        // On ne peut pas prendre comme modèle plus d'un document
+        if (nbDocs == 0) {
+            message("<?php echo $this->translate("Il faut sélectionner un document à copier.");?>", 'alert-danger');
+            return;
+        }
+
+        if ( nbDocs > 1) {
+            message("<?php echo $this->translate("Vous ne  pouvez sélectionner qu'un document.");?>", 'alert-danger');
+            return;
+        }
+
+        var docid = $("tbody .checkbox-docid:checked").first().val();
+        link('/submit/copy/docid/' + docid);
+    }
+    
+    $('#user').bind('click', function (e) { e.stopPropagation() })
+    //]]>
+</script>

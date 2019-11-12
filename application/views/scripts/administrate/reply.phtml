@@ -1,0 +1,10 @@
+<?php
+$this->layout()->pageTitle = $this->translate('Répondre à la demande de modification');
+?>
+
+<div class="alert alert-warning" role="alert">
+    <strong><?php echo $this->translate('Demande de modification') ?></strong><br/>
+    <?php echo $this->comment; ?>
+</div>
+
+<?php echo $this->form; ?>

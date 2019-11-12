@@ -1,0 +1,70 @@
+<?php
+$browseParams ['controller'] = Zend_Controller_Front::getInstance ()->getRequest ()->getControllerName ();
+$browseParams ['action'] = Zend_Controller_Front::getInstance ()->getRequest ()->getUserParam ( 'action' );
+
+$browseParams ['letter'] = $this->letter;
+
+$browseTypes = array (
+		'file' => 'file',
+		'notice' => 'notice',
+		'annex' => 'annex'
+);
+
+if (! array_key_exists ( $this->typeFilter, $browseTypes )) {
+	$browseParams ['submitType_s'] = null;
+} else {
+	$browseParams ['submitType_s'] = $this->typeFilter;
+}
+
+if ($browseParams ['submitType_s'] == null) {
+	unset ( $browseParams ['submitType_s'] );
+}
+
+if ( ($browseParams ['letter'] == 'all') OR ($browseParams ['letter'] == null) ) {
+	unset ( $browseParams ['letter'] );
+}
+
+/**
+ * Tri des facettes
+ */
+if (! array_key_exists ( $this->sortType, Hal_Settings_Search::$facetSortingTypeIconsClass )) {
+	$browseParams ['sort'] = Hal_Settings_Search::$defaultFacetSortingType;
+} else {
+	$browseParams ['sort'] = $this->sortType;
+}
+
+/**
+ * // Tri des facettes
+ */
+
+
+echo '<li class="list-group-item">';
+
+$browseParams ['sort'] = 'index';
+$url = $this->url ( $browseParams, null, TRUE );
+
+echo PHP_EOL . '<a ';
+echo ' data-original-title="' . $this->translate ( 'Tri par nom' ) . '" data-toggle="tooltip" data-placement="bottom" ';
+if ($this->sortType == 'index') {
+	echo ' disabled="disabled" ';
+	$class = 'btn btn-default btn-primary';
+} else {
+	$class = 'btn btn-default';
+}
+
+echo ' class="' . $class . ' btn-xs" href="' . $this->escape ( $url ) . '"><span class="' . Hal_Settings_Search::$facetSortingTypeIconsClass['index'] . '"></span></a>';
+
+$browseParams ['sort'] = 'count';
+$url = $this->url ( $browseParams, null, TRUE );
+
+echo '<a data-original-title="' . $this->translate ( 'Tri par nombre' ) . '" data-toggle="tooltip" data-placement="bottom" ';
+if ($this->sortType == 'count') {
+	echo ' disabled="disabled" ';
+	$class = 'btn btn-default btn-primary';
+} else {
+	$class = 'btn btn-default';
+}
+echo PHP_EOL . ' class="pull-right ' . $class . ' btn-xs" href="' . $this->escape ( $url ) . '"><span class="' . Hal_Settings_Search::$facetSortingTypeIconsClass['count'] . '"></span></a>';
+
+echo '</li>';
+

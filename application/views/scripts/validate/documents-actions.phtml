@@ -1,0 +1,68 @@
+<?php
+
+$this->jQuery()->addJavascriptFile("/js/document/validate.js");
+$this->jQuery()->addJavascriptFile("/js/document/document.js");
+// Contenu des réponses prédéfinies de l'utilisateur
+$this->responsesContent = '';
+$this->showHistory = true;
+$this->validate = true;
+?>
+<style>
+.editableform .form-control {
+	width: 400px;
+}
+</style>
+
+<form action="/validate/documents" method="post" id="validate-form">
+<?php
+
+$this->document->setDocid ( $this->docid );
+$this->document->load ();
+include __DIR__ . "/../administrate/documents-document.phtml";
+?>
+
+<div class="form-actions text-center">
+		<select class="form-control" id="evaluation-msg">
+			<option value=""><?php echo $this->translate('Réponses prédéfinies'); ?></option>
+        <?php
+								
+								foreach ( $this->responses as $message ) {
+									$array = $message->toArray ();
+									$this->responsesContent .= '<div id="msg-' . $array ['messageid'] . '">' . $array ['message'] . '</div>';
+									?>
+            <option value="<?php echo $array['messageid'] ?>"><?php echo $array['title'] ?></option>
+            <?php
+								}
+								?>
+    </select><br /> <label class="required label-comment" for="comment"><?php echo $this->translate('Commentaire obligatoire en cas de refus : ')?></label>
+		<textarea name="comment" id="comment" class="form-control" rows="3"></textarea>
+		<br /> <input type="hidden" name="validate-action"
+			id="validate-action" value="" /> <input type="hidden" name="docid"
+			id="docid" value="<?php echo $this->docid ;?>" />
+
+
+
+		<div class="btn-group btn-group">
+
+			<button type="button" class="btn btn-success btn-action"
+				attr-action="accept">
+				<i class="glyphicon glyphicon-ok-circle"></i>&nbsp;<?php echo $this->translate('Accepter'); ?></button>
+
+			<button type="button" class="btn btn-default btn-action"
+				attr-action="refuse">
+				<i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<?php echo $this->translate('Refuser'); ?></button>
+
+
+		</div>
+
+
+		<div style="display: none">
+        <?php echo $this->responsesContent?>	
+		</div>
+	</div>
+
+
+
+
+</form>
+

@@ -1,0 +1,13 @@
+<?php
+$query = str_replace('&group=true', '&group=false', $this->cv->_createSolr);
+
+$content = '<i>'. $this->translate('Exporter les publications affichées :') .'</i>';
+$content .= '<ul>';
+$content .= '<li><a href="'.SOLR_API.'/search/?omitHeader=true&wt=xml-tei&'.$query.'">XML-TEI</a></li>
+				<li><a href="'.SOLR_API.'/search/?omitHeader=true&wt=bibtex&'.$query.'">BibTeX</a></li>
+				<li><a href="'.SOLR_API.'/search/?omitHeader=true&wt=endnote&'.$query.'">EndNote</a></li>
+				<li><a href="'.SOLR_API.'/search/?omitHeader=true&wt=csv&'.$query.'">CSV</a></li>
+				<li><a href="'.SOLR_API.'/search/?omitHeader=true&wt=pdf&'.$query.'">PDF</a></li>';
+$content .= '</ul>';
+
+echo $this->widget(array('title' => $this->translate('cv_widget_export'), 'content' => $content, 'class' => 'widget-export'));

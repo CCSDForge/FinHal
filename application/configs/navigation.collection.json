@@ -1,0 +1,91 @@
+[{
+    "label" : "Privilèges",
+    "controller" : "rights",
+    "action" : "index",
+    "resource" : "rights-index",
+    "privilege" : "tamponneur,atamponneur,haladmin",
+    "pages": [
+        {
+            "label": "Mes collections",
+            "controller": "user",
+            "action": "mycollections",
+            "resource": "user-mycollections",
+            "privilege": "tamponneur,atamponneur,administrator,haladmin"
+        },
+        {
+            "label": "Gerer la collection",
+            "controller": "user",
+            "action": "collections",
+            "resource": "user-collections",
+            "privilege": "tamponneur,administrator,haladmin"
+        },
+        {
+            "label": "Administrer les collections",
+            "controller": "collection",
+            "action": "list",
+            "resource": "collection-list",
+            "privilege": "administrator"
+        },
+        {
+        "label": "Statistiques",
+        "controller": "stat",
+        "action": "index",
+        "resource": "stat-index",
+        "privilege": "tamponneur,haladmin"
+        }, {
+        "label" : "Site Web",
+        "controller" : "website",
+        "action" : "index",
+        "resource" : "website-index",
+        "privilege" : "tamponneur,haladmin",
+        "pages" : [ {
+            "label" : "Général",
+            "controller" : "website",
+            "action" : "common",
+            "resource" : "website-common",
+            "privilege" : "tamponneur,haladmin"
+        }, {
+            "label" : "En-tête",
+            "controller" : "website",
+            "action" : "header",
+            "resource" : "website-header",
+            "privilege" : "tamponneur,haladmin"
+        }, {
+            "label": "Pied de page",
+            "controller": "website",
+            "action": "footer",
+            "resource": "website-footer",
+            "privilege": "tamponneur,haladmin"
+        }, {
+            "label" : "Apparence",
+            "controller" : "website",
+            "action" : "style",
+            "resource" : "website-style",
+            "privilege" : "tamponneur,haladmin"
+        },{
+            "label": "Recherche",
+            "controller": "website",
+            "action": "search",
+            "resource": "website-search",
+            "privilege": "tamponneur,haladmin"
+        },{
+            "label" : "Actualités",
+            "controller" : "website",
+            "action" : "news",
+            "resource" : "website-news",
+            "privilege" : "tamponneur,haladmin"
+        }, {
+            "label" : "Menu",
+            "controller" : "website",
+            "action" : "menu",
+            "resource" : "website-menu",
+            "privilege" : "tamponneur,haladmin"
+        }, {
+            "label" : "Ressources",
+            "controller" : "website",
+            "action" : "public",
+            "resource" : "website-public",
+            "privilege" : "tamponneur,haladmin"
+        }]
+    }]
+}]

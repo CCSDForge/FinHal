@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:org="http://www.w3.org/ns/org#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:vcard="http://www.w3.org/2006/vcard/ns#" xmlns:hal="http://data.archives-ouvertes.fr/schema/">
+  <org:Organization rdf:about="https://data.archives-ouvertes.fr/structure/1">
+    <org:classification rdf:resource="https://data.archives-ouvertes.fr/vocabulary/StructureTypeLaboratory"/>
+    <skos:prefLabel>Laboratoire Kastler Brossel</skos:prefLabel>
+    <skos:altLabel>LKB (Lhomond)</skos:altLabel>
+    <vcard:url rdf:resource="http://www.lkb.ens.fr"/>
+    <org:siteAddress>24 rue Lhomond, F-75231 Paris CEDEX 05</org:siteAddress>
+    <vcard:country-name rdf:resource="http://fr.dbpedia.org/resource/France"/>
+    <org:unitOf rdf:resource="https://data.archives-ouvertes.fr/structure/59704"/>
+    <org:unitOf rdf:resource="https://data.archives-ouvertes.fr/structure/93591"/>
+    <org:unitOf rdf:resource="https://data.archives-ouvertes.fr/structure/441569"/>
+    <dcterms:identifier>UMR8552</dcterms:identifier>
+    <hal:status rdf:resource="https://data.archives-ouvertes.fr/vocabulary/StatusValid"/>
+  </org:Organization>
+</rdf:RDF>

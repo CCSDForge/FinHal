@@ -1,0 +1,65 @@
+<?php
+/**
+ * Affichage d'un laboratoire, institution, ...
+ */
+
+//Ccsd_Tools::debug($this->structure);
+?>
+
+<div class="struct-line" style="position:relative; padding-right:150px;">
+	<div class="struct-div" draggable="true" ondragstart="drag(event, '<?php echo $this->structid; ?>')">
+        <span class="<?php if($this->structure->getValid() == Ccsd_Referentiels_Structure::STATE_VALID) {echo 'valid-struct';} else if($this->structure->getValid() == Ccsd_Referentiels_Structure::STATE_OLD) {echo 'old-struct';} else {echo 'incoming-struct';} ?>">
+                <span class="structname"><?php echo ($this->structure->getSigle() != '' ? '<i>' . $this->structure->getSigle() . '</i>' . ' - ' : '') . $this->structure->getStructname() ;?></span></span><br />
+        <blockquote class="struct-block">
+            <?php if ($this->structure->getUrl() != '') { ?>
+                <div class=""><a href="<?php echo $this->structure->getUrl() ?>" target="_blank" rel="noopener"><?php echo $this->structure->getUrl() ?></a></div>
+            <?php } ?>
+
+            <?php foreach ($this->structure->getAllParents() as $parent) {
+                $code = Ccsd_Tools::ifsetor($parent['code']);
+                $struct = $parent['struct'];
+                $name =  $struct->getStructname();
+                if ($struct->getUrl() != '') {
+                    $name = '<a href="' . $struct->getUrl() . '" target="_blank">' . $name . '</a>' ;
+                }
+                ?>
+                <div>
+                    <?php echo  $name . ($code != '' ? ' : ' . $code : ''); ?>
+                </div>
+            <?php } ?>
+
+        </blockquote>
+    </div>
+    <div class="btn-group struct-dropdown-button" style="position: absolute; top:1px; right: 1px;">
+        <button type="button" class="btn btn-sm btn-default dropdown-toggle struct-button" data-toggle="dropdown">
+            &nbsp;<?php echo $this->translate("Pour cette structure"); ?>&nbsp;<span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu pull-right struct-dropdown-menu" role="menu" aria-labelledby="btn-tools">
+            <!--li class="dropdown-header doc-nb text-center">Pour les %s documents</li-->
+            <!--<li class="dropdown-header doc-nb text-center">Les données valides du référentiel ne sont pas modifiables</li>-->
+            <li class=""><a href="javascript:void(0);"
+                    <?php if ($this->structure->isValid()) {
+                        echo "class=\"btn-disabled\" data-toggle=\"tooltip\" data-original-title=\"".$this->translate('Les données valides du référentiel ne sont pas modifiables')."\"";
+                    } else {
+                        echo "onclick=\"getPopoverForm(".$this->structid.", ".$this->authorid.")\"";
+                    } ?>
+                >
+                    <?php echo $this->translate('Modifier'); ?>
+                </a>
+            </li>
+
+            <li class=""><a href="javascript:void(0);" onclick="seeStructDetails(<?php echo $this->authorid?>, <?php echo $this->structid?>)">&nbsp;<?php echo $this->translate("Voir les détails"); ?></a>
+            </li>
+
+            <li class=""><a href="javascript:void(0);" onclick="removeAffiliation(<?php echo $this->authorid?>, <?php echo $this->structid?>)">&nbsp;<?php echo $this->translate("Supprimer"); ?></a>
+            </li>
+
+            <li class=""><a href="javascript:void(0);" onclick="associateAllAuthors(<?php echo $this->structid?>)">&nbsp;<?php echo $this->translate("Associer à tous les auteurs"); ?></a>
+            </li>
+
+            <li class=""><a href="javascript:void(0);" onclick="deleteStructure(<?php echo $this->structid?>)">&nbsp;<?php echo $this->translate("Supprimer pour tous les auteurs"); ?></a>
+            </li>
+
+        </ul>
+    </div>
+</div>

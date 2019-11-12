@@ -1,0 +1,43 @@
+<?php
+if ($this->document instanceof Hal_Document) {
+    $logs = Halms_Document_Logger::get($this->document->getDocid());
+
+    if (count($logs)) {
+        $users = [];
+        $user = new Hal_User();
+        ?>
+        <div class="dropdown" style="display:inline-block;float:right;">
+        <button class="btn btn-default dropdown-toggle halms-color" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            <i class="glyphicon glyphicon-calendar"></i>&nbsp;<?php echo $this->translate('Historique');?>
+            <span class="caret"></span>
+        </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="width:600px;height: 400px; overflow: auto; right:0px; left:inherit;">
+            <?php foreach($logs as $i =>$log) {
+                if (! isset($users[$log['UID']])) {
+                    $user->find($log['UID']);
+                    $users[$log['UID']] = $user->getFullName();
+                }
+                ?>
+                <li style="background:<?php echo $i%2 ? '#ffffff' : '#f7f7f7'; ?>">
+                    <a href="#" style="word-wrap: inherit; padding:1px 20px;">
+                    <h5>
+                        <?php echo $this->translate('status_' . $log['STATUS']); ?>
+                        <small style="white-space: normal; ">
+                                <span class="halms-color">
+                                    &nbsp;|&nbsp;<strong><?php echo $log['DATE_ACTION'];?></strong>
+                                    &nbsp;|&nbsp;<?php echo $users[$log['UID']];?>
+
+                                </span>
+                            <?php if ($log['COMMENT'] != '') { echo '<br />' . $log['COMMENT']; } ?>
+                        </small>
+                        <small>
+                        </small>
+                    </h5>
+                    </a>
+                </li>
+            <?php } ?>
+            </ul>
+        </div>
+        <?php
+    }
+}

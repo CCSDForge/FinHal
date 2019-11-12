@@ -1,0 +1,50 @@
+<style type='text/css'>
+.pagination-sm > li > a, .pagination-sm > li > span {
+    padding: 5px;
+}
+</style>
+
+<script type='text/javascript'>
+
+ $(document).ready(function() { 
+   $('input[name=page], input[name=tri]').change(function(){
+        $(this).closest('form').submit();
+   });
+  });
+
+</script>
+
+<div class='row'>
+	<div class='col-md-10'>
+    <?php 
+    if ($this->paginator->getPageRange()) {
+    	echo $this->paginationControl($this->paginator, 'Jumping', 'partials/pagination_form.phtml', $this->params);
+    }
+    ?>
+    </div>
+    <?php 
+    if ($this->tri) {
+    ?>
+    <div class='col-md-1'>
+    	<div class="btn-group" style='margin: 20px 0px;'>
+	    	<button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">
+	  	    	<?php echo $this->translate('Trier par') ?> <span class="caret"></span>
+	    	</button>
+	    	<input type='radio' name='tri' value='<?php echo $this->params['tri'] ?>' style='display: none;' />
+	    	<ul class="dropdown-menu" role="menu">
+	  	    <?php 
+	    	foreach ($this->tri as $k => $v) {
+	        ?>
+		        <li <?php if ($this->params['tri'] == $k) { ?> class='active' <?php } ?>>
+		      	  <a href="javascript:void(0);" onclick="$(this).closest('div').find('input[name=tri]').val('<?php echo $k ?>'); $(this).closest('div').find('input[name=tri]').click()"><?php echo $this->translate($v) ?></a>
+		        </li>
+	        <?php 
+	        }
+	        ?>
+		    </ul>
+		</div>
+	</div>
+    <?php 
+    }
+    ?>
+</div>

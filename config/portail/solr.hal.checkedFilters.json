@@ -1,0 +1,5 @@
+{
+ "filter_dt" :  "ART,COMM,OUV,COUV,DOUV,REPORT,OTHER,THESE,HDR,LECTURE,UNDEFINED",
+ "filter_st": "file"
+}
+

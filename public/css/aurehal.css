@@ -1,0 +1,113 @@
+@CHARSET "UTF-8";
+
+body {
+    background: #eee;
+}
+
+.navbar .nav-lang > li > a, .navbar .nav-lang > li > span {
+    float: left;
+    padding: 10px 2px;
+}
+.navbar .nav-lang > li > a.active {
+    color: #ffffff; 
+}
+
+#container {
+	margin-top: 43px;
+    min-height: 600px;
+    background: #ffffff;
+    box-shadow: 1px 1px 12px #aaa;
+}
+
+.logo {
+	height: 100px;
+	background: url(/img/aurehal.png) no-repeat right center #1b1135;
+    margin-bottom: 20px;
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+.logo-title {
+	padding-left:50px;
+}
+.logo-title>a {
+    font-size: 40px;
+    color: #fff;
+    text-decoration: none;
+    line-height: 100px;
+    font-family: "Trebuchet MS",Helvetica,Jamrul,sans-serif;
+}
+.logo-title .first {
+    color:#428bca;
+}
+
+/**
+ * Formulaire
+ */
+
+.form {
+    width: 100%;
+    margin: 5px auto;
+    padding: 0;
+}
+
+.form dt {
+    padding: 0;
+    clear: left;
+    width: 200px;
+    float: left;
+    text-align: left;
+    margin: 5px 5px 5px 0;
+}
+
+.form dd {
+    padding: 0;
+    float: left;
+    margin: 5px 0px 5px 0;
+    width: 500px;
+}
+
+.form .required:after {
+    content: ' *';
+    color: #d14;
+    font-weight: bold;
+}
+.form  ul.errors {
+	color: #d14;
+    margin-top: -10px;
+    font-size: 12px;
+}
+.form dd input {
+    width: 486px;
+}
+.form dd select {
+	width: 500px;
+}
+.form dd textarea {
+    width:486px;
+}
+.form dd .inputlangmulti {
+    width: 357px;
+}
+.form dd .inputmulti {
+	width: 446px;
+}
+
+.form dd p.description {
+    font-style: italic;
+    margin: 0 0 5px;
+    font-size: 12px;
+    line-height: 14px;
+    color: darkgray;
+}
+.form:after {
+    clear: left;
+}
+
+.label-rgpinst {
+    background-color: #63031b;
+}
+
+.label-rgplabo {
+    background-color: #161063;
+}

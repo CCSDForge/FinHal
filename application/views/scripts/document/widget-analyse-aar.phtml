@@ -1,0 +1,46 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yannick
+ * Date: 26/09/2014
+ * Time: 09:42
+ *
+ * $this->document doit exister et etre un objet Hal_Document
+ *
+ */
+/** @var Hal_View $this */
+?>
+<div class="widget widget-analyse">
+    <h3 class="widget-header"><?php echo $this->translate('Analyses') ?></h3>
+    <div class="widget-content" >
+        <img src="//hal-campusaar.archives-ouvertes.fr/public/aar.png" alt="AAR" class="img-thumbnail" style="width:120px;float:left;margin-right:15px;"/>
+        <strong>Campus Archives Audiovisuelles de la Recherche</strong> (Campus AAR) est une plateforme communautaire destinée à l'analyse, la documentation la mise en valeur, et la publication de corpus audiovisuels numériques archivés sur MédiHal.
+
+        <div style="clear: left;" class="text-center">
+            <br />
+            <div class="btn-group  btn-group btn-group-sm" role="group">
+                <?php
+                    $analyses = $this->document->getMeta('campusaar_refAnalyse_local');
+                    $video = $this->document->getMeta('campusaar_idVideo_local');
+                    if (! $video) {
+                        $video='';
+                    }
+                ?>
+
+                <?php if ($analyses) {
+                    if (! is_array($analyses)) { $analyses = [$analyses]; } ?>
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Analyses existantes
+                        <span class="caret"></span>
+                        </button>
+                          <ul class="dropdown-menu">
+                                <?php foreach ($analyses as $i => $analyse) { ?>
+                                    <li><a href="http://plateforme.campus-aar.fr/campus/video/http%3A%2F%2Fcampus-aar.fr%2Fasa%23<?php echo $analyse ?>" target="_blank" rel="noopener">Analyse <?php echo $i +1; ?></a></li>
+                                <?php } ?>
+                          </ul>
+                <?php } ?>
+                <a href="http://plateforme.campus-aar.fr/campus/page/studio" target="_blank" type="button" class="btn btn-default">Analyser avec Studio Campus AAR</a>
+            </div>
+        </div>
+    </div>
+</div>

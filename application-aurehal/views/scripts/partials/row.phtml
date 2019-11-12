@@ -1,0 +1,174 @@
+<?php
+$label_valid = array (
+		'OLD'  => 'warning',
+		'INCOMING'   => 'danger',
+		'VALID'   => 'success'
+);
+$fieldlink = array (
+        'idHAL' => 'idHal_i',
+        'nom'   => 'lastName_sci',
+        'email' => 'email_s',
+        'name'  => 'name_sci',
+        'sigle'  => 'acronym_sci',
+        'titre'  => 'title_sci',
+        'editeur'  => 'publisher_sci',
+        'acronyme'  => 'acronym_sci',
+        'reference'  => 'reference_sci',
+        'numero'  => 'reference_sci',
+        'fundedby'  => 'financing_s'
+);
+
+switch ($this->controllerName) {
+    case 'author' :
+        $filterinfo = ['arxiv_id', 'idref_id', 'orcid_id', 'idHal_s', 'structure_s', 'url_s'];
+    break;
+
+    case 'structure' :
+        $filterinfo = ['parentName_s'];
+    break;
+
+    case 'journal' :
+        $filterinfo = ['eissn_s', 'url_s'];
+    break;
+    default:
+        $filterinfo = [];
+}
+
+foreach ($this->paginator as $row) {
+	reset ($this->head_columns);
+	$validField  = $row[$this->columns['valid']];
+	$lockedField = array_key_exists('locked_bool', $row) ? $row['locked_bool'] : false;
+	?>
+	<tr class='<?php
+        echo $label_valid[$validField];
+    ?>'>
+        <td>
+        	<?php
+
+            if ($plugin->isAllowed((new Zend_Controller_Request_Http())->setControllerName($this->controllerName)->setActionName('replace'), false) || (Hal_Auth::isAdminStruct() && $this->controllerName == 'structure')) {
+        		if ($this->isBrowsing) {
+
+					$options = array ('INCOMING');
+
+					if ($this->controllerName != 'structure') {
+						array_push ($options, 'OLD');
+					}
+
+					if (in_array ($validField, $options)) {
+					?>
+					<input type="checkbox" name="row[]" value="<?php echo $row[$this->columns[current($this->head_columns)]]?>" class="checkbox" <?php echo (isset($this->row) && in_array($row[$this->columns[current($this->head_columns)]], $this->row) ? "checked='checked'" : "") ?>/>
+      				<?php
+      				}
+				} else {
+
+                    if (!in_array ($validField, array ('INCOMING', 'OLD')) || 'author' == $this->controllerName || ('structure' == $this->controllerName && $validField != 'INCOMING')) {
+
+					?>
+  					<input type="radio" name="dest" value="<?php echo $row[$this->columns[current($this->head_columns)]]?>" class="radio"/>
+      				<?php
+      				}
+				 }
+			}
+			?>
+		</td>
+        <td>
+            <span class="badge" style='margin-top: 4px;'><?php echo $row[$this->columns[current($this->head_columns)]] ?></span>
+            <?php if ($this->controllerName != 'anrproject' && $this->controllerName != 'europeanproject' && count(array_intersect(array_keys ($row), $filterinfo))){?>
+            <div class="inforow" style="display:none">
+                <table class="table table-condensed table-bordered">
+                    <tr>
+                        <td style="background:#f8f8f8; text-align:center" colspan="2">
+                            <?php echo $this->translate("Infos complémentaires");?>
+                        </td>
+                    </tr>
+                    <?php
+                    foreach ($row as $key => $value){
+                        if (in_array($key, $filterinfo)){
+                        ?>
+                        <tr>
+                                <td style="background:#f8f8f8; text-align:right"><?php echo $key;?></td>
+                                <td>
+                                    <?php
+                                    if (is_array($value)){
+                                        foreach ($value as $v){
+                                            echo $v;
+                                        }
+                                    } else {
+                                        echo $value;
+                                    }
+                                    ?>
+                                </td>
+
+                        </tr>
+                        <?php
+                        }
+                    }
+                    ?>
+                </table>
+            </div>
+            <?php }?>
+            <script>
+                popoverOptions = {
+                    content: function () {
+                        return $(this).siblings('.inforow').html();
+                    },
+                    trigger: 'hover',
+                    html: true,
+                    placement: 'right'
+                };
+                $('.badge').popover(popoverOptions);
+            </script>
+        </td>
+        <?php
+        next($this->head_columns);
+        for ($i=0; $i < count ($this->head_columns) - 2; $i++) { ?>
+
+            <td>
+                <?php if (array_key_exists(current($this->head_columns), $fieldlink)){?>
+                <a href='/<?php echo $this->controllerName ?>/browse?critere=<?php echo $fieldlink[current($this->head_columns)];?>:"<?php
+                echo urlencode(addslashes(Ccsd_Tools::ifsetor($row[$this->columns[current($this->head_columns)]]))); ?>"'><?php
+                    echo Ccsd_Tools::ifsetor($row[$this->columns[current($this->head_columns)]]);
+                    next($this->head_columns);
+                    ?>
+                </a>
+                <?php } else {
+                    echo Ccsd_Tools::ifsetor($row[$this->columns[current($this->head_columns)]]);
+                    next($this->head_columns);
+                } ?>
+                </td>
+        <?php }
+        if (!isset ($this->no_actions)) {
+            ?>
+            <td align='center'>
+                <?php
+                reset($this->head_columns);
+                if (isset($this->isBrowsing) && $this->isBrowsing) {
+                    if ($plugin->isAllowed((new Zend_Controller_Request_Http())->setControllerName($this->controllerName)->setActionName('read'), false)) {
+                        ?>
+                        <a href='<?php echo URL . "/" . $this->controllerName . "/read/id/" . $row[$this->columns[current($this->head_columns)]]; ?>' alt='<?php echo $this->translate('Voir') ?>' title='<?php echo $this->translate('Voir') ?>'>
+                            <i class='glyphicon glyphicon-eye-open'></i>
+                        </a>
+                    <?php
+                    }
+                    if ($this->controllerName == 'structure' && !Hal_Auth::canModifyStructLock($row['docid']) && $lockedField) {
+                        ?>
+                        <a href="#" alt='<?php echo $this->translate('Structure verrouillée') ?>' title='<?php echo $this->translate('Structure verrouillée') ?>'>
+                            <i class=' glyphicon glyphicon-lock'></i>
+                        </a>
+                    <?php
+                    } else if ($plugin->isAllowed((new Zend_Controller_Request_Http())->setControllerName($this->controllerName)->setActionName('modify')->setParam('id', $row[$this->columns[current($this->head_columns)]]), false)) {
+                        ?>
+                        <a href='<?php echo URL . "/" . $this->controllerName . "/modify/id/" . $row[$this->columns[current($this->head_columns)]]; ?>' alt='<?php echo $this->translate('Modifier') ?>' title='<?php echo $this->translate('Modifier') ?>'>
+                            <i class=' glyphicon glyphicon-edit'></i>
+                        </a>
+                    <?php
+                    }
+                }
+                ?>
+            </td>
+        <?php
+        }
+        ?>
+    </tr>
+<?php 
+}

@@ -1,0 +1,1 @@
+ALTER TABLE `DOC_FILE` ADD `SOURCE` ENUM('author','compilation','converted','unzipped') NOT NULL DEFAULT 'author' AFTER `FILESOURCE`;

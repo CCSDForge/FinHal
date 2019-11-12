@@ -1,0 +1,16 @@
+<?php
+
+$this->json   = array ();
+$this->json[] = array ('id' => 0, 'label' => $this->translate('Nouveau') . '...');
+
+$classname = $this->classname;
+
+
+$res = $classname::search($this->term);
+if ($res && is_array ($res)) {
+	foreach ($res as $doc) {
+	    $this->json[] = array ("id" => $doc['docid'], "label" => $doc['label_html']);
+	}
+}
+
+echo Zend_Json::encode ( $this->json );

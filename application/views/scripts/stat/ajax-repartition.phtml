@@ -1,0 +1,105 @@
+<div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div>
+                <h4><?php echo $this->translate('hal_' . $this->facet); ?></h4>
+                <?php
+                $url = SOLR_API.'/search/?'.$this->data['query'];
+                ?>
+                <a href="<?php echo $url; ?>" target="_blank" style="font-size: xx-small"><?php echo $this->translate("Voir la requête sur l'API"); ?></a>
+            </div>
+            <div id="div-graph-<?php echo $this->category; ?>" style="width:100%; height:400px;"></div>
+            <div id="div-table-<?php echo $this->category; ?>" style="display:none; margin:20px;">
+                <div class="panel panel-default" style="overflow: auto; max-height:300px">
+                    <div class="panel-body">
+                        <table class="table stripped table-condensed table-hover">
+                            <thead>
+                            <tr>
+                                <?php foreach($this->data['data'][0] as $j => $field) {  ?>
+                                    <?php if ($j == 0) { ?>
+                                        <th><?php echo $field; ?></th>
+                                    <?php } else { ?>
+                                        <th class="text-right"><?php echo $field; ?></th>
+                                    <?php } ?>
+                                <?php } ?>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            foreach($this->data['data'] as $i => $row) {
+                                if ($i == 0) {
+                                    //Header
+                                    $graphData = array($row);
+                                    $csv = implode(';', $row) . "_SEP_";
+                                    continue;
+                                }
+                                $graphData[] = $row;
+                                $csv .= implode(';', $row) . "_SEP_";
+                                ?>
+                                <tr>
+                                    <?php foreach($row as $j => $field) { ?>
+                                        <?php if ($j == 0) { ?>
+                                            <td class="text-left">
+                                            <?php
+                                            if (in_array($this->facet, array('primaryDomain_s', 'level0_domain_s', 'domain_t', 'level1_domain_s', 'level2_domain_s', 'level3_domain_s'))) {
+                                                echo Ccsd_Tools_String::getHalMetaTranslated($this->translate($field));
+                                            } else {
+                                                echo $this->translate($field);
+                                            } ?></td>
+                                        <?php } else { ?>
+                                            <td class="text-right"><strong><?php echo $field; ?></strong></td>
+                                        <?php } ?>
+                                    <?php } ?>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="btn-group">
+                        <?php foreach($this->charts as $chartType) { ?>
+                            <button type="button" id="<?php echo $chartType ?>" class="btn btn-default btn-stat-result btn-chart <?php echo ($chartType == $this->chart) ? 'active' : '' ?>">
+                                <img src="/img/charts/<?php echo $chartType ?>.png" width="16px" height="16px"/>
+                            </button>
+                        <?php } ?>
+                        <button class="btn btn-default" onclick="showDataTable($(this), '<?php echo $this->category; ?>');"><img src="/img/charts/table.png" width="16px" height="16px"/></button>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="input-group group-sm form-group query-save">
+                        <input type="text" class="form-control" name="query-label" placeholder="<?php echo $this->translate('Nom de la requête') ?>">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" onclick="saveQuery('<?php echo $this->category; ?>')"><i class="glyphicon glyphicon-save"></i></button>
+                        </span>
+                    </div>
+                    <form action="<?php echo PREFIX_URL ; ?>stat/index" method="post" onsubmit="return deleteQuery('<?php echo $this->category; ?>');">
+                        <input type="hidden" name="method" value="delete" />
+                        <input type="hidden" name="qid" value="" />
+                        <button class="btn btn-default query-del" type="submit"><i class="glyphicon glyphicon-trash"></i>&nbsp;<?php echo $this->translate('Supprimer la requête'); ?></button>
+                    </form>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-group">
+                        <button class="btn btn-default" onclick="exportCSV('<?php echo $this->category; ?>');"><i class="glyphicon glyphicon-export"></i>&nbsp;<?php echo $this->translate('Exporter'); ?></button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<textarea id="csv-<?php echo $this->category; ?>" style="display:none;"><?php echo $csv; ?></textarea>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.btn-chart').click(function() {loadResult($(this).attr('id'))});
+    });
+</script>
+<?php
+$legend = $this->chart == StatController::CHART_PIE ? 'right' : 'none';
+
+echo $this->chart(array('container' => 'div-graph-' . $this->category, 'content' => $graphData, 'options' => array('legend' => array('position' => $legend))), $this->chart, true);

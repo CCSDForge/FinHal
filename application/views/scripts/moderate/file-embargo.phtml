@@ -1,0 +1,56 @@
+<?php
+/**
+ * @var Hal_View $this
+ * Created by PhpStorm.
+ * User: baptiste
+ * Date: 03/12/2015
+ * Time: 16:32
+*/
+$today = date('Y-m-d');
+
+$form = new Ccsd_Form();
+$form->setMethod('post');
+$form->addElement('date', 'calendar', array(
+    'label'=>"Embargo",
+    'value' => $this->datevisible,
+    'attr-mindate' => $today,
+    'attr-maxdate' => $this->datelimit,
+));
+$form->addElement('button', 'addemb', array(
+    'label' => $this->translate("Modifier l'embargo"),
+'class'		=>	'btn btn-primary',
+'onclick'	=>"putFileEmbargo(".$this->id.", ".$this->uid.", ".$this->docid.")"
+));
+
+$form->removeDecorator('Form');
+?>
+<div style="width:400px;" attr-popoverid="emb_new">
+    <div class="form-group">
+            <?php
+            echo $form;
+            ?>
+    </div>
+</div>
+<script type="text/javascript">
+    function putFileEmbargo(id, uid, docid){
+        var $calendar = $("#calendar-id");
+        $.ajax({
+            type: "POST",
+            url: '/moderate/ajaxputfileembargo',
+            data: {id : id, uid: uid, docid:docid, datelimit:$calendar.attr('attr-maxdate'), date: $calendar.val()},
+            success: function(data){
+                $('#emb_'+id).popover('destroy');
+                if ($calendar.val() === '') {
+                    $('#file'+id).prepend(getMessageHtml(translate("Veuillez remplir une date d'embargo"), 'alert-danger'));
+                } else if ($calendar.val() > $calendar.attr('attr-maxdate')) {
+                    $('#file'+id).prepend(getMessageHtml(translate("La date d'embargo est supérieure à la date de dépôt +2ans"), 'alert-danger'));
+                } else if ($calendar.val() < $calendar.attr('attr-mindate')) {
+                    $('#file'+id).prepend(getMessageHtml(translate("La date d'embargo est inférieure à la date d'aujourd'hui"), 'alert-danger'));
+                } else {
+                    $('#file'+id).replaceWith(data);
+                }
+                setTimeout(function() {$(".alert").alert("close");},5000);
+            }
+        });
+    }
+</script>

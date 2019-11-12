@@ -1,0 +1,199 @@
+<?php
+/* @var $plugin Aurehal_Acl_Plugin */
+$plugin = Zend_Controller_Front::getInstance()->getPlugin('Aurehal_Acl_Plugin');
+
+/* @var $paginator Zend_Paginator */
+$paginator = $this->paginator;
+
+$isAllowedToCreated = $plugin->isAllowed((new Zend_Controller_Request_Http())->setControllerName($this->controllerName)->setActionName('create'), false);
+$isAllowedToReplace = $plugin->isAllowed((new Zend_Controller_Request_Http())->setControllerName($this->controllerName)->setActionName('replace'), false);
+?>
+
+    <div class="row">
+        <div class="<?php echo ($isAllowedToCreated && $this->create) ? "col-md-7" : "col-md-10"; ?>">
+        <?php include __DIR__ . "/../" . $this->partial_form ?>
+    </div>
+    <div class="<?php echo ($isAllowedToCreated && $this->create) ? "col-md-1" : "col-md-0"; ?>"
+         style="border-right: 2px solid #E5E5E5; height: 34px;">
+        &nbsp;
+    </div>
+<?php
+if ($isAllowedToCreated && $this->create) {
+    ?>
+    <div class="col-md-1 col-md-offset-1">
+        <button class="btn btn-primary"
+                onclick="link('<?php echo URL . "/" . $this->controllerName ?>/create');"><?php echo $this->translate('Créer') ?></button>
+    </div>
+    <?php
+}
+?>
+    </div>
+
+<?php
+
+if (isset ($this->message)) {
+    ?>
+
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-md-12">
+            <div class="alert alert-danger">
+                <button data-dismiss="alert" class="close" type="button">×</button>
+                <?php echo $this->translate($this->message) ?>
+            </div>
+        </div>
+    </div>
+
+    <?php
+}
+
+
+$params = Zend_Controller_Front::getInstance()->getRequest()->getParams();
+unset ($params['module']);
+
+$controller = array_shift($params);
+$action = array_shift($params);
+
+$query = "/$controller/$action";
+
+if (!empty ($params)) {
+
+    $query .= "?";
+
+    foreach ($params as $key => $val) {
+        $query .= "$key=" . urlencode($val);
+    }
+
+}
+
+if ($paginator) {
+
+    $canReplace = false;
+    foreach ($this->paginator as $row) {
+        $canReplace = ("VALID" != $row[$this->columns['valid']]) || $canReplace;
+    }
+
+    if ('author' == $this->controllerName) {
+        $canReplace = true;
+    }
+    ?>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <?php include __DIR__ . "/../partials/paginationControl.phtml"; ?>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <form method="post" enctype="multipart/form-data"
+                          action="<?php echo URL . "/" . $this->controllerName . "/replace"; ?>">
+                        <input type="hidden" name="browse_url" value="<?php echo $this->escape($query) ?>"/>
+                        <table class="table table-condensed">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <?php
+                                foreach ($this->head_columns as $col) {
+                                    ?>
+                                    <th><?php echo $this->translate($col); ?></th>
+                                    <?php
+                                }
+                                ?>
+                            </tr>
+                            </thead>
+                            <?php
+                            if (($isAllowedToReplace || (Hal_Auth::isAdminStruct() && $this->controllerName == 'structure')) && $canReplace) { ?>
+                                <thead>
+                                <tr>
+                                    <td colspan="2">
+
+                                        <div class="input-group">
+                                      <span class="input-group-addon"
+                                            style="border-left-width: 0px; padding-left: 0px; border-bottom-width: 0px; border-top-width: 0px; background-color: inherit;">
+                                        <input type="checkbox"
+                                               onchange="$(this).closest('table').find('tr td input[type=\'checkbox\']').prop('checked', $(this).is(':checked'));">
+                                      </span>
+                                            <input type="text" readonly="readonly" disabled="disabled"
+                                                   value="Tous/Aucun" class="form-control"
+                                                   style="border-width: 0px; background-color: inherit;">
+
+                                        </div>
+
+                                    </td>
+
+                                    <?php for ($i = 2; $i < count($this->head_columns); $i++) { ?>
+                                        <td></td>
+                                    <?php } ?>
+
+                                    <td align="center">
+                                        <button class="btn btn-primary btn-xs"
+                                                style="margin-top: 4px;"><?php echo $this->translate('Remplacer') ?></button>
+                                    </td>
+
+                                </tr>
+                                </thead>
+                            <?php } ?>
+                            <tbody>
+
+                            <?php
+                            $this->isBrowsing = true;
+
+                            if ($paginator->getTotalItemCount()) {
+
+                                include __DIR__ . "/../partials/row.phtml";
+                            } else {
+                                ?>
+                                <tr>
+                                    <td colspan="<?php echo 4 + count($this->head_columns) ?>">
+                                        <div class="alert alert-info">
+                                            <?php echo $this->translate("Aucun résultat retourné.") ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+
+                            ?>
+
+                            </tbody>
+                            <?php if (($isAllowedToReplace || (Hal_Auth::isAdminStruct() && $this->controllerName == 'structure')) && $canReplace) { ?>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="2">
+
+                                        <div class="input-group">
+                                      <span class="input-group-addon"
+                                            style="border-left-width: 0px; padding-left: 0px; border-bottom-width: 0px; border-top-width: 0px; background-color: inherit;">
+                                        <input type="checkbox"
+                                               onchange="$(this).closest('table').find('tr td input[type=\'checkbox\']').prop('checked', $(this).is(':checked'));">
+                                      </span>
+                                            <input type="text" readonly="readonly" disabled="disabled"
+                                                   value="Tous/Aucun" class="form-control"
+                                                   style="border-width: 0px; background-color: inherit;">
+
+                                        </div>
+
+								</td>
+								
+								<?php for ($i = 2; $i < count($this->head_columns) ; $i++) { ?>
+								<td></td>
+								<?php } ?>
+								
+								<td align="center">
+									<button class='btn btn-primary btn-xs' style='margin-top: 4px;'><?php echo $this->translate('Remplacer') ?></button>
+								</td>
+								
+					    	</tr>
+					    </tfoot>
+					    <?php } ?>
+				    </table>
+				</form>
+	    	</div>
+	    </div>
+	    
+		<?php include __DIR__ . "/../partials/paginationControl.phtml"; ?>
+		
+    </div>
+</div>
+		
+<?php 
+}

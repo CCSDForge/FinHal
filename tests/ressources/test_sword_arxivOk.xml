@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.tei-c.org/ns/1.0 http://api-preprod.archives-ouvertes.fr/documents/aofr-sword.xsd"
+ xmlns="http://www.tei-c.org/ns/1.0" >
+<text>
+  <body>
+    <listBibl>
+      <biblFull>
+        <titleStmt>
+          <title xml:lang="en">Test transfert article on Arxiv with some accented char: Braced "e" {\\'e}, Unbraced "e" \\e and {\AE}</title>
+          <author role="aut">
+            <persName>
+              <forename type="first">Bruno</forename>
+              <surname>Marmol</surname>
+            </persName>
+            <affiliation ref="#struct-247160" />
+          </author>
+        </titleStmt>
+	<editionStmt>
+          <edition>
+            <ref type="src" target="paper.tex" subtype="author" n="1"/>
+            <ref type="src" target="reference.bbl" subtype="author" n="1"/>
+          </edition>
+	</editionStmt>
+	<seriesStmt><idno type="stamp" n="CNRS" /></seriesStmt>
+        <notesStmt>
+          <note type="commentary">19 pages.</note>
+        </notesStmt>
+        <sourceDesc>
+          <biblStruct>
+            <analytic>
+              <title xml:lang="en">Test transfert article on Arxiv</title>
+              <author role="aut">
+                <persName>
+                  <forename type="first">B.</forename>
+                  <surname>Marmol</surname>
+                </persName>
+                <affiliation ref="#struct-247160" />
+              </author>
+            </analytic>
+          </biblStruct>
+        </sourceDesc>
+        <profileDesc>
+          <langUsage>
+            <language ident="en" />
+          </langUsage>
+          <textClass>
+            <keywords scheme="author">
+              <term xml:lang="en">Test</term>
+              <term xml:lang="en">Arxiv</term>
+              <term xml:lang="en">Transfert</term>
+            </keywords>
+            <classCode scheme="halDomain" n="info"/>
+            <classCode scheme="halDomain" n="info"/>
+          </textClass>
+          <abstract xml:lang="en">We try to transfert some Articles to check code.
+	  We use the 'test' category on arxiv to not polute Arxiv moderators with
+	  bad things...
+	  If problem, mail to bruno.marmol @ ccsd.cnrs.fr
+	  </abstract>
+        </profileDesc>
+        
+      </biblFull>
+    </listBibl>
+  </body>
+</text>
+</TEI>
+

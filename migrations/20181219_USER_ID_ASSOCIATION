@@ -1,0 +1,18 @@
+
+--
+-- Structure de la table `USER_ID_ASSOCIATION`
+--
+
+CREATE TABLE `USER_ID_ASSOCIATION` (
+  `uid` varchar(100) NOT NULL,
+  `federation` varchar(250) NOT NULL,
+  `id_federation` varchar(250) NOT NULL,
+  `uidCcsd` varchar(15) NOT NULL,
+  `nom` varchar(150) NULL,
+  `prenom` varchar(150) NULL,
+  `email` varchar(250) NULL,
+  `valid` boolean NOT NULL,
+  PRIMARY KEY(uid,federation,id_federation)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS REF_IDHAL_IDP;

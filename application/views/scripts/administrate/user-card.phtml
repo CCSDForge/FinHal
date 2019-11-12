@@ -1,0 +1,32 @@
+<div class="row">
+    <div class="col-md-6">
+        <img src="<?php echo CV_URL . '/photo/' . $this->escape($this->user->getUid()) . '/normal' ?>" class="user-photo-normal img-thumbnail"/>
+        <?php if ($this->user->getHasAccountData() == true) : ?>
+            <span class="label label-info">Profil HAL</span>
+        <?php else: ?>
+            <span class="label label-default">Pas de profil HAL</span>
+        <?php endif; ?>
+    </div>
+    <div class="col-md-6">
+        <blockquote>
+            <p><?php echo $this->escape(Ccsd_Tools::formatUser($this->user->getLastname(), $this->user->getFirstname())) ?></p>
+            <small><?php echo 'UID : ' . $this->escape($this->user->getUid()) ?></small>
+            <small><?php echo $this->translate('Login') . ' : ' . $this->escape($this->user->getUsername()) ?></small>
+
+            <?php
+            if ($this->user->getScreen_name()) {
+                echo '<small>';
+                echo $this->translate("Nom d'affichage : ");
+                echo $this->escape($this->user->getScreen_name());
+                echo '</small>';
+            }
+            ?>
+
+            <?php if ($this->user->getCV()) : ?>
+                <small>
+                    <a href="<?php echo CV_URL . '/' . $this->escape($this->user->getIdHal()); ?>" target="_blank"><span class="glyphicon glyphicon-globe"></span>&nbsp;<?php echo $this->translate('CV') . ' : ' . $this->escape($this->user->getIdHal()) ?></a>
+                </small>
+            <?php endif; ?>
+        </blockquote>
+    </div>
+</div>

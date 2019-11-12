@@ -1,0 +1,31 @@
+<?php
+if (preg_match("/ONLINE_FILE/i", $this->group)) {
+        $typdoc='_FILE';
+    } elseif (preg_match("/ONLINE_REF/i", $this->group)){
+        $typdoc='_REF';
+    } else {
+        $typdoc='';
+    }
+?>
+<?php foreach($this->documents as $i => $document) { ?>
+    <tr>
+        <td width="150px">
+            <?php if ($this->group == Hal_Settings_Submissions::TYPE_ONLINE_FILE || $this->group == Hal_Settings_Submissions::TYPE_ONLINE_REF) { ?>
+            <label>
+                <input type="checkbox" class="checkbox-docid<?php echo $typdoc; ?>" name="docid" id="docid<?php echo $typdoc; ?>[]" value="<?php echo $document['docid']?>"/>&nbsp;
+                <?php echo $document['identifiant'] . ', v' . $document['version']; ?>
+            </label>
+            <?php } else { ?>
+            <label><input type="radio" name="docid" value="<?php echo $document['docid']?>" />&nbsp;
+            <?php echo $document['identifiant'] . ', v' . $document['version']; ?></label>
+            <?php } ?>
+        </td>
+        <td>
+            <?php echo strip_tags($document['ref'])?>
+            <?php if ($this->group == Hal_Settings_Submissions::TYPE_MODIFY_FILE || $this->group == Hal_Settings_Submissions::TYPE_MODIFY_REF) { ?>
+                <div class="alert alert-warning"><?php echo Hal_Document_Logger::getLastComment($document['docid'], Hal_Document_Logger::ACTION_ASKMODIF);?></div>
+            <?php } ?>
+        </td>
+        <td width="150px"><?php echo $document['date']?></td>
+    </tr>
+<?php } ?>

@@ -1,0 +1,366 @@
+<?php
+$id = isset($this->authorid) ? 'aut_' . $this->authorid . '_struct_' . $this->id : 'struct_' . $this->id;
+
+?>
+<div class="struct_new" attr-popoverid="<?php echo $id;?>">
+    <div >
+        <form class="form new-struct-form" id="new-struct-form">
+            <input type="hidden" name="authorid" value="<?php echo $this->authorid;?>" />
+            <input type="hidden" name="idx" value="<?php echo $this->id;?>" />
+            <ul class="list-group">
+                <?php include __DIR__ . '/structure-form-struct.phtml'; ?>
+            </ul>
+        </form>
+        <div class="text-center struct-buttons-div">
+            <button class="btn btn-default btn-sm"  onclick="$('#<?php echo $id?>').popover('destroy')"><?php echo $this->translate('Annuler') ?></button>
+            <button class="btn btn-primary" id="save-struct" onclick="submitStructureForm(); return false;"><?php echo $this->translate('Enregistrer') ?></button>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        <!--
+
+        $(function() {
+            autocompleteStructure('#name');
+            $('#new-struct-form select.TYPESTRUCT').change();
+            <?php if (isset($this->edit) && $this->edit) { ?>
+                initStructure();
+            <?php } ?>
+
+        });
+
+        function initStructure()
+        {
+            $('#new-struct-form select.TYPESTRUCT').each(function() {
+                  var struct = getStructure($(this));
+                  var form = getStructureForm(struct);
+                  showStructureLabel(struct, form);
+              }) ;
+        }
+
+        /**
+         * Enregistrement des modifications apportées pour une structure
+         * @param elem
+         * @return boolean
+         */
+        function editStructure(elem)
+        {
+            var struct = getStructure(elem);
+            var form = getStructureForm(struct);
+
+            if (structureValid(form)) {
+                showStructureLabel(struct, form);
+                return true;
+            }
+            return false;
+        }
+
+        function showStructureLabel(struct, form)
+        {
+            struct.find('.new-struct-label .text').first().html(form.find('input.STRUCTNAME').val());
+            var type = form.find('select.TYPESTRUCT').val();
+
+            /*if (type == 'institution') {
+                struct.find('input[name="code"]').first().show();
+            } else {
+                struct.find('input[name="code"]').first().hide();
+            }*/
+            struct.find('.new-struct-label .label').first().addClass(getLabelClassName(type)).html(type);
+            struct.find('.new-struct-label').first().css('display', 'block');
+
+            //if (form.find('input.STRUCTID').val() != '' && form.find('input.STRUCTID').val() != '0') {
+            if (form.find('input.VALID').val() != 'INCOMING' && form.find('input.VALID').val() != '') {
+                struct.find('.new-struct-label .addstruct, .new-struct-label .editstruct').css('display', 'none');
+            }
+            //On regarde si le parent est valide
+            structsup = struct.parent().parent().find('>.new-struct-item');
+            if (structsup.length && structsup.find('input.VALID').first().val() == 'VALID') {
+                struct.find('input[name="code"]').first().attr('readonly', 'readonly');
+                struct.find('.new-struct-label .delstruct').css('display', 'none');
+            } else if (struct.closest('li').is('.list-group-item')) {
+                //Pas 1ere structure
+                struct.find('.new-struct-label .delstruct').css('display', 'block');
+            }
+            form.hide();
+        }
+
+        function getLabelClassName(type)
+        {
+            switch (type){
+                case 'researchteam' :
+                    return 'label-primary';
+                    break;
+                case 'department' :
+                    return 'label-info';
+                    break;
+                case 'laboratory' ://Même Label que regrouplaboratory
+                case 'regrouplaboratory' :
+                    return 'label-warning';
+                    break;
+                case 'institution' ://Même Label que regroupinstitution
+                case 'regroupinstitution' :
+                    return 'label-danger';
+                    break;
+            }
+        }
+
+        /**
+         * Récupération d'une structure
+         * @param elem
+         * @return structure
+         */
+        function getStructure(elem)
+        {
+            return $(elem).closest('.new-struct');
+        }
+
+        /**
+         * Récupération du formulaire d'une structure
+         * @param structure
+         * @return boolean
+         */
+        function getStructureForm(structure)
+        {
+            return structure.find('.new-struct-form').first();
+        }
+
+        /**
+         * Indique si le formulaire d'une structure est valide
+         * @param form
+         * @returns {boolean}
+         */
+        function structureValid(form)
+        {
+            errors = false;
+            form.find('.required').closest('.form-group').find(':input').each(function() {
+                $(this).closest('.form-group').removeClass('has-error');
+                $(this).prev('.help-block').remove();
+                if ($(this).val() == '') {
+                    $(this).closest('.form-group').addClass('has-error');
+                    $("<span class='help-block'><?php echo $this->translate("Please supply the information");?></span>").insertBefore($(this));
+                    errors = true;
+                }
+            });
+            return errors == false;
+        }
+
+        /**
+         * Affichage du formulaire d'une structure
+         * @param elem
+         */
+        function viewStructureForm(elem)
+        {
+            var form = getStructureForm(getStructure(elem));
+            form.find('select.TYPESTRUCT').parent().hide().prev().hide();
+            form.find('select.TYPESTRUCT').parent().hide().prev().hide();
+            form.find('.btn-editstruct').text('<?php echo $this->translate('Modifier') ?>').show();
+            form.show();
+        }
+
+        /**
+         * Changement de type d'une structure
+         * @param elem
+         */
+        function changeStructureType(elem)
+        {
+            var struct = getStructure(elem);
+            var form = getStructureForm(struct);
+            var type = $(elem).val();
+            if (type == 'institution') {
+                //on ne peut plus lier d'autres structures
+                form.find('button.addstruct').hide();
+                form.find('.btn-editstruct').show();
+                struct.find('a.addstruct').first().hide();
+            } else {
+                form.find('.btn-editstruct').hide();
+                //Affichage du lien avec une nouvelle structure
+                form.find('button.addstruct').show();
+                struct.find('a.addstruct').first().show();
+            }
+        }
+
+        /**
+         * Association avec une nouvelle structure
+         * @param elem
+         * @return boolean
+         */
+        function linkStructure(elem)
+        {
+
+             struct = getStructure(elem);
+             form = getStructureForm(struct);
+
+             if (!form.is(':visible')) {
+                 //Formulaire non visible
+                 if ($('#new-struct-form .new-struct-form:visible').length) {
+                     var newElem = $('#new-struct-form .new-struct-form:visible').first().find('select.TYPESTRUCT');
+                     if (!editStructure(newElem)) {
+                         return false;
+                     }
+                 }
+             }
+
+             //Enregistrement d'une nouvelle structure
+             if (editStructure(elem)) {
+                //Création du clone pour rajouter une nouvelle structure
+                struct.find(".new-struct-parent").first().append(createClone(struct, form.find('select.TYPESTRUCT').val()));
+                //initACStructure(parentStruct.find(".new-struct-parent .new-struct-form input.STRUCTNAME").first());
+                return true;
+             }
+             return false;
+        }
+        /**
+         * Création d'un clone d'une structure
+         * @param struct
+         * @param type
+         */
+        function createClone(struct, type)
+        {
+            var clone = struct.clone();
+            //On supprime l'arborescence des parents du clone
+            clone.find('.new-struct-parent .new-struct').remove();
+            clone.addClass('list-group-item');
+            if (type == 'researchteam') {
+                removeTypes = ['researchteam'];
+            } else if (type == 'department') {
+                removeTypes = ['researchteam', 'department'];
+            } else if (type == 'laboratory') {
+                removeTypes = ['researchteam', 'department', 'laboratory'];
+            } else if (type == 'regrouplaboratory') {
+                removeTypes = ['researchteam', 'department', 'laboratory', 'regrouplaboratory'];
+            } else if (type == 'institution') {
+                removeTypes = ['researchteam', 'department', 'laboratory', 'regrouplaboratory', 'institution'];
+            } else {
+                removeTypes = ['researchteam', 'department', 'laboratory', 'regrouplaboratory', 'institution', 'regroupinstitution'];
+            }
+            //On supprime les valeurs non souhaitée du type de structure
+            $.each(removeTypes, function(i, val) {
+                clone.find('select.TYPESTRUCT option[value="' + val + '"]').remove();
+            });
+
+            clone.find('select.TYPESTRUCT').change();
+            clone.find('select.TYPESTRUCT').parent().show().prev().show();
+            //On réinitialise le formulaire
+            clone.find('input, textarea').val('');
+            clone.find('.new-struct-label').hide();
+            clone.find('.new-struct-form').show();
+            clone.find('.btn-editstruct').text('<?php echo $this->translate('Ajouter') ?>');
+
+            autocompleteStructure(clone.find('input.STRUCTNAME'));
+            return clone;
+        }
+
+        function autocompleteStructure(elem)
+        {
+            struct = getStructure(elem);
+            form = getStructureForm(struct);
+
+            //Autocompletion sur les structures
+            $(elem).autocomplete({
+                minLength: 2,
+                html: true,
+                source: function(request, response){
+                    $.ajax({
+                        url: "/ajax/ajaxsearchstructure",
+                        dataType: "json",
+                        data: {term: request.term, type: form.find('select.TYPESTRUCT').val()},
+                        success: function(data) {
+                            response($.map(data.response.docs, function(item) {
+                                return {id: item.docid, label: item.label_html}
+                            }));
+                        }
+                    });
+                },
+                //focus: function() {return false;},
+                select: function( event, ui ) {
+                    form.find('input.STRUCTID').val(ui.item.id);
+                    form.find('input.STRUCTNAME').val(ui.item.label);
+                    form.find('input.VALID').val('VALID');
+                    showStructureLabel(struct, form);
+                }/*,
+                close: function( event, ui ) {
+                    alert('close');
+
+                }*/
+            });
+        }
+
+        /**
+         * Indique si la structure est valide et peut être ajoutée
+         */
+        function structureFormValid(ul)
+        {
+            if (undefined == ul) {
+                ul = $('#new-struct-form>ul');
+            }
+            var valid = true;
+            ul.find('>li').each(function() {
+                haveChild = $(this).find('>ul>li').length > 0;
+                if (! haveChild) {
+                    form = getStructureForm($(this));
+                    structid = form.find('input.STRUCTID').val();
+                    type = form.find('select.TYPESTRUCT').val();
+                    //valid = valid && structureValid(form) &&((structid != '' && structid != '0' ) || type == 'institution');
+                    valid = valid &&((structid != '' && structid != '0' ) || type == 'institution');
+                } else {
+                    valid = valid && structureFormValid($(this).find('>ul'));
+                }
+            });
+            return valid;
+        }
+
+        function renameFormElements(ul, prefix, suffix)
+        {
+            if (undefined == ul) {
+                ul = $('#new-struct-form>ul');
+            }
+            if (undefined == prefix) {
+                prefix = '';
+            }
+            if (undefined == suffix) {
+                suffix = '';
+            }
+            ul.find('>li').each(function(index) {
+                form = $(this).find('.new-struct-item').first();
+                form.find("input, select, textarea").each(function() {
+                    name = $(this).attr('name');
+                    if (prefix != '') {
+                        prefixElem = prefix + index + '][';
+                        if (name == 'code') {
+                            $(this).attr('name', prefixElem + $(this).attr('name') + suffix);
+                        } else {
+                            $(this).attr('name', prefixElem + 'struct][' + $(this).attr('name') + suffix);
+                        }
+                    }
+                });
+                if ($(this).find('>ul>li').length > 0) {
+                    prefixParent = prefix == '' ? 'parents[' : prefix + index + '][struct][parents][';
+                    renameFormElements($(this).find('>ul'), prefixParent, ']');
+                }
+            });
+        }
+
+        function submitStructureForm()
+        {
+            if (structureFormValid()) {
+                //Suppression alerte
+                $('.popover-content .alert-danger').remove();
+
+                //Renommage des elements
+                renameFormElements();
+
+                var callback = function( data ) {popoverDestroy(); $('#aut-struct').html(data.autstruct); }
+                ajaxrequestsubmit({url: '/<?php echo $this->controller?>/ajaxsubmitstructureform', data: $('#new-struct-form').serialize(), success: callback, dataType: 'json',
+                    error: function(msg) {
+                        $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+                    }
+                });
+            } else {
+               $('.popover-content').prepend(getMessageHtml("<?php echo $this->translate("La nouvelle structure n'est pas valide (Peut-être n'avez-vous pas liée la structure)") ?>", 'alert-danger'));
+            }
+        }
+
+        //-->
+    </script>
+</div>

@@ -1,0 +1,9 @@
+<?php
+/** @var Hal_View $this */
+$this->layout()->title = $this->translate('Activation de votre compte');
+$this->layout()->pageTitle = $this->layout()->title;
+
+if ($this->errorMessage) {
+    echo $this->message($this->errorMessage, 'danger');
+}
+

@@ -1,0 +1,305 @@
+$identifier-height: 40px;
+$gray-border: #ddd;
+
+
+#identifiertype {
+  height: $identifier-height;
+}
+
+#identifier-input{
+  height:$identifier-height;
+}
+
+#metaButton {
+  height:$identifier-height;
+  margin: 0 auto;
+}
+
+
+#idtype-menu {
+  cursor:  pointer;
+  font-size: 12px;
+  text-align: left;
+  padding: 10px;
+}
+
+#demo-upload, #id-zone {
+  border: 2px dashed $gray-border;
+  background: #fdfdfd;
+}
+#id-zone {
+  border: 2px solid $gray-border;
+  vertical-align: middle;
+  height: 300px;
+  padding: 25px 25px;
+  border-radius: 5px;
+  text-align:center;
+}
+
+#file-zone {
+  padding:20px 20px 20px 20px;
+  /*max-width: 80%;*/
+  text-align: center;
+}
+
+#demo-upload {
+  height: 300px;
+  overflow-y: auto;
+}
+
+#idext-zone {
+  padding:0px 15px 0px 15px;
+}
+
+#id-zone-detailed {
+  vertical-align: middle;
+  border: 2px solid #ddd;
+  padding: 5px 5px;
+  border-radius: 5px;
+  text-align:center;
+  margin-top:10px;
+}
+
+
+.file-details{
+   margin-left: 20px;
+   border-left: 2px solid #dddddd;
+   margin-top: 10px;
+   display:none;
+ }
+
+.file-size {
+  font-size: smaller;
+  font-style: italic;
+}
+
+#search-message {
+  z-index: 1500;
+  opacity: 1;
+  border-left: 2px solid black;
+  border-bottom: 2px solid black;
+  border-right: 2px solid black;
+  text-align: center;
+  position: absolute;
+  top:4px;
+  left:25%;
+  height: 50%;
+  width: 50%;
+  margin: 0 auto;
+  background-color: white;
+  display:none;
+}
+
+
+.dz-progress { display: none !important; }
+
+.dz-success-mark { display: none !important; }
+
+.dz-error-mark { display: none !important; }
+
+.dropzone.dz-clickable * {
+  cursor: pointer !important;
+}
+
+.dropzone .dz-preview .dz-details .glyphicon-file {
+  position: absolute;
+  top: 60%;
+  left: 15%;
+  font-size: 20px;
+}
+.dropzone .dz-preview .dz-details .glyphicon-trash {
+  position: absolute;
+  top: 60%;
+  left: 70%;
+  font-size: 20px;
+}
+
+.dropzone {
+  text-align: center;
+}
+
+#files input {
+  margin-bottom: 0px;
+}
+.popover {
+  max-width:500px;
+  width:500px;
+}
+
+#files {
+  width:100%;
+}
+
+#div-files {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+#div-files>div.overflow {
+  overflow: auto;
+  max-height: 400px;
+}
+#div-files>div.compile {
+  margin: 10px;
+}
+.select-small {
+  height: 20px;
+  line-height: 20px;
+  font-size: 12px;
+  width: 100px;
+}
+.file-origin div, .file-licence div {
+  padding-left: 20px;
+}
+.file-origin input{
+  float: left;
+  margin-right: 10px;
+}
+.file-licence input{
+  margin-top: -3px;
+  margin-right: 10px;
+}
+
+.file-licence hr {
+  border-top: 1px solid #fbeed5;
+}
+
+.file-row {
+  padding-top:5px;
+}
+
+.file-row-detail {
+  display:inline-block;
+  width:15px;
+}
+
+.file-comments {
+  text-align:right;
+  padding-top:15px;
+}
+
+.detailed-view-transfer {
+  margin-top:30px;
+  padding:15px;
+  border:2px dashed #ddd;
+}
+
+#transfer-title {
+  text-align:center;
+}
+
+#ftp {
+  display:none;
+  height: 200px;
+  overflow:auto;
+  width:300px;
+}
+
+#ftp-list {
+  height: 200px;
+  overflow:auto;
+}
+
+.compile {
+  display:none;
+}
+
+#id-info {
+  font-style:italic;
+  font-size:11px;
+}
+
+#id-frame {
+  height:50px;
+}
+
+#idurl {
+  font-style:italic;
+}
+
+#metaButton {
+  margin: 0 auto;
+}
+
+#error-zone-file {
+  display:none;
+}
+
+#submit-file-header {
+  font-style:italic;
+  float:left;
+  margin-top:15px;
+}
+
+#step-file-footer {
+  font-style:italic;
+  float:right;
+  margin-top:15px;
+}
+
+.success-icon-ok {
+  margin-right:10px;
+  font-size:15px;
+  color: #468847;
+  text-align:left;
+}
+
+#modal-success-msg{
+font-size:17px;
+}
+
+#success-msg-title {
+  color:inherit;
+  text-align:center;
+  float:left;
+}
+
+.remove-x {
+  float:right;
+  font-size:15px;
+}
+
+.success-comment {
+  font-style: italic;
+  font-size:12px;
+}
+
+.center-url {
+  text-align: center;
+}
+
+.list-display {
+  display:list-item;
+}
+
+.success-icon-ko {
+  margin-right:10px;
+  font-size:15px;
+  color: red;
+  text-align:left;
+}
+
+.success-msg-button {
+  text-align:right;
+  width:100%;
+  font-size:15px;
+  padding-right:15px;
+  padding-bottom:15px;
+}
+
+.mainRadio {
+  margin-right:4px;
+  float:left;
+  margin-top:0px !important;
+}
+
+.filename-link {
+  float:left;
+}
+
+#error-zone-file {
+  margin-top: 20px;
+}
+
+.li-file {
+  background: #f5f5f5;;
+}

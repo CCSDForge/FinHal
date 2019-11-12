@@ -1,0 +1,59 @@
+<style>
+    h1, h2, h3, h4 {color: inherit;}
+    .media {
+        padding:10px;
+    }
+    .media-body, .media-left, .media-right {
+        display: table-cell;
+        vertical-align: top;
+    }
+    .media-left, .media>.pull-left {
+        padding-right: 10px;
+    }
+    .striped:nth-of-type(odd){
+        background-color: #efefef;
+    }
+
+    .striped:nth-of-type(even){
+        background-color: #ffffff;
+    }
+</style>
+
+<div class="panel panel-default">
+    <div class="panel-body">
+<?php
+foreach($this->portails as $i => $portail) {
+    ?>
+    <div class="media striped">
+        <div class="media-left">
+            <a href="<?php echo $portail['url']; ?>">
+                <img class="media-object img-thumbnaill" src="//thumb.ccsd.cnrs.fr/<?php echo $portail['img']?>/small" alt="<?php echo $portail['name'] ?>">
+            </a>
+        </div>
+        <div class="media-body">
+            <h4 class="media-heading">
+                <?php echo $portail['name'] ?>
+            </h4>
+            <?php $date = new Zend_Date($portail['date'], Zend_Date::YEAR . '-' . Zend_Date::MONTH . '-' . Zend_Date::DAY); ?>
+            <div><?php echo $this->translate("Date d'ouverture"); ?> : <strong><?php echo $date->get(Zend_Date::DATE_LONG); ?></strong></div>
+            <div><strong><a href="<?php echo $portail['url']; ?>" target="_blank"><?php echo $portail['url']; ?></a></strong></div>
+            <div class="btn-group" style="margin-bottom:5px;">
+                <a rel="nofollow" href="<?php echo $portail['url']; ?>/search/index/q/*/submitType_s/file"
+                   target="_blank" class="btn btn-default btn-xs"><?php echo $this->translate('Documents') ?>&nbsp;:&nbsp;<strong><?php echo number_format(Ccsd_Tools::ifsetor($portail['counter']['file'], 0), 0, '.', ' '); ?></strong></a>
+                <a rel="nofollow" href="<?php echo $portail['url']; ?>/search/index/q/*/submitType_s/notice"
+                   target="_blank" class="btn btn-default btn-xs"><?php echo $this->translate('Notices') ?>&nbsp;:&nbsp;<strong><?php echo number_format(Ccsd_Tools::ifsetor($portail['counter']['notice'], 0), 0, '.', ' '); ?></strong></a>
+                <a rel="nofollow" href="<?php echo $portail['url']; ?>/search/index/q/*/submitType_s/annex"
+                   target="_blank" class="btn btn-default btn-xs"><?php echo $this->translate('Annexes') ?>&nbsp;:&nbsp;<strong><?php echo number_format(Ccsd_Tools::ifsetor($portail['counter']['annex'], 0), 0, '.', ' '); ?></strong></a>
+                <a rel="nofollow"
+                   href="<?php echo $portail['url']; ?>/search/index/q/*/sid_i/<?php echo $portail['sid'] ?>"
+                   target="_blank"
+                   class="btn btn-default btn-xs"><?php echo $this->translate('Dépôts dans le portail') ?>
+                    &nbsp;:&nbsp;<strong><?php echo number_format(Ccsd_Tools::ifsetor($portail['submissions'], 0), 0, '.', ' '); ?></strong></a>
+            </div>
+        </div>
+    </div>
+    <?php
+}
+?>
+    </div>
+</div>

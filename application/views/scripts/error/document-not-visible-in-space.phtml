@@ -1,0 +1,24 @@
+<br>
+<div class="jumbotron">
+    <h2><?php echo $this->translate("Le document n'est pas visible dans cet espace."); ?></h2>
+
+    <?php
+    $identifiant = $this->escape($this->documentIdentifier);
+    $version = $this->escape($this->documentVersion);
+
+    if ($version != 0) {
+        $version = $this->translate('version %s', $version);
+    } else {
+        $version = '';
+    }
+
+    ?>
+    <?php echo $this->translate("Le document avec l'identifiant <strong>%s</strong> <em>%s</em> n'est pas visible dans cet espace.", [$identifiant, $version]); ?>
+    <?php echo $this->translate("Il n'est pas disponible dans ce portail ou cette collection."); ?>
+
+    <hr>
+    <a class="btn btn-primary" href="<?php echo $this->url(['controller' => 'search', 'action' => 'index']); ?>"
+       role="button"><?php echo $this->translate('Rechercher un document'); ?></a>
+</div>
+
+

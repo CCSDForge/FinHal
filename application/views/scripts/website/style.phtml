@@ -1,0 +1,9 @@
+<?php 
+$this->jQuery()->addStylesheet(CCSDLIB . "/css/colorpicker.css")->addJavascriptFile(CCSDLIB . "/js/bootstrap-colorpicker.js")->addJavascriptFile(CCSDLIB . "/js/colorpicker.js"); 
+
+$this->layout()->pageDescription = $this->translate("Personnalisation de l'apparence du site. Trois solutions sont proposées :<br>
+	- <b>En un clic</b> : Vous sélectionnez une apparence existante;<br />
+	- <b>Simple</b> : Vous remplissez le formulaire ci-dessous. Le système créera automatiquement la feuille de style du site;<br />
+	- <b>Avancée</b> : Vous éditez directement la feuille de style du site.");
+
+echo $this->form;

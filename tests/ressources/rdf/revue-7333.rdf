@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:fabio="http://purl.org/spar/fabio/" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:vcard="http://www.w3.org/2006/vcard/ns#" xmlns:prism="http://prismstandard.org/namespaces/basic/2.0/">
+  <fabio:Journal rdf:about="https://data.archives-ouvertes.fr/revue/7333">
+    <skos:prefLabel>Nature</skos:prefLabel>
+    <skos:altLabel>Nature</skos:altLabel>
+    <dcterms:publisher>
+      <vcard:Organization>
+        <vcard:organization-name>Nature Publishing Group</vcard:organization-name>
+      </vcard:Organization>
+    </dcterms:publisher>
+    <prism:issn>0028-0836</prism:issn>
+    <prism:eIssn>1476-4679</prism:eIssn>
+    <prism:url rdf:resource="http://www.nature.com"/>
+  </fabio:Journal>
+</rdf:RDF>

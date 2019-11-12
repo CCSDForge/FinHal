@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <?php if(APPLICATION_ENV != ENV_PROD) : ?>
+        <meta name="robots" content="noindex">
+    <?php endif; ?>
+<title>
+<?php if ($this->layout()->pageTitle != '') : ?>
+<?php echo $this->layout()->pageTitle . ' | ';?>
+<?php endif;?>
+API Archive Ouverte HAL
+</title>
+<meta charset="utf-8">
+<meta name="description"
+	content="<?php if ($this->layout ()->pageDescription != '') { echo $this->translate($this->layout ()->pageDescription) . ' - '; }?>API Archive ouverte HAL">
+<meta name="author" content="CCSD - Centre pour la Communication Scientifique Directe - UMS3668">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="5FHONilaVOZsrKFZEENeXdvl6RvRyi18CPR4EwODct4">
+<?php
+$this->headLink ()->appendStylesheet ( CCSDLIB . "/v3/css/bootstrap.min.css" );
+$this->headLink ()->appendStylesheet ( CCSDLIB . "/css/ccsd.css" );
+$this->headLink ()->appendStylesheet ( "/css/api.css" );
+$this->headLink ()->appendStylesheet ( CCSDLIB . '/js/sh/styles/shCore.css' );
+$this->headLink ()->appendStylesheet ( CCSDLIB . '/js/sh/styles/shThemeDefault.css' );
+
+echo $this->headLink ();
+
+$this->headScript ()->appendFile ( CCSDLIB . '/js/jquery/min.1.9.1.js' );
+$this->headScript ()->appendFile ( CCSDLIB . "/v3/js/bootstrap.min.js" );
+$this->headScript ()->appendFile ( CCSDLIB . '/js/sh/scripts/shCore.js' );
+$this->headScript ()->appendFile ( CCSDLIB . '/js/sh/scripts/shBrushXml.js' );
+
+
+// HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+$this->headScript ()->appendFile ( '//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js', 'text/javascript', array (
+		'conditional' => 'lt IE 9'
+) );
+$this->headScript ()->appendFile ( '//oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js', 'text/javascript', array (
+		'conditional' => 'lt IE 9'
+) );
+
+echo $this->headScript()?>
+</head>
+
+<body>
+<?php $this->navbar(false, null, false, null); ?>
+
+<div class="container">
+    <?php
+
+				echo $this->DisplayFlashMessages ( 'error', false );
+				echo $this->DisplayFlashMessages ( 'warning', false );
+				echo $this->DisplayFlashMessages ( 'success', false );
+				echo $this->DisplayFlashMessages ( 'info', false );
+				?>
+</div>
+	<br>
+	<div class="container">
+
+		<?php
+		if ($this->layout ()->pageTitle != '') {
+			echo '<div class="page-header">';
+			echo '<h1>';
+			echo $this->translate ( $this->layout ()->pageTitle );
+			if ($this->layout ()->pageDescription != '') {
+				echo '&nbsp;<small>';
+				echo $this->translate ( $this->layout ()->pageDescription );
+				echo '</small>';
+			}
+			echo '</h1>';
+			echo '</div>';
+		}
+
+		?>
+</div>
+	<div class="container">
+   	<?php echo $this->layout()->content ;?>
+</div>
+
+<?php echo $this->render('common/footer.phtml');?>
+
+
+<script>SyntaxHighlighter.all();</script>
+	<!-- Piwik -->
+	<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(["trackPageView"]);
+  _paq.push(["enableLinkTracking"]);
+
+  (function() {
+    var u=(("https:" == document.location.protocol) ? "https" : "http") + "://piwik-hal.ccsd.cnrs.fr/";
+    _paq.push(["setTrackerUrl", u+"piwik.php"]);
+    _paq.push(["setSiteId", "183"]);
+    var d=document, g=d.createElement("script"), s=d.getElementsByTagName("script")[0]; g.type="text/javascript";
+    g.defer=true; g.async=true; g.src=u+"piwik.js"; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+	<!-- End Piwik Code -->
+	<noscript>
+		<!-- Piwik Image -->
+		<img src="//piwik-hal.ccsd.cnrs.fr/piwik.php?idsite=183&amp;rec=1" style="border: 0" alt="" />
+	</noscript>
+	<!-- End Piwik -->
+</body>
+</html>

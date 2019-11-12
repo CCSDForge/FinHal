@@ -1,0 +1,253 @@
+<form method='post' action='<?php echo URL . "/" .$this->controllerName . "/replace" ?>'>
+
+<?php
+foreach ($this->params as $name => $value) {
+	if (in_array($name, array('controller', 'action'))) continue;
+	if (in_array($name, array('row','panel','docs'))) {
+		if ('row' == $name) {
+		    if ($this->name == 'Structure') {
+                $value = array_diff($value, $this->idReplace); //On enlève les structures non remplacées
+            }
+            foreach ($value as $val) {
+			?>
+			<input type='hidden' value="<?php echo $val ?>" name="<?php echo $name ?>[]" />
+			<?php 
+			}
+		} else if ('panel' == $name) {
+			foreach ($value as $i => $val) {
+			?>
+			<input type='hidden' value="<?php echo $val ?>" name="<?php echo $name ?>[<?php echo $i ?>]" />
+			<?php 
+			}
+		} else if ('docs' == $name) {
+			foreach ($value as $i => $val) {
+				foreach ($val as $docid => $visible) {
+					?>
+					<input type='hidden' value="<?php echo $visible ?>" id="<?php echo $name ?>_<?php echo $i ?>_<?php echo $docid ?>" name="<?php echo $name ?>[<?php echo $i ?>][<?php echo $docid ?>]" />
+					<?php 
+				}
+			}
+		}
+	} else {
+	?>
+	<input type='hidden' value="<?php echo $value ?>" name="<?php echo $name ?>" />
+	<?php 
+	}
+}
+
+$this->no_displaying_documents = true;
+
+?>
+
+<input type="hidden" name="searching" value="1"/>
+	
+<div class='col-md-12'>
+    <?php if ($this->trouve < 0) { ?>
+       <div class="alert alert-danger">
+        <strong>
+            <i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;<?php echo $this->translate("Remplacement impossible"); ?>
+        </strong>
+    </div>
+    <?php } ?>
+
+	<div class="panel panel-success">
+		<div class="panel-heading">
+        	<h5 class="panel-title"><?php echo $this->translate($this->name . " conservé(e) :") ?></h5>
+	      	</div>
+      		<div class="panel-body">
+	       	    <?php echo $this->obj_dest ?>
+		</div>
+	</div>
+</div>
+
+<?php
+if (isset ($this->obj_src) && $this->obj_src) {
+	if ($this->name == 'Structure') {
+	    $flipidreplace = array_flip($this->idReplace);
+        $objnoreplace = array_intersect_key($this->obj_src, $flipidreplace);
+        $this->obj_src = array_diff_key($this->obj_src, $flipidreplace);
+
+        if (empty($this->obj_src)) { //Si il n'y a pas de structures à remplacer
+            $this->trouve = -1;
+        }
+	}
+    ?>
+<div class='col-md-12'>
+	<div class="panel panel-danger">
+		<div class="panel-heading">
+        	<h5 class="panel-title"><?php echo $this->translate($this->name . "(s) remplacé(es) :") ?></h5>
+	      	</div>
+      		<div class="panel-body">
+      		<?php
+      		foreach ($this->obj_src as $i => $obj) {
+				echo $obj;
+			}
+	       	?>
+		</div>
+	</div>
+</div>
+<?php if (isset($objnoreplace) && $objnoreplace != null) { ?>
+		<div class='col-md-12'>
+			<div class="panel panel-warning">
+				<div class="panel-heading">
+					<h5 class="panel-title"><?php echo $this->translate($this->name . "(s) non remplacé(es) :") ?></h5>
+				</div>
+				<div class="panel-body">
+					<?php
+
+					foreach ($objnoreplace as $j => $objnot) {
+						echo $objnot;
+					}
+					?>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+}
+?>
+
+<?php 
+if (isset ($this->documents_src) && $this->documents_src) { 
+?>
+<style type='text/css'>
+.citation {
+	text-align : justify;
+	border-bottom: 2px solid #eeeeee;
+	margin-bottom: 2px;
+	padding-bottom: 2px;
+}
+.doc_moving{
+    transform: rotate(135deg) scaleX(-1);
+    -o-transform: rotate(135deg) scaleX(-1); 
+	-ms-transofmr: rotate(135deg) scaleX(-1); 
+	-webkit-transform: rotate(135deg) scaleX(-1);
+	-moz-transform: rotate (135deg) scaleX(-1); 
+	font-size: 20px;
+	color: #468847;
+}
+.doc_stay{
+    transform: rotate(160deg) scaleX(1);
+    -o-transform: rotate(160deg) scaleX(1); 
+	-ms-transofmr: rotate(160deg) scaleX(1); 
+	-webkit-transform: rotate(160deg) scaleX(1);
+	-moz-transform: rotate(160deg) scaleX(1);
+	font-size: 20px;
+	color: #d9534f;
+}
+.doc_moving_desc {
+	text-transform: uppercase;
+	font-weight: 700;
+	font-size: 10px;
+}
+.doc_stay_desc {
+	text-transform: uppercase;
+	font-weight: 700;
+	font-size: 10px;
+}
+.title {
+	color: #959595;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}	
+</style>
+<script type='text/javascript'>
+$(document).ready(function() {
+	$(document.body).tooltip({
+		selector: '.hasTooltip',
+		html: true,
+		placement: 'right',
+		container: 'body'
+	});
+});
+
+function move_focus (t) {
+	if (!$(t).attr('data-mouseover')) {
+		$(t).closest('.row').find('.hasTooltip').trigger('mouseover');
+	}
+	$(t).attr('data-mouseover', true);
+}
+
+function move_blur (t) {
+	$(t).closest('.row').find('.hasTooltip').trigger('mouseout');
+	$(t).removeAttr('data-mouseover');
+}
+</script>
+<div class='col-md-12'>
+	<div class="panel panel-warning">
+		<div class="panel-heading">
+        	<h5 class="panel-title"><?php echo $this->translate("Document(s) déplacé(s) :") ?></h5>
+	      	</div>
+      		<div class="panel-body">
+      		<?php 
+      		foreach ($this->documents_src as $objid => $docs) {
+				echo $this->obj_documents_src[$objid];
+				?>
+				<div class='row ' style='padding: 3px 0;'>
+					<div class='col-xs-offset-1 col-xs-9 col-md-offset-1 col-md-9 title'>
+						<span><?php echo $this->translate("-- Documents impactés par la fusion --") ?></span>
+					</div>
+				</div>
+				<?php 
+				foreach ($docs as $docid => $visible) {
+				?>
+				<div class='row ' style='padding: 3px 0;'>
+					<div class='col-xs-9 col-md-offset-1 col-md-9 citation' onmouseover='move_focus(this);' onmouseout='move_blur(this);'>
+						<?php echo Hal_Document::find($docid)->getCitation('full'); ?>
+					</div>
+					<div class='col-xs-1 col-md-1 hasTooltip' data-toggle='tooltip' data-placement='right' title='<span class="<?php echo $visible ? "doc_moving_desc" : "doc_stay_desc" ?>"><?php echo $this->translate($visible ? "Document à déplacer" : "Document à conserver") ?></span>'>
+						<i class='glyphicon glyphicon-share-alt <?php echo $visible ? "doc_moving" : "doc_stay" ?>'></i>
+					</div>
+				</div>
+				<?php 
+				}
+			}
+	       	?>
+		</div>
+	</div>
+</div>
+<?php 
+}
+?>
+
+<?php if (isset($this->canReplace) && $this->canReplace === false) { ?>
+    <div class="alert alert-danger">
+        <strong>
+            <i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;<?php echo $this->translate("Modifications non autorisées"); ?>
+        </strong><br />
+        <?php
+        if (isset($this->idReplace) && is_array($this->idReplace)) {
+            echo $this->translate("Les structures suivantes ne seront plus valides car elles dépendent de la structure remplacée ($this->name):");
+        ?>
+            <ul>
+            <?php
+            foreach ($this->idReplace as $i => $id) {
+			?>
+				<li><a href='/<?php echo $this->controllerName ?>/read/id/<?php echo $id ?>' target="_blank"><?php echo $id;?></a></li>
+			<?php
+            }
+            ?>
+            </ul>
+            <?php
+        }?>
+    </div>
+<?php }?>
+    <div class='row'>
+        <div class='col-md-6'>
+            <div class='panel-footer text-center'>
+                <a class='btn btn-default'  href='/<?php echo $this->controllerName ?>/browse'><?php echo $this->translate('Annuler la modification') ?></a>
+                <button class='btn btn-default'  name='dest' type='submit' value=''><?php echo $this->translate('Retour') ?></button>
+            </div>
+        </div>
+        <?php if ($this->trouve >= 0) { ?>
+        <div class='col-md-6'>
+            <div class='panel-footer text-center'>
+                <button class='btn btn-primary' name='to_replace' type='submit' value='1'><?php echo $this->translate('Effectuer la modification') ?></button>
+            </div>
+        </div>
+        <?php } ?>
+    </div>
+</form>

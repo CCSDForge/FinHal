@@ -1,0 +1,91 @@
+-*- org -*-
+
+PREPARATION:
+
+https://hangouts.google.com/call/DQVBch6kL2xhbBeq0sxZAAEJ
+
+Ouvrir un term sur dbname4  en root pour sauvegarde
+Ouvrir un term sur dbname2  en git  pour mise a jour code
+Ouvrit un term sur ccsdadm   en root pour mise a jour par salt et arret apache
+Ouvrir un term sur ccsdhal01 en root pour les autres manip
+
+* Mettre a jour branche de prod
+    cd /sites/hal_prod
+    git fetch
+    git checkout preprod
+    git pull
+    git checkout production
+    git rebase preprod
+
+    cd /sites/hal_prod/vendor/library
+    git fetch
+    git checkout preprod
+    git pull
+    git checkout production
+    git rebase preprod
+
+* Mettre un message sur le sorry serveur:
+    mv /sites/sorry-server/accueil-mise-en-prod2017.html /sites/sorry-server/accueil.html
+
+MIGRATION
+------------------------------------------------------------------------------------------
+* Arreter HAL:
+
+  salt -L ccsdwb11,ccsdwb13,ccsdwb14,ccsdwb15,ccsdwb16,ccsdwb17,ccsdwb23,ccsdwb27,ccsdwb28,ccsdwb29,ccsdhal01,ccsdhal02,ccsdhal03 cmd.run 'systemctl stop apache'
+
+* Sauvegarde de la base.
+     sur dbname4
+     En ROOT
+     sh ~marmol/tmp/saveDbtmp
+
+* Migration du core
+  mv /sites/hal /sites/hal-before-migration
+
+* Install du code
+  mv /sites/hal_prod /sites/hal
+ 
+  # La library est directement dans HAL!!!
+    On ne modifie pas la /sites/library utilisee pour Episcience!!!
+
+* 1 - Création de la table Owner_Tokens
+   mysql -h dbname4b -u root -p HALV3 <  20170725_add_owner_token.sql
+
+* 2 - Création de la table Pref_Mail
+   mysql -h dbname4b -u root -p HALV3 <  20170504_PREF_MAIL.sql
+
+* 3 - Création de la table Pref_Depot
+   mysql -h dbname4b -u root -p HALV3 <  20170401_PREF_DEPOT.sql
+
+
+* SUR Machine de prod ccsdhal01:
+   cd /sites/hal/migrations
+   php  /sites/hal/migrations/20170402_Migration_PrefDepot.php  -e production
+
+   mysql -h dbname4b -u root -p HALV3 <  20170402_Migration_PrefDepot.sql
+   mysql -h dbname4b -u root -p HALV3 <  20170403_DEL_COL_USER.sql
+
+**  Ajout des colonnes dans Doc_Metadatas et Doc_Hascopy
+   mysql -h dbname4b -u root -p HALV3 <  20170213_NewColumns_DocMetadatas.sql
+
+** Effacement du cache
+   find /cache/hal/production/docs -name "*.phps" -delete
+   Ne pas attendre la fin!!!
+
+* SOLR:  Deja fait par Raphael
+echo "ALTER TABLE `INDEX_QUEUE` ADD `HOSTNAME` VARCHAR(255) NOT NULL DEFAULT NULL AFTER `PID`;" | mysql -h dbname4b -u root -p SOLR_INDEX
+echo "ALTER TABLE `INDEX_QUEUE` ADD `MESSAGE`  VARCHAR(255) NULL DEFAULT NULL AFTER `STATUS`;"  | mysql -h dbname4b -u root -p SOLR_INDEX
+
+* Configuration du portail HAL
+  Ajouter dans le fichier
+  /data/hal/production/portail/hal/config/submit.ini
+
+  ; Type par défaut
+  defaultTypdoc = "none"
+
+* Correction des cron (nouvelle indexation)
+  Sur ccsdadm
+  edit: /srv/salt/cron/files/solrIndexQueue
+     decommenter la seconde partie et supprimer la premiere partie
+
+* Croiser les doigts et... redemarrer
+

@@ -1,0 +1,9 @@
+<?php
+/** @var Hal_View  $metrics */
+/** @var Hal_Cv $cv */
+$cv = $this->cv;
+$metrics = $cv->getFacetMetrics();
+$content = '<strong>'.$this->translate('Consultations du cv').'</strong>';
+$content .= '<h2 style="margin-top:10px;"><span class="label label-primary">'.$metrics.'</span></h2>';
+
+echo $this->widget(array('title' => $this->translate('cv_widget_metrics'), 'content' => $content, 'class' => 'widget-metrics'));

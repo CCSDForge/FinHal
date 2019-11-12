@@ -1,0 +1,474 @@
+<?php
+/**
+ * Vue par défaut d'une image
+ */
+if (! (isset($this->document) && $this->document instanceof Hal_Document) ) {
+    exit();
+}
+?>
+
+<div id="document">
+    <?php // Identifiant de l'article  ?>
+    <?php if ($this->document->getId()) { ?>
+        <div class="btn-group dropdown">
+            <button type="button" class="btn btn-danger"><?php echo $this->document->getId(); ?>, <?php echo $this->translate('version') . ' ' . $this->document->getVersion(); ?></button>
+            <?php if (is_array($this->document->getDocVersions()) && count($this->document->getDocVersions()) > 1) {
+                if (MODULE != SPACE_COLLECTION) {
+                    $url = PREFIX_URL;
+                } else {
+                    $site = Hal_Site::getCurrentPortail();
+                    $url  = $site->getUrl() .'/';
+                }?>
+                <?php // liens vers les autres versions  ?>
+                <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu pull-right" style="margin:0px" role="menu">
+                    <?php
+                    foreach ($this->document->getDocVersions() as $version) {
+                        if ($version['VERSION'] == $this->document->getVersion()) { continue; }
+                        if ($version['DOCSTATUS'] != 11 && $version['DOCSTATUS'] != 111) {
+                            if (!Hal_Document_Acl::canView($this->document)) {
+                                continue;
+                            } else {
+                                ?>
+                                <li title="<?php echo $this->document->statusToString($version['DOCSTATUS']);?>"><a style="font-style:italic; color: grey;" href="<?php echo $url . $this->document->getId() . 'v' . $version['VERSION'] ?>"><?php echo $this->translate('version') . ' ' . $version['VERSION']; ?></a>
+                                </li>
+                                <?php
+                            }
+                        } else {
+                            ?>
+                            <li><a href="<?php echo $url . $this->document->getId() . 'v' . $version['VERSION'] ?>"><?php echo $this->translate('version') . ' ' . $version['VERSION']; ?></a></li>
+                            <?php
+                        }
+                    } ?>
+                </ul>
+                <?php
+            } ?>
+        </div>
+    <?php } ?>
+
+    <div class="row" >
+        <div class="col-md-7">
+            <!-- Prévisualisation du fichier -->
+            <?php include 'widget-preview.phtml'; ?>
+
+            <!-- Licence -->
+            <?php include 'widget-licence.phtml';?>
+
+            <!-- Partager -->
+            <?php include 'widget-share.phtml'; ?>
+
+            <!-- Métriques -->
+            <?php include 'widget-metrics.phtml'; ?>
+
+            <!-- Campus AAR -->
+            <?php if ($this->document->getSid() == '4604') { //Campus AAR
+                include 'widget-analyse-aar.phtml';
+            } ?>
+        </div>
+        <div class="col-md-5">
+            <?php // Titre du document  ?>
+            <?php $titles = $this->document->getTitle();
+            if (count($titles)) { ?>
+                <h1 class="title">
+                    <?php
+                    if (count($titles) == 1) {
+                        //Une seule langue pour le titre
+                        echo current($titles);
+                        $lang = array_keys($titles)[0];
+                        $subtitle = $this->document->getSubTitle($lang);
+                        if ($subtitle) {
+                            echo "<small>" . $subtitle . "</small>";
+                        }
+                    } else {
+                        //Plusieurs langues pour le titre
+                        $fulltextLanguage = $this->document->getMeta('language');
+                        if (isset($fulltextLanguage) && array_key_exists($fulltextLanguage, $titles)) {
+                            $active = $fulltextLanguage;
+                        } else if (array_key_exists(Zend_Registry::get('lang'), $titles)) {
+                            $active = Zend_Registry::get('lang');
+                        } else if (array_key_exists('en', $titles)) {
+                            $active = 'en';
+                        } else {
+                            $active = array_keys($titles)[0];
+                        } ?>
+                        <div class="row">
+                            <div class="col-md-1 col-lang">
+                                <div class="btn-group-vertical btn-lang opacity">
+                                    <?php foreach(array_keys($titles) as $lang ) {?>
+                                        <button type="button" class="btn btn-default btn-xs <?php echo (($lang == $active) ? 'active' : '')?>" attr-lang="<?php echo $lang ?>"><?php echo $this->translate($lang) ?></button>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                            <div class="col-md-11 col-content">
+                                <?php foreach($titles as $lang => $value ) { ?>
+                                    <div class="linkify content-<?php echo $lang;?>" <?php echo ($lang != $active) ? 'style="display:none;"': '';?>>
+                                        <?php echo $value;
+                                        $subtitle = $this->document->getSubTitle($lang);
+                                        if ($subtitle) {
+                                            echo "<small>" . $subtitle . "</small>";
+                                        }
+                                        ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    <?php } ?>
+                </h1>
+            <?php } ?>
+
+            <?php // Date  ?>
+            <h4 class="date">
+                <?php
+                $circa = $this->document->getMeta('circa');
+                echo ( $circa=='1'?'ca&nbsp;':'' ).$this->document->getProducedDate();
+                ?>
+            </h4>
+
+            <?php // Auteurs  ?>
+            <div class="authors">
+                <?php $corresponding = false;
+                foreach ($this->document->getAuthors() as $author) {
+                    $structids = $author->getStructidx();
+                    foreach ($structids as &$idx) {
+                        $idx += 1;
+                    }
+
+                    if ($author->getIdHal() != 0) {
+                        $href = PREFIX_URL . 'search/index/q/*/authIdHal_s/' . urlencode($author->getIdhalstring());
+                    } else {
+                        $href = PREFIX_URL . 'search/index/q/*/authFullName_s/' . urlencode($author->getFullname(true));
+                    }
+                    ?>
+                    <span class="author">
+                    <a rel="nofollow" href="<?php echo $href ?>"
+                       target="_blank"><?php echo $author->getFullname(); ?></a>
+                        <?php
+                        if ($author->getQuality() == 'crp') {
+                            $corresponding = true;
+                            $structids[] = '*';
+                        } ?>
+                        <?php if (count($structids)) { ?>
+                            <sup><?php echo implode(', ', $structids) ?></sup>
+                        <?php } ?>
+                </span>
+                <?php } ?>
+                <button type="button" class="btn btn-default btn-xs opacity" onclick="displayDiv('.authors', '.authors-details')"><?php echo $this->translate('Détails') ?></button>
+                <div class="structs">
+                    <div class="struct">
+                        <?php if ($corresponding) { ?>
+                            <span class="">*</span>
+                            <span class="corresponding"><?php echo $this->translate('Auteur correspondant'); ?></span>
+                        <?php } ?>
+                    </div>
+                    <?php foreach ($this->document->getStructures() as $i => $struct) { ?>
+                        <div class="struct">
+                            <span class="structid"><?php echo $i + 1; ?></span>
+                            <a rel="nofollow"
+                               href="<?php echo PREFIX_URL ?>search/index/q/*/structId_i/<?php echo $struct->getStructId(); ?>/"
+                               target="_blank">
+                                <?php
+                                if ($struct->getSigle() != '') {
+                                    echo $struct->getSigle() . ' - ';
+                                }
+                                echo  $struct->getStructname();
+                                ?>
+                            </a>
+                            <?php
+                            if ($struct->getTypestruct() == Hal_Document_Structure::TYPE_RESEARCHTEAM) {
+                                $parents = $struct->getParents();
+                                if (count($parents)) {
+                                    $display = array();
+                                    foreach ($parents as $parent) {
+                                        $text = '';
+                                        if ($parent['struct']->getSigle() != '') {
+                                            $text .= $parent['struct']->getSigle() . ' - ';
+                                        }
+                                        $text .= $parent['struct']->getStructname();
+                                        $text .= '</a>';
+                                        if ($parent['code'] != '') {
+                                            $text .= ' : ' . $parent['code'];
+                                        }
+                                        $display[] = $text;
+                                    }
+                                    if (count($display)) {
+                                        ?>
+                                        <div><?php echo implode(', ', $display) ?></div>
+                                    <?php
+                                    }
+                                }
+                            } ?>
+                        </div>
+                    <?php } ?>
+                </div>
+            </div>
+            <?php // Auteurs  - liste détaillée  ?>
+            <div class="authors-details well" style="display:none;">
+                <?php
+                $corresponding = false;
+                $nbCol = $this->document->getAuthorsNb() <= 4 ? $this->document->getAuthorsNb() : 4;
+                $colClass = 'col-md-' . (12 / $nbCol);
+                ?>
+                <div class="row">
+                    <?php foreach ($this->document->getAuthors() as $i => $author) { ?>
+                    <div class="<?php echo $colClass ?>">
+                        <blockquote>
+                            <strong><i class="glyphicon glyphicon-user"></i>&nbsp;
+                                <?php if ($author->getIdHal() != 0) {
+                                    $href = PREFIX_URL . 'search/index/q/*/authIdHal_s/' . urlencode($author->getIdhalstring());
+                                } else {
+                                    $href = PREFIX_URL . 'search/index/q/*/authFullName_s/' . urlencode($author->getFullname(true));
+                                } ?>
+                                <a rel="nofollow" href="<?php echo $href ?>"
+                                   target="_blank"><?php echo $author->getFullname(true); ?></a>
+                                <?php $structids = $author->getStructidx();
+                                foreach ($structids as &$idx) {
+                                    $idx += 1;
+                                } ?>
+                                <?php if (count($structids)) { ?>
+                                    <sup><?php echo implode(', ', $structids) ?></sup>
+                                <?php } ?>
+                            </strong>
+                            <?php if ($author->getEmail()) { ?>
+                                <br/><?php echo Hal_Tools::encryptMail($author->getEmail(), "<i class='glyphicon glyphicon-envelope'></i>");?>
+                            <?php } ?>
+                            <?php if ($author->getUrl()) { ?>
+                                <a href="<?php echo $author->getUrl();?>" data-toggle="tooltip" title="<?php echo $author->getUrl();?>" target="_blank" rel="noopener"><i class='glyphicon glyphicon-globe'></i></a>
+                            <?php } ?>
+                            <br/><span class="label label-default"><?php echo $this->translate('relator_' . $author->getQuality()) ?></span>
+                            <?php if ($author->getOrganism()) { ?>
+                                <small><?php echo $this->translate("Etablissement employeur"); ?> : <a
+                                            rel="nofollow"
+                                            href="<?php echo PREFIX_URL ?>search/index/q/*/structId_i/<?php echo $author->getOrganismId(); ?>/"
+                                            target="_blank"><?php echo $author->getOrganism(); ?></a></small>
+                            <?php } ?>
+                            <?php if ($author->getIdHal()) { ?>
+                                <small><?php echo $this->translate("IdHAL");?> : <a href="<?php echo CV_URL . '/' . $author->getIdhalstring() ?>" target="_blank"><?php echo $author->getIdhalstring() ?></a></small>
+                            <?php } ?>
+                            <?php foreach ($author->getIdsAuthor() as $server => $url) { ?>
+                                <small><?php echo $this->translate($server);?> : <a href="<?php echo $url ?>" target="_blank" rel="noopener"><?php echo $url ?></a></small>
+                            <?php } ?>
+                        </blockquote>
+                    </div>
+                    <?php if ($i%$nbCol == ($nbCol-1)) { ?>
+                </div><div class="row">
+                    <?php } ?>
+                    <?php } ?>
+                </div>
+                <div class="structs">
+                    <?php foreach ($this->document->getStructures() as $i => $struct) {
+                        ?>
+                        <div class="well struct">
+                            <span class="structid"><?php echo $i + 1; ?></span>
+                            <?php echo $struct->display(PREFIX_URL); ?>
+                        </div>
+                    <?php } ?>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-default btn-xs" onclick="displayDiv('.authors', '.authors-details')"><?php echo $this->translate('Masquer les détails') ?></button>
+                </div>
+            </div>
+            <?php $abstract = $this->document->getAbstract(); ?>
+            <?php if (count($abstract)) { ?>
+                <div class="abstract">
+                    <?php
+                    if (count($abstract) == 1) {
+                        //1 seule langue pour le résumé
+                        ?>
+                        <div class="abstract-content">
+                            <strong><?php echo $this->translate('Description', current(array_keys($abstract))); ?></strong><?php echo ' : ' . current($abstract); ?>
+                        </div>
+                        <?php
+                    } else {
+                        //Plusieurs langues
+                        if (array_key_exists(Zend_Registry::get('lang'), $abstract)) {
+                            $active = Zend_Registry::get('lang');
+                        } else if (array_key_exists('en', $abstract)) {
+                            $active = 'en';
+                        } else {
+                            $active = array_keys($abstract)[0];
+                        } ?>
+                        <div class="row">
+                            <div class="col-md-1 col-lang">
+                                <div class="btn-group-vertical btn-lang opacity">
+                                    <?php foreach(array_keys($abstract) as $lang ) {?>
+                                        <button type="button" class="btn btn-default btn-xs <?php echo (($lang == $active) ? 'active' : '')?>" attr-lang="<?php echo $lang ?>"><?php echo $this->translate($lang) ?></button>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                            <div class="col-md-11 col-content">
+                                <?php foreach($abstract as $lang => $value ) { ?>
+                                    <div class="content-<?php echo $lang;?>" <?php echo ($lang != $active) ? 'style="display:none;"': '';?>>
+                                        <div class="linkify abstract-content">
+                                            <strong><?php echo $this->translate('Description', $lang)?></strong><?php echo ' : ' . $value; ?>
+                                        </div>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+
+            <div class="metadatas">
+                <?php $domains = $this->document->getDomains(); ?>
+                <?php if (count($domains)) { ?>
+                    <strong><?php echo $this->translate('domain'); ?></strong> :
+                    <blockquote style="margin-left:70px;margin-top:-15px;">
+                        <div>
+                            <?php foreach($domains as $i => $domain) {
+                                $domainExplode = Ccsd_Tools_String::getHalDomainPaths($domain);
+                                foreach ($domainExplode as $j => $d) {
+                                    $domainExplode[$j] = '<a rel="nofollow" href="' . PREFIX_URL . 'search/index/q/*/level' . $j . '_domain_s/' . $d . '" target="_blank">' . $this->translate(strtolower('domain_' . $d)) . '</a>';
+                                }
+                                ?>
+                                <div>
+                                    <?php if ($i == 0) echo '<strong>'; ?>
+                                    <?php echo implode(' / ', $domainExplode); ?>
+                                    <?php if ($i == 0) echo '</strong>'; ?>
+                                </div>
+                            <?php } ?>
+                        </div>
+                    </blockquote>
+                <?php } ?>
+            </div>
+
+            <?php // Mot-clés  ?>
+            <?php $keywords = $this->document->getKeywords(); ?>
+            <?php if (count($keywords)) { ?>
+                <div class="keywords">
+                    <?php
+                    if (count($keywords) == 1) {
+                        //1 seule langue pour les mots clés
+                        ?>
+                        <div class="keyword-content">
+                            <strong><?php echo $this->translate('keyword', current(array_keys($keywords))); ?></strong> :
+                            <?php
+                            $keywords = current($keywords);
+                            if (! is_array($keywords)) {$keywords = array($keywords);}
+                            foreach ($keywords as $keyword) { ?>
+                                <a rel="nofollow"
+                                   href="<?php echo PREFIX_URL ?>search/index/q/*/keyword_t/<?php echo $keyword; ?>/"
+                                   target="_blank" class="btn btn-default btn-xs"><?php echo $keyword ?></a>
+                            <?php } ?>
+                        </div>
+                    <?php
+                    } else {
+                        //Plusieurs langues
+                        if (array_key_exists(Zend_Registry::get('lang'), $keywords)) {
+                            $active = Zend_Registry::get('lang');
+                        } else if (array_key_exists('en', $keywords)) {
+                            $active = 'en';
+                        } else {
+                            $active = array_keys($keywords)[0];
+                        } ?>
+                        <div class="row">
+                            <div class="col-md-1 col-lang">
+                                <div class="btn-group-vertical btn-lang opacity">
+                                    <?php foreach(array_keys($keywords) as $lang ) {?>
+                                        <button type="button" class="btn btn-default btn-xs <?php echo (($lang == $active) ? 'active' : '')?>" attr-lang="<?php echo $lang ?>"><?php echo $this->translate($lang) ?></button>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                            <div class="col-md-11 col-content">
+                                <?php
+                                foreach($keywords as $lang => $value ) { ?>
+                                    <div class="content-<?php echo $lang;?>" <?php echo ($lang != $active) ? 'style="display:none;"': '';?>>
+                                        <div class="linkify keyword-content">
+                                            <strong><?php echo $this->translate('keyword', $lang); ?></strong> :
+                                            <?php foreach ($value as $keyword) { ?>
+                                                <a rel="nofollow"
+                                                   href="<?php echo PREFIX_URL ?>search/index/q/*/keyword_s/<?php echo $keyword; ?>/"
+                                                   target="_blank"
+                                                   class="btn btn-default btn-xs"><?php echo $keyword ?></a>
+                                            <?php } ?>
+                                        </div>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+
+            <hr />
+            <div class="metadatas-complete">
+                <div class="btn-view text-center"><button type="button" class="btn btn-default opacity" onclick="viewDocMetadatas(<?php echo $this->document->getDocid()?>)"><i class="glyphicon glyphicon-th-list"></i>&nbsp;<?php echo $this->translate('Voir la liste complète des métadonnées');?></button></div>
+                <div class="content"></div>
+                <div class="btn-hide text-center" style="display:none;"><button type="button" class="btn btn-default" onclick="hideDocMetadatas()"><i class="glyphicon glyphicon-th-list"></i>&nbsp;<?php echo $this->translate('Masquer la liste complète des métadonnées');?></button></div>
+            </div>
+        </div>
+    </div>
+    <hr />
+    <div>
+        <small>
+            <?php echo $this->document->getUri() ?><br />
+            <?php echo $this->translate('Contributeur') ?> : <a rel="nofollow"
+                                                                href="<?php echo PREFIX_URL ?>search/index/q/*/contributorId_i/<?php echo $this->document->getContributor('uid'); ?>/"
+                                                                target="_blank"><?php echo $this->document->getContributor('fullname') ?></a>
+            &lt;<?php echo Hal_Tools::encryptMail($this->document->getContributor('email')); ?>&gt;<br/>
+            <?php echo $this->translate('Soumis le') . ' : ' . $this->document->getSubmittedDate(Zend_Date::DATE_FULL . ' - ' . Zend_Date::TIMES) ?><br />
+            <?php echo $this->translate('Dernière modification le') . ' : ' . $this->document->getLastModifiedDate(Zend_Date::DATE_FULL . ' - ' . Zend_Date::TIMES) ?><br />
+        </small>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $('.btn-lang>button').click(function(){
+            $(this).parent().find('button').removeClass('active');
+            $(this).addClass('active').closest('.row').find('.col-content>div').hide();
+            $(this).closest('.row').find('.col-content .content-' + $(this).attr('attr-lang')).show();
+        });
+
+        linkifyElem ('.linkify');
+    });
+
+    function linkifyElem (selector)
+    {
+        $('.linkify').each(function(){
+            $(this).html(linkify($(this).html()));
+        });
+    }
+
+    function displayDiv(selector1, selector2)
+    {
+        if ($(selector1).is(':visible')) {
+            $(selector1).toggle('hide');
+            $(selector2).toggle('show');
+        } else {
+            $(selector2).toggle('hide');
+            $(selector1).toggle('show');
+        }
+    }
+
+    function viewDocMetadatas(docid)
+    {
+        if ($('.metadatas-complete .content').is(':hidden')) {
+            $('.metadatas-complete .btn-view').hide();
+            $('.metadatas-complete .content').toggle('slow');
+            $('.metadatas-complete .btn-hide').show();
+        } else {
+            $('.metadatas-complete .content').html(getLoader());
+            $.ajax({
+                url: "/view/metadata",
+                type: "post",
+                data: {docid:docid},
+                success: function( data ) {
+                    $('.metadatas-complete .btn-view').hide();
+                    $('.metadatas-complete .content').html(data);
+                    linkifyElem ('.metadatas-complete .content .linkify');
+                    $('.metadatas-complete .btn-hide').show();
+                }
+            });
+        }
+    }
+    function hideDocMetadatas()
+    {
+        $('.metadatas-complete .btn-view').show();
+        $('.metadatas-complete .content, .metadatas-complete .btn-hide').hide();
+    }
+
+
+</script>
+

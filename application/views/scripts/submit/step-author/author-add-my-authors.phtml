@@ -1,0 +1,40 @@
+<div class="aut_new" attr-popoverid="aut_new">
+
+    <div id="my-authors" class="authors-list">
+        <?php if (count($this->authors)) { ?>
+            <?php foreach($this->authors as $authorid => $fullname) { ?>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="authorid" value="<?php echo $authorid ?>" /><?php echo $fullname ?>
+                    </label>
+                </div>
+            <?php } ?>
+        <?php } else { ?>
+            <div class="alert alert-danger"><?php echo $this->translate('Aucun auteur trouvé !') ?></div>
+        <?php }  ?>
+    </div>
+    <?php if (count($this->authors)) { ?>
+        <div class="text-center">
+            <input type="button" onclick="addMyAuthors()" value="<?php echo $this->translate('Ajouter les auteurs sélectionnés') ?>" class="btn btn-primary btn-add-auth" />
+        </div>
+    <?php }  ?>
+</div>
+<script type="text/javascript">
+
+        function addMyAuthors()
+        {
+            var authorids = [];
+            $('#my-authors input:checkbox[name="authorid"]:checked').each(function() {
+               authorids.push($(this).val());
+            });
+
+            if (authorids.length != 0) {
+                popoverDestroy();
+                ajaxrequestsubmit({url: "/submit/ajaxsubmitauthorslist", data: {authorids : authorids}, success: function(data) { $('#aut-struct').html(data.autstruct); }, dataType: 'json',
+                    error: function(msg) {
+                        $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(msg.responseText) + '</p></div>');
+                    }
+                });
+            }
+        }
+</script>

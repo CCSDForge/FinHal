@@ -1,0 +1,93 @@
+<?php $this->layout()->pageDescription = $this->translate("Paramètres généraux et styles liés au portail")?>
+
+<form action="/administrate/settings" method="post">
+	<ul class="nav nav-tabs" id="portailSettings">
+	  <li class="active"><a href="#settings" data-toggle="tab"><?php echo $this->translate("Paramètres")?></a></li>
+	  <li><a href="#styles" data-toggle="tab"><?php echo $this->translate("Styles")?></a></li>
+	</ul>
+
+	<div class="tab-content">
+		<div id="settings" class="tab-pane active">
+			<div class="form-actions">
+			    <button type="button" class="btn" onclick="addElem('listSettings')"><i class="glyphicon glyphglyphicon glyphicon-plus-sign"></i>&nbsp;<?php echo $this->translate("Ajouter un paramètre")?></button>
+			</div>
+			<table class="table table-hover table-striped" id="listSettings">
+			   	<thead>
+			   		<tr>
+			   			<th width="200px"><?php echo $this->translate("Paramètre")?></th>
+			   			<th><?php echo $this->translate("Valeur")?></th>
+			   			<th width="70px" style="text-align:right"><?php echo $this->translate("Actions")?></th>
+			   		</tr>
+			  	</thead>
+			  	<tbody>
+			  	<?php foreach ($this->portailSettings as $setting => $value) {?>
+			  		<tr class="setting" style="vertical-align:middle">
+			  			<td><b><?php echo $setting;?></b></td>
+			  			<td><input type="text" name="settings[<?php echo $setting;?>]" value="<?php echo $value;?>" /></td>
+			  			<td style="text-align:right">
+			  				<a href="javascript:void(0)" onclick="$(this).closest('tr.setting').remove()"><i class="glyphicon glyphglyphicon glyphicon-trash"></i></a>
+			  			</td>
+			  		</tr>
+			  	<?php }?>
+			  	</tbody>
+			  	<tfoot style="display:none;">
+			  		<tr>
+			  			<td><input type="text" name="settings[new][SETTING][]" value="" /></td>
+			  			<td><input type="text" name="settings[new][VALUE][]" value="" /></td>
+			  			<td style="text-align:right">
+			  				<a href="javascript:void(0)" onclick="$(this).closest('tr.setting').remove()"><i class="glyphicon glyphglyphicon glyphicon-trash"></i></a>
+			  			</td>
+			  		</tr>
+			  	</tfoot>
+			</table>
+		</div> 
+		
+		<div id="styles" class="tab-pane">
+			<div class="form-actions">
+			    <button type="button" class="btn" onclick="addElem('listStyles')"><i class="glyphicon glyphglyphicon glyphicon-plus-sign"></i>&nbsp;<?php echo $this->translate("Ajouter un style")?></button>
+			</div>
+			<table class="table table-hover table-striped" id="listStyles">
+			   	<thead>
+			   		<tr>
+			   			<th><?php echo $this->translate("Paramètre")?></th>
+			   			<th><?php echo $this->translate("Valeur")?></th>
+			   			<th width="70px" style="text-align:right"><?php echo $this->translate("Actions")?></th>
+			   		</tr>
+			  	</thead>
+			  	<tbody>
+			  	<?php foreach ($this->websiteSettings as $setting => $value) {?>
+			  		<tr class="setting" style="vertical-align:middle">
+			  			<td width="200px"><b><?php echo $setting;?></b></td>
+			  			<td><input type="text" name="styles[<?php echo $setting;?>]" value="<?php echo $value;?>" /></td>
+			  			<td style="text-align:right">
+			  				<a href="javascript:void(0)" onclick="$(this).closest('tr.setting').remove()"><i class="glyphicon glyphglyphicon glyphicon-trash"></i></a>
+			  			</td>
+			  		</tr>
+			  	<?php }?>
+			  	</tbody>
+			  	<tfoot style="display:none;">
+			  		<tr>
+			  			<td><input type="text" name="styles[new][SETTING][]" value="" /></td>
+			  			<td><input type="text" name="styles[new][VALUE][]" value="" /></td>
+			  			<td style="text-align:right">
+			  				<a href="javascript:void(0)" onclick="$(this).closest('tr.setting').remove()"><i class="glyphicon glyphglyphicon glyphicon-trash"></i></a>
+			  			</td>
+			  		</tr>
+			  	</tfoot>
+			</table>
+		</div>
+	</div>
+	
+	<div class="form-actions">
+	    <div class="pull-right">
+	        <button type="submit" class="btn btn-primary">Enregistrer</button>
+	    </div>
+	</div>
+</form>
+<script>
+	function addElem(type)
+	{
+		var clone = $('#' + type + ' tfoot>tr').clone();
+		$('#' + type + ' tbody').append(clone);
+	}
+</script>

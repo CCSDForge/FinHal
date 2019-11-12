@@ -1,0 +1,11 @@
+<?php
+
+if (isset($this->data)) {
+    ?>
+    <div class="row">
+        <div class="col-md-4"><h4><?php echo '<small>' . $this->translate('Documents avec texte intégral') . ' : ' . '</small>' . $this->data['file'] ?> </h4></div>
+        <div class="col-md-4"><h4><?php echo '<small>' . $this->translate('Références bibliographiques') . ' : ' . '</small>' . $this->data['notice'] ?> </h4></div>
+        <div class="col-md-4"><h4><?php echo '<small>' . $this->translate('Notices avec annexe') . ' : ' . '</small>' . $this->data['annex'] ?> </h4></div>
+    </div>
+    <?php
+}

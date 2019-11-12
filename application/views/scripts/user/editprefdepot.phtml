@@ -1,0 +1,181 @@
+<?php
+$this->jQuery()->addJavascriptFile(CCSDLIB . "/js/bootstrap-typeahead.js")->addJavascriptFile(CCSDLIB . '/js/jquery/ui/autocomplete.html.js');
+$this->layout()->pageTitle = $this->translate("Modification de votre compte");
+$this->layout()->pageDescription = $this->translate("Vous pouvez modifier ici vos préférences de dépôt");
+$this->layout()->docLink = 'https://doc.archives-ouvertes.fr/compte-et-profil/';
+
+if (Ccsd_User_Models_User::ACCOUNT_EDIT_FAILURE == $this->resultMessage) {
+    echo '<div class="alert alert-failure">';
+    echo $this->translate('La modification du compte a échoué. Merci de ré-essayer.');
+    echo '</div>';
+}
+
+if ($this->form) {
+    echo $this->form;
+}
+
+$laboratory = $this->user->getLaboratory();
+$institution = $this->user->getInstitution();
+?>
+<script>
+    $(document).ready(function() {
+
+        $('.search-structure').each(function () {
+            $('#' + $(this).attr('id')).autocomplete({
+                minLength: 2,
+                html: true,
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/ajax/ajaxsearchstructure",
+                        dataType: "json",
+                        data: {term: request.term},
+                        success: function (data) {
+                            response($.map(data.response.docs, function (item) {
+                                return {id: item.docid, label: item.label_html}
+                            }));
+                        }
+                    });
+                },
+                focus: function (event, ui) {
+
+                    return false;
+                },
+                select: function (event, ui) {
+                    addStructure('#' + $(this).attr('id'), ui.item.label, ui.item.id, function(){});
+                    $('#' + $(this).attr('id')).val('');
+                    return false;
+                }
+            });
+
+        });
+
+        $('.search-institution').each(function () {
+            $('#' + $(this).attr('id')).autocomplete({
+                minLength: 2,
+                html: true,
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/ajax/ajaxsearchstructure",
+                        dataType: "json",
+                        data: {term: request.term, type: 'institution'},
+                        success: function (data) {
+                            response($.map(data.response.docs, function (item) {
+                                return {id: item.docid, label: item.label_html}
+                            }));
+                        }
+                    });
+                },
+                focus: function (event, ui) {
+
+                    return false;
+                },
+                select: function (event, ui) {
+                    addStructure('#' + $(this).attr('id'), ui.item.label, ui.item.id, function(){
+                        // On montre le champ lorsqu'on supprime une structure
+                        $('#hal-INSTITUTION').show();
+                    });
+
+                    $('#' + $(this).attr('id')).val('');
+
+                    // On cache le champ lorsqu'on ajoute une structure
+                    $('#hal-INSTITUTION').hide();
+                    return false;
+                }
+            });
+
+        });
+
+        function addStructure(elem, label, id, callbackFunc) {
+
+            var substr = label.split('<dl>');
+            if (substr.length > 1) {
+                var labelText = $.parseHTML(substr[0]);
+                var labelText = $(labelText).text();
+            } else {
+                var labelText = label;
+            }
+
+            var text = '<span id="struct-'+id+'" class="label label-primary">' + labelText + ' <small>(' + id + ')</small>&nbsp;<i class="glyphicon glyphicon-remove"></i>';
+            text += '<input type="hidden" name="' + $(elem).attr('name') + '[]" value="' + id + '" />';
+            text += '</span><br>';
+
+
+            $(elem).after(text);
+
+            // Permet de pouvoir remettre en place l'input pour l'établissement employeur
+            $('#struct-'+id).click(function(){
+                $(this).remove();
+                callbackFunc();
+            });
+        }
+
+        // Affichage ou non des préférences liées à l'auteur
+        function setPrefAuthDiv()
+        {
+            $('.search-author').each(function(id, el) {
+                if (el.checked) {
+                    if (el.value == 0) {
+                        $('.link-author').parent().parent().hide();
+                    }
+                    else {
+                        $('.link-author').parent().parent().show();
+                    }
+                }
+            });
+        }
+
+        $('.search-author').change(function () {
+            setPrefAuthDiv()
+        });
+
+        setPrefAuthDiv();
+
+        <?php
+
+        // INIT LABOS
+        if (isset($laboratory) && is_array($laboratory)) {
+            foreach($laboratory as $lab) {
+
+                $struct = new Hal_Document_Structure ( $lab );
+                $type = '';
+                if ($struct->getTypestruct()!='') {
+                    $type = ' <small>[' . $this->translate ( $struct->getTypestruct() ) . ']</small>';
+
+        ?>
+                    addStructure('#hal-LABORATORY', "<?php echo $this->escape($struct->getStructName()) . $type ?>", "<?php echo $lab?>", function(){});
+        <?php
+                }
+            }
+        }
+        ?>
+        $("#hal-LABORATORY").val('');
+
+        <?php
+        //INIT INSTITUTION
+        if (isset($institution) && is_array($institution) && !empty($institution)) {
+            foreach($institution as $lab) {
+
+                $struct = new Hal_Document_Structure ( $lab );
+                $type = '';
+                if ($struct->getTypestruct()!='') {
+                    $type = ' <small>[' . $this->translate ( $struct->getTypestruct() ) . ']</small>';
+
+        ?>
+                    addStructure('#hal-INSTITUTION', "<?php echo $this->escape($struct->getStructName()) . $type ?>", "<?php echo $lab?>", function(){
+                        // On montre le champ lorsqu'on supprime une structure
+                        $('#hal-INSTITUTION').show();
+                    });
+        <?php
+                }
+            }
+        ?>
+        // On cache le champ lorsqu'on a une structure
+        $('#hal-INSTITUTION').hide();
+        <?php
+        }
+        ?>
+        $("#hal-INSTITUTION").val('');
+
+    });
+
+</script>

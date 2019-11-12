@@ -1,0 +1,41 @@
+<ul id="languages_tabs" class="nav nav-tabs">
+<?php 
+	$locale = Zend_Registry::get("Zend_Translate")->getLocale(); 
+	$defaultLang = (array_key_exists($locale, $this->langs)) ? $locale : 'fr';
+?>
+<?php foreach ($this->langs as $code) : ?>
+	<li class="<?php if (count($this->langs) == 1 || $code == $defaultLang) echo 'active'?>" 
+		data-toggle="tooltip"
+		data-placement="bottom"
+		title="<?php echo ucfirst(Zend_Locale::getTranslation($code, 'language', $locale));?>">
+		<a href="<?php echo '#'.$code.'_form';?>" data-toggle="tab">
+			<img class="flag flag-<?php echo $code; if (count($this->langs) == 1 || $code == $defaultLang) echo ' selected'; else echo ' grayscale' ?>" alt="<?php echo $code; ?>" src="/img/spacer.gif" /> 			
+			<!-- <img class="<?php echo 'flag_'.$code; if (count($this->langs) == 1 || $code == $defaultLang) echo '_selected';?>" src='/img/spacer.gif' /> -->
+		</a>
+	</li>
+<?php endforeach;?>
+</ul>
+
+<?php echo $this->form; ?>
+
+<script>
+$(document).ready(function () {
+	$('a[data-toggle="tab"]').on('shown', function (e) {
+		$('a[data-toggle="tab"] img').each(function() {
+			var currentClass = $(this).attr('class');
+			$(this).attr('class', currentClass.replace('selected', 'grayscale'));
+		});
+		var currentClass = $(this).find('img').attr('class');
+		$(this).find('img').attr('class', currentClass+'selected');
+	});
+
+	$('a[data-toggle="tab"]').on('click', function (e) {
+		$('a[data-toggle="tab"] img').each(function() {
+			var currentClass = $(this).attr('class');
+			$(this).attr('class', currentClass.replace('selected', 'grayscale'));
+		});
+		var currentClass = $(this).find('img').attr('class');
+		$(this).find('img').attr('class', currentClass.replace('grayscale', 'selected'));
+	});	
+});
+</script>

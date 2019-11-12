@@ -1,0 +1,14 @@
+<ul class="media-list"><!-- last-publi -->
+    <?php foreach($this->articles['response']['docs'] as $article) {?>
+        <li class="media">
+            <?php if (isset($article["thumbId_i"])) { ?>
+                <a class="pull-left media-left" href="<?php echo PREFIX_URL . $article["halId_s"] . 'v' . $article["version_i"] ?>">
+                    <img src="<?php echo THUMB_URL."/" . $article["thumbId_i"] ?>/thumb" width="40" class="img-thumbnail" alt="Vignette" />
+                </a>
+            <?php } ?>
+            <div class="media-body">
+                <a href="<?php echo PREFIX_URL . $article["halId_s"] . 'v' . $article["version_i"] ?>"><?php echo strip_tags($article['citationFull_s']) ?></a>
+            </div>
+        </li>
+    <?php } ?>
+</ul>

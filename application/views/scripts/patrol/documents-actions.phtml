@@ -1,0 +1,65 @@
+<?php
+$this->jQuery()->addJavascriptFile("/js/document/evaluation.js");
+$this->jQuery()->addJavascriptFile("/js/document/document.js");
+$this->responsesContent = '';
+$this->showHistory = true;
+$this->moderate = true;
+?>
+<style>
+.editableform .form-control {
+	width: 400px;
+}
+</style>
+<form action="/patrol/doaction" method="post" id="evaluate-form">
+    <?php
+    foreach ( $this->docids as $docid ) {
+        $this->document->setDocid ( $docid );
+        $this->document->load ();
+        include __DIR__ . "/../moderate/documents-document.phtml";
+    }
+    ?>
+    <input type="hidden" name="useraction"	id="useraction" value="" />
+    <div class="form-actions text-center">
+		<div class="btn-group btn-group">
+            <button type="button" class="btn btn-primary btn-action" data-action="patrol">
+                <i class="glyphicon glyphicon-ok"></i>&nbsp;<?php echo $this->translate('Patrouiller'); ?></button>
+            <?php if (count($this->docids) == 1) { ?>
+                <button type="button" class="btn btn-default btn-action" data-action="edit">
+                    <i class="glyphicon glyphicon-pencil"></i>&nbsp;<?php echo $this->translate('Éditer'); ?></button>
+            <?php } ?>
+			<button type="button" class="btn btn-default btn-action" data-action="back">
+				<i class="glyphicon glyphicon-arrow-left"></i>&nbsp;<?php echo $this->translate('Retour'); ?></button>
+		</div>
+		<div style="display: none">
+        <?php echo $this->responsesContent?>
+		</div>
+	</div>
+	<div id="expert-select-form"></div>
+</form>
+<script>
+$(document).ready(function() {
+    $('.btn-action').click(function() {
+    	var action = $(this).attr('data-action');
+		var docid    = <?php echo $this->document->getDocid(); ?>;
+		var sid      = <?php echo $this->document->getSid(); ?>;
+		var domains  = <?php echo json_encode($this->document->getMeta('domain')); ?>;
+		var typdoc   = '<?php echo $this->document->getTypDoc(); ?>';
+		var forwardAction  = '<?php echo $this->forwardAction; ?>';
+		var sourceController   = '<?php echo Zend_Controller_Front::getInstance()->getRequest()->getControllerName(); ?>';
+        var cansubmit = true;
+		if (action ==  'validate') {
+			getExpertSelectForm(docid, sid, domains, typdoc, forwardAction, sourceController);
+			return;
+		}
+        if (((action == 'update') ||(action == 'annotate')) && $('#comment').val() == '') {
+            cansubmit = false;
+        }
+        if (cansubmit) {
+            $('#useraction').val($(this).attr('data-action'));
+            $('#evaluate-form').submit();
+        } else {
+
+        }
+    });
+});
+</script>

@@ -1,0 +1,167 @@
+{
+	"text":"hal_text",
+	"text_fulltext" : "hal_text_fulltext",
+	"title_t":"hal_title_t",
+	"subTitle_t":"hal_subTitle_t",
+	"bookTitle_t":"hal_bookTitle_t",
+	"serie_t":"hal_serie_t",
+
+	"abstract_t":"hal_abstract_t",
+	"fulltext_t":"hal_fulltext_t",
+
+	"keyword_t":"hal_keyword_t",
+	"identifiers_id":"hal_identifiers_id",
+	"halId_id" : "hal_halId_id",
+	"language_t":"hal_language_t",
+	"country_t":"hal_country_t",
+	"city_t":"hal_city_t",
+	"inPress_bool":"hal_inPress_bool",
+
+	"--sep0":"",
+
+	"auth_t":"hal_auth_t",
+
+	"authFullName_t":"hal_authFullName_t",
+
+	"authLastName_t":"hal_authLastName_t",
+	"authFirstName_t":"hal_authFirstName_t",
+	"authMiddleName_t":"hal_authMiddleName_t",
+	"authOrganism_t":"hal_authOrganism_t",
+
+	"authIdHal_s":"hal_authIdHal_s",
+	"authQuality_s":"hal_authQuality_s",
+	"authIdHal_i":"hal_authIdHal_i",
+	"authId_i":"hal_authId_i",
+	"authOrganismId_i":"hal_authOrganismId_i",
+	"authStructId_i":"hal_authStructId_i",
+
+	"director_t":"hal_director_t",
+	"publisher_t":"hal_publisher_t",
+	"scientificEditor_t":"hal_scientificEditor_t",
+	"seriesEditor_t":"hal_seriesEditor_t",
+	"--sep1":"",
+
+	"journal_t":"hal_journal_t",
+	"journalPublisher_t":"hal_journalPublisher_t",
+	"journalTitleAbbr_t":"hal_journalTitleAbbr_t",
+	"journalTitle_t":"hal_journalTitle_t",
+	"journalId_i":"hal_journalId_i",
+	"journalDate_s":"hal_journalDate_s",
+	"journalEissn_s":"hal_journalEissn_s",
+	"journalIssn_s":"hal_journalIssn_s",
+	"journalPublisher_s":"hal_journalPublisher_s",
+	"journalSherpaColor_s":"hal_journalSherpaColor_s",
+	"journalValid_s":"hal_journalValid_s",
+
+
+	"--sep2":"",
+
+	"conference_t":"hal_conference_t",
+	"conferenceTitle_t":"hal_conferenceTitle_t",
+	"conferenceOrganizer_t":"hal_conferenceOrganizer_t",
+	"conferenceStartDateY_i":"hal_conferenceStartDateY_i",
+	"conferenceEndDateY_i":"hal_conferenceEndDateY_i",
+	"invitedCommunication_t": "hal_invitedCommunication_t",
+
+	"--sep3":"",
+
+
+	"anrProject_t":"hal_anrProject_t",
+	"anrProjectAcronym_t":"hal_anrProjectAcronym_t",
+	"anrProjectCallAcronym_t":"hal_anrProjectCallAcronym_t",
+	"anrProjectCallTitle_t":"hal_anrProjectCallTitle_t",
+	"anrProjectReference_t":"hal_anrProjectReference_t",
+	"anrProjectTitle_t":"hal_anrProjectTitle_t",
+	"anrProjectId_i":"hal_anrProjectId_i",
+	"anrProjectValid_s":"hal_anrProjectValid_s",
+
+	"--sep4":"",
+	"europeanProject_t":"hal_europeanProject_t",
+	"europeanProjectAcronym_t":"hal_europeanProjectAcronym_t",
+	"europeanProjectCallId_t":"hal_europeanProjectCallId_t",
+	"europeanProjectReference_t":"hal_europeanProjectReference_t",
+	"europeanProjectTitle_t":"hal_europeanProjectTitle_t",
+	"europeanProjectEndDate_s":"hal_europeanProjectEndDate_s",
+	"europeanProjectFinancing_s":"hal_europeanProjectFinancing_s",
+	"europeanProjectStartDate_s":"hal_europeanProjectStartDate_s",
+	"europeanProjectValid_s":"hal_europeanProjectValid_s",
+	"europeanProjectId_i":"hal_europeanProjectId_i",
+
+	"--sep5" : "",
+
+
+	"structure_t":"hal_structure_t",
+	"structAcronym_t":"hal_structAcronym_t",
+	"structName_t":"hal_structName_t",
+	"structCode_t":"hal_structCode_t",
+	"structCountry_t":"hal_structCountry_t",
+	"structType_s":"hal_structType_s",
+	"structValid_s":"hal_structValid_s",
+	"structId_i": "hal_structId_i",
+	"rteamStructCountry_s": "hal_rteamStructCountry_s",
+	"deptStructCountry_s": "hal_deptStructCountry_s",
+	"labStructCountry_s": "hal_labStructCountry_s",
+	"rgrpLabStructCountry_s": "hal_rgrpLabStructCountry_s",
+	"instStructCountry_s": "hal_instStructCountry_s",
+	"rgrpInstStructCountry_s": "hal_rgrpInstStructCountry_s",
+
+	"--sep6" : "",
+
+	"producedDateY_i":"hal_producedDateY_i",
+	"releasedDateY_i": "hal_releasedDateY_i",
+	"writingDateY_i":"hal_writingDateY_i",
+
+	"modifiedDateY_i":"hal_modifiedDateY_i",
+	"submittedDateY_i":"hal_submittedDateY_i",
+	"ePublicationDateY_i":"hal_ePublicationDateY_i",
+
+
+	"--sep7" : "",
+	"collection_t":"hal_collection_t",
+	"collCategory_s":"hal_collCategory_s",
+	"collCode_s":"hal_collCode_s",
+	"collName_t":"hal_collName_t",
+	"collId_i":"hal_collId_i",
+
+	"--sep8" : "",
+
+	"contributorId_i":"hal_contributorId_i",
+	"contributorFullName_t":"hal_contributorFullName_t",
+
+	"--sep9" : "",
+
+
+	"domain_t":"hal_domain_t",
+
+	"primaryDomain_s":"hal_primaryDomain_s",
+	"level0_domain_s":"hal_level0_domain_s",
+	"level1_domain_s":"hal_level1_domain_s",
+	"level2_domain_s":"hal_level2_domain_s",
+	"level3_domain_s":"hal_level3_domain_s",
+
+	"--sep10" : "",
+
+	"status_i":"hal_status_i",
+	"version_i":"hal_version_i",
+	"submitType_s":"hal_submitType_s",
+	"docType_s":"hal_docType_s",
+	"isbn_id":"hal_isbn_id",
+	"number_id":"hal_number_id",
+	"doiId_id":"hal_doiId_id",
+
+
+	"--sep11" : "",
+
+	"classification_t":"hal_classification_t",
+	"audience_t":"hal_audience_t",
+	"popularLevel_t":"hal_popularLevel_t",
+	"peerReviewing_t" : "hal_peerReviewing_t",
+	"proceedings_t" : "hal_proceedings_t",
+	"localReference_t":"hal_localReference_t",
+
+	"funding_t":"hal_funding_t",
+	"collaboration_t":"hal_collaboration_t"
+
+
+
+}

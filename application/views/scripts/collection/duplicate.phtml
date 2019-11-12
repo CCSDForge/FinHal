@@ -1,0 +1,12 @@
+<?php $this->layout()->pageDescription = $this->translate("Duplication de collections")?>
+<style>
+    .form-btn, #nbdoc-result {
+        margin-left: 26%;
+        margin-bottom:10px;
+    }
+
+</style>
+<?php
+$this->form->setActions(true)->createSubmitButton();
+echo $this->form;
+?>

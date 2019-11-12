@@ -1,0 +1,41 @@
+
+<?php include __DIR__ . '/../common/document-header.phtml';?>
+
+<div class="alert alert-info">
+    <strong><?php echo $this->translate('Merci de vérifier les documents générés ci-dessous') ?><br/>
+        <?php echo $this->translate('Sans réponse de votre part avant le %%HALMS_LIMIT%%, le document sera transféré sur PubMed Central') ?>
+    </strong>
+</div>
+<div class="row">
+    <div class="col-md-6 text-center">
+        <h4><a href="/file/dcl/docid/<?php echo $this->document->getDocid();?>/filename/<?php echo $this->pdf;?>?<?php echo rand(0,9999);?>" target="_blank"><img src="/img/halms.pdf.png" title="<?php echo $this->translate('Version PDF'); ?>" border="0" /><br /><?php echo $this->translate('Version PDF'); ?></a></h4>
+    </div>
+    <div class="col-md-6 text-center">
+        <h4><a href="/file/dcl/docid/<?php echo $this->document->getDocid();?>/filename/<?php echo $this->html;?>?<?php echo rand(0,9999);?>" target="_blank"><img src="/img/halms.html.png" title="<?php echo $this->translate('Version HTML'); ?>" border="0" /><br /><?php echo $this->translate('Version HTML'); ?></a></h4>
+    </div>
+</div>
+
+<?php
+$this->formAction = '/submissions/index';
+$this->backLink = '/submissions';
+$this->btn = [
+    Halms_Document::STATUS_XML_FINISHED,
+    Halms_Document::STATUS_XML_ERROR_REPORTED_AUTHOR
+];
+include __DIR__ . '/../common/document-actions.phtml';
+?>
+
+<script type="text/javascript">
+    $(function() {
+        $('#form').submit(function() {
+            if ($('#status').val() == <?php echo Halms_Document::STATUS_XML_ERROR_REPORTED_AUTHOR?> && $('#comment').val() == '') {
+                $('#comment').addClass('error');
+                $('.comment-error').show();
+                return false;
+            }
+            $('#comment').removeClass('error');
+            $('.comment-error').hide();
+        });
+
+    });
+</script>

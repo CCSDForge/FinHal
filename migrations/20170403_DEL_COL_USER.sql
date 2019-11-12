@@ -1,0 +1,9 @@
+-- On supprime les colonnes qui ne servent plus dans USER
+
+
+SELECT '!!!!!!!!! - UNE FOIS QU A TOURNÉ :  migrationPrefDepot.php - !!!!!!!!!';
+
+ALTER TABLE `USER` DROP COLUMN `LABORATORY`;
+ALTER TABLE `USER` DROP COLUMN `DOMAIN`;
+ALTER TABLE `USER` DROP COLUMN `DEFAULT_AUTHOR`;
+ALTER TABLE `USER` DROP COLUMN `LABORATORY_OLD`;

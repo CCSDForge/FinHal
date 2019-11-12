@@ -1,0 +1,6 @@
+<?php
+    if (isset($this->data)) {
+?>
+    <h4><?php echo '<small>' . $this->translate('Nombre de ressources répondant aux critères')  . ' : ' . '</small><span class="label label-success">' . number_format($this->data, 0, '.', ' '); ?></span></h4>
+<?php
+    }

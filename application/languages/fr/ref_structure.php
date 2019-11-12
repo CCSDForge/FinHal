@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * Traductions pour la doc de l'API Référentiels
+ */
+return [
+
+    'structure_label_s' => 'Champ affiché par défaut suite à une recherche',
+    'structure_label_sci' => 'Champ affiché par défaut suite à une recherche',
+    'structure_label_xml' => 'Structure au format XML',
+    'structure_label_html' => 'Structure au format HTML',
+    'structure_sample_label_html' => htmlspecialchars('<span class="incoming">Service du MEB<dl><dt><span class="acronym">UPMC</span><span class="name">Université Pierre et Marie Curie - Paris 6</span></dt></dl></span>'),
+    'structure_acronym_s' => 'Acronyme',
+    'structure_acronym_sci' => 'Acronyme',
+    'structure_acronym_t' => 'Acronyme',
+    'structure_address_s' => 'Adresse postale, localisation',
+    'structure_address_t' => 'Adresse postale, localisation',
+    'structure_code_s' => 'Code unité',
+    'structure_code_sci' => 'Code unité',
+    'structure_country_s' => 'Pays',
+    'structure_docid' => 'Identifiant unique',
+    'structure_aliasDocid_i' => 'Identifiants de structures fusionnées',
+    'structure_name_s' => 'Nom de la structure',
+    'structure_name_sci' => 'Nom de la structure',
+    'structure_name_t' => 'Nom de la structure',
+    'structure_parentAcronym_s' => 'Acronyme de la structure parente',
+    'structure_parentAcronym_t' => 'Acronyme de la structure parente',
+    'structure_parentAddress_s' => 'Adresse postale, localisation de la structure parente',
+    'structure_parentCountry_s' => 'Pays de la structure parente',
+    'structure_parentDocid_i' => 'Identifiant unique de la structure parente',
+    'structure_parentName_s' => 'Nom de la structure parente',
+    'structure_parentName_t' => 'Nom de la structure parente',
+    'structure_parentType_s' => 'Type de la structure parente',
+    'structure_parentUpdateDate_s' => 'Date de mise à jour de la structure parente',
+    'structure_parentUpdateDate_tdate' => 'Date de mise à jour de la structure parente',
+    'structure_parentUrl_s' => 'URL de la structure parente',
+    'structure_parentValid_s' => 'État de la structure parente dans le référentiel',
+    'structure_structure_xml' => 'Représentation de la structure au format XML',
+    'structure_text' => 'Champ de recherche par défaut',
+    'structure_text_autocomplete' => 'Champ de recherche pour auto-complétion',
+    'structure_sample_text_autocomplete' => '',
+    'structure_type_s' => 'Type de structure',
+    'structure_updateDate_s' => 'Date de mise à jour',
+    'structure_updateDate_tdate' => 'Date de mise à jour',
+    'structure_url_s' => 'URL',
+    'structure_valid_s' => 'État de la structure dans le référentiel',
+    'structure_dateLastIndexed_tdate' => 'Date de dernière indexation',
+    'structure_*_id' => 'Identifiants externes de structures',
+    'structure_*_s' => 'Identifiants externes de structures'
+];

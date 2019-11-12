@@ -1,0 +1,31 @@
+
+<div class="col-md-10">
+
+<?php
+    $this->layout()->pageDescription = $this->translate("Vous trouvez ici les fichiers que vous avez transférés dans votre espace sur le serveur FTP du CCSD.<br />Ces fichiers vous sont proposés lors du dépôt ; cela vous permet par exemple de transférer des fichiers de grande taille (>100MB).<br />Le serveur FTP (FTP avec chiffrement explicite sur le port standard 21) est accessible à <b>ftp.ccsd.cnrs.fr</b> avec vos identifiants HAL en mode de connexion passif.");
+?>
+    <h3><?php echo $this->translate('Mon espace FTP'); ?>
+        <a href="<?php echo PREFIX_URL?>page/mon-espace-ftp" target="_blank" data-toggle="tooltip" title="<?php echo $this->translate('Aide'); ?>" alt="<?php echo $this->translate('Aide'); ?>">
+            <small><i class="glyphicon glyphicon-question-sign"></i></small>
+        </a>
+    </h3>
+
+<?php
+if (is_array($this->fileList)) {
+
+
+    echo '<ul class="list-unstyled">';
+    foreach ($this->fileList as $file) {
+        echo '<li>';
+        echo '<span class="glyphicon glyphicon-file"></span>&nbsp;' . $file;
+        echo '</li>';
+    }
+    echo '</ul>';
+} else {
+
+    echo '<div class="alert alert-info">' . $this->translate('Aucun fichier dans votre espace.') . '</div>';
+}
+
+?>
+
+</div>

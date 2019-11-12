@@ -1,0 +1,65 @@
+<div class="well" style="margin-top:10px;">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+    <fieldset style="margin-top:0px;">
+        <legend><?php echo $this->translate('Résultats'); ?></legend>
+        <?php
+        $href = '/search/index/q/*/authId_i/';
+        if (count($this->authors)) { ?>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th style="display:none;"><?php echo $this->translate('Défaut'); ?></th>
+                    <th style="width:70px;" title="Identifiant unique de la forme auteur"><?php echo $this->translate('Authorid'); ?></th>
+                    <th><?php echo $this->translate('Nom prénom'); ?></th>
+                    <th><?php echo $this->translate('Domaine e-mail'); ?></th>
+
+                    <th><?php echo $this->translate("Établissement employeur"); ?></th>
+                    <th style="width:50px;"><?php echo $this->translate("Actions"); ?></th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($this->authors as $data) { ?>
+                    <tr class="author" id="tr-<?php echo $data['docid'] ?>">
+                        <td style="display:none;">
+                            <input type="radio" name="default" value="<?php echo $data['docid'] ?>" />
+                            <input type="hidden" name="authorid[]" class="authorids" value="<?php echo $data['docid'] ?>" />
+                        </td>
+                        <td class=""><?php echo $data['docid']; ?></td>
+                        <td><strong><?php echo Ccsd_Tools::formatAuthor($data['lastName_s'], $data['firstName_s']); ?></strong></td>
+                        <td><?php echo Ccsd_Tools::ifsetor($data['emailDomain_s']); ?></td>
+                        <td><?php echo Ccsd_Tools::ifsetor($data['structure_s']); ?></td>
+                        <td style="text-align:center;">
+                            <a href="javascript:void(0);" class="author-doc" onclick="getListDoc($(this))" data-toggle="tooltip" title="<?php echo $this->translate('Consulter les documents associés à cette forme auteur'); ?>"><i class="glyphicon glyphicon-list-alt"></i></a>
+                            <a href="javascript:void(0);" class="author-add" onclick="addAuthorForm($(this))" data-toggle="tooltip" title="<?php echo $this->translate("Ajouter cette forme à mon IdHAL"); ?>"><i class="glyphicon glyphicon-plus-sign"></i></a>
+                            <a href="javascript:void(0);" class="author-remove" style="display:none;" onclick="removeAuthor($(this))" data-toggle="tooltip" title="<?php echo $this->translate("Retirer cette forme de mon IdHAL"); ?>"><i class="glyphicon glyphicon-remove-sign"></i></a>
+                        </td>
+                    </tr>
+                    <tr class="author-docs" style="display:none;" id="tr-docs-<?php echo $data['docid'] ?>">
+                        <td style="display:none;"></td>
+                        <td></td>
+                        <td colspan="4">
+                            <div class="list-docs" style="overflow: auto; max-height:200px;">
+
+                            </div>
+                        </td>
+                    </tr>
+                <?php } ?>
+                </tbody>
+            </table>
+            <script type="text/javascript">
+                <!--
+                $(function() {
+                    //Tooltip
+                    $('a[data-toggle="tooltip"], span[data-toggle="tooltip"]').tooltip();
+                });
+                //-->
+            </script>
+        <?php } else {
+            ?>
+            <h5><i><?php echo $this->translate("Aucune forme auteur n'a été trouvée"); ?></i></h5>
+            <?php
+        }
+        ?>
+    </fieldset>
+</div>
+

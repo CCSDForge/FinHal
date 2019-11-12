@@ -1,0 +1,197 @@
+<!-- <div id="facets"> -->
+<?php
+$this->jQuery()->addJavascriptFile(CCSDLIB . '/js/jquery/jquery.fastLiveFilter.js');
+
+// supprime le nombre de page dans l'url si c'est le meme que par défaut
+if ((isset($this->parsedSearchParams ['rows'])) and ( $this->parsedSearchParams ['rows'] == Hal_Settings_Search::DEFAULT_NUMBER_SEARCH_RESULTS)) {
+    unset($this->parsedSearchParams ['rows']);
+}
+
+// Liste des noms de champs pour les facettes
+foreach (Hal_Settings::getConfigFile('solr.hal.facets.json') as $facetName) {
+    $facetFieldNames [] = $facetName ['fieldName'];
+    $facetFieldNames [] = 'Tous';
+}
+
+if (is_array($this->activeFilters)) :
+    ?>
+        <ul class="list-unstyled">
+        <li><strong>
+                <?php echo $this->translate('Filtres'); ?>
+            </strong></li>
+
+
+                <?php foreach ($this->activeFilters as $filterName => $urlParams) : ?>
+
+                    <?php
+                    // traduction des noms de filtres qui ne sont pas dans les facettes
+                    if (!in_array($filterName, $facetFieldNames)) {
+                        $filterName = 'hal_' . $filterName;
+                    }
+                    ?>
+
+
+                    <li><a rel="nofollow" data-toggle="tooltip" data-placement="right"
+                           title="<?php echo $this->translate('Supprimer') . ' ' . $this->escape($this->translate($filterName)); ?>"
+                           class="label label-default"
+                           href="<?php echo $this->searchUrl($urlParams, null, true, true, $this->searchType); ?> ">
+                               <?php
+                               echo $this->escape($this->translate($filterName));
+                               ?>
+                            &nbsp;&times;
+                        </a></li>
+
+                    <?php endforeach; ?>
+
+            </ul>
+
+    <?php
+endif;
+
+if (($this->facetsArray) and ( $this->numFound > 0)) {
+
+    echo $this->numFound . '&nbsp;' . $this->translate()->getTranslator()->plural("résultat", "résultats", $this->numFound);
+
+    if (Hal_Auth::isLogged()) {
+        echo '&nbsp;<a id="saveResult" href="javascript:void(0)" class="btn btn-default btn-xs popover-link"><span class="glyphicon glyphicon-save"></span>&nbsp;' . $this->translate('enregistrer la recherche') . '</a>';
+    } else {
+        echo '&nbsp;<a rel="nofollow" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Identifiez-vous pour enregistrer cette recherche dans votre compte') . '" id="saveResultDisabled" href="javascript:void(0)" class="btn btn-default btn-xs popover-link disabled"><span class="glyphicon glyphicon-save"></span>&nbsp;' . $this->translate('enregistrer la recherche') . '</a>';
+    }
+    echo '<div id="exportMessage"></div>';
+
+    // affichage des valeurs des facettes
+    foreach ($this->facetsArray as $facet) {
+
+        // print_r($facet);
+        if ($facet ['values']) {
+            ?>
+                        <div class="widget-search" id="<?php echo $facet['fieldName']; ?>-facet">
+                <h3 class="widget-header widget-header-search"><?php echo $this->translate($this->escape($facet['displayName'])); ?>
+                    <a rel="nofollow" data-toggle="collapse" data-parent="<?php echo $facet['fieldName']; ?>-facet"
+                       href="#<?php
+                       echo $facet ['fieldName'];
+                       ?>-facet-content" style="float: right"><i class="glyphicon glyphicon-chevron-<?php echo (! $facet['closed'] ? 'up' : 'down')?> gray"></i></a>
+                                        </h3>
+                            <div class="widget-content collapse <?php echo (! $facet['closed'] ? 'in' : '')?> "
+                                 id="<?php echo $facet['fieldName']; ?>-facet-content">
+                                     <?php if ((count($facet['values']) > 10) && ( $facet['displayFilter'])) : ?>
+                                    <input id="<?php echo $facet['fieldName']; ?>-facet-input" type="text" name="filter"
+                                           class="facet-input input-sm" placeholder="<?php echo $this->translate('Filtrer'); ?>" />
+                                       <?php endif; ?>
+
+
+                        <div class="facet-content">
+                                        <ul class="list-unstyled <?php echo $facet['fieldName']; ?>-facet-list">
+                                            <?php
+                                            // cas particulier des codes pays pour HCERES
+                                            if (preg_match('/Country/', $facet['fieldName'] )) {
+                                                $countries = Ccsd_Locale::getCountry();
+                                            }
+                                            $i = 1;
+                                            //	$facetList = array();
+                                            foreach ($facet ['values'] as $facetValueLabel => $valueCount) {
+
+                                                // la valeur de la facette a un separateur eg
+                                                // ID_FacetSep_Libellé
+                                                if ($facet['hasSepInValue']) {
+                                                    $facetValueLabelArray = explode(Ccsd_Search_Solr::SOLR_FACET_SEPARATOR, $facetValueLabel);
+                                                    $facetValueLabel = $this->escape($facetValueLabelArray [1]);
+
+
+                                                    // Cas particulier auteurs
+                                                    // Si on a pas un idHal texte
+                                                    if (($facetValueLabelArray [0] == '') && ( $facet['fieldName'] == 'authIdHalFullName_fs')) {
+                                                        $facetValueCode = $facetValueLabelArray [1];
+                                                        $facet ['searchMapping'] = 'authFullName_s';
+                                                    } else {
+                                                        $facetValueCode = $facetValueLabelArray [0]; // laurent-romary
+                                                        $facet ['searchMapping'] = 'authIdHal_s';
+
+                                                        $facetValueLabel = '<span class="' . Hal_Settings::$idHalIconClass . '" data-toggle="tooltip" data-placement="auto"
+					data-original-title="' . $this->translate("IdHal de l'auteur") . '"></span>&nbsp;' . $facetValueLabel;
+                                                    }
+                                                    // END Cas particulier auteurs
+                                                } else {
+                                                    $facetValueCode = $this->escape($facetValueLabel);
+                                                }
+
+                                                // Traduction du libellé
+                                                if ($facet['translated']) {
+                                                    // cas particulier des codes pays pour l'HCERES
+                                                    if (preg_match('/Country/', $facet['fieldName']) && isset($countries[$facetValueLabel])) {
+                                                        $facetValueLabel = $countries[$facetValueLabel];
+                                                    }
+                                                    else {
+                                                        if ($facet ['translationPrefix'] != '') {
+                                                            $facetValueLabel = $facet ['translationPrefix'] . $facetValueLabel;
+                                                        }
+
+                                                        $facetValueLabel = $this->translate($facetValueLabel);
+                                                    }
+                                                }
+
+
+
+                                                $urlParams = Hal_Search_Solr_Search::buildFacetUrl($facet ['searchMapping'], $this->parsedSearchParams, $facetValueCode, $valueCount);
+                                                $url = $this->searchUrl($urlParams ['url'], null, true, true, $this->searchType);
+
+
+                                                if ($facet ['fieldName'] == 'producedDateY_i') {
+                                                    $indexOfArrayPrefix = '999';
+                                                } else {
+                                                    $indexOfArrayPrefix = '_';
+                                                }
+
+
+                                                if ($urlParams ['checked'] != true) {
+                                                    $indexOfArray = $i;
+                                                    $facetList [$indexOfArray] = '<a rel="nofollow" href="' . $url . '">' . $facetValueLabel . '</a>';
+                                                    $facetList [$indexOfArray] .= '<input type="checkbox">';
+                                                } else {
+                                                    // prefixe _ ou 999 pour trier par clé du tableau
+                                                    $indexOfArray = $indexOfArrayPrefix . $i;
+                                                    $facetList [$indexOfArray] = '<a rel="nofollow" href="' . $url . '">' . $facetValueLabel . '</a>';
+                                                    $facetList [$indexOfArray] .= '<input type="checkbox" checked="checked">';
+                                                }
+
+
+                                                $facetList [$indexOfArray] .= ' <span class="text-muted">(' . $this->escape($valueCount) . ')</span>';
+
+                                                $i ++;
+                                            } // iterate facets
+                                            // tri par clé du tableau
+                                            if ($facet ['fieldName'] == 'producedDateY_i') {
+                                                krsort($facetList, SORT_NUMERIC);
+                                            } else {
+                                                ksort($facetList);
+                                            }
+
+                                            foreach ($facetList as $value) {
+                                                echo '<li class="facet-item"><label class="checkbox">' . $value . '</label></li>';
+                                            }
+
+                                            unset($facetList, $value);
+                                            ?>
+                                        </ul>
+                                    </div>
+                            </div>
+                            <script>
+                                $(document).ready(function () {
+                                <?php if ((count($facet['values']) > 10) && ( $facet['displayFilter'])) : ?>
+                                            $('#<?php echo $facet['fieldName']; ?>-facet-input').fastLiveFilter('.<?php echo $facet['fieldName']; ?>-facet-list');
+                                <?php endif; ?>
+
+                                                $('#<?php echo $facet['fieldName']; ?>-facet').on('hide.bs.collapse', function () {
+                                        $(this).find('a[data-toggle="collapse"] i').attr('class', 'glyphicon glyphicon-chevron-down gray');
+                                    }).on('show.bs.collapse', function () {
+                                        $(this).find('a[data-toggle="collapse"] i').attr('class', 'glyphicon glyphicon-chevron-up gray');
+                                    });
+                                });
+                            </script>
+                        </div>
+                        <?php
+                    } // if ($facet['values'])
+                }
+            } // if ($this->facetsArray)
+            ?>
+<!-- </div> -->

@@ -1,0 +1,87 @@
+<?php
+    if (is_a($this, "Zend_View")) {
+        
+        $no_labels = false;
+        $new_typdoc = false;
+        if (!isset($element)) {
+            if (isset($this->id)) {
+                $element = new Hal_Typdoc(array(
+                        'id' => $this->id,
+                		'languages' => Zend_Registry::get('languages'),
+                        'type' => $this->type,
+                		'sid' => SITEID
+                ));
+                $element->parentid = 'root';
+                $element->initLabels();
+                
+                if (substr($this->id, 0, 3) == 'tmp') {
+                    $no_labels = true;
+                    $new_typdoc = true;
+                }
+            } else {
+                $element = new Hal_Typdoc();
+                $element->parentid = 'root';
+                $element->initLabels();
+            }
+            
+
+        }
+        
+        $element_name = $element->getLabel(Zend_Registry::get("Zend_Locale")->toString());
+        
+        ?>
+        <div class="ids">
+        	<input type="hidden" class="parentid" name="typdoc[<?php echo $element->getId(); ?>][parentid]" value="<?php echo $element->parentid; ?>" />
+            <input type="hidden" class="typdoctype" name="typdoc[<?php echo $element->getId(); ?>][type]" value="<?php echo $element->getType(); ?>" />
+        </div>
+        <table class="typdoc_table" style="width : 100%;">
+            <tr>
+            	<td width="20px"><i class="glyphicon glyphicon-move"></i></td>
+            	<td class="typdoc_name" <?php echo $element->getType() == 'typdoc' ? '' : 'colspan="2"'; ?>>
+            	    <div <?php echo $element->getType() == 'typdoc' ? 'class="typdoc_render"' : 'class="typdoc_render cat_typdoc_render"'; ?>><?php echo $element->getType() == 'typdoc' ? '<strong class="render_id">'.(!$new_typdoc ? $element->getId() .' - ' : '').'</strong>' : ''; ?><span class="render_name"><?php echo !$no_labels ? $element_name : ''; ?></span></div>
+            	    <div class="typdoc_input" <?php echo $no_labels ? 'style="display : block;"' : 'style="display : none;"' ; ?>>
+                	    <?php
+                	        echo $element->getFormElement($no_labels);
+                		?>
+
+                    	<?php
+                    	    if ($element->getType() == 'typdoc') {
+                    	        $form = new Ccsd_Form();
+                                $typdocElem = $form->createElement('text', 'id', array(
+                                    'label' =>  $this->translate('Code'),
+                                    'description' => $this->translate('Ne doit contenir que des majuscules et des _ (underscore)'),
+                                    'class' =>  'typdocid',
+                                    'required' => true,
+                                    'belongsTo' => 'typdoc[' . $element->getId() .']',
+                                    'value' => !in_array($element->getId(), $this->list_default_typdoc) && $new_typdoc ? '' : $element->getId(),
+                                ));
+                                if (in_array($element->getId(), $this->list_default_typdoc) || !$new_typdoc ) {
+                                    $typdocElem->setAttrib('disabled','disabled');
+                                }
+                                echo $typdocElem;
+                                ?>
+
+                                <?php
+
+                            }
+                    	    if (in_array($element->getId(), $this->list_default_typdoc) || $element->getType() == 'category' || !$new_typdoc) {
+                    	        ?>
+                    				<input type="hidden" class="typdocid" name="typdoc[<?php echo $element->getId(); ?>][id]" value="<?php echo $element->getId(); ?>" />
+                    	        <?php   
+                    	    }
+                    	?>
+
+            	    </div>
+
+            	</td>
+            	<td>
+            		<div class="pull-right">
+                		<a class="editElement" onclick="return false;" href="#"><i class="glyphicon glyphicon-pencil"></i></a>
+                        <a class="deleteElement" title="Supprimer" onclick="$(this).closest('li').remove();" href="javascript:void(0)"><i class="glyphicon glyphicon-trash"></i></a>
+                    </div>
+        		</td>
+            </tr>
+        </table>
+        <?php
+    }
+?>

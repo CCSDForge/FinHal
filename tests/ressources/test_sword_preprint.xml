@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.tei-c.org/ns/1.0 http://api-preprod.archives-ouvertes.fr/documents/aofr-sword.xsd"
+     xmlns="http://www.tei-c.org/ns/1.0">
+      <text>
+      <body>
+         <listBibl>
+            <biblFull>
+               <titleStmt>
+                  <title xml:lang="en">Estimating the risk of nuclear accidents</title>
+                  <author role="aut">
+                     <persName>
+                        <forename type="first">Suvrat</forename>
+                        <surname>Raju</surname>
+                     </persName>
+                     <affiliation ref="#struct-247160"/>
+                  </author>
+               </titleStmt>
+				<editionStmt>
+                    <edition>
+                        <ref type="file" target="http://feever.fr/Papers/WAC-grame.pdf" subtype="author" n="1"/>
+                    </edition>
+				</editionStmt>
+			<seriesStmt><idno type="stamp" n="USPC"/></seriesStmt>
+               <notesStmt>
+                  <note type="commentary">19 pages.</note>
+               </notesStmt>
+               <sourceDesc>
+                  <biblStruct>
+                     <analytic>
+                        <title xml:lang="en">Estimating the risk of nuclear accidents</title>
+                        <author role="aut">
+                           <persName>
+                              <forename type="first">s.</forename>
+                              <surname>raju</surname>
+                           </persName>
+                           <affiliation ref="#struct-247160"/>
+                        </author>
+                     </analytic>
+                     <idno type="arxiv">1608.08894</idno>
+                  </biblStruct>
+               </sourceDesc>
+               <profileDesc>
+                  <langUsage>
+                     <language ident="en"/>
+                  </langUsage>
+                  <textClass>
+                     <keywords scheme="author">
+                        <term xml:lang="en">Probabilistic Risk Assesment</term>
+                        <term xml:lang="en">Bayesian Analysis</term>
+                        <term xml:lang="en">Nuclear Safety</term>
+                     </keywords>
+                     <classCode scheme="halDomain" n="math.math-mp"/>
+                     <classCode scheme="halDomain" n="phys.nucl"/>
+                     <classCode scheme="halTypology" n="UNDEFINED"/>
+                  </textClass>
+                  <abstract xml:lang="en">We used Bayesian methods to compare the predictions.</abstract>
+               </profileDesc>
+               
+            </biblFull>
+         </listBibl>
+      </body>
+   </text>
+   </TEI>
+

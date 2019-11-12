@@ -1,0 +1,541 @@
+<?php
+/**
+ * @var Hal_View $this
+ * ================================================= CREDIT ====================================================
+ * Created by PhpStorm In CNRS-CCSD
+ * User: Zahen
+ * Date: 05/01/2017
+ * Time: 10:48
+ * =============================================================================================================
+ */
+
+/**
+ * =============================================== DESCRIPTION =================================================
+ * Using this view to display , edit, validate, remove and add an HAL document references
+ * =============================================================================================================
+ */
+// Check if we have the hal document object and the hal document references object
+if (!$this->document instanceof Hal_Document && !$this->references instanceof Hal_Document_References) {
+    exit();
+}
+
+// Get the total number of the cited references
+$nbReferences = $this->references->getNbReferences();
+$referencesArray = $this->references->get();
+// Create an array containing the HTML references
+/** @var string[] $references */
+$references = explode('<p class="ref"', $this->references->getHTMLReferences());
+?>
+
+<!-- Sorting Filters -->
+<div class="row">
+    <div class="references-filtre btn-group pull-right">
+        <a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+            <i class="glyphicon glyphicon-filter"></i>
+            <?php echo $this->translate('Filtrer'); ?>
+            <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li><a id="filter-well" class="dropdown-menu-item glyphicon glyphicon-ok" onclick="sortReferences('well');">
+                    <?php echo $this->translate('Références bien formées'); ?>
+                </a>
+            </li>
+            <li><a id="filter-oa" class="dropdown-menu-item" onclick="sortReferences('openAccess');">
+                    <?php echo $this->translate('Libre accès'); ?>
+                </a>
+            </li>
+            <li><a id="filter-doi" class="dropdown-menu-item" onclick="sortReferences('Doi');">
+                    <?php echo $this->translate('Doi'); ?>
+                </a>
+            </li>
+            <li><a id="filter-all" class="dropdown-menu-item" onclick="sortReferences('all');">
+                    <?php echo $this->translate('Tous (y compris les références mal formées)'); ?>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- References List -->
+<div class="references-section" data-spy="scroll">
+    <table>
+        <?php
+        for ($i = 1; $i < sizeof($references); $i++) {
+            // Citation
+            $citation = substr($references[$i], strpos($references[$i], '>') + 1, strpos($references[$i], '<span class="identifiers-reference">') - strlen($references[$i]));
+            // Reference ID
+            $referenceID = substr($references[$i], strpos($references[$i], '<id="') + 5, strpos($references[$i], '">') - strlen($references[$i]));
+            ?>
+            <tr class="reference-row <?php if (isset($referencesArray[$i])) {
+                echo $referencesArray[$i]['REFVALIDETY'];
+            } ?>">
+                <!-- For styling -->
+                <td class="reference-chevron">
+                    <span class="glyphicon glyphicon-chevron-right"></span>
+                </td>
+                <!-- Citation, DOI, URL -->
+                <td class="reference-text">
+                    <div class="inside-reference-text"><?php echo $citation;
+
+
+                        // DOI
+                        $DOI = $this->references->getElementByClassName($references[$i], 'doi-reference-value');
+                        if (!empty($DOI)) { ?>
+                            <div class="references-identifiers">
+                                <span class="references-identifier label" id="doi">DOI </span>
+                                <a class="references-identifier-value label" target="_blank" rel="noopener"
+                                   href="https://dx.doi.org/<?php echo $this->escape($DOI); ?>"><?php echo $this->escape($DOI); ?></a>
+                            </div>
+                        <?php }
+                        // URL
+                        $URL = $this->references->getElementByClassName($references[$i], 'url-reference-value');
+                        if (!empty($URL)) { ?>
+                            <div class="references-identifiers">
+                                <?php if (preg_match('/' . preg_replace('/\//', '\/', HAL_URL) . '/i', $URL)) { ?>
+                                    <span class="references-identifier label" id="free-full-text-hal">HAL </span>
+                                <?php } else { ?>
+                                    <span class="references-identifier label" id="free-full-text-url">URL </span>
+                                <?php } ?>
+                                <a class="references-identifier-value label" target="_blank"
+                                   href="<?php echo $this->escape($URL); ?>"><?php echo $this->escape($URL); ?></a>
+                            </div>
+                        <?php }
+                        // Link OpenAccess
+                        $LinkURL = $this->references->getLinkExt($DOI);
+                        if (Hal_Auth::isHALAdministrator()) { //À supprimer après lancement du script recupForLinkExt
+                            if (empty($URL) && isset($LinkURL)) { ?>
+                                <div class="references-identifiers">
+                                    <span class="references-identifier label" id="free-full-text-url">URL </span>
+                                    <a class="references-identifier-value label" target="_blank" rel="noopener"
+                                       href="<?php echo $this->escape($LinkURL); ?>"><?php echo $this->escape($LinkURL); ?></a>
+                                </div>
+                            <?php }
+                        } ?>
+
+                        <?php
+
+
+                        //  Search elsewhere : TODO move out the view
+
+                        $ref_authorsArr = '';
+                        $ref_title = $this->references->getElementByClassName($references[$i], Hal_Document_References::TITLE_REF);
+                        $ref_authors = $this->references->getElementByClassName($references[$i], Hal_Document_References::AUTHOR_REF);
+                        $ref_titleEvent = $this->references->getElementByClassName($references[$i], Hal_Document_References::TITLE_EVENT_REF_V);
+                        $ref_vol = $this->references->getElementByClassName($references[$i], Hal_Document_References::VOL_REF_V);
+                        $ref_issue = $this->references->getElementByClassName($references[$i], Hal_Document_References::ISSUE_REF_V);
+                        $ref_pages = $this->references->getElementByClassName($references[$i], Hal_Document_References::PAGES_REF_V);
+                        $ref_date = $this->references->getElementByClassName($references[$i], Hal_Document_References::DATE_REF_V);
+
+
+                        if (($ref_title != '') && ($ref_authors != '') && ($ref_date != '')) {
+
+                            $ref_authors = str_replace(', and ', ',', $ref_authors);
+                            $ref_authors = str_replace(' and ', ',', $ref_authors);
+                            $ref_authorsArr = explode(',', $ref_authors);
+                            $ref_authorsArr = array_map('trim', $ref_authorsArr);
+                            $ref_authorsArr = array_map('urlencode', $ref_authorsArr);
+
+                            $ref_authors = implode('&author=', $ref_authorsArr);
+
+
+                            $gsUrl = 'https://scholar.google.com/scholar_lookup?';
+                            $gsUrl .= 'title=' . urlencode($ref_title);
+                            $gsUrl .= '&author=' . urlencode($ref_authors);
+                            $gsUrl .= '&publication_year=' . urlencode($ref_date);
+
+
+                            if ($ref_titleEvent != '') {
+                                $gsUrl .= '&journal=' . urlencode($ref_titleEvent);
+                            }
+
+                            if ($ref_vol != '') {
+                                $gsUrl .= '&volume=' . urlencode($ref_vol);
+                            }
+                            if ($ref_issue != '') {
+                                $gsUrl .= '&issue=' . urlencode($ref_issue);
+                            }
+                            if ($ref_pages != '') {
+                                $gsUrl .= '&pages=' . urlencode($ref_pages);
+                            }
+
+                            if ($DOI != '') {
+                                $gsUrl .= '&doi=' . urlencode($DOI);
+                            }
+
+
+                            ?>
+                            <div class="references-identifiers">
+                                <span class="references-identifier label" id="se"><span
+                                            class="glyphicon glyphicon-search" aria-hidden="true"></span></span>
+                                <a class="references-identifier-value label" target="_blank" rel="noopener"
+                                   href="<?php echo $this->escape($gsUrl); ?>"
+                                   title="Google Scholar"><?php echo $this->translate('Chercher ailleurs'); ?></a>
+                            </div>
+
+                            <?php
+                            // end search elsewhere
+                        }
+                        ?>
+                    </div>
+                </td>
+                <?php if (Hal_Document_Acl::canUpdate($this->document)) { ?>
+                    <!-- Buttons [Validation, Modification, Remove] -->
+                    <td class="reference-buttons">
+                <span class="btn-group-vertical pull-right">
+                    <!-- Validation button -->
+                    <button type="button" class="validation-button btn btn-default btn-xs"
+                            data-status="<?php echo $this->references->isReferenceValidated($referenceID); ?>"
+                            title="<?php echo $this->translate("Valider la référence") ?>"
+                            id="<?php echo $referenceID; ?>"
+                            onclick="validateReference(this)">
+                       <span class="glyphicon glyphicon-ok"></span>
+                    </button>
+                    <!-- Modification button -->
+                    <button type="button" class="edit-button btn btn-default btn-xs"
+                            title="<?php echo $this->translate("Modifier la référence") ?>"
+                            id="<?php echo $referenceID; ?>"
+                            onclick="edit_add_Reference(this)">
+                       <span class="glyphicon glyphicon-pencil"></span>
+                    </button>
+                    <!-- Remove button -->
+                    <button type="button" class="remove-button btn btn-default btn-xs"
+                            title="<?php echo $this->translate("Supprimer la référence") ?>"
+                            id="<?php echo $referenceID; ?>"
+                            onclick="removeReference(this)">
+                       <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </span>
+                    </td>
+                <?php } ?>
+            </tr>
+        <?php } ?>
+    </table>
+</div>
+
+<?php if (Hal_Document_Acl::canModifyReference($this->document)) { ?>
+    <div class="clearfix" id="btn-add">
+        <button class="btn btn-default btn-sm pull-right" id="0" onclick="edit_add_Reference(this)">
+            <span class="glyphicon glyphicon-plus"></span>&nbsp;<?php echo $this->translate('Ajouter une référence'); ?>
+        </button>
+    </div>
+<?php } ?>
+
+<!-- Interface of modification -->
+<!-- Modal of modification -->
+<div id="modal-reference-modification" class="modal fade" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal header -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only"><?php echo $this->translate('Fermer'); ?></span>
+                </button>
+                <h4 class="modal-title"
+                    id="modal-modification-label"><?php echo $this->translate("Modification d'une référence"); ?></h4>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">
+                <form id="form-reference" method="post"></form>
+            </div>
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-toggle="modal"
+                        data-target="modal-reference-modification"
+                        data-dismiss="modal"><?php echo $this->translate('Annuler'); ?></button>
+                <button type="button" class="btn btn-primary" data-toggle="modal"
+                        data-target="modal-reference-modification"
+                        id="save-reference-modification"><?php echo $this->translate('Sauvegarder'); ?></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal of confirmation -->
+<div id="modal-reference-confirmation" class="modal fade" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal header -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only"><?php echo $this->translate('Fermer'); ?></span>
+                </button>
+                <h3 class="modal-title" id="modal-confirmation-label">Confirmation</h3>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body"></div>
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-toggle="modal"
+                        data-target="modal-reference-confirmation"
+                        data-dismiss="modal"><?php echo $this->translate('Non'); ?></button>
+                <button type="button" class="btn btn-primary" data-toggle="modal"
+                        data-target="modal-reference-confirmation" data-dismiss="modal"
+                        id="submit-reference-modification"><?php echo $this->translate('Oui'); ?></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Functions for the interface of modification -->
+<script type="text/javascript">
+    // Global variables
+    var referenceId;
+    var action;
+    var docId = <?php echo $this->document->getDocid(); ?>;
+    var dataForm = {};
+
+    // Functions
+    function sortReferences(e) {
+        $('.reference-row').show();
+
+        $('.dropdown-menu-item.glyphicon.glyphicon-ok').removeClass('glyphicon').removeClass('glyphicon-ok');
+
+        if (e === "openAccess") {
+            $('.reference-row').not($('.reference-row').has('.references-identifiers #free-full-text-hal, .references-identifiers #free-full-text-url')).hide();
+            $('#filter-oa').addClass('glyphicon').addClass('glyphicon-ok');
+        } else if (e === "Doi") {
+            $('.reference-row').not($('.reference-row').has('.references-identifiers #doi')).hide();
+            $('#filter-doi').addClass('glyphicon').addClass('glyphicon-ok');
+        } else if (e == "well") {
+            $('.BAD_FORMAT').hide();
+            $('#filter-well').addClass('glyphicon').addClass('glyphicon-ok');
+        } else {
+            $('#filter-all').addClass('glyphicon').addClass('glyphicon-ok');
+        }
+    }
+
+
+    // Editing a reference
+    function edit_add_Reference(e) {
+        referenceId = e.id;
+        action = 'prepareToEditReference';
+        var parent = document.getElementById('form-reference');
+        // Remove the children of the Form (in case of multiple modification)
+        while (parent.hasChildNodes()) {
+            parent.removeChild(parent.firstChild);
+        }
+        // Ajax Request to build Form elements
+        $.ajax({
+            url: "/view/references",
+            type: "post",
+            data: {refId: referenceId, docId: docId, actionReference: action},
+            dataType: 'json',
+            success: function (data) {
+                $.each(data, function (i, v) {
+                    // Form Group
+                    var div = document.createElement('div');
+                    div.setAttribute('class', 'form-group');
+                    // Label
+                    var label = document.createElement('label');
+                    label.setAttribute('for', i);
+                    // Info sign (Help)
+                    if (i == 'authors-reference' || i == 'doi-reference-value' || i == 'url-reference-value') {
+                        var spanHelpParent = document.createElement('span');
+                        setAttributes(spanHelpParent, {
+                            'class': 'help-icon',
+                            'data-toggle': 'tooltip',
+                            'data-placement': 'right',
+                            'title': createText(i, 'forHelp')
+                        });
+                        var spanHelp = document.createElement('span');
+                        spanHelp.setAttribute('class', 'glyphicon glyphicon-info-sign');
+                        spanHelpParent.appendChild(spanHelp);
+                    }
+                    // Input
+                    var input = document.createElement('input');
+                    setAttributes(input, {'type': 'text', 'class': 'form-control', 'id': i, 'value': v});
+                    // Appending
+                    label.appendChild(document.createTextNode(createText(i, 'forLabel')));
+                    if (spanHelpParent) {
+                        label.appendChild(spanHelpParent);
+                    }
+                    div.appendChild(label);
+                    div.appendChild(input);
+                    parent.appendChild(div);
+                });
+            }
+        });
+        // Show the Modal
+        if (referenceId == '0') {
+            $('#modal-modification-label').text("<?php echo $this->translate("Ajout d'une référence") ?>");
+        } else {
+            $('#modal-modification-label').text("<?php echo $this->translate("Modification d'une référence") ?>");
+        }
+        $("#modal-reference-modification").modal('show');
+    }
+
+    // Removing a reference
+    function removeReference(e) {
+        referenceId = e.id;
+        action = 'removeReference';
+        $('#modal-reference-confirmation').find('.modal-body').text('<?php echo $this->translate('Souhaitez-vous supprimer cette référence ?') ?>');
+        $('#modal-reference-confirmation').modal('show');
+    }
+
+    // Validating a reference
+    function validateReference(e) {
+        referenceId = e.id;
+        action = 'validateReference';
+        $('#modal-reference-confirmation').find('.modal-body').text("<?php echo $this->translate("Cette référence a été extraite automatiquement à partir de votre fichier, confirmez-vous qu'elle est valide ?") ?>");
+        $('#modal-reference-confirmation').modal('show');
+    }
+
+    // Events functions
+    $(document).ready(function () {
+        // Save button on modification Modal
+        $("#save-reference-modification").on('click', function () {
+            action = 'checkInputData';
+            // Check inputs Form before submitting
+            // Reset input errors
+            resetErrors();
+            // Build an array containing the inputs values
+            $('#form-reference :input').each(function () {
+                if ($(this).attr('type') !== 'submit') {
+                    dataForm[$(this).attr('id')] = $(this).val();
+                }
+            });
+            // Ajax Request to check the inputs values
+            $.ajax({
+                url: "/view/references",
+                type: "post",
+                data: {dataForm: dataForm, docId: docId, actionReference: action},
+                dataType: "json",
+                success: function (data) {
+                    if (data.length === 0) {
+                        // Successful validation
+                        $('#modal-reference-confirmation').find('.modal-body').text('<?php echo $this->translate('Souhaitez-vous enregistrer vos modifications ?'); ?>');
+                        $('#modal-reference-confirmation').modal('show');
+                        $('#modal-reference-modification').modal('hide');
+                    } else {
+                        // Input Errors - Display errors behind the input [in red color]
+                        var keys = [];
+                        $.each(data, function (i, v) {
+                            $.each(v, function (key, value) {
+                                keys.push(key);
+                                var msg = '<label class="error" for="' + key + '">' + value + '</label>';
+                                $('#form-reference input[id="' + key + '"').addClass('inputTxtError').after(msg);
+                            });
+                        });
+                        // Focus on the first input that have an error
+                        $('input[id="' + keys[0] + '"]').focus();
+                    }
+                }
+            });
+        });
+
+        // Ok button on confirmation modal
+        $("#submit-reference-modification").on('click', function () {
+            if (action == 'removeReference') {
+                action = 'removeReference';
+            } else if (action == 'validateReference') {
+                action = 'validateReference'
+            } else {
+                action = 'setReference';
+            }
+            $.ajax({
+                url: "/view/references",
+                type: "post",
+                data: {refId: referenceId, docId: docId, modifications: dataForm, actionReference: action},
+                success: function (data) {
+                    var scrollPos = $('.references .content .references-section').scrollTop();
+                    $('.references .content').html(data);
+                    linkifyElem('.references .content .linkify');
+                    $('.modal-backdrop').remove();
+                    $('.references .content .references-section').animate({
+                        scrollTop: scrollPos
+                    }, 0);
+                }
+            });
+        });
+    });
+
+    // Check the status of a reference to activate or deactivate the validation button
+    var validationButton = document.getElementsByClassName('validation-button');
+    $.each(validationButton, function (i, v) {
+        if (v.getAttribute('data-status') == 'VALIDETED') {
+            v.setAttribute("disabled", 'true');
+            v.style.color = "#666666";
+        }
+    });
+
+    // To update the number of references
+    var nbRefs = document.getElementById('references-title');
+    nbRefs.innerHTML = "<?php echo $this->translate('Littérature citée') . ' [' . $nbReferences . ' ' . $this->translate('références') . '] ';?>";
+
+    // Reset errors after submitting modifications on reference
+    function resetErrors() {
+        $('form input, form select').removeClass('inputTxtError');
+        $('label.error').remove();
+    }
+
+    // Set multiple attribute in one line
+    function setAttributes(el, attributes) {
+        $.each(attributes, function (i, v) {
+            el.setAttribute(i, v);
+        });
+    }
+
+    /* Create helping Text for <a> in Form
+       action = forLabel => Translate the element label to display
+       action = forHelp  => Create the text for the element */
+    function createText(el, action) {
+        switch (el) {
+            case 'authors-reference'          :
+                if (action == 'forLabel')
+                    return '<?php echo $this->translate('Auteurs');?>' + ' ';
+                else
+                    return "<?php echo $this->translate("Ex: P. Nom; Ex: P. Nom and P. Nom; Ex : P. Nom, P. Nom, P. Nom; Ex : P. Nom, P. Nom and P. Nom. L'affichage est limité à 5 auteurs max.")?>";
+                break;
+            case 'title-reference'            :
+                if (action == 'forLabel')
+                    return '<?php echo $this->translate('Titre');?>' + ' ';
+                else
+                    return '';
+                break;
+            case 'titleEvent-reference-value' :
+                if (action == 'forLabel')
+                    return '<?php echo $this->translate('Nom de la revue | conférence | événement');?>' + ' ';
+                else
+                    return '';
+                break;
+            case 'vol-reference-value'        :
+                if (action == 'forLabel')
+                    return 'Volume' + ' ';
+                else
+                    return '';
+                break;
+            case 'issue-reference-value'      :
+                if (action == 'forLabel')
+                    return '<?php echo $this->translate('Numéro');?>' + ' ';
+                else
+                    return '';
+                break;
+            case 'pages-reference-value'      :
+                if (action == 'forLabel')
+                    return 'Page(s)' + ' ';
+                else
+                    return '';
+                break;
+            case 'date-reference-value'       :
+                if (action == 'forLabel')
+                    return '<?php echo $this->translate('Année de publication');?>' + ' ';
+                else
+                    return '';
+                break;
+            case 'doi-reference-value'        :
+                if (action == 'forLabel')
+                    return 'DOI' + ' ';
+                else
+                    return '<?php echo $this->translate('Format exemple : 10.1000/xyz123');?>';
+                break;
+            case 'url-reference-value'        :
+                if (action == 'forLabel')
+                    return 'URL' + ' ';
+                else
+                    return '<?php echo $this->translate('Le lien vers le papier en libre accès');?>';
+                break;
+        }
+    }
+</script>

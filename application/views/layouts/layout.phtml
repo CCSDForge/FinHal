@@ -1,0 +1,216 @@
+<?php
+/** @var Hal_View $this */
+$style = new Hal_Website_Style();
+$this->containerClass = $style->getContainerClass();
+$this->navigation = $style->getNavigationOrientation();
+$this->cssFile = $style->getCssFile();
+
+$controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerName();
+if ( $controller == 'view' ) {
+    echo $this->doctype('XHTML1_RDFA');
+} else {
+    echo $this->doctype('HTML5');
+    $this->headMeta()->setCharset('UTF-8');
+}
+
+$site = Hal_Site::getCurrent();
+$layout = $this->layout();
+$lang = Zend_Registry::get('lang');
+$language = Zend_Registry::get('Zend_Locale')->getLanguage(); // Hum: pa la meme chose que $lang???
+?>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="<?php
+echo $language; ?>">
+<head>
+    <?php if(APPLICATION_ENV != ENV_PROD) : ?>
+    <meta name="robots" content="noindex">
+    <?php endif; ?>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Language" content="<?php echo $language; ?>" />
+    <?php
+    /** @var  $active Ccsd_Website_Navigation_Page[] */
+
+    if ($this->headTitle()->getContainer() == '') {
+        $active = $this->nav()->findActive($this->nav()->getContainer());
+        $this->headTitle($active ? $this->translate($active['page']->getLabel()) : $site->getShortname());
+    } elseif ($layout->pageTitle != '') {
+        $this->headTitle($layout->pageTitle);
+    }
+
+$this->headTitle()->prepend($site->getFullname());
+$this->headTitle()->setSeparator(' - ');
+
+$this->headLink(['rel'=>'dns-prefetch', 'href'=>CCSDLIB]);
+$this->headLink(['rel'=>'dns-prefetch', 'href'=>'//cas.ccsd.cnrs.fr']);
+$this->headLink(['rel'=>'dns-prefetch', 'href'=>'//cdn.mathjax.org']);
+$this->headLink(['rel'=>'icon', 'type'=>'type/png', 'href'=>(file_exists(SPACE . 'public/favicon.png') ? SPACE_URL . 'favicon.png' : '/img/favicon.png')]);
+$this->headLink(['rel'=>'search', 'type'=>'application/opensearchdescription+xml', 'href'=>'/search/opensearch', 'title'=>'HAL']);
+$this->headLink()->appendStylesheet("/css/print_hal.css", 'print');
+$this->headScript()->appendScript("var lang = '" . $language . "';");
+
+echo $this->headTitle().PHP_EOL;
+echo $this->headLink().PHP_EOL;
+echo $this->headMeta().PHP_EOL;
+
+\Hal\View\TrackerJS::addRgpdAntiTracker($this);
+
+echo $this->headScript().PHP_EOL;
+
+
+    $this->jQuery()
+    ->addJavascriptFile("/js/translations.php?lang=" . $lang)
+    ->addJavascriptFile(CCSDLIB ."/v3/js/bootstrap.min.js")
+    ->addJavascriptFile(CCSDLIB ."/js/form.js")
+    ->addJavascriptFile("/js/utile.js")
+    // CSS
+    ->addStylesheet(CCSDLIB . '/css/custom-theme/jquery-ui-1.10.0.custom.css')
+    ->addStylesheet(CCSDLIB . '/v3/css/bootstrap.min.css')
+    ->addStylesheet(CCSDLIB . '/css/ccsd.css')
+    ->addStylesheet('/css/hal.css');
+
+if ('index' != $controller && 'page' != $controller) {
+    $this->jQuery()
+        ->addJavascriptFile(CCSDLIB . "/js/datepicker/datepicker-" . $lang . ".js")
+        ->addJavascriptFile(CCSDLIB . "/js/datepicker.js");
+}
+
+//CSS spécifique au site
+if ($this->cssFile) {
+    $this->jQuery()->addStylesheet($this->cssFile);
+}
+
+echo $this->jQuery()->setLocalPath(CCSDLIB . '/js/jquery/jquery-1.12.4.min.js')->enable()->setUiLocalPath(CCSDLIB . '/js/jquery-ui-1.11.4/jquery-ui.min.js')->UiEnable();
+
+
+?>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async></script>
+<script type='text/x-mathjax-config'>MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['$$','$$']]}});</script>
+<style type="text/css">
+html {
+	position: relative;
+	min-height: 100%;
+}
+</style>
+    <?php
+   echo $this->headStyle().PHP_EOL;
+?>
+</head>
+<body>
+<?php $this->navbar(true, array('languages' =>  Zend_Registry::get('languages'), 'lang' => $lang), true, array('isLogged' => Hal_Auth::isLogged()), PREFIX_URL); ?>
+<div id="container" class="container<?php echo $this->containerClass;?>">
+    <div class="logo">
+        <?php
+        if (is_file(SPACE . LAYOUT . 'header.' . $lang . '.html')) {
+            //Header prédéfini du portail
+            echo file_get_contents(SPACE . LAYOUT . 'header.' . $lang . '.html');
+        } else {
+            //Header par défaut du module (portail, collection)
+            $title = $site->getFullname() ;
+            $name = '';
+            if (MODULE == SPACE_PORTAIL)
+                $name = PORTAIL;
+            else 
+                $name = COLLECTION;
+            
+            ?>
+            <table width="100%" cellpadding="5" style="border:1px solid #ccc; margin-bottom:10px; padding:10px;">
+                <tr>
+                    <td><h1><?php echo $title . ' ' . $name; ?></h1></td>
+                    <td align="right"><img src="/img/tampon-hal.jpg" /></td>
+                </tr>
+            </table>
+            <?php } ?>
+    </div>
+    <div class="row<?php echo $this->containerClass;?>">
+    <?php if ($this->navigation == Ccsd_Website_Style::MENU_LIST || $this->navigation == Ccsd_Website_Style::MENU_ACCORDION) {
+        $class="col-md-2";
+    } else {
+        $class = "col-md-12";
+    }?>
+        <div class="<?php echo $class; ?>">
+            <?php echo $this->sidebar($this, $this->navigation, $this->nav(),PREFIX_URL); ?>
+            <?php if ($this->navigation == Ccsd_Website_Style::MENU_LIST || $this->navigation == Ccsd_Website_Style::MENU_ACCORDION) {?>
+        </div>
+        <div class="col-md-10">
+            <?php }?>
+            <div class="corps">
+                <?php if ($style->displayBreadCrumbs()) {
+                    echo $breadcrumbs = trim($this->render('common/breadcrumbs.phtml'));
+                    if ($breadcrumbs == '' && $layout->pageTitle != '') {
+                        ?>
+                        <ol class="breadcrumb">
+                            <li class="active"> <?php echo $layout->pageTitle; ?> </li>
+                            <?php if(!empty($layout->docLink)) { ?>
+                                <a href="<?php echo $layout->docLink; ?>" target="_blank" rel="noopener"><span class="glyphicon glyphicon-question-sign" style="float:right; font-size:22px;" data-toggle="tooltip" data-original-title="Documentation"></span></a>
+                            <?php }?>
+                        </ol>
+                    <?php }
+                } else {
+                    if ($layout->pageTitle != '') {
+                        $title = $layout->pageTitle;
+                    } else {
+                        $active = $this->nav()->findActive($this->nav()->getContainer());
+                        $title = $active ? $active['page']->getLabel() : '';
+                    }
+
+                    if (trim($title) != '') { ?>
+                        <h1><?php echo $this->translate($title);?></h1>
+                    <?php } ?>
+                <?php } ?>
+                <?php if ($layout->pageDescription != '') { ?>
+                    <blockquote><?php echo $layout->pageDescription;?></blockquote>
+                    <hr />
+                <?php } ?>
+                <div id="flash-messages">
+                    <?php
+                    echo $this->DisplayFlashMessages('danger', false);
+                    echo $this->DisplayFlashMessages('warning', true);
+                    echo $this->DisplayFlashMessages('success', true);
+                    echo $this->DisplayFlashMessages('info', true);
+                    ?>
+                </div>
+                <?php
+                // Développement : affichage des mails
+                if ( APPLICATION_ENV == ENV_DEV || APPLICATION_ENV == ENV_TEST || APPLICATION_ENV == ENV_PREPROD ) {
+                    $session = new Zend_Session_Namespace();
+                    if ( isset($session->mail) ) {
+                        if (! is_array($session->mail)) {
+                            $session->mail = array($session->mail);
+                        }
+                        foreach($session->mail as $mail) {
+                            if ($mail instanceof Hal_Mail) {
+                                $this->mail = $mail;
+                                echo $this->render('common/mail.phtml');
+                            }
+                        }
+                        unset($session->mail);
+                    }
+                }
+
+                echo $layout->content ;?>
+
+            </div>
+            <?php if ($this->displayErrors) {echo $this->render('common/errors.phtml');}?>
+        </div>
+    </div>
+    <?php if ( in_array(APPLICATION_ENV, [ENV_DEV, ENV_TEST]) ) { echo $this->render('common/debug.phtml'); } ?>
+</div>
+<?php echo $this->render('common/footer.phtml'); ?>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(document.body).tooltip({ selector: '[data-toggle="tooltip"]' , html: true, container: 'body'});
+    });
+</script>
+<?php
+//PIWIK
+$config = \Hal\Config::getInstance();
+$matomoHost = $config->getOption('matomo.host');
+$piwikId = Hal_Site::getCurrent()->getSetting('piwikid');
+echo \Hal\View\TrackerJS::getMatomoTracker($matomoHost, $piwikId);
+?>
+
+</body>
+</html>

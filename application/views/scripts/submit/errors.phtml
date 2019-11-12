@@ -1,0 +1,15 @@
+
+<?php
+    foreach ($this->errors as $name => $msgs) {
+
+        if (!is_array($msgs))
+            $msgs = [$msgs];
+
+        foreach ($msgs as $i => $msg) {
+
+?>
+    <p> <?php if(!is_int($name)) echo $this->translate ($name)." : ";?><?php echo $this->translate ($msg);?></p>
+<?php
+        }
+    }
+?>

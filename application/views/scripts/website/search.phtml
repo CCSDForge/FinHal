@@ -1,0 +1,25 @@
+<?php
+$this->jQuery()->addStylesheet(CCSDLIB . "/css/colorpicker.css")->addJavascriptFile(CCSDLIB . "/js/bootstrap-colorpicker.js")->addJavascriptFile(CCSDLIB . "/js/colorpicker.js");
+
+$this->layout()->pageDescription = $this->translate("Personnalisation des filtres de Recherche.");
+
+?>
+
+<form action="<?php echo PREFIX_URL ?>website/search" id="search" method="post">
+    <div class="row">
+
+        <?php
+        echo $this->render('search/ajaxfilters.phtml')
+        ?>
+    </div>
+    <div class="form-actions text-center">
+        <input type="submit" class="btn btn-primary" name="header" type="submit" value="<?php echo $this->translate("Enregistrer"); ?>">
+    </div>
+</form>
+
+<script>
+    $('body').on('click', '.checkall', function() {
+        $(this).closest('fieldset').find(':checkbox')
+            .prop('checked', this.checked);
+    });
+</script>

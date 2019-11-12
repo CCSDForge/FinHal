@@ -1,0 +1,24 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: bblondelle
+ * Date: 11/10/17
+ * Time: 14:27
+ */
+?>
+
+<div class="widget widget-openaccess">
+    <h3 class="widget-header"><?php echo $this->translate('Lien texte intégral') ?></h3>
+    <div class="widget-content">
+        <span>
+            <?php
+            /** @var Hal_Document $doc */
+            $doc = $this->document;
+            /** @var Hal_LinkExt $linkext */
+             $linkext = $doc->getMetaObj('LINKEXT'); ?>
+            <a href="<?php echo $linkext->getUrl() ?>" target="_blank" rel="noopener">
+                <img src="/img/logo-<?php echo $linkext->getIdSite()?>.png" alt="<?php echo $linkext->getIdSite()?>">
+            </a>
+        </span>
+    </div>
+</div>

@@ -1,0 +1,70 @@
+<?php if ($this->trouve < 0) { ?>
+    <div class="alert alert-danger">
+        <strong>
+            <i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;<?php echo $this->translate("Remplacement impossible"); ?>
+        </strong>
+    </div>
+<?php } ?>
+
+<div class='row'>
+    <?php if (isset ($this->oldstruct)) { ?>
+    <div class='col-md-6'>
+        <div class="panel panel-warning">
+            <div class="panel-heading">
+                <h5 class="panel-title"><?php echo $this->translate($this->name . "(s) fermée(s) :") ?></h5>
+            </div>
+            <div class="panel-body">
+                <?php
+                echo $this->oldstruct;
+                ?>
+            </div>
+        </div>
+    </div>
+    <?php }
+    if (isset ($this->newstruct)) { ?>
+    <div class='col-md-6'>
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h5 class="panel-title"><?php echo $this->translate($this->name . " conservée :") ?></h5>
+            </div>
+            <div class="panel-body">
+                <?php echo $this->newstruct ?>
+            </div>
+        </div>
+    </div>
+    <?php }?>
+</div>
+<hr/>
+<div class='row'>
+    <?php if (isset ($this->oldchild)) { ?>
+    <div class='col-md-6'>
+        <div class="panel panel-warning">
+            <div class="panel-heading">
+                <h5 class="panel-title"><?php echo $this->translate("Sous structure(s) fermée(s)/dupliquée(s)") ?></h5>
+            </div>
+            <div class="panel-body">
+                <?php
+                foreach ($this->oldchild as $obj)
+                    echo $obj;
+                ?>
+            </div>
+        </div>
+    </div>
+    <?php }
+    if (isset ($this->newchild)) { ?>
+    <div class='col-md-6'>
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h5 class="panel-title"><?php echo $this->translate($this->name . "(s) créée(s)/dupliquée(s) :") ?></h5>
+            </div>
+            <div class="panel-body">
+                <?php
+                foreach ($this->newchild as $obj)
+                    echo $obj;
+                ?>
+            </div>
+        </div>
+    </div>
+    <?php }?>
+</div>
+

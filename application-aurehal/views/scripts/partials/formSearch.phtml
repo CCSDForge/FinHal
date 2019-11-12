@@ -1,0 +1,16 @@
+<form method="get" action="<?php echo URL . '/' . $this->controllerName . "/browse" ?>">
+    <div class="input-group">
+        <?php
+        $critere = Zend_Controller_Front::getInstance()->getRequest()->getParam('critere');
+
+        echo new Zend_Form_Element_Text('critere', [
+            'class' => 'form-control',
+            'decorators' => [['ViewHelper']],
+            'value' => Ccsd_Tools::ifsetor($critere, "")
+        ])
+        ?>
+        <div class="input-group-btn">
+            <button class="btn btn-primary"><?php echo $this->translate("Rechercher") ?></button>
+        </div>
+    </div>
+</form>

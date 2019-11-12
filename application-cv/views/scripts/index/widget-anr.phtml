@@ -1,0 +1,38 @@
+<?php
+
+$anrs = $this->cv->getFacetAnr();
+if (count($anrs)) {
+    $anrids = isset($filters['anrProjectId_i']) && is_array($filters['anrProjectId_i']) ? array_keys($filters['anrProjectId_i']) : array();
+    $listPrinc = $listSec = '';
+    $count = 0;
+    foreach ($anrs as $anr) {
+        $link = $href;
+
+        if ((isset($anr['anrProjectId_i'])) && (in_array($anr['anrProjectId_i'], $anrids))) {
+            $filters['anrProjectId_i'][$anr['anrid']]['value'] = $anr['name'];
+        } else {
+            $link .= '/anrProjectId_i/' . urlencode($anr['anrid']);
+        }
+
+        $elem = '<li><a href="' . $link . '" >' . $anr['name'] . ' <span class="badge badge-default">' . $anr['nbdoc'] . '</span></a></li>';
+        if ($count < 10) {
+            $listPrinc .= $elem;
+        } else {
+            $listSec .= $elem;
+        }
+        $count ++;
+    }
+    $content = '<div class="anr">';
+    $content .= '   <ul>' . $listPrinc . '</ul>';
+    if ($listSec != '') {
+        $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste complète") . '</a></div>';
+        $content .= '</div>';
+        $content .= '<div class="anr-list" style="display:none;">';
+        $content .= '   <div class="overflow"><ul>' . $listPrinc . $listSec . '</ul></div>';
+        $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste principale") . '</a></div>';
+    }
+    $content .= '</div>';
+
+    echo $this->widget(array('title' => $this->translate('cv_widget_anr'), 'content' => $content, 'class' => 'widget-' . 'anr'));
+}
+

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cerif="http://www.eurocris.org/ontologies/cerif/1.3/">
+  <cerif:Project rdf:about="https://data.archives-ouvertes.fr/anrProject/1">
+    <cerif:title>Quelles interventions publiques et privées pour réduire l'utilisation des traitements phytosanitaires dans le secteur du vin ?</cerif:title>
+    <cerif:startDate>2005</cerif:startDate>
+    <cerif:abstract>Programme fédérateur Agriculture et Développement Durable</cerif:abstract>
+    <cerif:acronym>VIN</cerif:acronym>
+    <cerif:internalIdentifier>ANR-05-PADD-0001</cerif:internalIdentifier>
+  </cerif:Project>
+</rdf:RDF>

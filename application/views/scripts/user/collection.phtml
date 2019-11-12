@@ -1,0 +1,216 @@
+<?php
+/** @var Hal_View $this */
+$this->jQuery()
+    ->addJavascriptFile(CCSDLIB ."/js/jquery.dataTables.min.js")
+    ->addJavascriptFile(CCSDLIB ."/js/dataTables.bootstrap.js")
+    ->addStylesheet(CCSDLIB . '/css/dataTables.bootstrap.css');
+
+$this->layout()->breadcrumbs = $this->collection->getShortname();
+$halUser = new Hal_User();
+
+$fullcritere = Hal_Site_Collection::getFullCritere($this->collection->getSid());
+?>
+
+<h4><?php echo $this->collection->getShortName() ?><small> - <?php echo $this->collection->getFullname() ?></small></h4>
+<hr>
+<h5><?php echo $this->translate('Informations sur la collection'); ?></h5>
+<div class="row">
+    <div class="col-md-8">
+        <div class="well">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th><?php echo $this->translate('Information'); ?></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><?php echo $this->translate('Catégorie'); ?></td>
+                    <td><?php echo $this->collection->getCategory(); ?></td>
+                </tr>
+                <tr>
+                    <td><?php echo $this->translate('Gestionnaire de la collection'); ?></td>
+                    <td>
+                        <?php foreach ($this->collection->getTamponneurs() as $uid) {
+                            $halUser->find($uid);
+                            ?>
+                            <span class="label label-primary"><?php echo $halUser->getFullName();?></span>&nbsp;
+                        <?php } ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td><?php echo $this->translate('Mode de tamponnage'); ?></td>
+                    <td><?php echo ($this->collection->getMode() == Hal_Site_Settings_Collection::MODE_AUTO ? '<span class="label label-success">' . $this->translate($this->collection->getMode()) . '</span>' : $this->translate($this->collection->getMode())); ?></td>
+                </tr>
+                <tr>
+                    <td><?php echo $this->translate('Critère de la collection'); ?></td>
+                    <td><?php echo $this->collection->getCritere(); ?></td>
+                </tr>
+                <?php
+                /** @var Hal_Site_Collection[] $collectionsSup */
+                $collectionsSup = $this->collection->getParents();
+                if (count($collectionsSup) > 0) {
+                    ?>
+                    <tr>
+                        <td><?php echo $this->translate('Collections supérieures'); ?></td>
+                        <td>
+                            <?php foreach ($collectionsSup as $collectionSup) {?>
+                                <span class="label label-primary"><?php echo $collectionSup->getShortname();?></span>&nbsp;
+                            <?php } ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><?php echo $this->translate('Critère complet de la collection'); ?></td>
+                        <td><?php echo $fullcritere; ?></td>
+                    </tr>
+                <?php
+                } ?>
+                <?php
+                /** @var Hal_Site_Collection[] $collectionsInf */
+                $collectionsInf = $this->collection->getCollectionsInf();
+                if (count($collectionsInf) > 0) {
+                    ?>
+                    <tr>
+                        <td><?php echo $this->translate('Collections filles'); ?></td>
+                        <td>
+                            <?php foreach ($collectionsInf as $collectionInf) {?>
+                                <a href="/<?php echo $collectionInf['SITE'];?>" target="_blank" class="label label-default"><strong><?php echo $collectionInf['SITE'];?></strong> - <?php echo $collectionInf['NAME'];?></a>&nbsp;
+                            <?php } ?>
+                        </td>
+                    </tr>
+                    <?php
+                } ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-4 text-center">
+        <strong><?php echo $this->translate('Nombre de documents tamponnés'); ?></strong>
+        <?php
+        $graphData = array(array($this->translate('Type'), $this->translate('Documents')));
+        $nb = 0;
+        foreach ($this->collection->getNbDocTamponned() as $label => $nbDoc) {
+            $graphData[] = array($this->translate($label), $nbDoc);
+            $nb += $nbDoc;
+        }?>
+        <h2><span class="label label-primary"><?php echo $nb;?></span></h2>
+        <div id="graph" style=""></div>
+        <?php echo $this->chart(array('container' => 'graph', 'content' => $graphData, 'options' => array('legend' => array('position' => 'none'))), 'PieChart'); ?>
+        <hr />
+        <a href="<?php echo '/' . $this->collection->getShortname();?>" class="btn btn-primary" target="_blank"><i class="glyphicon glyphicon-globe"></i>&nbsp;<?php echo $this->translate('Accéder à la collection'); ?></a>
+        <br />
+        <br />
+        <a href="<?php echo '/' . $this->collection->getShortname() . '/stat/index' ;?>" class="btn btn-primary" target="_blank"><i class="glyphicon glyphicon-stats"></i>&nbsp;<?php echo $this->translate('Accéder aux statistiques'); ?></a>
+    </div>
+</div>
+
+<?php if ($fullcritere != '') { ?>
+    <h5><?php echo $this->translate('Liste des articles non encore tamponnés'); ?></h5>
+    <div class="well">
+        <div id="btn-doc-list">
+            <button class="btn btn-default" onclick="getDocToTamponnate(<?php echo $this->collection->getSid() ?>)"><i class="glyphicon glyphicon-eye-open"></i>&nbsp;<?php echo $this->translate('Voir la liste des articles non encore tamponnés correspondant au critère de tamponnage'); ?></button>
+        </div>
+        <div id="doc-list"></div>
+    </div>
+<?php } ?>
+
+<h5><?php echo $this->translate('Tamponnage / Détamponnage'); ?></h5>
+<div class="well">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="input-group">
+                <input type="text" class="form-control" id="doc" placeholder="<?php echo $this->translate('Identifiant du document (exemple hal-00000001v2, tel-00000001)'); ?>">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" onclick="getDocRef(<?php echo $this->collection->getSid() ?>)"><i class="glyphicon glyphicon-search"></i></button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div id="doc-ref" style="display:none;"></div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function(){
+
+    });
+
+    function getDocRef(sid)
+    {
+        $.ajax({
+            url: "/collection/ajaxgetdoc",
+            method: "post",
+            data: {'doc': $('#doc').val(), 'sid':sid},
+            success: function(data) {
+                $('#doc-ref').html(data).show();
+            }
+        });
+    }
+
+    function getDocToTamponnate(sid)
+    {
+        $.ajax({
+            url: "/collection/ajaxgetdoctotamponnate",
+            method: "post",
+            data: {'sid': sid},
+            success: function(data) {
+                $('#doc-list').html(data).show();
+                $('#btn-doc-list').hide();
+            }
+        });
+    }
+
+    function addTampon(docid, sid)
+    {
+        if (docid == 0) {
+            docid = [];
+            $('#documents .doc-check:checked').each(function() {
+                docid.push($(this).val());
+            });
+        }
+        $.ajax({
+            url: "/collection/add",
+            method: "post",
+            data: {'docid': docid, sid : sid},
+            success: function(data) {
+                if ($.isArray(docid)) {
+                    $.each(docid, function( index, value ) {
+                        $('.doc-' + value).remove();
+                    });
+                } else {
+                    $('.doc-' + docid).remove();
+                }
+                if ($('#documents .doc-check').length == 0) {
+                    $('#doc-list').hide();
+                    $('#btn-doc-list').show();
+                }
+            }
+        });
+    }
+
+    function delTampon(docid,sid)
+    {
+        $.ajax({
+            url: "/collection/del",
+            method: "post",
+            data: {'docid': docid, sid : sid},
+            success: function(data) {
+                $('.doc-' + docid).remove();
+            }
+        });
+    }
+
+    function hideFromCollection(docid,sid)
+    {
+        $.ajax({
+            url: "/collection/hide",
+            method: "post",
+            data: {'docid': docid, sid : sid},
+            success: function(data) {
+                $('.doc-' + docid).find('a[data-toggle="tooltip"]').tooltip('hide');
+                $('.doc-' + docid).remove();
+            }
+        });
+    }
+</script>

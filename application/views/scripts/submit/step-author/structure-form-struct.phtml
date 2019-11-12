@@ -1,0 +1,86 @@
+<?php
+/* @var $form Ccsd_Form*/
+
+$populate = !empty($this->structure->toArray()['STRUCTNAME']);
+
+$form = $this->structure->getForm(true, $populate);
+$form->removeElement('SDATE');
+$form->removeElement('EDATE');
+
+
+$form->setAttrib('class', 'form');
+$form->getElement('TYPESTRUCT')->setAttrib('onchange', 'changeStructureType(this)');
+$form->removeElement('code');
+
+/* @var $elem Zend_Form_Element*/
+foreach ($form->getElements() as $elem) {
+    $class = $elem->getAttrib('class') . ' ' . $elem->getName();
+    $elem->setAttrib('class', $class);
+
+}
+$form->removeDecorator('Form');
+if (! isset($structidCannotDelete)) {
+    $structidCannotDelete = array();
+}
+
+if (! $this->structure->isValid()) {
+    $form->getElement('STRUCTID')->setValue('');
+}
+
+
+/**
+ * on ne peut pas supprimer
+ * - la 1ere structure
+ * - les structures valides
+ */
+$canDelete = (isset($this->isFirst) && !$this->isFirst) &&
+    (($this->structure->getStructid() == 0 && !$this->structure->isValid()) ||
+     (! in_array($this->structure->getStructid(), $structidCannotDelete)));
+
+if ($this->structure->getStructid() != 0 && $this->structure->isValid()) {
+    //Structure valide on ne peut pas supprimer les parents
+
+    foreach ($this->structure->getParents() as $parent) {
+        $structidCannotDelete[] = $parent['struct']->getStructid();
+    }
+
+}
+$class = (isset($this->isFirst) && !$this->isFirst) ? 'list-group-item' : '';
+?>
+<li class="<?php echo $class ?> new-struct">
+    <div class="new-struct-item">
+        <div class="new-struct-label">
+            <span class="label label-default"></span>&nbsp;
+            <span class="text"><?php echo $form->getElement('STRUCTNAME')->getValue();?></span>
+            <input type="text" name="code" value="<?php echo $this->code;?>" placeholder="<?php echo $this->translate('Code (UMR, EA, ...)');?>"/>
+            <span class="actions structure-icons">
+                <a href="javascript:void(0)" onclick="linkStructure(this);" class="addstruct"><i class="glyphicon glyphicon-plus"></i></a>
+                <a href="javascript:void(0)" onclick="viewStructureForm(this);" class="editstruct"><i class="glyphicon glyphicon-pencil"></i></a>
+                <a href="javascript:void(0)" onclick="$(this).closest('.new-struct').remove();" <?php echo ($canDelete ? '' : 'style="display:none"'); ?> class="delstruct"><i class="glyphicon glyphicon-trash"></i></a>
+            </span>
+        </div>
+        <div class="new-struct-form">
+            <?php echo $form; ?>
+            <div class="form-group row">
+                <label class="col-md-3"></label>
+                <div class="col-md-9">
+                    <button type="button" class="btn btn-default btn-editstruct" onclick="editStructure(this)"><?php echo $this->translate('Ajouter') ?></button>
+                    <button type="button" class="btn btn-default addstruct" onclick="linkStructure(this)"><i class="glyphicon glyphicon-plus"></i>&nbsp;<?php echo $this->translate('Lier une structure') ?></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="struct-group"></div>
+    <ul class="list-group new-struct-parent">
+        <?php
+
+        foreach ($this->structure->getParents() as $parent) {
+            $this->structure = $parent['struct'];
+            
+            $this->code = $parent['code'];
+            $this->isFirst = false;
+            include __DIR__ . '/structure-form-struct.phtml';
+        }
+        ?>
+    </ul>
+</li>

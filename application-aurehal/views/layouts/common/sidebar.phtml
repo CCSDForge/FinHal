@@ -1,0 +1,9 @@
+<div class="list-group">
+    <?php 
+    /* @var $page Zend_Navigation_Page_Mvc */
+    	foreach ($this->nav()->getPages() as $page) {
+        $active = $page->isActive(true) || $page->getController() == Zend_Controller_Front::getInstance()->getRequest()->getControllerName();
+        ?>
+        <a href="<?php echo $this->pagelink($page) ?>" class="list-group-item <?php echo $active ? 'active' : ''?>"><?php echo $this->translate($page->getLabel())?></a>
+    <?php } ?>
+</div>

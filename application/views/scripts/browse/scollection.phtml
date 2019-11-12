@@ -1,0 +1,23 @@
+<?php
+
+if ($this->collections) {
+    $nbGroup = count($this->collections) ;
+
+    foreach($this->collections as $group => $collections) {
+        if ($nbGroup > 1) {
+            ?>
+                <h3><?php echo $this->translate($group) ?></h3>
+            <?php
+        }
+        ?>
+        <ul class="list-group">
+            <?php foreach($collections as $tampid => $libelle) { ?>
+                <li class="list-group-item">
+                    <a href="/<?php echo $tampid?>"><?php echo $libelle?></a>
+                </li>
+            <?php } ?>
+        </ul>
+        <?php
+    }
+
+}

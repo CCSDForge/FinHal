@@ -1,0 +1,71 @@
+<?php
+/** @var Hal_View $this */
+echo $this->doctype('XHTML1_RDFA'); ?>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="<?php echo Zend_Registry::get('Zend_Locale')->getLanguage(); ?>">
+<head>
+    <?php if(APPLICATION_ENV != ENV_PROD) : ?>
+        <meta name="robots" content="noindex">
+    <?php endif; ?>
+    <?php
+        echo $this->headTitle($this->layout()->pageTitle).PHP_EOL;
+    ?>
+    <meta charset="utf-8">
+    <meta name="description" content="Publication and online CV from HAL">
+    <meta name="author" content="HAL">
+    <?php
+        
+    $this->jQuery()
+    ->addJavascriptFile(CCSDLIB . "/v3/js/bootstrap.min.js");
+    $this->headLink(['rel'=>'icon', 'type'=>'type/png', 'href'=>'/img/favicon.png']);
+    $this->headLink()->prependStylesheet(CCSDLIB . "/css/ccsd.css");
+    $this->headLink()->prependStylesheet(CCSDLIB . "/v3/css/bootstrap.min.css");
+        
+    echo $this->jQuery()
+    ->setLocalPath(CCSDLIB . '/js/jquery/min.1.9.1.js')
+    ->enable();
+
+    echo $this->headLink();
+    echo $this->headStyle();
+    ?>
+    <script type="text/javascript"
+            src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_HTMLorMML"></script>
+    <script type='text/x-mathjax-config'>
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['$$','$$']]}});
+    </script>
+
+
+
+    <?php if (APPLICATION_ENV == ENV_PROD) : ?>
+    <!-- Matomo -->
+    <script type="text/javascript">
+        var _paq = _paq || [];
+        /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+        _paq.push(['trackPageView']);
+        _paq.push(['enableLinkTracking']);
+        (function() {
+            var u="//piwik-hal.ccsd.cnrs.fr/";
+            _paq.push(['setTrackerUrl', u+'piwik.php']);
+            _paq.push(['setSiteId', '259']);
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+        })();
+    </script>
+    <noscript><p><img src="//piwik-hal.ccsd.cnrs.fr/piwik.php?idsite=259&amp;rec=1" style="border:0;" alt="" /></p></noscript>
+    <!-- End Matomo Code -->
+    <?php endif; ?>
+
+
+</head>
+<body>
+<?php $this->navbar(true, array('languages' =>  Zend_Registry::get('languages'), 'lang' => Zend_Registry::get('lang')), true, ['isLogged'=>Hal_Auth::isLogged()]); ?>
+    <div class="container" id="container">
+        <?php echo $this->layout()->content ;?>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(document.body).tooltip({ selector: '[data-toggle="tooltip"]' , html: true, container: 'body'});
+        });
+    </script>
+
+</body>
+</html>

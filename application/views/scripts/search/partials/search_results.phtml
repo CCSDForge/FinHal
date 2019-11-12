@@ -1,0 +1,196 @@
+<?php
+$this->declareVars ( array (
+    'parsedSearchParams' => array ()
+) );
+
+// supprime le nombre de page dans l'url si c'est le meme que par défaut
+
+if ((isset ( $this->parsedSearchParams ['rows'] )) and ($this->parsedSearchParams ['rows'] == $this->paginatordefaultNumberOfResults)) {
+    unset ( $this->parsedSearchParams ['rows'] );
+}
+?>
+
+<br />
+<div id="saveSuccess" class="alert alert-success" style="display: none;">
+    <?php  echo $this->translate("Enregistrement réussi"); ?>
+    <a href="<?php echo $this->url(array('controller'=> 'user', 'action'=> 'search')); ?>"><?php  echo $this->translate("Mes recherches enregistrées / mes alertes"); ?></a>
+</div>
+<div id="saveFail" class="alert alert-error" style="display: none;">
+    <?php  echo $this->translate("Une erreur est survenue lors de l'enregistrement"); ?>
+</div>
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th style="width: 15px; vertical-align: middle;"><input
+                    class="select-all checkbox-docid" data-toggle="tooltip" data-placement="left"
+                    data-original-title="<?php echo $this->translate('Sélectionner tous les documents'); ?>"
+                    type="checkbox" id="select-all-head" /></th>
+        <th style="vertical-align: middle; text-align: left;">
+
+            <?php
+
+            if ($this->paginator) {
+                echo $this->paginationControl ( $this->paginator, 'Sliding', 'partials/search_pagination.phtml', array (
+                    'parsedSearchParams' => $this->parsedSearchParams
+                ) );
+            }
+
+            ?>
+
+
+
+        <th style="vertical-align: middle; text-align: right;">
+            <div class="btn-group">
+
+                <?php
+                include 'search_sort.phtml';
+                include 'search_rows.phtml';
+                include 'search_tools.phtml';
+                ?>
+            </div>
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($this->results as $doc) : ?>
+        <tr>
+            <td style="vertical-align: middle"><input name="docid[]"
+                                                      id="docid_<?php echo $doc->docid; ?>" value="<?php echo $doc->docid; ?>"
+                                                      type="checkbox" class="checkbox-docid" /></td>
+            <td colspan="2">
+
+                <?php echo $doc->label_coins; ?>
+
+                <?php if ($doc->thumbId_i != 0) : ?>
+                <div class="media">
+                    <a class="pull-left"
+                       href="<?php echo  strtoupper(PREFIX_URL) . $this->escape($doc->halId_s) . 'v' . $doc->version_i; ?>">
+                        <img class="media-object img-thumbnail" style="width: 50px;"
+                             src="<?php echo THUMB_URL . '/' . $this->escape($doc->thumbId_i) ; ?>/thumb"
+                             alt="...">
+                    </a>
+                    <div class="media-body">
+                        <?php else: ?>
+                            <div>
+                                <?php endif; ?>
+                                <a
+                                        href="<?php echo  strtoupper(PREFIX_URL) . $this->escape($doc->halId_s) . 'v' . $doc->version_i; ?>"
+                                        data-toggle="tooltip" data-placement="bottom"
+                                        title="<?php echo $this->translate('Voir la ressource'); ?>" class="ref-halid"><?php echo $this->escape($doc->halId_s) . '<small>v' . $doc->version_i . '</small>'; ?></a>
+                                &nbsp;<span
+                                        class="<?php echo Hal_Settings::getLabelClassName($doc->docType_s); ?>"><?php echo $this->translate('typdoc_' . $doc->docType_s); ?></span>
+                                <br>
+                                <?php
+
+                                if ($doc->authIdHalFullName_fs) {
+
+                                    $authorSeparator = ',&nbsp;';
+                                    $nbAuthorsInDoc = count ( $doc->authIdHalFullName_fs );
+                                    $maxNumberOfAuthors = 5;
+                                    $outputFormat = '<a rel="nofollow" data-toggle="tooltip" data-placement="bottom" title="' . $this->translate("Documents de l'auteur") . '" href="%s">%s</a>';
+                                    $arrayOfAuthorsWithURL = [] ;
+
+                                    $arrayOfAuthors = array_slice ( $doc->authIdHalFullName_fs, 0, $maxNumberOfAuthors );
+
+                                    foreach ( $arrayOfAuthors as $author ) {
+                                        $tab = '';
+                                        $tab = Ccsd_Search_Solr::facetStringResultAsArray ( $author );
+
+                                        if ($tab [0] == '') {
+                                            $tab [0] = $tab [1];
+                                            $searchField = 'authFullName_s';
+                                        } else {
+                                            $searchField = 'authIdHal_s';
+                                        }
+
+                                        $url = $this->url ( array (
+                                            'controller' => 'search',
+                                            'action' => 'index',
+                                            'q' => '*',
+                                            $searchField => $this->escape ( $tab [0] )
+                                        ), null, TRUE );
+
+                                        $arrayOfAuthorsWithURL [] = sprintf ( $outputFormat, $url, $tab [1] );
+                                    }
+
+                                    $authorList = implode ( $authorSeparator, $arrayOfAuthorsWithURL );
+
+                                    if ($nbAuthorsInDoc > count ( $arrayOfAuthorsWithURL )) {
+                                        $authorList .= ' <i>et al.</i> ';
+                                    } else {
+                                        $authorList = trim ( $authorList, '.' ) . '.';
+                                    }
+                                    echo '<span class="ref-authors">' . $authorList . '</span>';
+                                }
+                                echo '&nbsp;<strong><a href="' . strtoupper ( PREFIX_URL ) . $this->escape ( $doc->halId_s ) . '" data-toggle="tooltip" data-placement="bottom" title="' . $this->translate ( 'Voir la ressource' ) . '">';
+                                echo $doc->title_s [0] . '</a></strong>';
+
+                                echo '<br/>';
+                                echo $doc->citationRef_s;
+                                echo ' ';
+                                if (isset($doc->linkExtUrl_s) && $doc->thumbId_i == 0) { //Vérifie qu'un lien vers texte intégral existe et que le document n'a pas de fichier
+                                    echo '<a href="' . $doc->linkExtUrl_s . '" style="text-decoration: none;">';
+                                    echo '<img src="/img/logo-'. $doc->linkExtId_s. '.png" title="'. $doc->linkExtId_s .'" height="18px" />';
+                                }
+                                ?>
+                            </div>
+                    </div>
+            </td>
+        </tr>
+
+    <?php endforeach; // end results ?>
+    </tbody>
+    <tfoot>
+    <tr>
+        <th style="width: 15px; vertical-align: middle;"><input data-toggle="tooltip"
+                                                                data-placement="left"
+                                                                data-original-title="<?php echo $this->translate('Sélectionner tous les documents'); ?>"
+                                                                type="checkbox" id="select-all-foot" class="select-all checkbox-docid" /></th>
+        <th style="vertical-align: middle; text-align: left;">
+            <?php
+            if ($this->paginator) {
+                echo $this->paginationControl ( $this->paginator, 'Sliding', 'partials/search_pagination.phtml', array (
+                    'parsedSearchParams' => $this->parsedSearchParams
+                ) );
+            }
+
+            ?>
+        </th>
+        <th style="vertical-align: middle; text-align: right;">
+            <div class="btn-group">
+
+                <?php
+                include 'search_sort.phtml';
+                include 'search_rows.phtml';
+                include 'search_tools.phtml';
+                ?>
+            </div>
+        </th>
+    </tr>
+    </tfoot>
+</table>
+<!-- </form> -->
+<div id="popupSaveSearch" class="popover fade in" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-body" style="width: 500px; padding: 10px 0px;">
+        <form id="formSaveSearch" style="height: 34px;">
+            <div class="pull-right" style="padding-left: 10px;">
+                <button id="saveSearchButton" class="btn btn-primary" type="button"
+                        onclick="saveSearch();return false;"><?php echo $this->translate("Enregistrer"); ?></button>
+                <button id="cancelSaveSearchButton" class="btn btn-default" type="button"
+                        onclick="$('#saveResult').popover('hide');return false;"><?php echo $this->translate("Annuler"); ?></button>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon"><?php echo $this->translate('Libellé'); ?></span> <input
+                        id="lib" class="form-control required" type="text" name="lib"
+                        placeholder="<?php echo $this->translate('ex : Ma recherche'); ?>">
+            </div>
+            <input type="hidden" name="url"
+                   value="<?php echo $this->escape($this->mySearch->url); ?>" /> <input type="hidden"
+                                                                                        name="url_api" value="<?php echo $this->escape($this->mySearch->url_api); ?>" />
+            <div class="form-error alert alert-danger">
+                <?php echo $this->translate("Des champs obligatoires n'ont pas été remplis."); ?>
+            </div>
+        </form>
+    </div>
+</div>

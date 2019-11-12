@@ -1,0 +1,28 @@
+@CHARSET "UTF-8";
+.footer {
+    background: url(/img/footer-bg.jpg) no-repeat 10px 10px #9a9b9c;
+    height: 140px;
+    margin-top: 30px;
+}
+.footer .footer-contact {
+    margin-left: 300px;
+    padding-top: 25px;
+}
+.footer .footer-contact h4, .footer .footer-contact a {
+    color: #dadadb;
+}
+.footer .footer-contact h4 {
+    text-transform: uppercase;
+    font-weight: normal;
+}
+.footer .footer-ccsd {
+    float: right;
+    margin-top: -70px;
+    margin-right: 50px;
+}
+
+
+code {
+	color:black;
+	white-space: normal;
+}

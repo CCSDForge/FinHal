@@ -1,0 +1,110 @@
+<?php
+$this->layout()->pageDescription = $this->translate("Liste des collections de l'archive HAL");
+?>
+
+<form action="/collection/list" method="post" id="form-collection-list">
+    <div class="form-actions">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="q" value="<?php echo $this->q ?>" id="q" autocomplete="off"/>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="submit">
+                            <i class="icon glyphicon glyphicon-search"></i>&nbsp;<?php echo $this->translate('Rechercher') ?>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <a href="/collection/create" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i>&nbsp;<?php echo $this->translate('Créer une collection') ?></a>
+                <?php if ($this->isHalAdmin) { ?>
+                <a href="/collection/duplicate" class="btn btn-default">&nbsp;<?php echo $this->translate('Dupliquer une collection') ?></a>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+</form>
+
+<?php
+if (count($this->collections)) {
+    if (count($this->collections) > 20) {
+        $this->jQuery()
+            ->addJavascriptFile(CCSDLIB ."/js/jquery.dataTables.min.js")
+            ->addJavascriptFile(CCSDLIB ."/js/dataTables.bootstrap.js")
+            ->addStylesheet(CCSDLIB . '/css/dataTables.bootstrap.css');
+        ?>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#list-collections').dataTable({
+                 "iDisplayLength": 20,
+                 "bLengthChange":false
+                 });
+            });
+        </script>
+        <?php
+    }
+    $halUser = new Hal_User();
+    $users = array();
+    ?>
+    <table class="table table-hover" id="list-collections">
+        <thead>
+        <tr>
+            <th width="100px"></th>
+            <th><?php echo $this->translate('Collection'); ?></th>
+            <th><?php echo $this->translate('Gestionnaires de collection'); ?></th>
+            <th width="100px" style="text-align:right;"><?php echo $this->translate('Actions'); ?></th>
+        </tr>
+        </thead>
+        <tbody>
+            <?php foreach($this->collections as $collection) {
+                $halCollection = Hal_Site::loadSiteFromId($collection['SID']);
+                $mode = $halCollection -> getMode();
+                // $mode = Hal_Site_Collection::getCollectionMode($collection['SID']);
+                ?>
+                <tr>
+                    <td align="center"  class="middle"><i class="glyphicon glyphicon-tag" style="font-size: 30px;line-height:70px;"></i></td>
+                    <td class="middle">
+                        <h4><?php echo $collection['SITE'] ?><small> - <?php echo $collection['NAME'] ?></small></h4>
+                        <blockquote><?php echo $this->translate('Date de création'); ?> : <?php echo $collection['DATE_CREATION'] ?>
+                            <small><?php echo $this->translate('Catégorie'); ?> : <?php echo $collection['CATEGORY'] ?></small>
+                            <small><?php echo $this->translate('Mode'); ?> : <?php echo ($mode == Hal_Site_Settings_Collection::MODE_AUTO ? '<span class="label label-success">' . $this->translate($mode) . '</span>' : $this->translate($mode)) ?></small>
+                        </blockquote>
+                    </td>
+                    <td class="middle">
+                        <?php foreach ($halCollection->getTamponneurs() as $uid) {
+                            if (! isset($users[$uid])) {
+                                $halUser->find($uid);
+                                $users[$uid] = $halUser->getFullName();
+                            }
+                            ?>
+                            <span class="label label-primary"><?php echo $users[$uid];?></span>&nbsp;
+                        <?php } ?>
+                    </td>
+                    <?php $url = $collection['URL'] != '' ? $collection['URL'] : PREFIX_URL . $collection['SITE'];?>
+                    <td class="middle" style="text-align:right">
+                        <a href="<?php echo $url ?>" data-toggle="tooltip" title="<?php echo $this->translate('Consulter')?>"><i class="glyphicon glyphicon-eye-open"></i></a>
+                        <a href="/collection/create/tampid/<?php echo $collection['SITE']; ?>" data-toggle="tooltip" title="<?php echo $this->translate('Modifier')?>"><i class="glyphicon glyphicon-pencil"></i></a>
+                        <?php if ($this->isHalAdmin) { ?>
+                            <a href="/collection/delete/tampid/<?php echo $collection['SITE']; ?>" data-toggle="tooltip" title="<?php echo $this->translate('Supprimer')?>"><i class="glyphicon glyphicon-trash"></i></a>
+                        <?php } ?>
+                    </td>
+                </tr>
+            <?php } ?>
+        </tbody>
+    </table>
+<?php } ?>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#q').autocomplete({
+            minLength: 2,
+            html: true,
+            source: "/administrate/ajaxsearchcollection",
+            select: function( event, ui ) {
+                $('#q').val(ui.item.id);
+                $('#form-collection-list').submit();
+                return false;
+            }
+        });
+    });
+</script>

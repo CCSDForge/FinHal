@@ -1,0 +1,15 @@
+
+<fieldset class="well well-small" id="profil_<?php echo $this->name ?>" >
+    <legend style="border: none;">
+        <?php echo $this->translate($this->element->getLegend()); ?>
+    </legend>
+    <blockquote class="description"><?php echo $this->translate($this->element->getDescription()); ?></blockquote>
+    <?php
+
+    $decorator = new Ccsd_Form_Decorator_FormElements();
+    $decorator->setElement($this->element);
+
+    echo $decorator->render("");
+
+    ?>
+</fieldset>

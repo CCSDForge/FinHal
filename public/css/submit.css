@@ -1,0 +1,1427 @@
+/* line 5, ../scss/submit/_step-file.scss */
+#identifiertype {
+  height: 40px;
+}
+
+/* line 9, ../scss/submit/_step-file.scss */
+#identifier-input {
+  height: 40px;
+}
+
+/* line 13, ../scss/submit/_step-file.scss */
+#metaButton {
+  height: 40px;
+  margin: 0 auto;
+}
+
+/* line 19, ../scss/submit/_step-file.scss */
+#idtype-menu {
+  cursor: pointer;
+  font-size: 12px;
+  text-align: left;
+  padding: 10px;
+}
+
+/* line 26, ../scss/submit/_step-file.scss */
+#demo-upload, #id-zone {
+  border: 2px dashed #ddd;
+  background: #fdfdfd;
+}
+
+/* line 30, ../scss/submit/_step-file.scss */
+#id-zone {
+  border: 2px solid #ddd;
+  vertical-align: middle;
+  height: 300px;
+  padding: 25px 25px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+/* line 39, ../scss/submit/_step-file.scss */
+#file-zone {
+  padding: 20px 20px 20px 20px;
+  /*max-width: 80%;*/
+  text-align: center;
+}
+
+/* line 45, ../scss/submit/_step-file.scss */
+#demo-upload {
+  height: 300px;
+  overflow-y: auto;
+}
+
+/* line 50, ../scss/submit/_step-file.scss */
+#idext-zone {
+  padding: 0px 15px 0px 15px;
+}
+
+/* line 54, ../scss/submit/_step-file.scss */
+#id-zone-detailed {
+  vertical-align: middle;
+  border: 2px solid #ddd;
+  padding: 5px 5px;
+  border-radius: 5px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* line 64, ../scss/submit/_step-file.scss */
+.file-details {
+  margin-left: 20px;
+  border-left: 2px solid #dddddd;
+  margin-top: 10px;
+  display: none;
+}
+
+/* line 71, ../scss/submit/_step-file.scss */
+.file-size {
+  font-size: smaller;
+  font-style: italic;
+}
+
+/* line 76, ../scss/submit/_step-file.scss */
+#search-message {
+  z-index: 1500;
+  opacity: 1;
+  border-left: 2px solid black;
+  border-bottom: 2px solid black;
+  border-right: 2px solid black;
+  text-align: center;
+  position: absolute;
+  top: 4px;
+  left: 25%;
+  height: 50%;
+  width: 50%;
+  margin: 0 auto;
+  background-color: white;
+  display: none;
+}
+
+/* line 94, ../scss/submit/_step-file.scss */
+.dz-progress {
+  display: none !important;
+}
+
+/* line 96, ../scss/submit/_step-file.scss */
+.dz-success-mark {
+  display: none !important;
+}
+
+/* line 98, ../scss/submit/_step-file.scss */
+.dz-error-mark {
+  display: none !important;
+}
+
+/* line 100, ../scss/submit/_step-file.scss */
+.dropzone.dz-clickable * {
+  cursor: pointer !important;
+}
+
+/* line 104, ../scss/submit/_step-file.scss */
+.dropzone .dz-preview .dz-details .glyphicon-file {
+  position: absolute;
+  top: 60%;
+  left: 15%;
+  font-size: 20px;
+}
+
+/* line 110, ../scss/submit/_step-file.scss */
+.dropzone .dz-preview .dz-details .glyphicon-trash {
+  position: absolute;
+  top: 60%;
+  left: 70%;
+  font-size: 20px;
+}
+
+/* line 117, ../scss/submit/_step-file.scss */
+.dropzone {
+  text-align: center;
+}
+
+/* line 121, ../scss/submit/_step-file.scss */
+#files input {
+  margin-bottom: 0px;
+}
+
+/* line 124, ../scss/submit/_step-file.scss */
+.popover {
+  max-width: 500px;
+  width: 500px;
+}
+
+/* line 129, ../scss/submit/_step-file.scss */
+#files {
+  width: 100%;
+}
+
+/* line 133, ../scss/submit/_step-file.scss */
+#div-files {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+/* line 137, ../scss/submit/_step-file.scss */
+#div-files > div.overflow {
+  overflow: auto;
+  max-height: 400px;
+}
+
+/* line 141, ../scss/submit/_step-file.scss */
+#div-files > div.compile {
+  margin: 10px;
+}
+
+/* line 144, ../scss/submit/_step-file.scss */
+.select-small {
+  height: 20px;
+  line-height: 20px;
+  font-size: 12px;
+  width: 100px;
+}
+
+/* line 150, ../scss/submit/_step-file.scss */
+.file-origin div, .file-licence div {
+  padding-left: 20px;
+}
+
+/* line 153, ../scss/submit/_step-file.scss */
+.file-origin input {
+  float: left;
+  margin-right: 10px;
+}
+
+/* line 157, ../scss/submit/_step-file.scss */
+.file-licence input {
+  margin-top: -3px;
+  margin-right: 10px;
+}
+
+/* line 162, ../scss/submit/_step-file.scss */
+.file-licence hr {
+  border-top: 1px solid #fbeed5;
+}
+
+/* line 166, ../scss/submit/_step-file.scss */
+.file-row {
+  padding-top: 5px;
+}
+
+/* line 170, ../scss/submit/_step-file.scss */
+.file-row-detail {
+  display: inline-block;
+  width: 15px;
+}
+
+/* line 175, ../scss/submit/_step-file.scss */
+.file-comments {
+  text-align: right;
+  padding-top: 15px;
+}
+
+/* line 180, ../scss/submit/_step-file.scss */
+.detailed-view-transfer {
+  margin-top: 30px;
+  padding: 15px;
+  border: 2px dashed #ddd;
+}
+
+/* line 186, ../scss/submit/_step-file.scss */
+#transfer-title {
+  text-align: center;
+}
+
+/* line 190, ../scss/submit/_step-file.scss */
+#ftp {
+  display: none;
+  height: 200px;
+  overflow: auto;
+  width: 300px;
+}
+
+/* line 197, ../scss/submit/_step-file.scss */
+#ftp-list {
+  height: 200px;
+  overflow: auto;
+}
+
+/* line 202, ../scss/submit/_step-file.scss */
+.compile {
+  display: none;
+}
+
+/* line 206, ../scss/submit/_step-file.scss */
+#id-info {
+  font-style: italic;
+  font-size: 11px;
+}
+
+/* line 211, ../scss/submit/_step-file.scss */
+#id-frame {
+  height: 50px;
+}
+
+/* line 215, ../scss/submit/_step-file.scss */
+#idurl {
+  font-style: italic;
+}
+
+/* line 219, ../scss/submit/_step-file.scss */
+#metaButton {
+  margin: 0 auto;
+}
+
+/* line 223, ../scss/submit/_step-file.scss */
+#error-zone-file {
+  display: none;
+}
+
+/* line 227, ../scss/submit/_step-file.scss */
+#submit-file-header {
+  font-style: italic;
+  float: left;
+  margin-top: 15px;
+}
+
+/* line 233, ../scss/submit/_step-file.scss */
+#step-file-footer {
+  font-style: italic;
+  float: right;
+  margin-top: 15px;
+}
+
+/* line 239, ../scss/submit/_step-file.scss */
+.success-icon-ok {
+  margin-right: 10px;
+  font-size: 15px;
+  color: #468847;
+  text-align: left;
+}
+
+/* line 246, ../scss/submit/_step-file.scss */
+#modal-success-msg {
+  font-size: 17px;
+}
+
+/* line 250, ../scss/submit/_step-file.scss */
+#success-msg-title {
+  color: inherit;
+  text-align: center;
+  float: left;
+}
+
+/* line 256, ../scss/submit/_step-file.scss */
+.remove-x {
+  float: right;
+  font-size: 15px;
+}
+
+/* line 261, ../scss/submit/_step-file.scss */
+.success-comment {
+  font-style: italic;
+  font-size: 12px;
+}
+
+/* line 266, ../scss/submit/_step-file.scss */
+.center-url {
+  text-align: center;
+}
+
+/* line 270, ../scss/submit/_step-file.scss */
+.list-display {
+  display: list-item;
+}
+
+/* line 274, ../scss/submit/_step-file.scss */
+.success-icon-ko {
+  margin-right: 10px;
+  font-size: 15px;
+  color: red;
+  text-align: left;
+}
+
+/* line 281, ../scss/submit/_step-file.scss */
+.success-msg-button {
+  text-align: right;
+  width: 100%;
+  font-size: 15px;
+  padding-right: 15px;
+  padding-bottom: 15px;
+}
+
+/* line 289, ../scss/submit/_step-file.scss */
+.mainRadio {
+  margin-right: 4px;
+  float: left;
+  margin-top: 0px !important;
+}
+
+/* line 295, ../scss/submit/_step-file.scss */
+.filename-link {
+  float: left;
+}
+
+/* line 299, ../scss/submit/_step-file.scss */
+#error-zone-file {
+  margin-top: 20px;
+}
+
+/* line 303, ../scss/submit/_step-file.scss */
+.li-file {
+  background: #f5f5f5;
+}
+
+/* line 1, ../scss/submit/_step-meta.scss */
+#form_meta label {
+  font-weight: normal;
+}
+
+/* line 4, ../scss/submit/_step-meta.scss */
+#form_meta label.required {
+  font-weight: bold;
+}
+
+/* line 8, ../scss/submit/_step-meta.scss */
+#iconMetas {
+  font-size: 14px;
+}
+
+/* line 12, ../scss/submit/_step-meta.scss */
+#iconMetas.glyphicon-ok, .green {
+  color: #3A9D23;
+}
+
+/* line 16, ../scss/submit/_step-meta.scss */
+#iconMetas.glyphicon-remove, .red {
+  color: #CF0A1D;
+}
+
+/* line 20, ../scss/submit/_step-meta.scss */
+#panel-body-meta input[type='checkbox'] {
+  width: auto;
+}
+
+/* line 24, ../scss/submit/_step-meta.scss */
+#error-zone-meta {
+  display: none;
+}
+
+/* line 28, ../scss/submit/_step-meta.scss */
+#meta-footer-note {
+  font-style: italic;
+  margin-top: 15px;
+}
+
+/* line 33, ../scss/submit/_step-meta.scss */
+#map {
+  padding-bottom: 20px;
+}
+
+/* line 37, ../scss/submit/_step-meta.scss */
+#map-canvas {
+  width: 100%;
+  height: 350px;
+  display: block;
+}
+
+/* line 43, ../scss/submit/_step-meta.scss */
+#error-zone-meta {
+  margin-top: 20px;
+}
+
+/* line 1, ../scss/submit/_step-author.scss */
+.aut_new {
+  width: 500px;
+}
+
+/* line 5, ../scss/submit/_step-author.scss */
+.authors-list {
+  height: 200px;
+  overflow: auto;
+}
+
+/* line 10, ../scss/submit/_step-author.scss */
+.add-author-label {
+  font-size: 13px;
+}
+
+/* line 14, ../scss/submit/_step-author.scss */
+.add-authors-div {
+  margin: 10px;
+}
+
+/* line 18, ../scss/submit/_step-author.scss */
+.add-authors-group {
+  border-radius: 0px !important;
+}
+
+/* line 22, ../scss/submit/_step-author.scss */
+.author ul {
+  margin-bottom: 0px;
+}
+
+/* line 26, ../scss/submit/_step-author.scss */
+.create-author {
+  width: 400px;
+}
+
+/* line 30, ../scss/submit/_step-author.scss */
+.searchStructure {
+  width: 100%;
+}
+
+/* line 34, ../scss/submit/_step-author.scss */
+#add-authors-group {
+  padding: 20px 0 0 15px;
+}
+
+/* line 38, ../scss/submit/_step-author.scss */
+.aut-error {
+  border: 2px solid #b94a48;
+}
+
+/* line 42, ../scss/submit/_step-author.scss */
+#aut-struct .author:hover .actions-hover, #aut-struct .actions-hover-forced, .new-struct-hover:hover, .struct-line:hover .struct-dropdown-button {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* line 47, ../scss/submit/_step-author.scss */
+.struct-selected {
+  box-shadow: 0px 0px 2px 2px lightgrey;
+  border-radius: 3px;
+  padding: 5px;
+}
+
+/* line 53, ../scss/submit/_step-author.scss */
+#aut-struct .actions-hover, .new-struct-hover, .struct-dropdown-button {
+  opacity: 0.2;
+}
+
+/* line 57, ../scss/submit/_step-author.scss */
+.struct_new {
+  width: 500px;
+}
+
+/* line 61, ../scss/submit/_step-author.scss */
+.popover .form label {
+  width: 100px;
+}
+
+/* line 65, ../scss/submit/_step-author.scss */
+.new-struct-form ul {
+  list-style-type: none;
+  margin-left: 0;
+  padding-left: 0px;
+}
+
+/* line 71, ../scss/submit/_step-author.scss */
+.new-struct-form ul ul {
+  margin-left: 5px;
+  padding-left: 5px;
+}
+
+/* line 81, ../scss/submit/_step-author.scss */
+.new-struct ul.new-struct-parent {
+  margin-top: 5px;
+}
+
+/* line 85, ../scss/submit/_step-author.scss */
+.new-struct-parent.list-group {
+  margin-bottom: 0px;
+}
+
+/* line 89, ../scss/submit/_step-author.scss */
+.struct-div {
+  display: inline-block;
+}
+
+/* line 93, ../scss/submit/_step-author.scss */
+.struct-block {
+  display: none;
+  margin-top: 5px;
+  margin-left: 30px;
+}
+
+/* line 99, ../scss/submit/_step-author.scss */
+.struct-buttons-div {
+  clear: left;
+}
+
+/* line 103, ../scss/submit/_step-author.scss */
+.struct-action-div {
+  display: inline-block;
+}
+
+/* line 107, ../scss/submit/_step-author.scss */
+.popover {
+  max-width: inherit;
+}
+
+/* line 111, ../scss/submit/_step-author.scss */
+#aut_new input {
+  vertical-align: inherit;
+}
+
+/* line 115, ../scss/submit/_step-author.scss */
+#authors div.author:hover, #authors div.author.active {
+  background: #f8f8f8;
+  border: 1px solid #dfdfdf;
+}
+
+/* line 120, ../scss/submit/_step-author.scss */
+#authors div.author .actions {
+  display: none;
+}
+
+/* line 124, ../scss/submit/_step-author.scss */
+#authors div.author:hover .actions, #authors div.author.active .actions {
+  display: inline;
+}
+
+/* line 128, ../scss/submit/_step-author.scss */
+#authors div.author:not(:last-child):after {
+  content: ", ";
+}
+
+/* line 132, ../scss/submit/_step-author.scss */
+#authors > div sup {
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+/* line 137, ../scss/submit/_step-author.scss */
+.author-form {
+  width: 600px;
+  margin: 10px auto;
+  border: 1px solid #dfdfdf;
+  border-radius: 5px;
+}
+
+/* line 144, ../scss/submit/_step-author.scss */
+.author-form h4 {
+  background: #f8f8f8;
+  padding: 10px;
+  margin: 0px;
+  border-bottom: 1px solid #ccc;
+}
+
+/* line 151, ../scss/submit/_step-author.scss */
+.author-form form {
+  padding: 10px;
+}
+
+/* line 155, ../scss/submit/_step-author.scss */
+.new-struct-label {
+  display: none;
+}
+
+/* line 159, ../scss/submit/_step-author.scss */
+.structure-icons {
+  float: right;
+}
+
+/* line 163, ../scss/submit/_step-author.scss */
+.struct-group {
+  clear: left;
+}
+
+/* line 167, ../scss/submit/_step-author.scss */
+#structures {
+  margin-top: 20px;
+}
+
+/* line 171, ../scss/submit/_step-author.scss */
+#structures > div {
+  margin-bottom: 5px;
+  padding: 6px;
+  border: 1px solid #fff;
+  border-radius: 2px;
+  position: relative;
+}
+
+/* line 179, ../scss/submit/_step-author.scss */
+#structures span.structure-idx {
+  background: #666;
+  color: #fff;
+  margin: 0px 4px;
+  padding: 1px 4px;
+}
+
+/* line 186, ../scss/submit/_step-author.scss */
+#structures .actions {
+  display: none;
+  position: absolute;
+  top: 8px;
+  right: 5px;
+}
+
+/* line 193, ../scss/submit/_step-author.scss */
+#structures > div {
+  background: #f8f8f8;
+  border: 1px solid #dfdfdf;
+}
+
+/* line 198, ../scss/submit/_step-author.scss */
+#structures > div .actions {
+  display: block;
+}
+
+/* line 201, ../scss/submit/_step-author.scss */
+.popover-content {
+  width: 500px;
+}
+
+/* line 204, ../scss/submit/_step-author.scss */
+.struct-parent {
+  font-weight: normal;
+  font-size: 11px;
+}
+
+/* line 209, ../scss/submit/_step-author.scss */
+.ui-helper-hidden-accessible {
+  display: none;
+}
+
+/* line 213, ../scss/submit/_step-author.scss */
+.ui-autocomplete {
+  max-height: 100px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* line 218, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item:first-child {
+  background: #f5f5f5;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* line 222, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item:first-child a {
+  font-style: italic;
+  font-weight: bold;
+}
+
+/* line 226, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item .address {
+  font-style: italic;
+}
+
+/* line 229, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item .address:not(:empty):before {
+  content: '(';
+  display: inline;
+}
+
+/* line 233, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item .address:not(:empty):after {
+  content: ') ';
+}
+
+/* line 236, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item .idhal:not(:empty):before {
+  display: inline;
+}
+
+/* line 239, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item .url:not(:empty):before {
+  content: ' - ';
+}
+
+/* line 242, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item a:hover > * {
+  color: #ffffff;
+}
+
+/* line 245, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item a > .acronym {
+  padding-left: 5px;
+  font-style: italic;
+}
+
+/* line 249, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item a > .acronym:not(:empty):before {
+  content: '[';
+}
+
+/* line 252, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item a > .acronym:not(:empty):after {
+  content: '] ';
+}
+
+/* line 256, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item a dl, #struct-info dl {
+  margin: 0px;
+}
+
+/* line 259, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item a dt, #struct-info dt {
+  margin: 0px;
+  font-size: 10px;
+  font-weight: normal;
+  display: inline;
+  line-height: 12px;
+}
+
+/* line 266, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item a dt:not(:first-child):before, #struct-info dt:not(:first-child):before {
+  content: ' ; ';
+}
+
+/* line 269, ../scss/submit/_step-author.scss */
+.ui-autocomplete .ui-menu-item a dt .code:before, #struct-info dt .code:before {
+  content: ' : ';
+}
+
+/* line 272, ../scss/submit/_step-author.scss */
+.ui-front {
+  z-index: 10000;
+}
+
+/* line 276, ../scss/submit/_step-author.scss */
+.ui-menu .ui-menu-item {
+  font-size: 12px;
+}
+
+/* line 280, ../scss/submit/_step-author.scss */
+.valid-struct {
+  color: #468847;
+}
+
+/* line 284, ../scss/submit/_step-author.scss */
+.old-struct {
+  color: #c09853;
+}
+
+/* line 288, ../scss/submit/_step-author.scss */
+.incoming-struct {
+  color: #b94a48;
+}
+
+/* line 292, ../scss/submit/_step-author.scss */
+#error-zone-author {
+  margin-top: 20px;
+}
+
+/* line 296, ../scss/submit/_step-author.scss */
+.struct-div {
+  cursor: grab;
+}
+
+/* line 300, ../scss/submit/_step-author.scss */
+.author-line {
+  line-height: 1.7em !important;
+}
+
+/* line 304, ../scss/submit/_step-author.scss */
+#author-table {
+  font-size: 14px;
+}
+
+/* line 308, ../scss/submit/_step-author.scss */
+.author-name-and-fonction {
+  margin-bottom: 4px;
+}
+
+/* line 312, ../scss/submit/_step-author.scss */
+.struct-dropdown-menu {
+  text-align: left;
+  margin: 0px 0 0 !important;
+}
+
+/* line 317, ../scss/submit/_step-author.scss */
+.struct-line {
+  padding: 2px;
+}
+
+/* line 1, ../scss/submit/_step-recap.scss */
+.condition-filled {
+  color: #468847;
+}
+
+/* line 5, ../scss/submit/_step-recap.scss */
+.condition-notfilled {
+  color: #b94a48;
+}
+
+/* line 9, ../scss/submit/_step-recap.scss */
+#doublon-msg {
+  font-size: 18px;
+}
+
+/* line 13, ../scss/submit/_step-recap.scss */
+#doublon-msg h4 {
+  font-size: 20px;
+  font-size: 1.2em;
+}
+
+/* line 18, ../scss/submit/_step-recap.scss */
+#recap-citation h4 {
+  font-size: 1.2em;
+}
+
+/* line 22, ../scss/submit/_step-recap.scss */
+.margin-20 {
+  margin-top: 20px;
+}
+
+/* line 26, ../scss/submit/_step-recap.scss */
+.margin-top-5 {
+  margin-top: 5px;
+}
+
+/* line 30, ../scss/submit/_step-recap.scss */
+.margin-bottom-0 {
+  margin-bottom: 0px;
+}
+
+/* line 34, ../scss/submit/_step-recap.scss */
+.margin-0 {
+  margin: 0 0 0 0;
+}
+
+/* line 38, ../scss/submit/_step-recap.scss */
+#chevron-arxiv {
+  float: right;
+}
+
+/* line 42, ../scss/submit/_step-recap.scss */
+#transfert-arxiv-details {
+  display: none;
+}
+
+/* line 46, ../scss/submit/_step-recap.scss */
+#error-zone-arxiv {
+  display: none;
+}
+
+/* line 50, ../scss/submit/_step-recap.scss */
+#transfert-pmc-details {
+  display: none;
+}
+
+/* line 54, ../scss/submit/_step-recap.scss */
+#recap-buttons {
+  clear: left;
+}
+
+/* line 58, ../scss/submit/_step-recap.scss */
+#error-zone-recap {
+  margin-top: 20px;
+}
+
+/* line 8, ../scss/submit.scss */
+.container {
+  width: 100%;
+}
+
+/* line 12, ../scss/submit.scss */
+.accordion-icon {
+  margin-right: 10px;
+}
+
+/* line 16, ../scss/submit.scss */
+.validity-icon {
+  margin-left: 10px;
+}
+
+/* line 20, ../scss/submit.scss */
+.switch-container {
+  margin-bottom: 10px;
+  height: 5px;
+}
+
+/* line 25, ../scss/submit.scss */
+.switch-view-button {
+  margin-right: 10px;
+  float: right;
+  font-size: 15px;
+}
+
+/* line 31, ../scss/submit.scss */
+.panel-link, .panel-link:hover, .panel-link:focus {
+  text-decoration: none;
+}
+
+/* line 35, ../scss/submit.scss */
+.modal-body {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* line 39, ../scss/submit.scss */
+#waiting-msg {
+  color: inherit;
+}
+
+/* line 43, ../scss/submit.scss */
+#legal-text {
+  display: none;
+}
+
+/* line 47, ../scss/submit.scss */
+#legal-intro {
+  text-align: center;
+  width: 100%;
+}
+
+/* line 52, ../scss/submit.scss */
+#legal-title {
+  font-size: 20px;
+}
+
+/* line 56, ../scss/submit.scss */
+.legal-subtitle {
+  font-size: 16px;
+}
+
+/* line 60, ../scss/submit.scss */
+.legal-comment {
+  font-style: italic;
+  font-size: 12px;
+}
+
+/* line 65, ../scss/submit.scss */
+#legal-blabla {
+  text-align: justify;
+  width: 100%;
+}
+
+/* line 69, ../scss/submit.scss */
+#legal-end {
+  text-align: right;
+  width: 100%;
+  font-size: 15px;
+}
+
+/* line 76, ../scss/submit.scss */
+.text-right .pagination {
+  margin: -10px 0;
+}
+
+/* line 79, ../scss/submit.scss */
+.corps .form-actions {
+  margin-top: 0px;
+}
+
+/* line 84, ../scss/submit.scss */
+.alert hr {
+  margin: 10px 0;
+  border-top: 1px solid #BCE8F2;
+  border-bottom: 0;
+}
+
+/* line 89, ../scss/submit.scss */
+.alert-text hr {
+  border-top: 1px solid #e1e1e8;
+}
+
+/* line 93, ../scss/submit.scss */
+.alert-warning {
+  color: #92620f !important;
+}
+
+/* line 97, ../scss/submit.scss */
+* html .ui-autocomplete {
+  height: 100px;
+}
+
+/* line 100, ../scss/submit.scss */
+.input-group-addon > button {
+  background: inherit;
+}
+
+/* Style the buttons that are used to open and close the accordion panel */
+/* line 107, ../scss/submit.scss */
+div.panel-heading {
+  /*background-color: rgba(185, 74, 72, 0.4);*/
+  font-size: 18px;
+}
+
+/* line 112, ../scss/submit.scss */
+#render-step .panel-default > .panel-heading {
+  background-color: #eee;
+}
+
+/* line 116, ../scss/submit.scss */
+div.panel-heading.valid {
+  /*background-color: rgba(70, 136, 71, 0.4);*/
+}
+
+/* line 120, ../scss/submit.scss */
+a {
+  outline: 0;
+}
+
+/* line 124, ../scss/submit.scss */
+div.panel-default {
+  border: 0px;
+  border-radius: 0px;
+}
+
+/* line 129, ../scss/submit.scss */
+a:focus {
+  outline: none !important;
+}
+
+/* Style the accordion panel. Note: hidden by default */
+/* line 134, ../scss/submit.scss */
+div.panel-collapse {
+  background-color: #f5f5f5;
+  border-left: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
+/* line 142, ../scss/submit.scss */
+button.accordion {
+  color: #0f192a;
+  font-size: 18px;
+}
+
+/* The "show" class is added to the accordion panel when the user clicks on one of the buttons. This will show the panel content */
+/* line 148, ../scss/submit.scss */
+div.panel.show {
+  display: block;
+}
+
+/* line 152, ../scss/submit.scss */
+.wizard .nav-tabs {
+  position: relative;
+  margin: 30px auto 0;
+  border-bottom-color: #31708f;
+  padding-bottom: 1px;
+}
+
+/* line 159, ../scss/submit.scss */
+.wizard > div.wizard-inner {
+  position: relative;
+}
+
+/* line 163, ../scss/submit.scss */
+.connecting-line {
+  height: 2px;
+  background: #e0e0e0;
+  position: absolute;
+  width: 80%;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+  top: 50%;
+  z-index: 1;
+}
+
+/* line 175, ../scss/submit.scss */
+.wizard .nav-tabs > li.active > a, .wizard .nav-tabs > li.active > a:hover, .wizard .nav-tabs > li.active > a:focus {
+  color: #555555;
+  cursor: default;
+  border: 0;
+  border-bottom-color: transparent;
+}
+
+/* line 182, ../scss/submit.scss */
+span.round-tab {
+  width: 70px;
+  height: 70px;
+  line-height: 70px;
+  display: inline-block;
+  border-radius: 100px;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  z-index: 2;
+  position: absolute;
+  left: 0;
+  text-align: center;
+  font-size: 25px;
+}
+
+/* line 196, ../scss/submit.scss */
+span.round-tab i {
+  color: #9da0a4;
+}
+
+/* line 199, ../scss/submit.scss */
+.wizard li.active span.round-tab {
+  background: #d9edf7;
+  border: 2px solid #bce8f1;
+}
+
+/* line 204, ../scss/submit.scss */
+.wizard li.active span.round-tab i {
+  color: #31708f;
+}
+
+/* line 208, ../scss/submit.scss */
+.wizard li.enabled span.round-tab {
+  background: #fff;
+  border: 2px solid #999;
+}
+
+/* line 213, ../scss/submit.scss */
+.wizard li.enabled span.round-tab i {
+  color: #3c763d;
+}
+
+/* line 217, ../scss/submit.scss */
+.wizard li.valid span.round-tab {
+  background: #dff0d8;
+  border: 2px solid #d6e9c6;
+}
+
+/* line 222, ../scss/submit.scss */
+.wizard li.valid span.round-tab i {
+  color: #3c763d;
+}
+
+/* line 226, ../scss/submit.scss */
+span.round-tab:hover {
+  color: #666;
+  border: 2px solid #666;
+}
+
+/* line 231, ../scss/submit.scss */
+span.round-tab:hover i {
+  color: #666;
+}
+
+/* line 235, ../scss/submit.scss */
+.wizard .nav-tabs > li {
+  width: 25%;
+}
+
+/* line 239, ../scss/submit.scss */
+.wizard li:after {
+  content: " ";
+  position: absolute;
+  left: 46%;
+  opacity: 0;
+  margin: 0 auto;
+  bottom: 0px;
+  border: 5px solid transparent;
+  border-bottom-color: #31708f;
+  transition: 0.1s ease-in-out;
+}
+
+/* line 251, ../scss/submit.scss */
+.wizard li.active:after {
+  content: " ";
+  position: absolute;
+  left: 46%;
+  opacity: 1;
+  margin: 0 auto;
+  bottom: 0px;
+  border: 10px solid transparent;
+  border-bottom-color: #31708f;
+}
+
+/* line 262, ../scss/submit.scss */
+.wizard .nav-tabs > li a {
+  width: 70px;
+  height: 70px;
+  margin: 20px auto;
+  border-radius: 100%;
+  padding: 0;
+}
+
+/* line 270, ../scss/submit.scss */
+.wizard .nav-tabs > li a:hover {
+  background: transparent;
+}
+
+/* line 274, ../scss/submit.scss */
+.wizard .tab-pane {
+  position: relative;
+  padding-top: 50px;
+}
+
+/* line 279, ../scss/submit.scss */
+.wizard h3 {
+  margin-top: 0;
+}
+
+/* line 283, ../scss/submit.scss */
+.wizard h2, #id-zone h2 {
+  font-size: 18px;
+  color: #31708f;
+}
+
+@media (max-width: 585px) {
+  /* line 290, ../scss/submit.scss */
+  .wizard {
+    width: 90%;
+    height: auto !important;
+  }
+
+  /* line 295, ../scss/submit.scss */
+  span.round-tab {
+    font-size: 12px;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+  }
+
+  /* line 302, ../scss/submit.scss */
+  .wizard .nav-tabs > li a {
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+  }
+
+  /* line 308, ../scss/submit.scss */
+  .wizard li.active:after {
+    content: " ";
+    position: absolute;
+    left: 35%;
+  }
+}
+/* line 314, ../scss/submit.scss */
+.wizard h4 {
+  margin-left: 20px;
+  font-size: 14px;
+  clear: both;
+  color: #336;
+}
+
+/* line 320, ../scss/submit.scss */
+#flash-messages {
+  margin-top: 10px;
+}
+
+/* line 325, ../scss/submit.scss */
+.uploading {
+  background-color: #D8D8D8 !important;
+}
+
+/* line 331, ../scss/submit.scss */
+span.nav-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-block;
+  border-radius: 100px;
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  z-index: 2;
+  text-align: center;
+  font-size: 15px;
+  margin-left: 16px;
+}
+
+/* line 344, ../scss/submit.scss */
+span.nav-icon i {
+  color: #9da0a4;
+  position: relative;
+  display: inline;
+  top: 4px;
+}
+
+/* line 351, ../scss/submit.scss */
+span.nav-icon:hover {
+  color: #666;
+  border: 2px solid #666;
+}
+
+/* line 356, ../scss/submit.scss */
+span.nav-icon:hover i {
+  color: #666;
+}
+
+/* line 359, ../scss/submit.scss */
+.nou:hover {
+  text-decoration: none;
+}
+
+/* line 363, ../scss/submit.scss */
+.text-danger {
+  color: #c7254e;
+}
+
+/* line 365, ../scss/submit.scss */
+.input-xs {
+  height: 22px;
+}
+
+/* line 368, ../scss/submit.scss */
+.btn-group-xxs > .btn {
+  padding: 5px 10px;
+  padding: 1px 5px;
+  font-size: 10px;
+  line-height: 1.3;
+  border-radius: 3px;
+}
+
+/* line 376, ../scss/submit.scss */
+.processing {
+  display: none !important;
+}
+
+/* line 380, ../scss/submit.scss */
+.panel {
+  overflow: visible !important;
+}
+
+/* line 384, ../scss/submit.scss */
+#typdoc-menu {
+  position: absolute;
+  z-index: 100;
+  cursor: pointer;
+}
+
+/* line 390, ../scss/submit.scss */
+#typdoc-button {
+  text-align: left;
+}
+
+/* line 394, ../scss/submit.scss */
+.disabled-option,
+.disabled-option:visited,
+.disabled-option:active,
+.disabled-option:hover {
+  color: #aaa !important;
+  cursor: default;
+}
+
+/* line 402, ../scss/submit.scss */
+.progress-bar.active, .progress.active .progress-bar {
+  -webkit-animation: progress-bar-stripes 2s linear infinite;
+  -o-animation: progress-bar-stripes 2s linear infinite;
+  animation: progress-bar-stripes 2s linear infinite;
+}
+
+/* line 408, ../scss/submit.scss */
+.progress-bar-striped, .progress-striped .progress-bar {
+  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+  background-image: -o-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+  -webkit-background-size: 40px 40px;
+  background-size: 40px 40px;
+}
+
+/* line 416, ../scss/submit.scss */
+.switch-view-button {
+  cursor: pointer;
+}
+
+/* line 420, ../scss/submit.scss */
+.btn-disabled {
+  cursor: not-allowed;
+  opacity: .65;
+}
+
+tr.author:hover {
+  background-color:#f9f9f9;
+}
+
+.struct-line {
+  padding: 5px;
+}
+.struct-line:hover {
+  background-color:#ffffff;
+}
+
+.info {
+  padding: 6px 8px;
+  font: 14px/16px Arial, Helvetica, sans-serif;
+  background: white;
+  background: rgba(255,255,255,0.8);
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  border-radius: 5px;
+}

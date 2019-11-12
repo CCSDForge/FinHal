@@ -1,0 +1,94 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yannick
+ * Date: 02/06/15
+ * Time: 16:21
+ */
+
+?>
+<script type="text/javascript" src="<?php echo CCSDLIB ?>/js/jwplayer/jwplayer.js"></script>
+<script type="text/javascript">jwplayer.key="hOkBsHFzo2UzoKBm+u2dVsDnxVSC41llsOuG5g==";</script>
+<div id="videoPreview1">Chargement de la vidéo...</div>
+<br />
+
+
+<!--<script type="text/javascript">
+    function setPlayerAndroid4(){
+        jwplayer("videoPreview1").setup({
+            file : 'http://ccsdvid1.in2p3.fr/hal/_definst_/mp4:01/07/46/79/DCFIN.mp4/playlist.m3u8',
+            'width': '600' ,
+            'height': '360' ,
+            'autostart': 'false',
+            type: "mp4",
+            primary: "html5",
+            'stretching': 'exactfit',
+            autostart: 'true'
+        });
+    }
+
+
+    // new
+    function setPlayer( ) {
+        jwplayer('videoPreview1').setup({
+            'id': 'playerID',
+            'width': '600' ,
+            'height': '360' ,
+            'autostart': 'false',
+            'primary': "flash",
+            'playlist': [{
+                sources: [{
+                    file: "rtmp://ccsdvid1.in2p3.fr/hal/_definst_/mp4:01/07/46/79/DCFIN.mp4",
+                    type:"rtmp"
+
+                },{
+                    file: "http://ccsdvid1.in2p3.fr/hal/_definst_/mp4:01/07/46/79/DCFIN.mp4/playlist.m3u8"
+                }]
+            }]
+        });
+    }
+
+    $(document).ready( function() {
+
+        if (navigator.userAgent.match(/android/i) != null){
+
+            setPlayerAndroid4( );
+        }
+        else {
+            setPlayer( );
+        }
+
+    });
+</script>-->
+
+<script type="text/javascript">
+    $(document).ready( function() {
+        jwplayer.key="hOkBsHFzo2UzoKBm+u2dVsDnxVSC41llsOuG5g==";
+        if (navigator.userAgent.match(/android/i) != null){
+            jwplayer("videoPreview1").setup({
+                file: "http://ccsdvid1.in2p3.fr:80/hal/_definst_/mp4:01/07/46/79/DCFIN.mp4/playlist.m3u8",
+                width: 600,
+                height: 360,
+                type: "mp4",
+                primary: "html5",
+                stretching: "exactfit"
+            });
+        } else {
+            jwplayer("videoPreview1").setup({
+                playlist: [{
+                    sources: [
+                        {file: "rtmp://ccsdvid1.in2p3.fr/hal/_definst_/mp4:01/07/46/79/DCFIN.mp4", type: "rtmp"},
+                        {file: "http://ccsdvid1.in2p3.fr:80/hal/_definst_/mp4:01/07/46/79/DCFIN.mp4/playlist.m3u8"}
+                    ],
+                    title: "Le 20 ans du Web",
+                    image: "//thumb.ccsd.cnrs.fr/6461825/large",
+                }],
+                primary: "flash",
+                skin: "five",
+                logo: { file: "/img/videhal.png", position: "bottom-right"},
+                width: 600,
+                height: 360,
+            });
+        }
+    })
+</script>

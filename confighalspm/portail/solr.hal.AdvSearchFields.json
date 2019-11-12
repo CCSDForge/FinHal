@@ -1,0 +1,26 @@
+{
+	"text":"hal_text",
+	"text_fulltext" : "hal_text_fulltext",
+	"title_t":"hal_title_t",
+	"domain_t":"spm_domain_t",
+
+	"abstract_t":"hal_abstract_t",
+	"fulltext_t":"hal_fulltext_t",
+
+	"keyword_t":"hal_keyword_t",
+	"language_t":"hal_language_t",
+
+	"--sep0":"",
+
+	"partner_t":"spm_partner_t",
+	"structure_t":"spm_structure_t",
+	"auth_t":"hal_auth_t",
+
+	"--sep6" : "",
+
+	"producedDateY_i":"hal_producedDateY_i",
+
+	"--sep7" : "",
+
+	"collection_t":"hal_collection_t"
+}

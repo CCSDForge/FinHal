@@ -1,0 +1,101 @@
+<?php
+/**
+ * @var Hal_View $this
+ */
+$url = $this->url;
+
+$trad_en = [
+    "Nous n'avons pas réussi à trouver un compte HAL existant qui corresponde aux informations d'authentification (Vous n'avez soit pas de compte, soit il y a plusieurs adresses mail correspondantes, etc.)."
+    => "We can't find any HAL account which corresponds to authentication informations (You maybe doesn't have an account or your email address is associated to more than one account...).",
+    "Si vous avez un compte HAL, connectez-vous à HAL pour associer l'authentification externe avec ce compte."
+    => 'If you have an HAL account, connect to this account to link external account with this one.',
+    'Vous devez d\'abord vous <a href="%s">créer un compte HAL</a>.'
+    => 'First, you need to <a href="%s">create an HAL account</a>.',
+    "Puis recommencer votre connexion avec le compte Orcid !"
+    => "Then, reconnect to external Orcid account",
+    "Sinon, vous pouvez créer un nouveau compte via les informations disponibles."
+    => 'Otherwise, you can create a new HAL account using informations given by external authentication.',
+    "Se connecter avec un compte HAL existant (CAS)"
+    => "Connect to an existing Hal account",
+    "Association avec un compte HAL"
+    => "Associate with local account",
+    "Créer un compte HAL à partir de ce compte externe"
+    => "Create a new account from this external account.",
+    "Le compte externe ne donne pas suffisamment d'information pour créer un nouveau compte automatiquement!"
+    => "The external account doesn't give suffisant informations to create new account",
+    "Besoin d'une étape supplémentaire!"
+    => "There is the need for one other step!",
+];
+$trad_eu = [];;
+$trad_es = ['' => ''];
+/** @var Hal_Translate $translator */
+try {
+    $translator = Zend_Registry::get('Zend_Translate');
+} catch (Exception $e) {
+}
+$translator->addTranslation( [ 'locale' => 'en', 'content' => $trad_en ]);
+
+/** Il faut refaire un set locale: le addTranslation a remis une langue par defaut... */
+/** @var Zend_Locale $locale */
+try {
+    $locale = Zend_Registry::get('lang');
+} catch (Exception $e) {
+    $locale="fr";
+}
+$translator->setLocale($locale);
+/** @var Hal_View_Helper_Layout $layout */
+$layout = $this->layout();
+$layout->title = $this->translate('Création de votre compte');
+$layout->pageTitle = $layout->title;
+
+$html = "";
+
+$arrayAuthList = $this->resultAuth;
+
+$authOk=array_map(function ($a) { foreach ($a as $k=>$v) { return $k; }; return ""; } ,$arrayAuthList);
+?>
+<div class='account_association'><?php
+    $newAccountPossible =  [];
+    foreach ($arrayAuthList as $key=>$authArray) {
+        foreach ($authArray as $type => $attr) {
+            //just one element here
+            $adapter = \Ccsd\Auth\AdapterFactory::getTypedAdapter($type);
+            // Todo: Ecrire une fonction: $adapter->canCreateNewAccount()
+            if ($adapter::AdapterName === 'IDP') {
+                $newAccountPossible[$type] = $key; ?>
+
+            <?php }
+            ?>
+        <?php }
+    }
+    echo "<h3>" . $this->translate("Besoin d'une étape supplémentaire!") . "</h3>";
+    echo "<br />";
+    echo $this->translate("Nous n'avons pas réussi à trouver un compte HAL existant qui corresponde aux informations d'authentification (Vous n'avez soit pas de compte, soit il y a plusieurs adresses mail correspondantes, etc.).");
+    ?>
+    <p><?php
+        echo $this->translate("Si vous avez un compte HAL, connectez-vous à HAL pour associer l'authentification externe avec ce compte.");
+        if ($newAccountPossible !== []) {
+            echo $this->translate("Sinon, vous pouvez créer un nouveau compte via les informations disponibles.");
+        } ?>
+    </p>
+    <h4><?php echo $this->translate("Vous avez un compte HAL"); ?></h4>
+    <?php
+    $redirUrl = "/user/login?authType=CAS&url=$url";
+    ?>
+    <a class="btn btn-default" href="<?php echo $redirUrl; ?>"><?php
+            echo $this->translate("Association avec un compte HAL"); ?></a>
+        <h4><?php
+        // Juste pour avoir le lien sur l'IDP pour creer un compte.
+        // Orci ne permet pas d'avoir un compte automatique
+        echo $this->translate("Vous n'avez pas de compte HAL"); ?></h4>
+        <?php
+        if ($newAccountPossible === []) {
+            echo $this->translate('Vous devez d\'abord vous <a href="%s">créer un compte HAL</a>.', "/user/create");
+            echo $this->translate("Puis recommencer votre connexion avec le compte Orcid !");
+        } else {
+            foreach ($newAccountPossible as $type => $key) { ?>
+                <a class="btn btn-default" href="/user/login?authType=<?php echo $type; ?>&forceCreate=true&key=<?php echo $key; ?>"><?php
+                    echo $this->translate("Créer un compte HAL à partir de ce compte externe"); ?></a><br />
+            <?php }
+        }?>
+</div>

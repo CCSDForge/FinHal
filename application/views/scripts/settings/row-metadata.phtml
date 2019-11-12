@@ -1,0 +1,12 @@
+<td>
+	<?php echo $this->code ?>
+</td>
+<td class='value'><?php echo $this->traduction; ?></td>
+<td align="right">
+    <a href="javascript:void(0);" onclick="edit_metadata(this, '<?php echo $this->code ?>');">
+        <i class="glyphicon glyphicon-edit"></i>
+    </a>
+    <a href="javascript:void(0);" onclick="delete_metadata(this, '<?php echo $this->code ?>');">
+        <i class="glyphicon glyphicon-trash"></i>
+    </a>
+</td>

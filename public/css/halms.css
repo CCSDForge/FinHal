@@ -1,0 +1,22 @@
+.no-margin {margin:0;}
+.halms-well {background-color: #ffffff;}
+.logo .jumbotron {margin-bottom: 0px;}
+.container h1, .container h2, .container h3, .container h4, .halms-color {color:#368291;}
+.nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {background-color: #368291;}
+.nav-pills li>a {color: #368291; font-size:16px;}
+/*.halms-color {font-size:13px;}*/
+.listfiles {font-family: Courier, monospace; font-size:14px;padding-left:10px;}
+.listfiles>li {padding-top:5px;}
+.listfiles tr .btn-group {display:none;}
+.listfiles tr:hover .btn-group {display:inline-block;}
+.home-badge {font-size:50px; text-align:center;margin-top:20px;}
+.home-thumbnail {height:280px; padding-top:20px; background:#368291; position: relative;}
+.home-thumbnail h3 {color: #ffffff; text-align:center}
+.home-thumbnail h3 .step {background:#333; padding: 2px 15px; border-radius:40px; color: #fff; margin-right:10px; position:absolute; top:0; left:0; border-top-left-radius: 0;font-size:50px;}
+.home-thumbnail p {color: #ddd; text-align: justify;}
+.btn-primary {background-color:#5E9BA7;border-color:#368291;}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {background-color:#368291;}
+.xml-valid, .xml-notvalid, .comment-error {display:none;}

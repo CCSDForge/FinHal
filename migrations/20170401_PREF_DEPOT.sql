@@ -1,0 +1,11 @@
+-- Ajout de la table USER_PREF_DEPOT
+
+CREATE TABLE `USER_PREF_DEPOT` (
+ `PREFID` int(11) NOT NULL AUTO_INCREMENT,
+ `UID` int(11) NOT NULL,
+ `PREF` varchar(255) NOT NULL,
+ `VALUE` varchar(255) NOT NULL,
+ PRIMARY KEY (`PREFID`)
+)  ENGINE=MyISAM DEFAULT CHARSET=utf8 ;
+
+SELECT '!!!!!!!!! - UNE FOIS LA TABLE CRÉÉE : 20170402_Migration_PrefDepot.php - !!!!!!!!!';

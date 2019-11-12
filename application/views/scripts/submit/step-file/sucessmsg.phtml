@@ -1,0 +1,105 @@
+<?php /** @var Hal_View $this  */ ?>
+<div id="modal-success-msg" class="modal-dialog modal-sm">
+    <div class="modal-content">
+        <div class="modal-header list-display">
+            <h4 id="success-msg-title" class="modal-title">
+                <?php echo $this->translate('Chargement terminé');?>
+            </h4>
+            <span class="glyphicon glyphicon-remove remove-x" onclick="hideLoading('modal-success');">
+            </span>
+        </div>
+        <div class="modal-body">
+            <?php if ($this->converted) { ?>
+                <div>
+                    <i class="glyphicon glyphicon-ok success-icon-ok"></i>
+                    <?php echo $this->translate("Votre fichier "). $this->filename . $this->translate(" a été converti en ") . $this->convertedName; ?>
+                </div>
+                <br />
+            <?php } ?>
+            <?php if ($this->compiled) { ?>
+                <div>
+                    <i class="glyphicon glyphicon-ok success-icon-ok"></i>
+                    <?php echo $this->translate("Votre fichier "). $this->filename . $this->translate(" a été compilé."); ?>
+                </div>
+                <br />
+            <?php } ?>
+            <?php if ($this->typechosen != '') { ?>
+                <div>
+                    <i class="glyphicon glyphicon-ok success-icon-ok"></i>
+                    <?php echo $this->translate("Votre document est du type")." '". $this->translate('typdoc_'.$this->typechosen) . "'."; ?>
+                    <br />
+                    <span class="success-comment">
+                    <?php echo $this->translate("En cas d'erreur, vous pouvez modifier le type de document dans \"Compléter les métadonnées du document\"."); ?>
+                    </span>
+                </div>
+                <br />
+            <?php } ?>
+            <?php if ($this->returncode == 3) { ?>
+            <div>
+                <i class="glyphicon glyphicon-remove success-icon-ko"></i>
+                <?php echo $this->translate("Aucune métadonnée n'a été récupérée à partir de votre fichier : ") . $this->filename; ?>
+            </div>
+            <br />
+            <?php } else if ($this->returncode == 1 || $this->returncode == 2) {?>
+            <div>
+                <i class="glyphicon glyphicon-ok success-icon-ok"></i>
+                <?php echo $this->translate("Des métadonnées ont été récupérées à partir de votre fichier :").' '.$this->filename; ?>
+                <br />
+                <span class="success-comment">
+                    <?php $returnString="";
+                    foreach ($this->pdfMetas as $meta) {
+                        if (!empty($returnString)) {
+                            $returnString .= ', ';
+                        }
+                        $returnString .= $this->translate(ucfirst($meta));
+                    }
+                    echo $returnString; ?>
+                </span>
+            </div>
+            <br />
+            <?php }
+                if ($this->returncode == 2) {?>
+            <div>
+                <i class="glyphicon glyphicon-ok success-icon-ok"></i>
+                <?php echo $this->translate("Nous avons complété votre dépôt à partir du DOI détecté :"); ?>
+                <br />
+                <span class="center-url"><?php echo $this->doiUrl;?></span>
+                <br />
+                <span class="success-comment">
+                    <?php $returnString="";
+                    foreach ($this->doiMetas as $meta) {
+                        if (!empty($returnString)) {
+                            $returnString .= ', ';
+                        }
+                        $returnString .= $this->translate(ucfirst($meta));
+                    }
+                    echo $returnString; ?>
+                </span>
+            </div>
+            <?php }
+
+            if ($this->returncode == 4) {?>
+                <div>
+                    <i class="glyphicon glyphicon-ok success-icon-ok"></i>
+                    <?php echo $this->translate("Nous avons complété votre dépôt à partir de l'identifiant :"); ?>
+                    <br />
+                    <span class="center-url"><?php echo $this->idUrl;?></span>
+                    <br />
+                    <span class="success-comment">
+                    <?php $returnString="";
+                    foreach ($this->idMetas as $meta) {
+                        if (!empty($returnString)) {
+                            $returnString .= ', ';
+                        }
+                        $returnString .= ucfirst($this->translate($meta));
+                    }
+                    echo $returnString; ?>
+                </span>
+                </div>
+            <?php }?>
+        </div>
+        <div class="success-msg-button">
+            <input value="Ok" onclick="hideLoading('modal-success');" type="button" class="btn btn-sm btn-primary"/>
+        </div>
+    </div>
+</div>

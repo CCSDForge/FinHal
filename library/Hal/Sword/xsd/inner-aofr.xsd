@@ -1,0 +1,779 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.tei-c.org/ns/1.0" targetNamespace="http://www.tei-c.org/ns/1.0">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+    <xs:annotation>
+        <xs:documentation>AOfr Schema for HAL Open Archive</xs:documentation>
+    </xs:annotation>
+    <xs:element name="TEI">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="ns1:teiHeader"/>
+                <!-- ZMO : Add minOccurs = 0 to teiHeader, to resolve problems with docs without this element-->
+                <xs:element ref="ns1:text" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="teiHeader">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="ns1:fileDesc" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="fileDesc">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="ns1:titleStmt" minOccurs="0"/>
+                <xs:element minOccurs="0" ref="ns1:publicationStmt"/>
+                <xs:element ref="ns1:sourceDesc" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="text">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="ns1:body" minOccurs="0"/>
+                <xs:element minOccurs="0" ref="ns1:back"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="body">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="ns1:listBibl" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="listBibl">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="ns1:biblFull" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="biblFull">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="ns1:titleStmt"/>
+                <!-- ZMO : Add minOcurrs = 0 to titleStmt, homogeneously with the import schema (aofr-sword.xsd) -->
+                <xs:element minOccurs="0" ref="ns1:editionStmt"/>
+                <xs:element minOccurs="0" ref="ns1:publicationStmt"/><!-- ZMO : Add minOcurrs = 0, homogeneously with the import schema (aofr-sword.xsd) -->
+                <xs:element minOccurs="0" ref="ns1:seriesStmt"/>
+                <xs:element minOccurs="0" ref="ns1:notesStmt"/>
+                <xs:element ref="ns1:sourceDesc" minOccurs="0"/>
+                <xs:element ref="ns1:profileDesc" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="titleStmt">
+        <xs:complexType>
+            <xs:sequence> 
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:title"/>
+                <!-- ZMO : Add minOcurrs = 0 to title, homogeneously with the import schema (aofr-sword.xsd) -->
+                <!-- %%title et %%subTitle SE RETROUVE ÉGALEMENT DANS text/body/listBibl/biblFull/sourceDesc/biblStruct/analytic-->
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:author"/>
+                <!-- %%auteur(s) et affiliation(s) - SE RETROUVE ÉGALEMENT DANS text/body/listBibl/biblFull/sourceDesc/biblStruct/analytic -->
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:editor"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:funder"/>
+                <!-- %%funding, %%anrProject et %europeanProject -->
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="editor">
+        <xs:complexType mixed="true">
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="ns1:persName" minOccurs="0"/>
+                <xs:element ref="ns1:email" minOccurs="0"/>
+            </xs:choice>
+            <xs:attribute name="role" use="optional">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="depositor"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="funder">
+        <xs:complexType mixed="true">
+            <xs:attribute name="ref"/>
+            <!-- pour les projets ANR et Européen connu de HAL : ref -> #projanr-IDENTIFANT ou #projeurop-IDENTIFANT -->
+            <!-- sinon la définitions des projets se fait dans text/back : ref -> #local-IDLOCAL -->
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="editionStmt">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="ns1:edition" minOccurs="0"/>
+                <xs:element minOccurs="0" ref="ns1:respStmt"/>
+                <!-- ZMO : Add minOccurs = 0 to respStmt, to resolve the problem with docs without this element-->
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="edition">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:date"/>
+                <!-- ZMO : Add minOccurs = 0 to date, homogeneously with the import schema (aofr-sword.xsd) -->
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:ref"/>
+                <xs:element minOccurs="0" ref="ns1:fs"/>
+                <!-- ZMO : Add the FS element (Feature Structure / Generic field) in edition element to allow protails to add some additionals informations -->
+            </xs:sequence>
+            <xs:attribute name="n" use="optional" type="xs:string"/>
+            <!-- ZMO : Change the use of attribut n to optional, for the docs without this attribut-->
+            <xs:attribute name="type" use="optional">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="current"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    
+    <!-- ZMO : Elements fs (represents a feature structure, that is, a collection of feature-value pairs organized as a structural unit.), 
+                        f (represents a feature value specification, that is, the association of a name with a value of any of several different types), 
+                        string (represents the value part of a feature-value specification which contains a string),
+                        to allow protails to add some additionals informations about docs -->
+    <xs:element name="fs">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:f"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="f">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:string"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:numeric"/>
+            </xs:sequence>
+            <xs:attribute name="name" use="required" type="xs:string"/>
+            <xs:attribute name="notation"> 
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="string"/>
+                        <xs:enumeration value="numeric"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="string" type="xs:string"/>
+    <xs:element name="numeric" type="xs:decimal"/>
+    <!-- End Add By ZMO -->
+    
+    <xs:element name="respStmt">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="ns1:resp" minOccurs="0"/>
+                <xs:element maxOccurs="unbounded" ref="ns1:name" minOccurs="0"/>
+                <!-- %%conferenceOrganizer -->
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="resp" type="xs:string"/>
+    <xs:element name="name">
+        <xs:complexType mixed="true">
+            <xs:sequence minOccurs="0">
+                <xs:element ref="ns1:persName" minOccurs="0"/>
+                <xs:element ref="ns1:email" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="key" use="optional" type="xs:integer"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="publicationStmt">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="ns1:distributor"/>
+                <!-- ZMO : Add minOccurs = 0 to distributor, for docs without this element-->
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:idno"/>
+                <xs:element minOccurs="0" ref="ns1:availability"/>
+                <xs:element minOccurs="0" ref="ns1:date"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="distributor" type="xs:string"/>
+    <xs:element name="availability">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:element ref="ns1:licence" minOccurs="0"/>
+                <!-- %%licence -->
+            </xs:sequence>
+            <xs:attribute name="status" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="licence">
+        <xs:complexType mixed="true">
+            <xs:attribute name="target" type="xs:anyURI"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="seriesStmt">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:idno"/>
+                <!-- %%collection -->
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="notesStmt">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:note"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="note">
+        <xs:complexType mixed="true">
+            <xs:attribute name="n" type="xs:integer"/>
+            <xs:attribute name="type" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="commentary"/>
+                        <!-- %%comment -->
+                        <xs:enumeration value="description"/>
+                        <!-- %%description -->
+                        <xs:enumeration value="audience"/>
+                        <!-- valeur possible de l'attribut n : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:audience&wt=xml -->
+                        <xs:enumeration value="invited"/>
+                        <!-- valeur possible de l'attribut n : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:invitedCommunication&wt=xml -->
+                        <xs:enumeration value="popular"/>
+                        <!-- valeur possible de l'attribut n : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:popularLevel&wt=xml -->
+                        <xs:enumeration value="peer"/>
+                        <!-- valeur possible de l'attribut n : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:peerReviewing&wt=xml -->
+                        <xs:enumeration value="proceedings"/>
+                        <!-- valeur possible de l'attribut n : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:proceedings&wt=xml -->
+                        <xs:enumeration value="report"/>
+                        <!-- valeur possible de l'attribut n : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:reportType&wt=xml -->
+                        <xs:enumeration value="image"/>
+                        <!-- valeur possible de l'attribut n : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:imageType&wt=xml -->
+                        <xs:enumeration value="lecture"/>
+                        <!-- valeur possible de l'attribut n : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:lectureType&wt=xml -->
+                        <xs:enumeration value="degree"/>
+                        <!-- ZMO : Add Two others elements found in the import schema (aofr_sowrd.xsd)-->
+                        <xs:enumeration value="pastel_thematique"/>
+                        <!-- ZMO : valeur possible de l'attribut n : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:pastel_thematique&wt=xml -->
+                        <xs:enumeration value="pastel_library"/>
+                        <!-- ZMO : valeur possible de l'attribut n : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:pastel_library&wt=xml -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="sourceDesc">
+        <xs:complexType>
+            <xs:sequence> 
+                <!-- ZMO : Change Choice to Sequence, to cover all elements -->
+                <xs:element minOccurs="0" ref="ns1:p"/> 
+                <!-- ZMO : Add minOccurs to p, for docs without this element -->
+                <xs:element minOccurs="0" ref="ns1:biblStruct"/> 
+                <!-- ZMO : Add minOccurs to biblStruct,  for docs without this element -->
+                <xs:element minOccurs="0" ref="ns1:listPlace"/> 
+                <!-- ZMO : Add the element listPlace that can contains a list of places, optionally followed by a list of relationships. In our case, we use the element geo under the elements place/placeName/location to describe  any expression of a set of geographic coordinates, representing a point, line, or area on the surface of the earth in some notation --> 
+                <xs:element minOccurs="0" ref="ns1:recordingStmt"/>
+                <!-- ZMO : Add the element recordingStmt to describe a set of recordings of a spoken text (an audio or a video for exemple) -->
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="p">
+        <xs:complexType mixed="true">
+            <xs:attribute name="part" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="biblStruct">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="ns1:analytic" minOccurs="0"/>
+                <xs:element minOccurs="0" ref="ns1:monogr"/>
+                <xs:element minOccurs="0" ref="ns1:series"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:idno"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:ref"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:relatedItem"/>
+                <!-- ZMO : Add maxOccurs to relatedItem, homogeneously with the import schema (aofr-sword.xsd)-->
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="analytic">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="ns1:title" minOccurs="0"/>
+                <!-- %%title et %%subTitle -->
+                <xs:element maxOccurs="unbounded" ref="ns1:author" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="monogr">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:idno"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:title"/>
+                <!-- %%journal, %%bookTitle et %%source -->
+                <xs:element minOccurs="0" ref="ns1:meeting"/>
+                <xs:element minOccurs="0" ref="ns1:respStmt"/>
+                <xs:element minOccurs="0" ref="ns1:settlement"/>
+                <!-- %%city [type in PATENT,IMG,MAP,LECTURE] -->
+                <xs:element minOccurs="0" ref="ns1:country"/>
+                <!-- %%country  [type not in PATENT,IMG,MAP,LECTURE] -->
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:editor"/>
+                <!-- %%scientificEditor -->
+                <xs:element minOccurs="0" ref="ns1:imprint"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:authority"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="meeting">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="ns1:title"/>
+                <!-- %%conferenceTitle -->
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:date"/>
+                <!-- %%conferenceStartDate et %%conferenceEndDate -->
+                <xs:element minOccurs="0" ref="ns1:settlement"/>
+                <!-- %%city  [type not in PATENT,IMG,MAP,LECTURE] -->
+                <xs:element minOccurs="0" ref="ns1:country"/> 
+                <!-- ZMO : Add minOccurs = 0 to country, homogeneously with the import schema (aofr-sword.xsd) -->
+                <!-- %%country  [type not in PATENT,IMG,MAP,LECTURE] -->
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="imprint">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:publisher"/>
+                <!-- %%publisher -->
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:pubPlace"/>
+                <!-- %%publicationLocation -->
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:biblScope"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:date"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="publisher" type="xs:string"/>
+    <xs:element name="pubPlace" type="xs:string"/>
+    <xs:element name="biblScope">
+        <xs:complexType mixed="true">
+            <xs:attribute name="unit" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="serie"/>
+                        <!-- %%serie -->
+                        <xs:enumeration value="volume"/>
+                        <!-- %%volume -->
+                        <xs:enumeration value="issue"/>
+                        <!-- %%issue -->
+                        <xs:enumeration value="pp"/>
+                        <!-- %%page -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="authority">
+        <xs:complexType mixed="true">
+            <xs:attribute name="type" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="institution"/>
+                        <!-- %%authorityInstitution -->
+                        <xs:enumeration value="school"/>
+                        <!-- %%thesisSchool -->
+                        <xs:enumeration value="supervisor"/>
+                        <!-- %%director -->
+                        <xs:enumeration value="jury"/>
+                        <!-- %%committee -->
+                        <xs:enumeration value="supervisorEmail"/>
+                        <!-- %%mail director -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="series">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:editor"/>
+                <!-- %%seriesEditor -->
+                <xs:element minOccurs="0" ref="ns1:title"/>
+                <!-- %%lectureName -->
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="relatedItem">
+        <xs:complexType mixed="true">
+            <xs:attribute name="type" use="required" type="xs:string"/>
+            <!-- valeur possible de l'attribut type : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:relatedType&wt=xml -->
+            <xs:attribute name="target" use="required" type="xs:anyURI"/>
+        </xs:complexType>
+    </xs:element>
+    
+    <!-- ZMO : adding listPlace (list of places, optionally followed by a list of relationships), 
+                      place (data about a geographic location), 
+                      location (defines the location of a place as a set of geographical coordinates), 
+                      geo (contains any expression of a set of geographic coordinates, representing a point, line, or area on the surface of the earth in some notation), 
+                      to recognize the geographic coordinates of image docs in our case -->
+    <xs:element name="listPlace">
+        <xs:complexType> 
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:place"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="place">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:location"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="location">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:geo"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="geo" type="xs:string"/>
+    <!-- End Add By ZMO -->
+    
+    <!-- ZMO : adding recordingStmt (describes a set of recordings used as the basis for transcription of a spoken text),
+                      recording ( provides details of an audio or video recording event used as the source of a spoken text, either directly or from a public broadcast), 
+                      to describe duration of audio and video docs in our case-->
+    <xs:element name="recordingStmt">
+        <xs:complexType> 
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:recording"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="recording">
+        <xs:complexType> 
+            <xs:attribute name="type" default="video">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="video"/>
+                        <xs:enumeration value="audio"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="dur" type="xs:string"/> <!-- To Be replaced by the attribute below, but not for know -->
+            <!--<xs:attribute name="dur">
+                <xs:simpleType>
+                    <xs:restriction base='xs:duration'> 
+                        <xs:pattern value='PT\p{Nd}{2}H\p{Nd}{2}M\p{Nd}{2}S'/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>-->
+        </xs:complexType>
+    </xs:element>
+    <!-- End Add By ZMO --> 
+      
+    <xs:element name="profileDesc">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="ns1:langUsage" minOccurs="0"/>
+                <xs:element minOccurs="0" ref="ns1:textClass"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:abstract"/>
+                <xs:element minOccurs="0" ref="ns1:particDesc"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="langUsage">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="ns1:language" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="language">
+        <xs:complexType mixed="true">
+            <xs:attribute name="ident" use="required" type="xs:string"/>
+            <!-- %%language -->
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="textClass">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="ns1:keywords"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:classCode"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="keywords">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="ns1:term" minOccurs="0"/>
+                <!-- %%keyword -->
+            </xs:sequence>
+            <xs:attribute name="scheme" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="author"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="term">
+        <xs:complexType mixed="true">
+            <xs:attribute ref="xml:lang" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="classCode">
+        <xs:complexType mixed="true">
+            <xs:attribute name="n" type="xs:string"/>
+            <xs:attribute name="scheme" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="classification"/>
+                        <!-- %%classification -->
+                        <xs:enumeration value="acm"/>
+                        <!-- %%classification ACM -->
+                        <xs:enumeration value="mesh"/>
+                        <!-- %%classification MESH -->
+                        <xs:enumeration value="jel"/>
+                        <!-- %%classification JEL -->
+                        <xs:enumeration value="halDomain"/>
+                        <!-- %%domain HAL : http://api-preprod.archives-ouvertes.fr/ref/domain/?wt=wml -->
+                        <xs:enumeration value="halTypology"/>
+                        <!-- %%type HAL : http://api-preprod.archives-ouvertes.fr/ref/typdoc/?wt=xml -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="abstract">
+        <!-- %%abstract -->
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="ns1:p" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute ref="xml:lang" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="particDesc">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="ns1:org" minOccurs="0"/>
+                <!-- %%collaboration -->
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="back">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="ns1:listOrg" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="listOrg">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="ns1:org" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="type" use="required">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="structures"/>
+                        <xs:enumeration value="projects"/>
+                        <xs:enumeration value="laboratories"/>
+                        <!-- ZMO : Add this enumeration of the value laboratories, homogeneously with the import schema (aofr-sword.xsd) -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="title">
+        <xs:complexType mixed="true">
+            <xs:attribute name="level" type="xs:string" use="optional"/>
+            <xs:attribute name="type" type="xs:string" use="optional"/>
+            <xs:attribute ref="xml:lang" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="author">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="ns1:persName"/>
+                <xs:element minOccurs="0" ref="ns1:email"/>
+                <xs:element minOccurs="0" ref="ns1:ptr"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:idno"/>
+                <xs:element minOccurs="0" ref="ns1:orgName"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:affiliation"/>
+            </xs:sequence>
+            <xs:attribute name="role" use="required" type="xs:string"/>
+            <!-- valeur possible de l'attribut n : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:relator&wt=xml -->
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="persName">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="ns1:forename" minOccurs="0"/>
+                <xs:element ref="ns1:surname" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="forename">
+        <xs:complexType mixed="true">
+            <xs:attribute name="type">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="first"/>
+                        <xs:enumeration value="middle"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="surname" type="xs:string"/>
+    <xs:element name="email"> <!-- ZMO : Add the attribute n to the element email to differentiate real email and MD5 -->
+        <xs:complexType mixed="true">
+            <xs:attribute name="n" use="optional" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="ptr">
+         <xs:complexType>
+             <xs:attribute name="type" use="required">
+                 <xs:simpleType>
+                     <xs:restriction base="xs:string">
+                         <xs:enumeration value="url"/>
+                     </xs:restriction>
+                 </xs:simpleType>
+             </xs:attribute>
+             <xs:attribute name="target" use="required" type="xs:string"/>
+         </xs:complexType>
+     </xs:element>
+    <xs:element name="affiliation">
+        <xs:complexType>
+            <xs:attribute name="ref" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="date">
+        <xs:complexType mixed="true">
+            <xs:attribute name="notBefore" type="xs:date"/>
+            <!-- %%embargo sur chaque fichier -->
+            <xs:attribute name="type">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="whenWritten"/>
+                        <!-- %%writingDate -->
+                        <xs:enumeration value="start"/>
+                        <xs:enumeration value="end"/>
+                        <xs:enumeration value="datePub"/>
+                        <xs:enumeration value="dateDefended"/>
+                        <xs:enumeration value="dateEpub"/>
+                        <xs:enumeration value="whenSubmitted"/>
+                        <xs:enumeration value="whenModified"/>
+                        <xs:enumeration value="whenReleased"/>
+                        <xs:enumeration value="whenProduced"/>
+                        <xs:enumeration value="whenEndEmbargoed"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="when" type="xs:string"/>
+            <xs:attribute use="optional" name="precision"> <!-- ZMO : Circa -->
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="unknown"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="ref">
+        <xs:complexType mixed="true">
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="ns1:date" minOccurs="0"/>
+                <xs:element ref="ns1:desc" minOccurs="0"/>
+            </xs:choice>
+            <xs:attribute name="n" type="xs:string" use="optional"/>
+            <!-- valeur possible : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:typeAnnex&wt=xml -->
+            <xs:attribute name="subtype" type="xs:string" use="optional"/>
+            <!-- valeur possible : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:fileSource&wt=xml -->
+            <xs:attribute name="target" use="optional" type="xs:string"/>
+            <xs:attribute name="type" use="required" type="xs:string"/>
+            <!-- valeur possible : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:fileType&wt=xml -->
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="idno">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:i"/>
+            </xs:sequence>
+            <xs:attribute name="n" type="xs:string"/>
+            <xs:attribute name="corresp" type="xs:string"/>
+            <!-- l'attribut "p" est obsolete et remplace par l'attribut "corresp" -->
+            <xs:attribute name="p" type="xs:string"/>
+            <xs:attribute name="status" type="xs:string"/>
+            <xs:attribute name="type" use="required" type="xs:string"/>
+            <xs:attribute name="notation"> <!-- ZMO : Add the attribute notation to allow the writing of idhal in string or numeric form -->
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="string"/>
+                        <xs:enumeration value="numeric"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="i" type="xs:string"/>
+    <xs:element name="settlement" type="xs:string"/>
+    <xs:element name="country">
+        <xs:complexType mixed="true">
+            <xs:attribute name="key" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="org">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                    <xs:element ref="ns1:desc" minOccurs="0"/>
+                    <xs:element ref="ns1:idno" minOccurs="0"/>
+                    <xs:element ref="ns1:orgName" minOccurs="0"/>
+                    <xs:element ref="ns1:date" minOccurs="0"/>
+                </xs:choice>
+                <xs:choice>
+                    <xs:element minOccurs="0" ref="ns1:listRelation"/>
+                </xs:choice>
+            </xs:sequence>
+            <xs:attribute name="status" type="xs:string"/>
+            <xs:attribute name="type" use="required" type="xs:string"/>
+            <xs:attribute use="optional" ref="xml:id"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="listRelation">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="ns1:relation" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="relation">
+        <xs:complexType>
+            <xs:attribute name="type" type="xs:string"/>
+            <xs:attribute name="name" type="xs:string"/>
+            <xs:attribute name="active" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="orgName">
+        <xs:complexType mixed="true">
+            <xs:attribute name="ref"/>
+            <xs:attribute name="type" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="desc">
+        <xs:complexType mixed="true">
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="ns1:ref" minOccurs="0"/>
+                <xs:element ref="ns1:address" minOccurs="0"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="address">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="ns1:addrLine"/>
+                <xs:element ref="ns1:country" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="addrLine" type="xs:string"/>
+</xs:schema>

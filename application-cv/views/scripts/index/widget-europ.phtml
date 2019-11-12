@@ -1,0 +1,36 @@
+<?php
+
+$europs = $this->cv->getFacetEurop();
+if (count($europs)) {
+    $europids = isset($filters['europeanProjectId_i']) && is_array($filters['europeanProjectId_i']) ? array_keys($filters['europeanProjectId_i']) : array();
+    $listPrinc = $listSec = '';
+    $count = 0;
+    foreach ($europs as $europ) {
+        $link = $href;
+        if ( (isset($anr['europeanProjectId_i'])) && (in_array($europ['europeanProjectId_i'], $europids)) ) {
+            $filters['europeanProjectId_i'][$europ['europid']]['value'] = $europ['name'];
+        } else {
+            $link .= '/europeanProjectId_i/' . $europ['europid'];
+        }
+        $elem = '<li><a href="' . $link . '" >' . $europ['name'] . ' <span class="badge badge-default">' . $europ['nbdoc'] . '</span></a></li>';
+        if ($count < 10) {
+            $listPrinc .= $elem;
+        } else {
+            $listSec   .= $elem;
+        }
+        $count ++;
+    }
+    $content = '<div class="europ">';
+    $content .= '   <ul>' . $listPrinc . '</ul>';
+    if ($listSec != '') {
+        $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste complète") . '</a></div>';
+        $content .= '</div>';
+        $content .= '<div class="europ-list" style="display:none;">';
+        $content .= '   <div class="overflow"><ul>' . $listPrinc . $listSec . '</ul></div>';
+        $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste principale") . '</a></div>';
+    }
+    $content .= '</div>';
+
+    echo $this->widget(array('title' => $this->translate('cv_widget_europ'), 'content' => $content, 'class' => 'widget-'.'europ'));
+}
+

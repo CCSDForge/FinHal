@@ -1,0 +1,71 @@
+<?php 
+/* @var $plugin Aurehal_Acl_Plugin */
+$plugin = Zend_Controller_Front::getInstance()->getPlugin('Aurehal_Acl_Plugin');
+
+/* @var $paginator Zend_Paginator */
+$paginator = $this->paginator;
+
+if ($paginator) {
+
+if ($paginator->getTotalItemCount()) {
+	$canReplace = false;
+	foreach ($this->paginator as $row) {
+		$canReplace = ("VALID" != $row[$this->columns['valid']]) || $canReplace;
+	}
+	
+	if ('author' == $this->controllerName) {
+		$canReplace = true;
+	}
+?>
+
+
+	
+<?php //include __DIR__ . "/../partials/paginationControl.phtml"; ?>
+		
+    	<div class='row'>
+    		<div class='col-md-12'>
+
+			    	<table class="table table-condensed">
+			   	 		<thead>
+						    <tr>
+						        <th></th>
+						        <?php
+			        foreach ($this->head_columns as $col) {
+			        ?>
+			        <th><?php echo $this->translate($col);?></th>
+			        <?php 
+			        }
+			        ?>
+			    </tr>
+		    </thead>
+		    <tbody>
+		    
+		    <?php 
+		    $this->isBrowsing = true; 
+		    include __DIR__ . "/../structure/ajax_row.phtml"; 
+		    ?>
+				    
+				    </tbody>
+			    </table>
+		
+    	</div>
+    </div>
+    
+	<?php //include __DIR__ . "/../partials/paginationControl.phtml"; ?>
+	
+		
+<?php 
+} else {
+?>
+	
+<div class='row'>
+	<div class='col-md-12'>	
+		<div class='alert alert-info'>
+		<?php echo $this->translate("Aucun résultat retourné.") ?>
+		</div>
+	</div>
+</div>
+
+<?php 
+}
+}

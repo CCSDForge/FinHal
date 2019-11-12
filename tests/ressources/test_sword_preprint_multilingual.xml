@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:hal="http://hal.archives-ouvertes.fr/">
+  <text>
+    <body>
+      <listBibl>
+        <biblFull>
+          <titleStmt>
+            <title xml:lang="en">Teaching Core Subjects in Chinese:
+            A Strategy for Chinese as a Second Language</title>
+            <title xml:lang="zh">用汉语教授一门科目对外汉语教学的一种策略</title>
+            <author role="aut">
+              <persName>
+                <forename type="first">Rémi</forename>
+                <surname>Anicotte</surname>
+              </persName>
+              <email type="md5">
+              79ddaf84150d08a676f6f8d99eb337fd</email>
+              <email type="domain">yahoo.com</email>
+              <ptr type="url"
+              target="http://crlao.ehess.fr/index.php?1391"></ptr>
+              <idno type="idhal" notation="string">
+              remi-anicotte</idno>
+              <idno type="idhal" notation="numeric">10369</idno>
+              <idno type="halauthorid">1059798</idno>
+              <idno type="ORCID">
+              http://orcid.org/0000-0001-9397-1479</idno>
+              <affiliation ref="#struct-1324"></affiliation>
+            </author>
+            <editor role="depositor">
+              <persName>
+                <forename>Rémi</forename>
+                <surname>Anicotte</surname>
+              </persName>
+              <email type="md5">
+              79ddaf84150d08a676f6f8d99eb337fd</email>
+              <email type="domain">yahoo.com</email>
+            </editor>
+          </titleStmt>
+          <editionStmt>
+            <edition n="v1">
+              <date type="whenSubmitted">2014-07-25 22:23:34</date>
+            </edition>
+            <edition n="v2">
+              <date type="whenSubmitted">2014-09-03 11:04:19</date>
+            </edition>
+            <edition n="v3" type="current">
+              <date type="whenSubmitted">2016-11-21 14:08:49</date>
+              <date type="whenWritten">2012-11-01</date>
+              <date type="whenModified">2017-04-07 01:03:50</date>
+              <date type="whenReleased">2016-11-21 17:00:33</date>
+              <date type="whenProduced">2012-11-01</date>
+              <date type="whenEndEmbargoed">2016-11-21</date>
+              <ref type="file"
+              target="https://hal.archives-ouvertes.fr/hal-01052438v3/document">
+
+                <date notBefore="2016-11-21"></date>
+              </ref>
+              <ref type="file" subtype="author" n="1"
+              target="https://hal.archives-ouvertes.fr/hal-01052438/file/Anicotte%202012_Yong%20hanyu%20jiaoshou%20yimen%20kemu_dui%20wai%20hanyu%20de%20yizhong%20celue_postprint%20%281%29.pdf">
+
+                <date notBefore="2016-11-21"></date>
+              </ref>
+              <ref type="file" subtype="author" n="0"
+              target="https://hal.archives-ouvertes.fr/hal-01052438/file/Anicotte%202012_Yong%20hanyu%20jiaoshou%20yimen%20kemu_dui%20wai%20hanyu%20de%20yizhong%20celue_postprint.pdf">
+
+                <date notBefore="2016-11-21"></date>
+              </ref>
+            </edition>
+            <respStmt>
+              <resp>contributor</resp>
+              <name key="200628">
+                <persName>
+                  <forename>Rémi</forename>
+                  <surname>Anicotte</surname>
+                </persName>
+                <email type="md5">
+                79ddaf84150d08a676f6f8d99eb337fd</email>
+                <email type="domain">yahoo.com</email>
+              </name>
+            </respStmt>
+          </editionStmt>
+          <publicationStmt>
+            <distributor>CCSD</distributor>
+            <idno type="halId">hal-01052438</idno>
+            <idno type="halUri">
+            https://hal.archives-ouvertes.fr/hal-01052438</idno>
+            <idno type="halBibtex">anicotte:hal-01052438</idno>
+            <idno type="halRefHtml">&lt;i&gt;数学通报&lt;/i&gt;, 2012,
+            51 (11), pp.11-16</idno>
+            <idno type="halRef">数学通报, 2012, 51 (11),
+            pp.11-16</idno>
+            <availability status="restricted">
+              <licence target="http://creativecommons.org/licenses/by/">
+              Attribution</licence>
+            </availability>
+          </publicationStmt>
+          <seriesStmt>
+            <idno type="stamp" n="TICE">Bibliothèque TICE</idno>
+            <idno type="stamp" n="CNRS">CNRS - Centre national de
+            la recherche scientifique</idno>
+            <idno type="stamp" n="EHESS">Ecole des Hautes Etudes en
+            Sciences Sociales</idno>
+            <idno type="stamp" n="INSMI">CNRS-INSMI - INstitut des
+            Sciences Mathématiques et de leurs Interactions</idno>
+            <idno type="stamp" n="INALCO">Institut national des
+            langues et civilisations orientales</idno>
+            <idno type="stamp" n="SHS">Sciences de l'Homme et de la
+            Société</idno>
+            <idno type="stamp" n="CRLAO">Centre de Recherches
+            Linguistiques sur l'Asie Orientale</idno>
+            <idno type="stamp" n="PSL">Paris Sciences et Lettres
+            (PSL) Research University</idno>
+            <idno type="stamp" n="USPC">Université Sorbonne Paris
+            Cité</idno>
+          </seriesStmt>
+          <notesStmt>
+            <note type="audience" n="2">International</note>
+            <note type="popular" n="1">Yes</note>
+            <note type="peer" n="1">Yes</note>
+          </notesStmt>
+          <sourceDesc>
+            <biblStruct>
+              <analytic>
+                <title xml:lang="en">Teaching Core Subjects in
+                Chinese: A Strategy for Chinese as a Second
+                Language</title>
+                <title xml:lang="zh">用汉语教授一门科目对外汉语教学的一种策略</title>
+                <author role="aut">
+                  <persName>
+                    <forename type="first">Rémi</forename>
+                    <surname>Anicotte</surname>
+                  </persName>
+                  <email type="md5">
+                  79ddaf84150d08a676f6f8d99eb337fd</email>
+                  <email type="domain">yahoo.com</email>
+                  <ptr type="url"
+                  target="http://crlao.ehess.fr/index.php?1391">
+                  </ptr>
+                  <idno type="idhal" notation="string">
+                  remi-anicotte</idno>
+                  <idno type="idhal" notation="numeric">
+                  10369</idno>
+                  <idno type="halauthorid">1059798</idno>
+                  <idno type="ORCID">
+                  http://orcid.org/0000-0001-9397-1479</idno>
+                  <affiliation ref="#struct-1324"></affiliation>
+                </author>
+              </analytic>
+              <monogr>
+                <idno type="halJournalId" status="INCOMING">
+                96043</idno>
+                <title level="j">数学通报</title>
+                <imprint>
+                  <biblScope unit="volume">51</biblScope>
+                  <biblScope unit="issue">11</biblScope>
+                  <biblScope unit="pp">11-16</biblScope>
+                  <date type="datePub">2012-11-01</date>
+                </imprint>
+              </monogr>
+            </biblStruct>
+          </sourceDesc>
+          <profileDesc>
+            <langUsage>
+              <language ident="zh">Chinese</language>
+            </langUsage>
+            <textClass>
+              <keywords scheme="author">
+                <term xml:lang="en">Bilingual education</term>
+                <term xml:lang="en">Mathematics teaching</term>
+                <term xml:lang="en">Chinese as a second
+                language</term>
+                <term xml:lang="zh">数学教学</term>
+                <term xml:lang="zh">双语教育</term>
+                <term xml:lang="zh">对外汉语教学</term>
+              </keywords>
+              <classCode scheme="halDomain" n="shs.edu">Humanities
+              and Social Sciences/Education</classCode>
+              <classCode scheme="halDomain" n="math.math-ho">
+              Mathematics [math]/History and Overview
+              [math.HO]</classCode>
+              <classCode scheme="halTypology" n="ART">Journal
+              articles</classCode>
+            </textClass>
+            <abstract xml:lang="en">The teaching of a core subject
+            as mathematics has been implemeted for advanced
+            students of Chinese in the French educational
+            system.</abstract>
+            <abstract xml:lang="zh">
+            多样的教学设置方案根据不同的学生人群或教学目标开设了有针对性的课程。本文介绍法国国民教育部设置的东方班和国际班两个对外汉语教学项目。其特点是开设了用汉语教授的数学课程，具有需要协调的双重目标：第一是强化学生的汉语理解与表达能力，第二是传授科目专业知识与技能。</abstract>
+          </profileDesc>
+        </biblFull>
+      </listBibl>
+    </body>
+    <back>
+      <listOrg type="structures">
+        <org type="laboratory" xml:id="struct-1324" status="VALID">
+          <idno type="IdRef">028948327</idno>
+          <idno type="ISNI">0000000121656461</idno>
+          <idno type="RNSR">199812891A</idno>
+          <orgName>Centre de Recherches Linguistiques sur l'Asie
+          Orientale</orgName>
+          <orgName type="acronym">CRLAO</orgName>
+          <date type="start">1971</date>
+          <desc>
+            <address>
+              <addrLine>105, boulevard Raspail, 75006,
+              PARIS</addrLine>
+              <country key="FR" />
+            </address>
+            <ref type="url">http://crlao.ehess.fr/</ref>
+          </desc>
+          <listRelation>
+            <relation active="#struct-99539" type="direct" />
+            <relation name="UMR8563" active="#struct-300064"
+            type="direct" />
+            <relation name="UMR8563" active="#struct-441569"
+            type="direct" />
+          </listRelation>
+        </org>
+        <org type="institution" xml:id="struct-99539"
+        status="VALID">
+          <orgName>École des hautes études en sciences
+          sociales</orgName>
+          <orgName type="acronym">EHESS</orgName>
+          <desc>
+            <address>
+              <addrLine>54, boulevard Raspail 75006
+              Paris</addrLine>
+              <country key="FR" />
+            </address>
+            <ref type="url">http://www.ehess.fr/</ref>
+          </desc>
+        </org>
+        <org type="institution" xml:id="struct-300064"
+        status="VALID">
+          <idno type="IdRef">026388715</idno>
+          <idno type="ISNI">0000000121884202</idno>
+          <orgName>Institut National des Langues et Civilisations
+          Orientales</orgName>
+          <orgName type="acronym">Inalco</orgName>
+          <date type="start">1971</date>
+          <desc>
+            <address>
+              <addrLine>65, rue des Grands Moulins, 75013, PARIS.2,
+              rue de Lille, 75007, PARIS.</addrLine>
+              <country key="FR" />
+            </address>
+            <ref type="url">http://www.inalco.fr/</ref>
+          </desc>
+        </org>
+        <org type="institution" xml:id="struct-441569"
+        status="VALID">
+          <idno type="IdRef">02636817X</idno>
+          <idno type="ISNI">0000000122597504</idno>
+          <orgName>Centre National de la Recherche
+          Scientifique</orgName>
+          <orgName type="acronym">CNRS</orgName>
+          <date type="start">1939-10-19</date>
+          <desc>
+            <address>
+              <country key="FR" />
+            </address>
+            <ref type="url">http://www.cnrs.fr/</ref>
+          </desc>
+        </org>
+      </listOrg>
+    </back>
+  </text>
+</TEI>

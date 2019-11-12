@@ -1,0 +1,111 @@
+<?php
+
+if (Hal_Auth::isLogged()) {
+    /* @var $user Hal_User */
+    $user = Hal_Auth::getInstance()->getIdentity();
+    $userFirstName = $this->escape($user->getFirstname());
+    $userLastName = $this->escape($user->getLastname());
+} else {
+    $userFirstName = '';
+    $userLastName = '';
+}
+
+
+if ($this->first != '') {
+    $first = $this->escape($this->first);
+} elseif ($userFirstName != '') {
+    $first = $userFirstName;
+} else {
+    $first = '';
+}
+
+if ($this->last != '') {
+    $last = $this->escape($this->last);
+} elseif ($userLastName != '') {
+    $last = $userLastName;
+} else {
+    $last = '';
+}
+
+if ($this->type != '') {
+    $type = $this->escape($this->type);
+}
+?>
+<form class="form-horizontal" action="/crac/search" method="get" enctype="application/x-www-form-urlencoded">
+
+    <div class="row">
+        <div class="col-md-5">
+
+            <fieldset>
+                <legend>Auteur</legend>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Prénom</label>
+                    <div class="col-sm-10">
+                        <input style="width:75%" type="text" class="form-control" name="first" required minlength="1"
+                               maxlength="100" value="<?php echo $first; ?>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Nom de famille</label>
+                    <div class="col-sm-10">
+                        <input style="width:75%" type="text" class="form-control" name="last" required minlength="2"
+                               maxlength="100" value="<?php echo $last; ?>">
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+
+        <div class="col-md-7">
+            <div class="form-group">
+
+
+                <fieldset>
+                    <legend>Type de publication</legend>
+
+                    <label class="control-label">
+                        <input type="radio" name="type[]" value="peer-true" required <?php if ($type == 'peer-true') {
+                            echo ' checked="checked"';
+                        } ?>>
+                        Publication(s), parue(s) ou à paraître, dans des revues ou des actes de congrès, <em>avec</em>
+                        comité de lecture.
+                    </label>
+
+            </div>
+
+
+            <div class="form-group">
+                <label class="control-label">
+                    <input type="radio" name="type[]" value="peer-false" required <?php if ($type == 'peer-false') {
+                        echo ' checked="checked"';
+                    } ?>>
+                    Publication(s), parue(s) ou à paraître, dans des revues ou des actes de congrès, <em>sans</em>
+                    comité de lecture.
+                </label>
+
+            </div>
+
+
+            <div class="form-group">
+                <label class="control-label">
+                    <input type="radio" name="type[]" value="books" required <?php if ($type == 'books') {
+                        echo ' checked="checked"';
+                    } ?>>
+                    Ouvrages ou chapitre d’ouvrage(s) parus(s) ou sous presse
+                </label>
+            </div>
+            </fieldset>
+
+        </div>
+
+
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+
+            <button class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span>&nbsp;Rechercher</button>
+        </div>
+
+    </div>
+</form>

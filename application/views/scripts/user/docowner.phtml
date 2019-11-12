@@ -1,0 +1,469 @@
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+    <?php if (count($this->ownershipClaim) > 0) {  ?>
+        <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingThree">
+                <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        <?php echo $this->translate("Demandes de propriété reçues");?>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseThree" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingThree">
+                <div class="panel-body">
+                    <blockquote><?php echo $this->translate("Acceptez/refusez les demandes de propriété faites pour vos dépôts");?></blockquote>
+                    <?php
+                    $document = new Hal_Document();
+                    $user = new Hal_User();
+                    ?>
+                    <div id="claim" class="well">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th><?php echo $this->translate('Utilisateur'); ?></th>
+                                <th><?php echo $this->translate('Document'); ?></th>
+                                <th class="text-right"><?php echo $this->translate('Actions'); ?></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            foreach ($this->ownershipClaim as $request) {
+                                $document->setDocid($request['DOCID']);
+                                $document->load();
+                                $user->find($request['UID']);
+                                ?>
+                                <tr id="claim-<?php echo $request['DOCID']?>-<?php echo $request['UID']?>">
+                                    <td style="vertical-align:middle">
+                                        <img class="user-photo-thumb" alt="Photo de l'utilisateur" src="<?php echo  CV_URL . '/photo/' . $request['UID'] . '/thumb'; ?>" style="width:16px;"/>
+                                        <?php echo $user->getFullName(); ?>
+                                    </td>
+                                    <td style="vertical-align:middle"><?php echo $document->getCitation('full'); ?></td>
+                                    <td style="vertical-align:middle" class="text-right">
+                                        <button type="button" class="btn btn-primary btn-xs" onclick="acceptClaim(<?php echo $request['DOCID']?>, <?php echo $request['UID']?>);">
+                                            <i class="glyphicon glyphicon-ok"></i>&nbsp;
+                                            <?php echo $this->translate('Accepter'); ?>
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-xs" onclick="refusedClaim(<?php echo $request['DOCID']?>, <?php echo $request['UID']?>);">
+                                            <i class="glyphicon glyphicon-remove"></i>&nbsp;
+                                            <?php echo $this->translate('Refuser'); ?>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
+                        </table>
+                        <hr />
+                    </div>
+                    <script language="Javascript">
+                        //<!--
+                        /**
+                         * Refus d'une demande
+                         * @param docid
+                         * @param uid
+                         */
+                        function refusedClaim(docid,uid)
+                        {
+                            sentClaim(docid,uid, 0);
+                        }
+                        /**
+                         * Acceptation d'une demande
+                         * @param docid
+                         * @param uid
+                         */
+                        function acceptClaim(docid,uid)
+                        {
+                            sentClaim(docid,uid, 1);
+                        }
+
+                        /**
+                         * Envoi de la demande
+                         * @param docid
+                         * @param uid
+                         * @param type
+                         */
+                        function sentClaim(docid,uid,accept)
+                        {
+                            $.ajax({
+                                url: "/user/docowner",
+                                type: "post",
+                                data: {docid: docid, uid: uid, accept: accept},
+                                success: function( data ) {
+                                    $('#claim-' + docid + '-' + uid).remove();
+                                    if ($('#claim>table>tbody>tr').length == 0) {
+                                        $('#claim').hide();
+                                    }
+                                }
+                            });
+                        }
+
+                        //-->
+
+                    </script>
+                </div>
+            </div>
+        </div>
+    <?php } ?>
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne">
+            <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                    <?php echo $this->translate("Partager la propriété d'un dépôt");?>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+            <div class="panel-body">
+                <blockquote><?php echo $this->translate("Vous pouvez partager la propriété de vos dépôts avec d'autres utilisateurs");?></blockquote>
+                <?php if (isset($this->docid) || (isset($this->userDocids) || count($this->userDocids) == 0)) { ?>
+                    <form action="/user/docowner" method="post" id="share-doc">
+                        <input type="hidden" name="accept" value="accept" />
+                        <input type="hidden" name="uid" value="" />
+                        <?php if (isset($this->ownershipState) && key($this->ownershipState) != 0){?>
+                            <table id="myselect" class="table">
+                                <thead>
+                                <tr>
+                                    <th><?php echo $this->translate('Sélectionner le(s) document(s)'); ?></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td style="vertical-align:middle;width:50%;">
+                                        <div class="panel-body panel-articles" style="overflow:auto;max-height:400px;">
+                                            <?php if (count($this->ownershipState) > 2) { ?>
+                                                <div class="input-group">
+                                        <span class="input-group-addon" style="border-left-width: 0px; padding-left: 0px; border-bottom-width: 0px; border-top-width: 0px; background-color: inherit;">
+                                            <input type="checkbox" onchange="if ($(this).is(':checked')) {$(this).closest('div.panel-articles').find('table.table-striped tbody tr td input.checkbox-docid').prop( 'checked', true );}
+                                            else{$(this).closest('div.panel-articles').find('table.table-striped tbody tr td input.checkbox-docid').prop( 'checked', false );;}">
+                                        </span>
+                                                    <input type="text" readonly="readonly" disabled='disabled' value="Tous/Aucun" class="form-control" style="border-width: 0px; background-color: inherit;">
+                                                </div>
+                                            <?php }?>
+                                            <table class="table table-striped" id="ownselect">
+                                                <tbody>
+                                                <?php
+                                                foreach ($this->ownershipState as $docid => $check) {
+                                                    if ($check == 'checked'){
+                                                        $document = Hal_Document::find($docid);
+                                                        $checked = false;
+                                                        if ($checked = $check == 'checked') {
+                                                            $this->ownershipState[$docid] = 'traited';
+                                                        }
+                                                        ?>
+                                                        <tr>
+                                                            <td width="15px">
+                                                                <input type="checkbox" name="docid[]" value="<?php echo $document->getDocid() ?>" id="docid_<?php echo $document->getDocid() ?>" class="checkbox-docid" <?php echo($checked ? 'checked="checked"' : '') ?>/>
+                                                            </td>
+                                                            <td>
+                                                                <?php if ($document->getTypeSubmit() == Hal_Document::FORMAT_FILE || $document->getTypeSubmit() == Hal_Document::FORMAT_ANNEX) { ?>
+                                                                    <i class="glyphicon glyphicon-file" title="<?php echo $this->translate($document->getTypeSubmit()) ?>"></i>&nbsp;
+                                                                <?php } ?>
+                                                                <?php echo $document->getCitation('full'); ?>
+                                                                <?php if ($checked) { ?>
+                                                                    <script type="text/javascript">
+                                                                        $(document).ready(function () {
+                                                                            $("input[value='<?php echo $document->getDocid() ?>']").focus();
+                                                                        });
+                                                                    </script>
+                                                                <?php } ?>
+                                                            </td>
+                                                        </tr>
+                                                        <?php
+                                                    }
+                                                }
+                                                ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <a href="" id="showhide" onclick="toggleDoc()">- <?php echo $this->translate("Afficher/Cacher mes dépôts");?></a>
+                            <script>
+                                function toggleDoc(){
+                                    event.preventDefault();
+                                    if ($("#mydeposit").is(':visible')){
+                                        $("#mydeposit").fadeOut('fast');
+                                    } else {
+                                        $("#mydeposit").fadeIn('fast');
+                                    }
+                                }
+                            </script>
+                        <?php }?>
+                        <table id="mydeposit" class="table" <?php if(isset($this->ownershipState) && key($this->ownershipState) != 0) { ?> style="display:none;"<?php }?>>
+                            <thead>
+                            <tr>
+                                <th><?php echo $this->translate('Sélectionner le(s) document(s)'); ?></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td style="vertical-align:middle;width:50%;">
+                                    <div class="panel-body panel-articles" style="overflow:auto;max-height:400px;">
+                                        <?php if ((isset($this->docid)) || (count($this->userDocids) < 1000)) { ?>
+                                            <div class="input-group">
+                                        <span class="input-group-addon" style="border-left-width: 0px; padding-left: 0px; border-bottom-width: 0px; border-top-width: 0px; background-color: inherit;">
+                                            <input type="checkbox" onchange="if ($(this).is(':checked')) {$(this).closest('div.panel-articles').find('table.table-striped tbody tr td input.checkbox-docid').prop( 'checked', true );}
+                                            else{$(this).closest('div.panel-articles').find('table.table-striped tbody tr td input.checkbox-docid').prop( 'checked', false );;}">
+                                        </span>
+                                                <input type="text" readonly="readonly" disabled='disabled' value="Tous/Aucun" class="form-control" style="border-width: 0px; background-color: inherit;">
+                                            </div>
+                                        <?php }?>
+                                        <table class="table table-striped" id="ownsub">
+                                            <tbody>
+                                            <?php $docids = array();?>
+                                            <?php if (isset($this->docid)) {
+                                                $document = Hal_Document::find($this->docid);?>
+                                                <input type="hidden" name="docid" value="<?php echo $document->getDocid() ?>"/>
+                                                <?php echo $document->getCitation('full'); ?>
+                                                <?php $this->ownershipState[$this->docid] = 'traited'; ?>
+                                            <?php } else { ?>
+                                                <?php
+                                                if (count($this->userDocids) < 1000) {
+                                                    foreach($this->userDocids as $i => $doc) {
+                                                        if ($i < 20) {
+                                                            $document = Hal_Document::find($doc['docid']);
+                                                            $checked = false;
+                                                            if (isset($this->docid)) {
+                                                                $checked = $this->docid == $document->getDocid();
+                                                            } else if (isset($this->ownershipState[$doc['docid']])) {
+                                                                if ($checked = $this->ownershipState[$doc['docid']] == 'checked') {
+                                                                    $this->ownershipState[$doc['docid']] = 'traited';
+                                                                }
+                                                            } ?>
+                                                            <tr>
+                                                                <td width="15px"><input type="checkbox" name="docid[]" value="<?php echo $document->getDocid() ?>" id="docid_<?php echo $document->getDocid() ?>" class="checkbox-docid" <?php echo ($checked ? 'checked="checked"' : '') ?>/></td>
+                                                                <td>
+                                                                    <?php if ($document->getTypeSubmit() == Hal_Document::FORMAT_FILE || $document->getTypeSubmit() == Hal_Document::FORMAT_ANNEX) { ?>
+                                                                        <i class="glyphicon glyphicon-file" title="<?php echo $this->translate($document->getTypeSubmit())?>"></i>&nbsp;
+                                                                    <?php } ?>
+                                                                    <?php echo $document->getCitation('full'); ?>
+                                                                    <?php if ($checked) { ?>
+                                                                        <script type="text/javascript">
+                                                                            $(document).ready(function(){
+                                                                                $("input[value='<?php echo $document->getDocid() ?>']").focus();
+                                                                            });
+                                                                        </script>
+                                                                    <?php } ?>
+                                                                </td>
+                                                            </tr>
+                                                            <?php
+                                                        } else {
+                                                            $docids[] = $doc['docid'];
+                                                        }
+                                                    }
+                                                } else {?>
+                                                    <span>
+                                                            <?php echo $this->translate('Vous avez plus de 1000 dépôts. Pour accélérer le chargement de la page, ils ne seront pas affichés.'); ?><br>
+                                                        <?php echo $this->translate('Vous pouvez partager la propriété d\'un document en indiquant son identifiant.'); ?>
+                                                        </span>
+                                                <?php }?>
+                                            <?php } ?>
+                                            </tbody>
+                                        </table>
+                                        <script type="text/javascript">
+                                            <?php
+                                            if (count($docids)) {
+                                            foreach(array_chunk($docids, 100) as $i => $docs) {
+                                            ?>
+                                            $.ajax({
+                                                type: "post",
+                                                url: "/user/ajaxdocowner",
+                                                data: { docids: [<?php echo implode(', ', $docs)?> ] }
+                                            }).done(function( data ) {
+                                                $('#ownsub tbody').append(data);
+                                            });
+                                            <?php
+                                            }
+                                            }
+                                            ?>
+                                        </script>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <table class="table table-striped table-hover table-condensed">
+                                            <tbody>
+                                            <tr>
+                                                <td colspan="3">
+                                                    <strong>
+                                                        <input type="checkbox" class="checkbox-docid" name="docid[]" id="docid[]" value="0" />&nbsp;
+                                                        <?php echo $this->translate('Identifiant du document') ?>&nbsp;<input type="text" name="identifiant" autocomplete="off" onfocus="$(this).prevAll('input:checkbox').click();" />&nbsp;
+                                                        <?php echo $this->translate('Mot de passe') ?>&nbsp;<input type="text" name="pwd" autocomplete="off"/>
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="form-group text-center">
+                            <label for="user"><?php echo $this->translate("Sélectionner l'utilisateur"); ?></label>
+                            <input type="text"  id="user" style="width:400px;" placeholder="<?php echo $this->translate('Recherche utilisateur (par nom, prénom, e-mail, uid)'); ?>"/>&nbsp;
+                            <button type="submit" class="btn btn-primary" id="btnSubmit" name="share">
+                                <i class="glyphicon glyphicon-user"></i>&nbsp;
+                                <?php echo $this->translate('Partager la propriété'); ?>
+                            </button>
+                        </div>
+
+                        <!--/form-->
+                        <?php
+                        $new = 1;
+                        if (isset($this->ownershipState)) {
+                        foreach ($this->ownershipState as $id => $val) {
+                        if (($val != 'traited') && ($id != 0)) {
+                        if ($new) {?>
+                        <div class="alert alert-warning alert-fixed">
+                            <?php echo $this->translate("Vous n'avez pas le droit de partager la propriété des dépôts suivants : <br>");
+                            $new = 0;
+                            }
+                            $document = new Hal_Document($id,'',0,true);
+                            echo $document->getId()."<br>";
+                            }
+                            }
+                            }
+                            if (!$new) {
+                            ?>
+                        </div>
+                    <?php } ?>
+
+                        <?php $resultat = "";
+                        if ((empty($this->partage)) && (empty($this->echec)) && (empty($this->interdit)) && (empty($this->inexistant) && (!empty($this->erreur)))) {
+                            $resultat .= "<blockquote>".$this->erreur."</blockquote>";
+                        } else {
+                            if (!empty($this->partage)) {
+                                foreach($this->partage as $i => $docid) {
+                                    if ($i == 0) {
+                                        $resultat .=  "<blockquote class='alert alert-success'>".$this->translate("La propriété est partagée pour les dépôts suivants : ");
+                                    }
+                                    $resultat .=  $docid." ";
+                                }
+                                if ($i >0) {
+                                    $resultat .=  "</blockquote>";
+                                }
+                            }
+                            if (!empty($this->interdit)) {
+                                foreach($this->interdit as $i => $docid) {
+                                    if ($i == 0) {
+                                        $resultat .=   "<blockquote class='alert alert-danger'>".$this->translate("Vous n'avez pas le droit de partager la propriété des dépôts suivants : ");
+                                    }
+                                    $resultat .=  $docid." ";
+                                }
+                                if ($i >0) {
+                                    $resultat .=  "</blockquote>";
+                                }
+                            }
+                            if (!empty($this->echec)) {
+                                foreach($this->echec as $i => $docid) {
+                                    if ($i == 0) {
+                                        $resultat .=  "<blockquote class='alert alert-danger'>".$this->translate("Problème technique, merci de renouveler la demande pour les dépôts suivants : ");
+                                    }
+                                    $resultat .=  $docid." ";
+                                }
+                                if ($i >0) {
+                                    $resultat .=  "<</blockquote>";
+                                }
+                            }
+                            if (!empty($this->inexistant)) {
+                                foreach($this->inexistant as $i => $docid) {
+                                    if ($i == 0) {
+                                        $resultat .=  "<blockquote class='alert alert-danger'>".$this->translate("Les dépôts ayant les docid suivants n'existent pas : ");
+                                    }
+                                    $resultat .=  $docid." ";
+                                }
+                                if ($i >0) {
+                                    $resultat .=  "</blockquote>";
+                                }
+                            }
+                        }
+                        if ($resultat != "") {
+                            echo '<div class="alert alert-warning alert-fixed" id="retour">'.$resultat.'</div>';
+                        } ?>
+
+                        <script type="text/javascript">
+                            $(document).ready(function(){
+                                src = '/administrate/ajaxsearchuser';
+                                $('#user').autocomplete({
+                                    min_length: 2,
+                                    html: true,
+                                    source: function(request, response) {
+                                        $.ajax({
+                                            url: src,
+                                            dataType: "json",
+                                            data: {
+                                                term : request.term,
+                                                valid : 1
+                                            },
+                                            success: function(data) {
+                                                response(data);
+                                            }
+                                        });
+                                    },
+                                    select: function( event, ui ) {
+                                        $('#share-doc input[name="uid"]').val(ui.item.id);
+                                    }
+                                });
+                            });
+                        </script>
+                    </form>
+                <?php } else { ?>
+                    <div class="alert alert-warning alert-fixed"><?php echo $this->translate("Aucun document n'est associé à votre compte !");?></div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="panel panel-default">
+        <!--div class="panel-heading"-->
+        <div class="panel-heading" role="tab" id="headingTwo">
+            <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    <?php echo $this->translate("Demander la propriété d'un dépôt");?>
+                </a>
+            </h4>
+        </div>
+        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+            <div class="panel-body">
+                <blockquote><?php echo $this->translate("Vous pouvez envoyer une demande de propriété d'un dépôt à son contributeur");?></blockquote>
+                <form action="/user/docowner" method="post">
+                    <input type="hidden" name="method" value="request" />
+                    <input type="hidden" name="origin" value="form" />
+                    <div class="form-group">
+                        <div class='row'>
+                            <div class='col-xs-10 col-sm-10 col-md-10 col-lg-10'>
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <label for="identifiant"><?php echo $this->translate("Identifiant HAL du dépôt"); ?></label>
+                                    <br/>
+                                    <br/>
+                                    <label for="message"><?php echo $this->translate("Message au propriétaire du dépôt"); ?></label>
+                                </div>
+
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <input type="text" name="identifiant" id="identifiant" placeholder="<?php echo $this->translate("Saisir l'identifiant"); ?>" required />
+                                    <br/>
+                                    <br/>
+                                    <textarea id='message' name="message" class="form-control" rows="2" cols="20" style="width:500px;height:150px;margin:0 auto 20px;" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="glyphicon glyphicon-send"></i>&nbsp;
+                        <?php echo $this->translate('Envoyer la demande'); ?>
+                    </button>
+                </form>
+                <hr />
+                <a href="javascript:void(0)" class="btn btn-default btn-xs" onclick="$('#docowner-request').load('/user/ajaxgetdocrequest');"><?php echo $this->translate('Voir les demandes envoyées'); ?></a>
+                <div id="docowner-request"></div>
+            </div>
+        </div>
+    </div>
+
+
+</div>

@@ -1,0 +1,48 @@
+
+<?php
+
+if (isset($this->data)) {
+    ?>
+    <div class="result">
+    <?php
+    echo $this->data;
+    ?>
+    </div>
+    <div class="text-center">
+        <a href="/sparql" class="btn btn-default"><?php echo $this->translate('Retour'); ?></a>
+    </div>
+
+    <script type="application/javascript">
+        $(function() {
+            $('.result>table').attr('border','0').addClass('table table-striped table-hover');
+
+        });
+    </script>
+<?php
+} elseif(isset($this->json)) {
+    $this->headScript ()->appendFile ( CCSDLIB . '/js/d3.min.js' );
+    $this->headScript ()->appendFile ( CCSDLIB . '/js/d3sparql.js' );
+    ?>
+    <script type="application/javascript">
+        var json = <?php echo $this->json ?>;
+        $(function() {
+            d3.json(json, render)
+        });
+
+
+        function render(json) {
+            var config = {
+                "charge": -500,
+                "distance": 50,
+                "width": 1000,
+                "height": 750,
+                "selector": "#result"
+            }
+            d3sparql.forcegraph(json, config)
+        }
+    </script>
+    <div id="result"></div>
+<?php
+} else {
+    echo  $this->form;
+}

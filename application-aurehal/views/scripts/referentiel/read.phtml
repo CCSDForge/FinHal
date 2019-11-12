@@ -1,0 +1,59 @@
+<?php if (isset ($this->message)) { ?>
+<div class='alert alert-info'>
+<?php echo $this->translate($this->message) ?>
+</div>
+<?php }
+echo $this->DisplayFlashMessages('danger', false); ?>
+<?php
+/* @var $plugin Aurehal_Acl_Plugin */
+$plugin = Zend_Controller_Front::getInstance()->getPlugin('Aurehal_Acl_Plugin');
+
+if ($plugin->isAllowed((new Zend_Controller_Request_Http())->setControllerName($this->controllerName)->setActionName('replace'), false) || (Hal_Auth::isAdminStruct() && $this->controllerName == 'structure')) {
+	if (in_array ($this->objet->toArray()['VALID'], array ('INCOMING', 'OLD'))) {
+?>
+<div class='row'>
+	<div class='col-md-1 pull-right' style='margin-right: 20px;'>
+		<form action="/<?php echo $this->controllerName ?>/replace" method="POST">
+			<input type='hidden' name='browse_url' value='/<?php echo $this->controllerName ?>/read/id/<?php echo $this->objet->toArray()[$this->objet->getPK()] ?>' />
+			<input type='hidden' name='row[]' value='<?php echo $this->objet->toArray()[$this->objet->getPK()] ?>' />
+			<button class='btn btn-primary btn-xs' type='submit' ><?php echo $this->translate('Remplacer') ?></button>
+		</form>
+	</div>
+</div>
+<?php 
+	}
+}	
+?>
+<div class='row'>
+	<div class='col-md-12'>
+		<?php
+		if (isset ($this->objet)) {
+			echo $this->objet->__toString(array('showParents' => true, 'showOptions' => true, 'showDetails' => true));
+			if (Hal_Auth::isLogged()) include __DIR__ . "/history.phtml";
+                        if (Hal_Auth::isLogged()) include __DIR__ . "/alias.phtml";
+         } else { ?>
+		<div class='alert alert-info'>
+		<?php echo $this->translate('Aucune fiche trouvée') ?>
+		</div>
+		<?php 
+		}
+		?>
+	</div>
+</div>
+<?php  if (!isset ($this->no_javascript)) { ?>
+<script type='text/javascript'>
+$(document).ready(function() {
+	$('[data-load-remote]').on('click',function(e) {
+	    e.preventDefault();
+	    var self = $(this);
+	    var remote = self.data('load-remote');
+	    $(self.data('remote-target')).html('');
+	    if(remote) {
+	        $(self.data('remote-target')).load(remote);
+	        $(self.data('restore-target')).click(function() { link($(self.data('restore-target')).attr('onclick') + "/id/" + self.data('restore-id')); });
+	        $(self.data('target')).modal('show');
+	    }
+	});
+});
+</script>
+<?php } ?>

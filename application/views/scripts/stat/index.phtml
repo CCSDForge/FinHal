@@ -1,0 +1,446 @@
+<style>
+    .well h4 {color: inherit;}
+    #stat-module a {
+        opacity: 0.5;
+    }
+    #stat-module a:hover {
+         opacity: 1;
+     }
+    #stat-module .active a {
+        opacity: 1;
+        color: #428bca;
+        background-color:#f5f5f5;
+    }
+    .list-group-item-header {
+        font-size: 12px;
+        font-weight: 700;
+        color: #959595;
+        text-transform: uppercase;
+    }
+    .list-group-item-elem {
+        margin-top:5px;
+        margin-bottom:20px;
+    }
+    #stat-module a {font-size:larger;}
+</style>
+<?php
+$this->jQuery()->addJavascriptFile('https://www.google.com/jsapi');
+$this->jQuery()->addJavascript('google.load("visualization", "1.0", {"packages":["corechart"]});');
+$this->layout()->pageDescription = $this->translate("Consulter les statistiques des ressources disponibles dans votre corpus.");
+?>
+
+<div class="well select-resources">
+    <h4 style="margin-bottom:20px;"><?php echo $this->translate('Sélection des ressources') ?></h4>
+    <h4 style="margin-bottom:20px;"><?php echo $this->translate("Pour des raisons de performances, le corpus est limité à ".Hal_Stats::MAX_DOCS_REQUESTED. " documents.") ?></h4>
+    <?php echo $this->form; ?>
+
+    <div class="btn-group" id="list-fields">
+        <button class="btn btn-default btn-xs dropdown-toggle" type="button" data-toggle="dropdown">
+            <?php echo $this->translate('Champs');?> <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" style="overflow: auto;height:200px">
+            <?php foreach($this->filters as $filter => $label) {?>
+            <li>
+            <?php if (substr($filter, 0, 2) == '--' ) : ?>
+            	- - - - - - - - - -
+            <?php else: ?>
+                <a href="javascript:void(0);" onclick="$('#filters').focus().val($('#filters').val() + ' <?php echo $filter; ?>:')"><?php echo $this->translate($label); ?></a>
+            <?php endif; ?>
+            </li>
+            <?php } ?>
+        </ul>
+    </div>
+</div>
+
+<div class="well select-resources">
+    <h4 style="margin-bottom:20px;"><?php echo $this->translate('Statistiques des ressources sélectionnées') ?></h4>
+    <ul id="stat-module" class="nav nav-tabs">
+        <li class=""><a href="#<?php echo StatController::STAT_REPARTITION; ?>" data-toggle="tab"><img src="/img/charts/PieChart.png" width="16px" height="16px"/>&nbsp;<?php echo $this->translate("Répartition des ressources") ?></a></li>
+        <li class=""><a href="#<?php echo StatController::STAT_CONSULTATION; ?>" data-toggle="tab"><img src="/img/charts/LineChart.png" width="16px" height="16px"/>&nbsp;<?php echo $this->translate("Consultation des ressources") ?></a></li>
+        <li class=""><a href="#<?php echo StatController::STAT_RESSOURCE; ?>" data-toggle="tab"><img src="/img/charts/ColumnChart.png" width="16px" height="16px"/>&nbsp;<?php echo $this->translate("Consultation par ressource") ?></a></li>
+        <li class=""><a href="#<?php echo StatController::STAT_PROVENANCE; ?>" data-toggle="tab"><img src="/img/charts/GeoChart.png" width="16px" height="16px"/>&nbsp;<?php echo $this->translate("Provenance") ?></a></li>
+    </ul>
+
+    <div class="tab-content" style="margin-top:20px;">
+        <!-- Répartition -->
+        <div class="tab-pane active" id="<?php echo StatController::STAT_REPARTITION; ?>">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <form class="form-query">
+                                <span class="list-group-item-header"><?php echo $this->translate('Champ') ?></span>
+                                <select name="facet" class="form-control input-sm list-group-item-elem">
+                                    <?php foreach ($this->fields['all'] as $field => $label) { ?>
+                                        <option value="<?php echo $field?>"><?php echo $this->translate($label); ?></option>
+                                    <?php } ?>
+                                </select>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('Grouper') ?></span>
+                                <select name="pivot" class="form-control input-sm list-group-item-elem">
+                                    <option value=""><?php echo $this->translate('Non') ?></option>
+                                    <?php foreach ($this->fields['uni'] as $field => $label) { ?>
+                                        <option value="<?php echo $field?>"><?php echo $this->translate($label); ?></option>
+                                    <?php } ?>
+                                </select>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('Tri') ?></span>
+                                <select name="sort" class="form-control input-sm list-group-item-elem">
+                                    <option value="count"><?php echo $this->translate('Nombre') ?></option>
+                                    <option value="index"><?php echo $this->translate('Alphabétique') ?></option>
+                                </select>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('Cumul') ?></span>
+                                <select name="cumul" class="form-control input-sm list-group-item-elem">
+                                    <option value="0"><?php echo $this->translate('Non') ?></option>
+                                    <option value="1"><?php echo $this->translate('Oui') ?></option>
+                                </select>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('Paramètres additionnels') ?></span>
+                                <input type="text" name="additional" class="form-control input-sm list-group-item-elem" placeholder="key1=val1&key2=val2"/>
+
+                                <hr />
+
+                                <button class="form-control btn btn-primary list-group-item-elem" type="button" onclick="loadResult()"><i class="glyphicon glyphicon-search"></i>&nbsp;<?php echo $this->translate('Rechercher') ?></button>
+                                <input type="hidden" name="chart" value="<?php echo StatController::CHART_PIE ?>"/>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9 result">
+                </div>
+            </div>
+        </div>
+
+        <!-- Consultation -->
+        <div class="tab-pane" id="<?php echo StatController::STAT_CONSULTATION; ?>">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <form class="form-query">
+                                <span class="list-group-item-header"><?php echo $this->translate('Type') ?></span>
+                                <select name="type" class="form-control input-sm list-group-item-elem">
+                                    <?php foreach ($this->typeConsult as $type => $label) { ?>
+                                        <option value="<?php echo $type?>"><?php echo $label; ?></option>
+                                    <?php } ?>
+                                </select>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('De') ?></span>
+                                <div class="input-group input-group-sm list-group-item-elem">
+                                    <input type="text" name="start" value="<?php echo $this->start ?>" id="date_cons_start" attr-minDate="<?php echo $this->start ?>" attr-changemonth="1" attr-changeyear="1" class="datepicker form-control" onkeydown="return false" />
+                                    <label for="date_cons_start" class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></label>
+                                </div>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('A') ?></span>
+                                <div class="input-group input-group-sm list-group-item-elem">
+                                    <input type="text" name="end" value="<?php echo $this->end ?>" id="date_cons_end" attr-changemonth="1" attr-changeyear="1" class="datepicker form-control" onkeydown="return false"/>
+                                    <label for="date_cons_end" class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></label>
+                                </div>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('Intervalle') ?></span>
+                                <select name="interval" class="form-control input-sm list-group-item-elem">
+                                    <option value="month"><?php echo $this->translate('Mois') ?></option>
+                                    <option value="year"><?php echo $this->translate('Année') ?></option>
+                                </select>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('Cumul') ?></span>
+                                <select name="cumul" class="form-control input-sm list-group-item-elem">
+                                    <option value="0"><?php echo $this->translate('Non') ?></option>
+                                    <option value="1"><?php echo $this->translate('Oui') ?></option>
+                                </select>
+
+                                <hr />
+                                <button class="form-control btn btn-primary list-group-item-elem" type="button" onclick="loadResult()"><i class="glyphicon glyphicon-search"></i>&nbsp;<?php echo $this->translate('Rechercher') ?></button>
+                                <input type="hidden" name="chart" value="<?php echo StatController::CHART_LINE ?>"/>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9 result">
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Ressource -->
+        <div class="tab-pane" id="<?php echo StatController::STAT_RESSOURCE; ?>">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <form class="form-query">
+                                <span class="list-group-item-header"><?php echo $this->translate('Type') ?></span>
+                                <select name="type" class="form-control input-sm list-group-item-elem">
+                                    <?php foreach ($this->typeConsult as $type => $label) { ?>
+                                        <option value="<?php echo $type?>"><?php echo $label; ?></option>
+                                    <?php } ?>
+                                </select>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('De') ?></span>
+                                <div class="input-group input-group-sm list-group-item-elem">
+                                    <input type="text" name="start" value="<?php echo $this->start ?>" id="date_res_start" attr-minDate="<?php echo $this->start ?>" attr-changemonth="1" attr-changeyear="1" class="datepicker form-control" onkeydown="return false"/>
+                                    <label for="date_res_start" class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></label>
+                                </div>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('A') ?></span>
+                                <div class="input-group input-group-sm list-group-item-elem">
+                                    <input type="text" name="end" value="<?php echo $this->end ?>" id="date_res_end" attr-changemonth="1" attr-changeyear="1" class="datepicker form-control" onkeydown="return false"/>
+                                    <label for="date_res_end" class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></label>
+                                </div>
+
+                                <hr />
+                                <button class="form-control btn btn-primary list-group-item-elem" type="button" onclick="loadResult()"><i class="glyphicon glyphicon-search"></i>&nbsp;<?php echo $this->translate('Rechercher') ?></button>
+                                <input type="hidden" name="chart" value="<?php echo StatController::CHART_COLUMN ?>"/>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9 result">
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Provenance -->
+        <div class="tab-pane" id="<?php echo StatController::STAT_PROVENANCE; ?>">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <form class="form-query">
+                                <span class="list-group-item-header"><?php echo $this->translate('Type') ?></span>
+                                <select name="type" class="form-control input-sm list-group-item-elem">
+                                    <?php foreach ($this->typeConsult as $type => $label) { ?>
+                                        <option value="<?php echo $type?>"><?php echo $label; ?></option>
+                                    <?php } ?>
+                                </select>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('De') ?></span>
+                                <div class="input-group input-group-sm list-group-item-elem">
+                                    <input type="text" name="start" value="<?php echo $this->start ?>" id="date_prov_start" attr-minDate="<?php echo $this->start ?>" attr-changemonth="1" attr-changeyear="1" class="datepicker form-control" onkeydown="return false"/>
+                                    <label for="date_prov_start" class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></label>
+                                </div>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('A') ?></span>
+                                <div class="input-group input-group-sm list-group-item-elem">
+                                    <input type="text" name="end" value="<?php echo $this->end ?>" id="date_prov_end" attr-changemonth="1" attr-changeyear="1" class="datepicker form-control" onkeydown="return false"/>
+                                    <label for="date_prov_end" class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></label>
+                                </div>
+
+                                <span class="list-group-item-header"><?php echo $this->translate('Affichage') ?></span>
+                                <select name="view" class="form-control input-sm list-group-item-elem">
+                                    <option value="country" <?php echo $this->view == 'country' ? 'selected' : '';?>><?php echo $this->translate('Par pays') ?></option>
+                                    <option value="domain" <?php echo $this->view == 'domain' ? 'selected' : '';?>><?php echo $this->translate('Par nom de domaine') ?></option>
+                                </select>
+
+                                <hr />
+                                <button class="form-control btn btn-primary list-group-item-elem" type="button" onclick="loadResult()"><i class="glyphicon glyphicon-search"></i>&nbsp;<?php echo $this->translate('Rechercher') ?></button>
+                                <input type="hidden" name="chart" value="<?php echo StatController::CHART_GEO ?>"/>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9 result">
+
+                </div>
+
+            </div>
+        </div>
+
+        <div id="loader" style="display:none;">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                        <strong><img src="/img/loading.gif" />&nbsp;<?php echo $this->translate('Chargement'); ?>...</strong>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $(function() {
+                    $(".datepicker").each(function() {
+                        $(this).datepicker('setDate', $(this).val());
+                    });
+                });
+                $('#filters-element .help-block').append('&nbsp;');
+                $('#list-fields').appendTo('#filters-element .help-block');
+
+                //Changement d'espace de sélection
+                $('#space').change(function() {
+                    $.ajax({
+                        url: "<?php echo PREFIX_URL ; ?>stat/ajaxgetdefaultfilters",
+                        method: "post",
+                        data: {'space': $('#space').val()},
+                        success: function(data) {
+                            $('#defaultFilters').val(data);
+                        }
+                    });
+                });
+
+                //Sélection d'une requete prédéfinie
+                $('#query').change(function() {
+                    if ($('#query').val() != '') {
+                        $.ajax({
+                            url: "<?php echo PREFIX_URL ; ?>stat/ajaxquery",
+                            method: "post",
+                            data: {'queryid': $('#query').val()},
+                            dataType: 'json',
+                            success: function(data) {
+                                if (data != undefined) {
+                                    $.each(data, function( meta, value ) {
+                                        meta = meta.toLowerCase();
+                                        if ((meta == 'filters' || meta == 'space') && value != '') {
+                                            $('#' + meta).val(value);
+                                        } else {
+                                            $('#' + data.CATEGORY + ' [name="' + meta + '"]').val(value);
+                                        }
+                                    });
+                                    $('#stat-module a[href="#' + data.CATEGORY + '"]').tab('show');
+                                    $('#space').change();
+                                    loadResult(undefined, false);
+                                }
+                            }
+                        });
+                    }
+                });
+
+                //Retourne le nombre de documents répondant aux critères
+                $('#space, #query, #filters').change(function() {
+                    $.ajax({
+                        url: "<?php echo PREFIX_URL ; ?>stat/ajaxnbdoc",
+                        method: "post",
+                        data: {'space': $('#space').val(), 'filters': $('#filters').val()},
+                        success: function(data) {
+                            if ($('#nbdoc-result').length == 0) {
+                                $('.select-resources').append('<div id="nbdoc-result"></div>');
+                            }
+                            $('#nbdoc-result').html(data);
+                        }
+                    });
+                });
+
+                $('#filters').change();
+                $('#stat-module a[href="#<?php echo $this->category ?>"]').tab('show');
+                <?php if ($this->submit) { ?>
+                    loadResult();
+                <?php } ?>
+
+            });
+
+
+            /**
+             * Chargement des résultats
+             * @param chart
+             */
+            function loadResult(chart, initQueryId)
+            {
+                var category = $('.tab-pane.active').attr('id');
+                $('#' + category + ' .result').html($('#loader').html());
+                var data = {'space': $('#space').val(), 'filters': $('#filters').val(), 'category': category};
+
+                if (chart != undefined) {
+                    $('#' + category + ' [name="chart"]').val(chart);
+                }
+
+                if (initQueryId == undefined) {
+                    $('#query').val('0');
+                }
+                $.ajax({
+                    url: "<?php echo PREFIX_URL ; ?>stat/ajaxdata",
+                    method: "post",
+                    data: $.param(data) + '&' + $('#' + category + ' .form-query').serialize(),
+                    success: function(data) {
+                        $('#' + category + ' .result').html(data);
+                        if ($('#query').val() != '0') {
+                            $('#' + category + ' .query-save').hide();
+                        } else {
+                            $('#' + category + ' .query-del').hide();
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Export des données au format CSV
+             */
+            function exportCSV(category)
+            {
+                var d=new Date();
+                var filename = 'export-stats.' + d.toISOString() + '.csv';
+
+                var str = $('#csv-' + category).val();
+                str = str.replace(/_SEP_/g, '\r\n');
+
+                var link = '<a id="link-csv" href="data:text/csv;charset=utf-8,' + escape(str) + '" download="' + filename + '" target="_blank"></a>';
+                $('#link-csv').remove();
+                $('body').append($(link));
+                document.getElementById("link-csv").click();
+            }
+
+            /**
+             * Enregistrement d'une requete
+             */
+            function saveQuery(category)
+            {
+                var label = $('#' + category + ' [name="query-label"]').val().trim();
+                if (label == '') {
+                    $('#' + category + ' [name="query-label"]').closest('.form-group').addClass('has-error');
+                    $('#' + category + ' [name="query-label"]').focus();
+                } else {
+                    $('#' + category + ' [name="query-label"]').closest('.form-group').removeClass('has-error');
+
+                    var data = {'label': label, 'category': category, 'filters': $('#filters').val(), 'space': $('#space').val()};
+                    $.ajax({
+                        url: "<?php echo PREFIX_URL ; ?>stat/ajaxsavequery",
+                        method: "post",
+                        data: $.param(data) + '&' + $('#' + category + ' .form-query').serialize(),
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data != undefined) {
+                                $('#query').empty();
+                                $.each(data, function( value, label ) {
+                                    $('#query').append($("<option></option>")
+                                        .attr("value", value).text(label));
+                                });
+                                message("<?php echo $this->translate("La requête a été enregistrée");?>", 'alert-success');
+                                //$('html,body').animate({scrollTop:jQuery("#container").offset().top},1000,'swing');
+                            }
+                        }
+                    });
+                }
+            }
+
+            function deleteQuery(category)
+            {
+                queryId = $('#query').val();
+                if (queryId == '0') {
+                    message("<?php echo $this->translate("La requête ne peut pas être supprimée");?>", 'alert-danger');
+                    return false;
+                }
+                $('#' + category + ' [name="qid"]').val(queryId);
+                return true;
+            }
+
+            /**
+             * Affichage des données dans un tableau
+             * @param elem
+             */
+            function showDataTable(elem, category, hide)
+            {
+                if (hide == undefined) {
+                    $('#div-table-' + category).show();
+                    $('#div-graph-' + category).hide();
+                } else {
+                    $('#div-table-' + category).hide();
+                    $('#div-graph-' + category).show();
+                }
+                $(elem).closest('.btn-group').find('button').removeClass('active');
+                $(elem).addClass('active');
+            }
+
+        </script>
+    </div>
+</div>

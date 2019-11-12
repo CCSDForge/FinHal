@@ -1,0 +1,14 @@
+<?php
+
+$idsExt = $this->cv->getIdExt();
+$servers = $this->cv->getServerExt();
+$urls = $this->cv->getServerUrl();
+$content = '<ul>';
+$content .= '<li> IdHAL : ' . $this->cv->getUri() .'</li>';
+if (count($idsExt)) {
+    foreach($idsExt as $server => $id) {
+        $content .= '<li>' . $servers[$server] . ' : <a href="' . $urls[$server] . $id . '" target="_blank">' . $id . '</a></li>';
+    }
+}
+$content .= '</ul>';
+echo $this->widget(array('title' => $this->translate('cv_widget_idext'), 'content' => $content, 'class' => 'widget-'.'idext'));

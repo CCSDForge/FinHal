@@ -1,0 +1,52 @@
+<?php
+
+$authors = $this->cv->getFacetAuthors();
+
+if (count($authors)) {
+    //Récupération des coauteurs
+    $authids   = isset($filters['authIdHal_s']) && is_array($filters['authIdHal_s']) ? array_keys($filters['authIdHal_s']) : array();
+    $fullnames = isset($filters['authFullName_t']) && is_array($filters['authFullName_t']) ? array_keys($filters['authFullName_t']) : array();
+    $listPrinc = $listSec = '';
+    $count = 0;
+
+
+    foreach ($authors as $author) {
+        $link = $href;
+
+        if ($author['authIdHal_s'] != '') {
+            if (in_array($author['authIdHal_s'], $authids)) {
+                $filters['authIdHal_s'][$author['authIdHal_s']]['value'] = $author['authFullName_t'];
+            } else {
+                $link .= '/authIdHal_s/' . urlencode($author['authIdHal_s']);
+            }
+            $icon = '<i class="glyphicon glyphglyphicon glyphicon-user" data-toggle="tooltip" data-original-title="' . $this->translate("IdHal de l'auteur") . '"></i>';
+        } else {
+            if (in_array($author['authFullName_t'], $fullnames)) {
+                $filters['authFullName_t'][$author['authFullName_t']]['value'] = $author['authFullName_t'];
+            } else {
+                $link .= '/authFullName_t/' . urlencode('"'.$author['authFullName_t'].'"');
+            }
+            $icon = '';
+        }
+        $elem = '<li>' . $icon . '&nbsp;<a href="' . $link . '" >' . $author['authFullName_t'] . ' <span class="badge badge-default">' . $author['nbdoc'] . '</span></a></li>';
+        if ($count < 10) {
+            $listPrinc .= $elem;
+        } else {
+            $listSec   .= $elem;
+        }
+        $count ++;
+    }
+    $content = '<div class="coauthors">';
+    $content .= '   <ul style="list-style-type: none; margin-left:0;">' . $listPrinc . '</ul>';
+    if ($listSec != '') {
+        $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste complète") . '</a></div>';
+        $content .= '</div>';
+        $content .= '<div class="coauthors-list" style="display:none;"><div class="overflow">';
+        $content .= '   <ul style="list-style-type: none; margin-left:0;">' . $listPrinc . $listSec . '</ul>';
+        $content .= '   </div><div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste principale") . '</a></div>';
+    }
+    $content .= '</div>';
+
+    echo $this->widget(array('title' => $this->translate('cv_widget_coauthors'), 'content' => $content, 'class' => 'widget-'.'coauthors'));
+}
+

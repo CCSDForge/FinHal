@@ -1,0 +1,149 @@
+<tr id="file-<?php echo $this->i?>" class="file">
+    <td>
+		<div class="row">
+            <div class="col-md-7 file-row">
+                <span class="glyphicon glyphicon-warning-sign" data-toggle="tooltip" title="Fichier HTML" <?php echo $this->iconwarning?>></span>
+                <input type="hidden" name="id" class="id" value="<?php echo $this->i?>" />
+                <div class="file-row-detail">
+                    <?php if (in_array($this->file->getExtension(), $this->mainFileType)) {
+                        $visible = (!$this->canChange && ! $this->file->getDefault()) ? 'style="display:none;' : '';
+                        ?>
+                        <span <?php echo $visible ?>>
+                            <input type="checkbox" name="default" id="default-<?php echo $this->i?>" class="default file-default" value="<?php echo $this->i?>" <?php echo $this->file->getDefault() ? "checked='checked'" : ""?> onchange="selectmainFile('<?php echo $this->i?>', '<?php echo $this->file->getName();?>')"/>
+                        </span>
+                    <?php } ?>
+                </div>
+                <span class="file-name"><a href="/file/tmp/fid/<?php echo $this->i ?>" target="_blank" title="<?php echo $this->file->getName();?>"><?php echo Ccsd_File::shortenFilename($this->file->getName(), 50)?></a></span>
+                &nbsp;<span class="file-size">(<?php echo $this->file->getSize()?>)</span>
+            </div>
+
+		</div>
+	</td>
+    <td>
+        <?php if ($this->divOrigin) { ?>
+            <?php if ($this->editFile) { ?>
+                <select name="origin[<?php echo $this->i ?>]" id="origin-<?php echo $this->i?>" class="file-origin form-control input-sm">
+                    <optgroup label="<?php echo $this->translate('Fichiers auteur'); ?>">
+                        <option value="<?php echo Hal_Settings::FILE_SOURCE_AUTHOR; ?>" <?php echo ($this->file->getOrigin() == Hal_Settings::FILE_SOURCE_AUTHOR) ? 'selected="selected"' : '' ?>><?php echo $this->translate('fileSource_author'); ?></option>
+                    </optgroup>
+                    <optgroup label="<?php echo $this->translate('Fichiers éditeur'); ?>">
+                        <option value="<?php echo Hal_Settings::FILE_SOURCE_GREEN_PUBLISHER; ?>" <?php echo ($this->file->getOrigin() == Hal_Settings::FILE_SOURCE_GREEN_PUBLISHER) ? 'selected="selected"' : '' ?>><?php echo $this->translate("fileSource_greenPublisher"); ?></option>
+                        <option value="<?php echo Hal_Settings::FILE_SOURCE_PUBLISHER_AGREEMENT; ?>" <?php echo ($this->file->getOrigin() == Hal_Settings::FILE_SOURCE_PUBLISHER_AGREEMENT) ? 'selected="selected"' : '' ?>><?php echo $this->translate('fileSource_publisherAgreement'); ?></option>
+                        <option value="<?php echo Hal_Settings::FILE_SOURCE_PUBLISHER_PAID; ?>" <?php echo ($this->file->getOrigin() == Hal_Settings::FILE_SOURCE_PUBLISHER_PAID) ? 'selected="selected"' : '' ?>><?php echo $this->translate('fileSource_publisherPaid'); ?></option>
+                    </optgroup>
+                </select>
+            <?php } else { ?>
+                <input type="hidden" name="origin[<?php echo $this->i ?>]" value="<?php echo $this->file->getOrigin() ?>" />
+                <?php if ( in_array($this->file->getOrigin(), Hal_Settings::getFileOrigines()) ) {
+                    echo $this->translate('fileSource_' . $this->file->getOrigin());
+                } ?>
+            <?php } ?>
+        <?php } ?>
+    </td>
+    <td>
+        <?php if ($this->canChange) { ?>
+        <select name="type[<?php echo $this->i ?>]" id="type-<?php echo $this->i?>" class="form-control input-sm file-type" onchange="changeFileType(<?php echo $this->i?>, '<?php echo Hal_Settings::FILE_SOURCE_AUTHOR; ?>', '<?php echo Hal_Settings::FILE_SOURCE_PUBLISHER_PAID; ?>')">
+            <?php
+            // Si regression il y a, c'est surement parce qu'on a viré ce morceau... mais il a l'air de servir à rien puisque les options sont grisées
+            // Et il introduit un bug dans le type de dépot quand on ajoute un fichier à une notice
+            /*if ($this->onlyAnnex) {
+                $this->file->setType('annex');
+            }*/
+            foreach ($this->types as $value) {  ?>
+                <option name="<?php echo $this->i?>" value="<?php echo $value;?>" <?php echo ($value == $this->file->getType()) ? 'selected="selected"' : ''?> <?php echo ($this->onlyAnnex && $value != 'annex') ? 'disabled="disabled"' : ''?>><?php echo $this->translate('fileType_' . $value);?></option>
+            <?php }?>
+        </select>
+        <?php } else { ?>
+            <input type="hidden" name="type[<?php echo $this->i ?>]" value="<?php echo $this->file->getType() ?>" />
+            <?php echo $this->translate('fileType_' . $this->file->getType());?>
+        <?php } ?>
+    </td>
+    <td>
+        <select name="visible[<?php echo $this->i ?>]" id="visible-<?php echo $this->i?>" onchange="if(value == 'date') {displayDate(true, '<?php echo $this->i ?>');} changeFileType('<?php echo $this->i?>'); " class="form-control input-sm" <?php if ($this->file->getDateVisible() != date('Y-m-d')) echo "style='display:none;'"?>>
+            <?php
+            $find = false;
+            foreach ($this->fileVisibility  as $value) {
+                $label = $this->translate('embargo_' . $value);
+                if ($value == "never") {
+                    $date = '9999-12-31';
+                } else if ($value == "date") {
+                    $date = 'date';
+                } else {
+                    $date = new Zend_Date();
+                    if (strpos($value, '-') !== false) {
+                        list($nb, $part) = explode('-', $value);
+                        $date->add($nb, $part);
+                    }
+                    $date = substr($date->get(Zend_Date::ISO_8601), 0, 10);
+                    $label .= ' (' . $date . ')';
+                }
+                $find = $find || $date == $this->file->getDateVisible();
+                ?>
+                <option value="<?php echo $date;?>" <?php echo ($date == $this->file->getDateVisible() || ($this->file->getDateVisible() != '' && $date == 'date' && ! $find)) ? 'selected="selected"' : ''?>><?php echo $label;?></option>
+            <?php }?>
+        </select>
+        <div class="input-group" id="date-<?php echo $this->i ?>"  <?php if ($this->file->getDateVisible() == date('Y-m-d')) echo "style='visibility:hidden;'"?> >
+            <span data-toggle="tooltip" data-placement="bottom" data-original-title="Cliquer ici pour ouvrir le calendrier" class="input-group-addon calendar-trigger" onclick="datepicker('#visible-date-<?php echo $this->i ?>');$('#visible-date-<?php echo $this->i ?>').datepicker('show');" >
+                <i class="glyphicon glyphicon-calendar"></i>
+            </span>
+            <input type="text" name="date[<?php echo $this->i ?>]" class="datepicker form-control input-sm" id="visible-date-<?php echo $this->i?>" value="<?php echo $this->file->getDateVisible();?>" section="1" class="form-control input-sm datepicker meta-complete" attr-maxdate="<?php echo date_modify(new DateTime(date('Y-m-d')), '+2 years')->format('Y-m-d');?>" attr-trigger="1" attr-changemonth="1" attr-changeyear="1" type="text">
+            <span class="input-group-addon calendar-trigger" onclick="displayDate(false, '<?php echo $this->i ?>');">
+                <i class="glyphicon glyphicon-remove"></i>
+            </span>
+        </div>
+    </td>
+    <td class="file-comments">
+        <?php if ($this->canChange && Ccsd_File::isAnArchive($this->file->getName())) {?>
+            <a href="javascript:void(0)" onclick="unzip(<?php echo $this->i?>);" title="<?php echo $this->translate('Décompresser')?>"><i class="glyphicon glyphicon-book"></i></a>&nbsp;
+        <?php }?>
+        <?php if ($this->editFile) { ?>
+            <a href="javascript:void(0)" onclick="fileDetails(<?php echo $this->i?>);" title="<?php echo $this->translate("Ajouter un commentaire, choisir le type d'annexe") ?>"><i class="glyphicon glyphicon-pencil"></i></a>&nbsp;
+        <?php } ?>
+        <?php if ($this->canChange) { ?>
+            <a href="javascript:void(0)" class="file-delete" title="<?php echo $this->translate('Supprimer')?>"><i class="glyphicon glyphicon-trash"></i></a>
+        <?php } ?>
+    </td>
+</tr>
+<tr id="file-details-<?php echo $this->i?>">
+    <td colspan="5">
+        <div class="form-horizontal file-details">
+        <div class="form-group">
+            <label for="comment-<?php echo $this->i?>" class="col-md-3 control-label optional"><?php echo $this->translate('Commentaire')?></label>
+            <div class="col-md-9">
+                <textarea name="comment[<?php echo $this->i ?>]" id="comment-<?php echo $this->i?>" class="form-control input-sm"><?php echo $this->file->getComment()?></textarea>
+            </div>
+        </div>
+
+        <div class="form-group file-annex-<?php echo $this->i?>">
+            <label for="format-<?php echo $this->i?>" class="col-md-3 control-label optional"><?php echo $this->translate("Type d'annexe")?></label>
+            <div class="col-md-9">
+                <select name="format[<?php echo $this->i ?>]" id="format-<?php echo $this->i?>" class="form-control input-sm">
+                    <option></option>
+                    <?php foreach ($this->formats as $format=>$label) {?>
+                        <option value="<?php echo $format;?>" <?php echo ($format == $this->file->getFormat()) ? 'selected="selected"' : ''?>><?php echo $this->translate($label);?></option>
+                    <?php }?>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group file-annex-<?php echo $this->i?>">
+            <label for="defaultannex-<?php echo $this->i?>" class="col-md-3 control-label optional"><?php echo $this->translate("Annexe principale")?></label>
+            <div class="col-md-9">
+                <select name="defaultannex[<?php echo $this->i ?>]" id="defaultannex-<?php echo $this->i?>" class="form-control input-sm default-annex" onchange="changeDefaultAnnex(this)">
+                    <option></option>
+                    <?php foreach (array(0, 1) as $v) {?>
+                        <option value="<?php echo $v;?>" <?php echo ($v == $this->file->getDefaultannex()) ? 'selected="selected"' : ''?>><?php echo $this->translate('annex_main_' . $v);?></option>
+                    <?php }?>
+                </select>
+            </div>
+        </div>
+    </div>
+    </td>
+</tr>
+
+<script>
+    $('.datepicker').datepicker({
+        maxDate: "+2Y",
+        dateFormat: "yy-mm-dd"
+    });
+</script>

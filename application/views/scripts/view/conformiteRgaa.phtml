@@ -1,0 +1,28 @@
+<?php
+// Un site souhaitant une page de conformite differente du defaut n'a qu'a charger une ressource
+//    conformiteRgaa.fr.html   (et conformiteRgaa.en.html)
+$fileName = 'conformiteRgaa';
+$localDir = SPACE . PUBLIC_DEF;
+$defaultDir = APPROOT . '/'. CONFIG . 'html/';
+try {
+    $lang = Zend_Registry::get('lang');
+} catch (Zend_Exception $e) {
+    $lang = 'fr';
+}
+
+$localFile   = $localDir   . $fileName . '.' . $lang .'.html';
+$defaultFile = $defaultDir . $fileName . '.' . $lang .'.html';
+
+if (is_file($localFile)) { //Fichier specifique au portail
+    $toIncludeFile = $localFile;
+} else if (is_file($defaultFile)) {
+    $toIncludeFile = $defaultFile;
+} else {
+    $toIncludeFile = null;
+}
+?>
+<div class="content">
+<?php if ($toIncludeFile !== null) {
+    echo file_get_contents($toIncludeFile);
+} ?>
+</div>

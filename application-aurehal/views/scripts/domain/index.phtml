@@ -1,0 +1,21 @@
+<?php $this->jQuery()->addJavascriptFile(CCSDLIB . "/js/bootstrap-typeahead.js"); ?>
+
+<div class='row'>
+	<div class='col-md-3'>
+		<div class="btn-group" data-toggle="buttons">
+			<label class="btn btn-primary btn-xs <?php if ($this->locale == 'fr') echo "active" ?>">
+		    	<span onclick="link('/domain?locale=fr')"><?php  echo $this->translate("fr") ?></span>
+		  	</label>
+		  	<label class="btn btn-primary btn-xs <?php if ($this->locale == 'en') echo "active" ?>">
+		    	<span onclick="link('/domain?locale=en')"><?php  echo $this->translate("en") ?></span>
+		  	</label>
+		</div>
+	</div>
+	<div class='col-md-9'>
+	</div>
+</div>
+<div class='row'>
+	<div class='col-md-10'>
+		<?php echo $this->form; ?>
+	</div>
+</div>

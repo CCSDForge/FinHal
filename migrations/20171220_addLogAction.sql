@@ -1,0 +1,1 @@
+ALTER TABLE `DOC_LOG` CHANGE `LOGACTION` `LOGACTION` ENUM('create','annotate','discussion','askmodif','modif','validate','moderate','update','online','version','addfile','copy','jref','domain','tampon','addtampon','deltampon','hide','delete','related','notice','share','remod','request','editmoderation') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'create';

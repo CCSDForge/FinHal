@@ -1,0 +1,66 @@
+<?php
+if (!defined('DOPMC') || (DOPMC===true)) {
+    ?>
+    <div id="recap-pubmedcentral" class="alert alert-text margin-top-5">
+        <h4 class="margin-0">
+            <input type="checkbox" name="pubmedcentral" id="pubmedcentral" value="1"
+                <?php
+                if (!empty($this->pmcErrors)) {
+                    echo "disabled=\"true\" data-toggle=\"tooltip\" data-original-title=\"Votre dépôt ne remplit pas les conditions de transfert vers PubMedCentral\"";
+                } ?>
+            >
+            <label for="pubmedcentral"><img src="/img/pubmedcentral.jpg" title="Pubmed Central" height="40px"/></a>
+            </label>
+            <button type="button" onclick="$('#transfertpubmedcentraldetails').toggle()"
+                    class="btn btn-default btn-sm pull-right"><?php echo $this->translate("Voir les conditions pour le transfert"); ?></button>
+        </h4>
+        <div class="collapse" id="transfertpubmedcentraldetails">
+            <hr/>
+            <p>
+                <?php echo $this->translate("Pour pouvoir transférer sur PubMed Central, votre dépôt doit satisfaire les conditions suivantes :"); ?>
+                <br/>
+            <ul>
+                <li class="<?php if (in_array(Hal_PubMedCentral::ERROR_NOID, $this->pmcErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Le document doit être lié à un identifiant PubMed."); ?>
+                </li>
+                <li class="<?php if (in_array(Hal_PubMedCentral::ERROR_LANG, $this->pmcErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Le document doit être en anglais."); ?>
+                </li>
+                <li class="<?php if (in_array(Hal_PubMedCentral::ERROR_DOMAIN, $this->pmcErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Un des domaines choisi doit être un sous-domaine des Sciences du Vivant."); ?>
+                </li>
+                <li class="<?php if (in_array(Hal_PubMedCentral::ERROR_ONLINE, $this->pmcErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Le document ne doit pas être déjà en ligne sur PubMed Central."); ?>
+                </li>
+                <li class="<?php if (in_array(Hal_PubMedCentral::ERROR_FILEFORMAT, $this->pmcErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Le fichier principal doit être un fichier auteur."); ?>
+                </li>
+            </ul>
+            <?php echo $this->translate("Le transfert vers la base PMC aura lieu sous certaines conditions: Votre article devra être référencé dans PubMed, son texte intégral pourra être rendu public en fonction de la politique de l'éditeur. D'autre part, il faut compter 3 semaines en moyenne car votre dépôt doit être transformé en XML et vérifié par les modérateurs. Vous recevrez ensuite un mail vous invitant à valider la version finale avant envoi vers PubMed Central."); ?>
+
+            </p>
+        </div>
+    </div>
+    <?php
+}
+?>

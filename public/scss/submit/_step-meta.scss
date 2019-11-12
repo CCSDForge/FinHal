@@ -1,0 +1,45 @@
+#form_meta label {
+  font-weight:normal;
+}
+#form_meta label.required {
+  font-weight:bold;
+}
+
+#iconMetas {
+  font-size:14px;
+}
+
+#iconMetas.glyphicon-ok, .green {
+  color:#3A9D23;
+}
+
+#iconMetas.glyphicon-remove, .red {
+  color:#CF0A1D;
+}
+
+#panel-body-meta input[type='checkbox'] {
+  width: auto;
+}
+
+#error-zone-meta {
+  display:none;
+}
+
+#meta-footer-note {
+  font-style:italic;
+  margin-top:15px;
+}
+
+#map {
+  padding-bottom:20px;
+}
+
+#map-canvas {
+  width:100%;
+  height:350px;
+  display:block;
+}
+
+#error-zone-meta {
+  margin-top: 20px;
+}

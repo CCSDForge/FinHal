@@ -1,0 +1,49 @@
+<?php
+/** @var Hal_View $this
+
+ Affichage d'une VALEUR de metadonnees, (pas de l'objet meta)
+
+ * Variable prepositionnees:
+ *  @var mixed $value: la valeur de la meta (peut etre un tableau
+ *  @var Hal_Document_Meta_Abstract $metaObj: l'objet de la meta
+ *
+ *
+ */
+
+    if (is_array($value)) {
+        echo implode(", ", $value);
+    } elseif (in_array($meta, array('domain', 'acm', 'acm2012', 'pacs', 'jel', 'domain_inter', 'otherType'))) {
+        if (preg_match('/domain_inter/', $meta)) {
+            $meta = preg_replace('/domain_inter/', 'domain', $meta);
+            $i++;
+        }
+        $value = Ccsd_Tools_String::getHalMetaTranslated($value, null, '/', $meta, true);
+        if ($i == 0) {
+            $value = '<strong>' . $value . '</strong>';
+        }
+        echo $value;
+    } elseif ($meta == 'language' || $meta == 'country') {
+        $value = $meta == 'language' ? strtolower($value) : strtoupper($value);
+        $tmp = Zend_Locale::getTranslation($value, $meta);
+        echo ($tmp != '') ? $tmp : $value;
+    } elseif (in_array($meta, ['campusaar_classaar', 'campusaar_genre', 'campusaar_context'])) {
+        echo $this->translate($value);
+    } elseif (in_array($meta, $metasList)) {
+        echo $this->translate(Hal_Referentiels_Metadata::getLabel($meta, $value));;
+    } elseif ($meta == 'date') {
+        if ($document->getMeta('inPress')) {
+            echo $this->translate('inPress');
+        } else {
+            echo $value;
+        }
+    } elseif ($meta == 'circa') {
+        if ($value) {
+            echo $this->translate('Oui');
+        } else {
+            echo $this->translate('Non');
+        }
+    } elseif ($meta == 'researchdata') {
+        echo "<a href=\"" . Hal_ResearchData::getDataUrl($value) . "\" target=\"_blank\" type=\"noopener\">" . $value . "</a>";
+    } else {
+        echo $value;
+    }

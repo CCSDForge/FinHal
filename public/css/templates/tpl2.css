@@ -1,0 +1,38 @@
+@CHARSET "UTF-8";
+
+body {
+    background-color: #dddddd;
+}
+
+a, a:hover, a:focus {
+	color: #BF1B2F;
+}
+.nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
+    background-color: #BF1B2F;
+}
+
+.nav .dropdown-toggle .caret {
+	border-top-color: #BF1B2F;
+    border-bottom-color: #BF1B2F;
+}
+
+h1, h2, h3 {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #BF1B2F;
+}
+#container{
+    background-color: #ffffff;
+    padding: 10px 10px 50px;
+    border: 1px solid #cccccc;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+    margin-bottom: 50px;
+    min-height: 800px;
+    border-radius: 0 0 5px 5px;
+}
+div, table,label, input, button, select, textarea {
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 10;
+}
+.footer {
+    display:none;
+}

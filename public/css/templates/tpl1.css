@@ -1,0 +1,25 @@
+@CHARSET "UTF-8";
+
+body {
+    background-color: #c0deed;
+}
+
+a {
+}
+
+h1, h2, h3 {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10;
+}
+#container{
+    background-color: #ffffff;
+    padding: 10px 10px 50px;
+    border: 1px solid #cccccc;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+    margin-bottom: 50px;
+    min-height: 600px;
+}
+div, table,label, input, button, select, textarea {
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 10;
+}

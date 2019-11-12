@@ -1,0 +1,82 @@
+<style type='text/css'>
+.pagination-sm > li > a, .pagination-sm > li > span {
+    padding: 5px;
+}
+</style>
+<div class='row'>
+	<div class='col-md-9'>
+    <?php 
+    if ($this->paginator->getPageRange()) {
+    	echo $this->paginationControl($this->paginator, 'Jumping', 'partials/pagination.phtml', $this->params);
+    }
+    ?>
+    </div>
+    <div class='col-md-3'>
+    <?php 
+    if ($this->filter) {
+    ?>
+    <div class="btn-group" style='margin: 20px 0px;'>
+    	<button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">
+  	    	<?php echo $this->translate('Voir') ?> <span class="caret"></span>
+    	</button>
+    	<ul class="dropdown-menu" role="menu">
+  	    <?php 
+    	foreach ($this->filter as $k => $v) {
+        ?>
+	        <li <?php if ($this->params['filter'] == $k) { ?> class='active' <?php } ?>>
+	      	  <a href="<?php echo URL . $this->url (array_merge($this->params, array('filter' => $k)), null); ?>"><?php echo $this->translate($v) ?></a>
+	        </li>
+        <?php 
+        }
+        ?>
+	    </ul>
+	</div>
+    <?php 
+    } 
+    if ($this->tri) {
+    ?>
+   
+    	<div class="btn-group" style='margin: 20px 0px;'>
+	    	<button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">
+	  	    	<?php echo $this->translate('Trier') ?> <span class="caret"></span>
+	    	</button>
+	    	<ul class="dropdown-menu" role="menu">
+	  	    <?php 
+	    	foreach ($this->tri as $k => $v) {
+	        ?>
+		        <li <?php if ($this->params['tri'] == $k) { ?> class='active' <?php } ?>>
+		      	  <a href="<?php echo URL . $this->url (array_merge($this->params, array('tri' => $k)), null); ?>"><?php echo $this->translate($v) ?></a>
+		        </li>
+	        <?php 
+	        }
+	        ?>
+		    </ul>
+		</div>
+	
+    <?php 
+    }
+    if ($this->nb) {
+    ?>
+    
+    	<div class="btn-group" style='margin: 20px 0px;'>
+		    <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">
+		  	    <?php echo $this->translate('Afficher') ?> <span class="caret"></span>
+		    </button>
+		    <ul class="dropdown-menu" role="menu">
+		  	    <?php 
+		    	foreach ($this->nb as $k => $v) {
+		        ?>
+			        <li <?php if ($this->params['nbResultPerPage'] == $k) { ?> class='active' <?php } ?>>
+			      	  <a href="<?php echo URL . $this->url (array_merge($this->params, array('nbResultPerPage' => $k)), null); ?>"><?php echo $this->translate($v) ?></a>
+			        </li>
+		        <?php 
+		        }
+		        ?>
+			</ul>
+		</div>
+   
+    <?php 
+    }
+    ?>
+    </div>
+</div>

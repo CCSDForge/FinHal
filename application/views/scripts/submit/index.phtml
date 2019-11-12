@@ -1,0 +1,276 @@
+<?php
+/** @var Hal_View $this */
+$this->layout()->docLink = 'https://doc.archives-ouvertes.fr/deposer/';
+
+$renderNav = array(
+    Hal_Settings::SUBMIT_STEP_FILE => array('icon' => "glyphicon glyphicon-folder-open", 'title' => "Déposer le(s) fichier(s)"),
+    Hal_Settings::SUBMIT_STEP_META => array('icon' => "glyphicon glyphicon-list", 'title' => "Compléter les métadonnées du document"),
+    Hal_Settings::SUBMIT_STEP_AUTHOR => array('icon' => "glyphicon glyphicon-user", 'title' => "Compléter les données auteur(s)"),
+    Hal_Settings::SUBMIT_STEP_RECAP => array('icon' => "glyphicon glyphicon-list-alt", 'title' => "Valider le dépôt"),
+);
+
+$jsonRenderNav = json_encode($renderNav);
+$jsonAcceptedExtensions = json_encode($this->extensions);
+
+$this->jQuery()->addStylesheet(CCSDLIB . "/js/fileupload/css/jquery.fileupload.css")
+                ->addStylesheet('/css/submit.css?20170926')
+                ->addStylesheet("/css/jquery.switchButton.css")
+                ->addStylesheet("//unpkg.com/leaflet@1.3.4/dist/leaflet.css")
+                ->addStylesheet(CCSDLIB . "/js/fileupload/css/dropzone.css")
+                ->addJavascriptFile(CCSDLIB . "/js/fileupload/js/vendor/jquery.ui.widget.js")
+                ->addJavascriptFile(CCSDLIB . "/js/fileupload/js/jquery.iframe-transport.js")
+                ->addJavascriptFile(CCSDLIB . "/js/fileupload/js/jquery.fileupload.js")
+                ->addJavascriptFile(CCSDLIB . "/js/fileupload/js/dropzone.js")
+                ->addJavascriptFile("/js/jquery.switchButton.js")
+                ->addJavascriptFile('/js/submit/index.js')
+                ->addJavascriptFile('/js/submit/file.js')
+                ->addJavascriptFile('/js/submit/author.js')
+                ->addJavascriptFile('/js/submit/file-detailled.js')
+                ->addJavascriptFile('/js/submit/meta.js')
+                ->addJavascriptFile('/js/submit/recap.js')
+                ->addJavascriptFile('//unpkg.com/leaflet@1.3.1/dist/leaflet.js')
+                ->addJavascriptFile('//leaflet.github.io/Leaflet.Editable/src/Leaflet.Editable.js');
+
+$this->headScript()->appendScript("var dropzoneWidth = 0;\nvar mainableExtensions = '" .json_encode($this->mainFileType)."';\nvar maxUploadSize = '" .ini_get("upload_max_filesize")."';\nvar step = '" . $this->activeStep ."';\nvar acceptedExtensions='". $jsonAcceptedExtensions ."';\nvar globalHalSettings = '{\"file\":{\"icon\":\"glyphicon glyphicon-folder-open\",\"title\":\"Ajouter des fichiers\"},\"meta\":{\"icon\":\"glyphicon glyphicon-list\",\"title\":\"Compl\u00e8ter les m\u00e9tadonn\u00e9es\"},\"author\":{\"icon\":\"glyphicon glyphicon-user\",\"title\":\"Compl\u00e8ter les donn\u00e9es auteur(s)\"},\"recap\":{\"icon\":\"glyphicon glyphicon-ok\",\"title\":\"Valider le d\u00e9pot\"}}';");
+
+
+if (Hal_Settings::SUBMIT_INIT != $this->submitType) {
+    $this->layout()->submitTypdoc = $this->translate("Modification du document ") . "<a href='/" . $this->document->getId() . "' target='_blank'>" . $this->document->getId() . "</a> " . $this->translate("soumis par ") . $this->document->getContributor('fullname') . " le " . $this->document->getSubmittedDate(Zend_Date::DATE_FULL);
+}
+?>
+
+<?php if (!empty($this->moderationMsg)) {?>
+    <div class="alert alert-warning alert-fixed">
+        <?php echo $this->moderationMsg;?>
+    </div>
+<?php }?>
+<section>
+    <div class="wizard">
+        <div id="render-step">
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                <?php
+                $nbStep = 1;
+                foreach ($this->steps as $step => $valid) {?>
+                <div id="<?php echo $step ?>" class="panel panel-default">
+                    <div class="panel-heading heading" role="tab" id="heading<?php echo $nbStep;?>">
+                        <a class="panel-link" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse<?php echo $nbStep;?>" aria-expanded="true" aria-controls="collapse<?php echo $nbStep;?>">
+                            <div class="panel-title">
+                                <i class="accordion-icon <?php echo $renderNav[$step]['icon'];?>"></i>
+                                <?php echo $this->translate($renderNav[$step]['title'])?>
+                                <span id="<?php echo $step ?>-validity" class="validity-icon"><i></i></span>
+                            </div>
+                        </a>
+                    </div>
+                    <div id="collapse<?php echo $nbStep;?>" class="panel-collapse collapse <?php echo ($step == $this->activeStep || $step == Hal_Settings::SUBMIT_STEP_RECAP) ? 'in' : ''?>" role="tabpanel" aria-labelledby="heading<?php echo $nbStep;?>">
+                        <div class="panel-body">
+                            <?php if ($step == Hal_Settings::SUBMIT_STEP_FILE || $step == Hal_Settings::SUBMIT_STEP_META || $step == Hal_Settings::SUBMIT_STEP_AUTHOR) {?>
+                            <div class="switch-container">
+                                <?php if ($step == Hal_Settings::SUBMIT_STEP_AUTHOR
+                                    ||    $step == Hal_Settings::SUBMIT_STEP_META
+                                    || $this->type != Hal_Settings::SUBMIT_UPDATE
+                                    || $this->type != Hal_Settings::SUBMIT_ADDFILE
+                                    || $this->type != Hal_Settings::SUBMIT_ADDANNEX) {?>
+                                <div id="change-view-button-<?php echo $step; ?>" class="switch-view-button"
+
+                                <?php if ($step == Hal_Settings::SUBMIT_STEP_FILE && $this->submitType != Hal_Settings::SUBMIT_UPDATE) {
+                                    echo "data-toggle=\"tooltip\" data-original-title=\"". $this->translate("Ajouter un embargo, compiler votre fichier laTex, etc")."\">".$this->translate("Afficher la vue détaillée");
+                                } else if ($step == Hal_Settings::SUBMIT_STEP_META) {
+                                    echo ">" . $this->translate("Afficher la liste complète des métadonnées");
+                                } else if ($step == Hal_Settings::SUBMIT_STEP_AUTHOR) {
+                                    echo "data-toggle=\"tooltip\" data-original-title=\"". $this->translate("Ajouter des auteurs par lot")."\">".$this->translate("Afficher toutes les options");
+                                } else {
+                                    echo ">";
+                                }?>
+                                <i id="icon-switch-<?php echo $step; ?>" class="<?php
+                                if (($step == Hal_Settings::SUBMIT_STEP_FILE && $this->filemode) || ($step == Hal_Settings::SUBMIT_STEP_META && $this->metamode) || ($step == Hal_Settings::SUBMIT_STEP_AUTHOR && $this->authormode))
+                                    echo 'glyphicon glyphicon-unchecked';
+                                else
+                                    echo 'glyphicon glyphicon-check';
+                                ?>">
+
+                                </i>
+                            </div>
+                        <?php } ?>
+                        </div>
+                        <?php } ?>
+                        <div  id="panel-body-<?php echo $step ?>">
+                            <?php include __DIR__ . "/step-{$step}/index.phtml"; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <?php
+            $nbStep ++;
+            } ?>
+        </div>
+    </div>
+</section>
+
+<div id="modal-success" class="modal fade bs-example-modal-sm " tabindex="-1"
+     role="dialog" aria-hidden="true" data-backdrop="static">
+</div>
+<div id="modal-loading" class="modal fade bs-example-modal-sm " tabindex="-1"
+     role="dialog" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="waiting-msg" class="modal-title">
+                    <i class="glyphicon glyphicon-time"></i> <span></span>
+                </h4>
+            </div>
+            <div class="modal-body">
+                <br/>
+                <p><?php echo $this->translate("Si votre document comporte beaucoup d'auteurs, le processus de récupération peut prendre un peu de temps. Merci pour votre patience.")?></p>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped active" role="progressbar"
+                         aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%;">
+                    </div>
+                </div>
+            </div>
+
+            <?php if ($this->seeLegal) {?>
+
+                <div id="legal-text" class="modal-body">
+                    <div id="legal-intro">
+                        <span id="legal-title"><?php echo $this->translate("Dépôt de fichier - Quels sont vos droits ?"); ?></span>
+                        <br/>
+                        <br/>
+                        <span class="legal-subtitle"><?php echo $this->translate("Vous déposez le fichier téléchargé depuis le site de l’éditeur ?"); ?></span>
+                        <br/>
+                        <span class="legal-subtitle"><?php echo $this->translate("Votre fichier contient un scan de la version publiée ?"); ?></span>
+                        <br/>
+                        <br/>
+                    </div>
+                    <span class="legal-subtitle"><?php echo $this->translate("Dans quel cas pouvez-vous le faire :"); ?></span>
+                    <br/>
+                    * <?php echo $this->translate("la publication est sous licence Creative Commons"); ?>
+                    <br/>
+                    <span class="legal-comment"><?php echo $this->translate("(présence de la mention CC-BY ou ©the authors)"); ?></span>
+                    <br/>
+                    <br/>
+
+                    * <?php echo $this->translate("l'éditeur l’autorise : consultez le site Sherpa/Romeo pour vérifier"); ?>
+                    <br/>
+                    <span class="legal-comment"><?php echo $this->translate("(mention « author can archive publisher's version/PDF »)"); ?></span>
+                    <br/>
+                    <br/>
+
+                    * <?php echo $this->translate("vous avez l’autorisation de l’éditeur"); ?>
+                    <br/>
+                    <span class="legal-comment"><?php echo $this->translate("(affichez la vue détaillée puis sélectionnez l’option « j’ai l’accord explicite »)"); ?></span>
+                    <br/>
+                    <br/>
+                    <?php echo $this->translate("Si aucune de ces conditions n’est remplie, choisissez plutôt de déposer la version avant publication (dernière version avant publication ou postprint)."); ?>
+                    <br/>
+                    <br/>
+                    <div id="legal-blabla">
+                        <?php echo $this->translate("Pour un article publié dans une revue et si les recherches ont été financées au moins pour moitié sur fonds publics, la Loi pour une République Numérique (art. 30) protège les auteurs contre les durées d’embargo très longues que certains éditeurs imposent pour la version postprint. La loi limite à 6 mois maximum pour les STM et 12 mois pour les SHS. Affichez la vue détaillée pour appliquer une durée d’embargo."); ?>
+                    </div>
+                    <br/>
+                    <div id="legal-end">
+                        <input id="seelegal-check" type="checkbox"/> <span onclick="$('#seelegal-check').trigger('click');"><?php echo $this->translate("Ne plus afficher"); ?></span>
+                        <br/>
+                        <input id="legal-button" value="Ok" onclick="$('#legal-text').hide();changeSeeLegal();" type="button" class="btn btn-sm btn-primary"/>
+                    </div>
+                </div>
+
+            <?php } ?>
+        </div>
+    </div>
+</div>
+
+<script type="application/javascript">
+
+    $(document).ready(function () {
+        // Patch : On cache le modal qui reste affiché par défaut (seulement le 2e)... pourquoi??
+        hideLoading('modal-success');
+
+        initSwitchView('file', <?php echo $this->filemode; ?>);
+        initSwitchView('meta', <?php echo $this->metamode; ?>);
+        initSwitchView('author', <?php echo $this->authormode; ?>);
+        initSwitchStep();
+
+        // On initialise la vue avec les fichiers en session
+        <?php if ($this->submitType == Hal_Settings::SUBMIT_UPDATE) {
+            // Dans le cas de la modifcation des métadonnées, il n'y a rien à initialiser dans la vue fichier
+        } else if (Hal_Settings::SUBMIT_MODE_DETAILED == $this->filemode) {?>
+            // Vue détaillée
+            init('/<?php echo $this->controller; ?>/upload');
+        <?php } else {?>
+            initDropzone();
+
+            // Vue simplifiée, MAJ avec les fichiers en session
+            var myDropzone = Dropzone.instances[0];
+
+            // Initialisation de la variable globale dropzoneWidth
+            dropzoneWidth = $("#demo-upload").width();
+
+            <?php foreach ($this->files as $i => $file) { /**@var Hal_Document_File $file */ $fileArray = $file->toArray(); ?>
+            addMockFileToDropzone(myDropzone, "<?php echo $i; ?>", "<?php echo $fileArray["name"]; ?>", 0, "<?php echo $fileArray["typeMIME"]; ?>", "<?php echo $file->getTmpThumb(); ?>", "<?php echo $fileArray["default"]; ?>");
+            <?php } ?>
+        <?php }?>
+
+        // Prevent collapse de l'étape recap
+        $('#collapse4').on('hide.bs.collapse', function (e) {
+            return e.preventDefault();
+        });
+
+        // Vérification de la validité des étapes quand on click sur "Valider le Dépot"
+        $('#heading4').on('click', function () {
+            // On envoit les données de l'étape métadonnée au cas où il y aurait eu des changements
+            var postData = [];
+            postData = $("#form_meta").serializeArray();
+
+            ajaxrequestsubmit({url: "/submit/ajaxresetvalidity", data: postData,
+                success: function () {
+                    // Fermeture de l'étape
+                    var child = $('body').find($('.panel-collapse.collapse.in'));
+
+                    if (child.length > 1 && child[0].id != 'collapse4') {
+                        $('#' + child[0].id).collapse('hide');
+                        $('html, body').animate({
+                            scrollTop: 0
+                        }, 0);
+                    }
+                }, dataType: 'json',
+                error: function (error) {
+
+                    try {
+                        // Test pour différencier les 2 cas... oui c'est un peu moche :s
+                        var response = jQuery.parseJSON(error.responseText);
+
+                        // Erreur : le dépôt n'est pas valide
+                        $("#error-zone-recap").show();
+                        $('html, body').animate({
+                            scrollTop: 0
+                        }, 0);
+                    } catch (ex) {
+                        // Erreur bloquante du serveur
+                        $('#panel-body-recap').html('<div id="error-zone-recap" class="alert alert-danger fade in" role="alert"><p>'+ translate(error.responseText) + '</p></div>');
+                    }
+                }
+            });
+        });
+
+        // Mise à jour des type de document autorisés
+        var typdocs = JSON.parse("<?php echo $this->availableTypdocs;?>");
+
+        majTypdocsDropdown("typdoc-menu", typdocs);
+        majTypdocs("type", typdocs);
+
+        // Initialisation du changement de type de document
+        $('.idext-elem').click(function() {
+            $('#identifiertype').html(this.textContent+"<span class=\"caret\" style=\"margin-left:10px;\"></span>");
+            $("#idtype-menu").val(this.getAttribute("value"));
+        });
+
+        // Initialisation de la validité selon le type de dépot
+        <?php if (Hal_Settings::SUBMIT_INIT != $this->submitType) {?>
+            majstepValidity(JSON.parse('<?php echo Zend_Json::encode($this->steps);?>'));
+        <?php } ?>
+        });
+
+</script>
+
+

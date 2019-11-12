@@ -1,0 +1,18 @@
+<span>Nombre de documents : <strong><?php echo count($this->docids) ?></strong></span>
+<blockquote><?php echo implode(', ', $this->docids);?></blockquote>
+
+<form action="" method="post">
+    <?php foreach ($this->docids as $docid) {?>
+        <input type="hidden" name="docids[]" value="<?php echo $docid ?>">
+    <?php } ?>
+    <select name="field">
+        <?php foreach ($this->fields as $group =>$fields) {?>
+            <optgroup label="<?php echo $group ?>">
+                <?php foreach ($fields as $val =>$text) {?>
+                    <option value="<?php echo $val ?>"><?php echo $text ?></option>
+                <?php } ?>
+            </optgroup>
+        <?php } ?>
+    </select>
+    <input type="submit" />
+</form>

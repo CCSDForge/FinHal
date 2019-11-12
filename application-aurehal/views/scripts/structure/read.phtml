@@ -1,0 +1,22 @@
+<?php 
+
+$this->no_javascript = true;
+include __DIR__ . "/../referentiel/read.phtml" 
+
+?>
+
+<script type='text/javascript'>
+$(document).ready(function() {
+	$('[data-load-remote]').on('click',function(e) {
+	    e.preventDefault();
+	    var self = $(this);
+	    var remote = self.data('load-remote');
+	    $(self.data('remote-target')).html('');
+	    if(remote) {
+	        $(self.data('remote-target')).load(remote);
+	        $(self.data('restore-target')).click(function() { link($(self.data('restore-target')).attr('onclick') + "/do/restore/id/" + self.data('restore-id')); });
+	        $(self.data('target')).modal('show');
+	    }
+	});
+});
+</script>

@@ -1,0 +1,375 @@
+<style>
+    .btn-tools-list ul {
+        display: block;
+    }
+    .relative {   position:relative;
+    }
+    .table-overflow {
+        margin-top:40px;
+        padding-top:40px;
+        max-height:150px;
+        overflow:auto;
+    }
+    tbody {
+        margin-top:15px;
+        padding-top:40px;
+    }
+    .table-overflow tbody > tr:first-child {
+        width:100%;
+        position:absolute;
+        top: -30px;
+    }
+    .identifiantCol {
+        min-width:250px;
+        max-width:250px;
+        width:10%;
+    }
+    .dateCol {
+        min-width:150px;
+        max-width:150px;
+        width:10%;
+    }
+    .referenceCol {
+        width:80%;
+
+    }
+</style>
+<?php
+/** @var Hal_View $this */
+$titles = array(
+    Hal_Settings_Submissions::TYPE_MODIFY_FILE => $this->translate('Documents en attente de modification'),
+    Hal_Settings_Submissions::TYPE_OFFLINE_FILE => $this->translate('Documents en attente de vérification'),
+    Hal_Settings_Submissions::TYPE_ONLINE_FILE => $this->translate('Documents en ligne'),
+    Hal_Settings_Submissions::TYPE_MODIFY_REF => $this->translate('Références bibliographiques en attente de modification'),
+    Hal_Settings_Submissions::TYPE_OFFLINE_REF => $this->translate('Références bibliographiques en attente de vérification'),
+    Hal_Settings_Submissions::TYPE_ONLINE_REF => $this->translate('Références bibliographiques en ligne'),
+    Hal_Settings_Submissions::TYPE_MYSPACE => $this->translate("Documents en attente d'être déposés"),
+    Hal_Settings_Submissions::TYPE_EMBARGO => $this->translate('Documents confidentiels')
+);
+$textActions = array(
+    Hal_Settings_Submissions::ACTION_SEE		=>	'<i class="glyphicon glyphicon-eye-open active"></i>&nbsp;' . $this->translate('Voir'),
+    Hal_Settings_Submissions::ACTION_MODERATE	=>	'<i class="glyphicon glyphicon-retweet active"></i>&nbsp;' . $this->translate('Remettre en modération'),
+    Hal_Settings_Submissions::ACTION_MODIFY	    =>  '<i class="glyphicon glyphicon-pencil active"></i>&nbsp;' . $this->translate('Modifier'),
+    Hal_Settings_Submissions::ACTION_METADATA	=>	'<i class="glyphicon glyphicon-pencil active"></i>&nbsp;' . $this->translate('Modifier les métadonnées'),
+    Hal_Settings_Submissions::ACTION_REPLY		=>	'<i class="glyphicon glyphicon-comment active"></i>&nbsp;' . $this->translate('Répondre'),
+    Hal_Settings_Submissions::ACTION_DELETE		=>	'<i class="glyphicon glyphicon-trash active"></i>&nbsp;' . $this->translate('Supprimer'),
+    Hal_Settings_Submissions::ACTION_VERSION	=>	'<i class="glyphicon glyphicon-plus active"></i>&nbsp;' . $this->translate('Déposer une nouvelle version'),
+    Hal_Settings_Submissions::ACTION_TRANSFERT	=>	'<i class="glyphicon glyphicon-user active"></i>&nbsp;' . $this->translate('Partager la propriété...'),
+    Hal_Settings_Submissions::ACTION_FILE		=>	'<i class="glyphicon glyphicon-file active"></i>&nbsp;' . $this->translate('Ajouter un fichier'),
+    Hal_Settings_Submissions::ACTION_ADDFILE	=>	'<i class="glyphicon glyphicon-file active"></i>&nbsp;' . $this->translate('Ajouter un fichier annexe'),
+    Hal_Settings_Submissions::ACTION_RELATED    =>	'<i class="glyphicon glyphicon-link active"></i>&nbsp;' . $this->translate('Lier la ressource'),
+    Hal_Settings_Submissions::ACTION_COPY       =>	'<i class="glyphicon glyphicon-export active"></i>&nbsp;' . $this->translate('Utiliser comme modèle'),
+    Hal_Settings_Submissions::ACTION_UNSHARE    =>	'<i class="glyphicon glyphicon-remove active"></i>&nbsp;' . $this->translate('Supprimer de mon espace'),
+);
+
+foreach ($this->settings as $group => $actions) {
+    if (preg_match("/ONLINE_FILE/i", $group)) {
+        $typdoc='_FILE';
+    } elseif (preg_match("/ONLINE_REF/i", $group)){
+        $typdoc='_REF';
+    } else {
+        $typdoc='';
+    }
+    $idLocal="table" . time() . $group;
+    if (Hal_Settings_Submissions::displayIfEmpty($group) || (isset($this->documents[$group]) && count($this->documents[$group]))) {
+        ?>
+        <fieldset>
+            <h4><?php echo $titles[$group]; ?>
+                <span style="float:right" class="label label-h4"><?php echo isset($this->documents[$group]) ? count($this->documents[$group]) : 0 ; ?></span>
+            </h4>
+            <div class="collapse-data" >
+                <form action="/user/submissions" method="post">
+                    <input type="hidden" name="method" class="method" />
+                    <?php if (isset($this->documents[$group])) { ?>
+                    <div class="relative">
+                        <div class="table-overflow" id="<?php echo $idLocal; ?>">
+                            <table class="table table-striped table-hover table-condensed table-<?php echo $group ?>">
+                                <tbody>
+                                <tr>
+                                    <th class="identifiantCol" ><?php echo $this->translate('Identifiant')?></th>
+                                    <th class="referenceCol"><?php echo $this->translate('Référence')?></th>
+                                    <th class="dateCol" ><?php echo $this->translate('Date de dépôt')?></th>
+                                </tr>
+
+                                <?php
+                                $docids = array();
+                                foreach($this->documents[$group] as $i => $document) {
+                                    if ($i < 20) {
+                                        $article = Hal_Document::find($document['docid']);
+                                        $checked = false;
+                                        if (isset($this->docid)) {
+                                            $checked = $this->docid == $document->getDocid();
+                                        } else {
+                                            $checked = false;
+                                        }
+                                        if (! $article instanceof Hal_Document) continue;
+                                        ?>
+                                        <tr>
+                                        <td class="identifiantCol"><?php
+                                            if ($group == Hal_Settings_Submissions::TYPE_ONLINE_FILE || $group == Hal_Settings_Submissions::TYPE_ONLINE_REF) { ?>
+                                                <label>
+                                                    <input type="checkbox" class="checkbox-docid<?php echo $typdoc; ?>" name="docid" id="docid<?php echo $typdoc; ?>[<?php echo $i; ?>]" value="<?php echo $document['docid']?>" <?php echo ($checked ? 'checked="checked"' : '') ?>/>&nbsp;
+                                                    <?php echo $document['identifiant'] . ', v' . $document['version']; ?>
+                                                </label>
+                                            <?php if ($checked) { ?>
+                                                <script type="text/javascript">
+                                                    $(document).ready(function(){
+                                                        $("input[value='<?php echo $document['docid'] ?>']").focus();
+                                                    });
+                                                </script>
+                                            <?php } ?>
+                                            <?php } else { ?>
+                                                <label><input type="radio" name="docid" id="docid" value="<?php echo $document['docid']?>" <?php echo ($checked ? 'checked="checked"' : '') ?>/>&nbsp;
+                                                    <?php echo $document['identifiant'] . ', v' . $document['version']; ?></label>
+                                            <?php }
+                                            ?></td>
+                                        <td class="referenceCol"><?php echo strip_tags($article->getCitation('full'));
+                                            if ($group == Hal_Settings_Submissions::TYPE_MODIFY_FILE || $group == Hal_Settings_Submissions::TYPE_MODIFY_REF) { ?>
+                                                <div class="alert alert-warning"><?php echo Hal_Document_Logger::getLastComment($document['docid'], Hal_Document_Logger::ACTION_ASKMODIF);?></div>
+                                            <?php } ?></td>
+                                        <?php  $date=$document['date'];
+                                        list($dateDay, $dateHour) = explode(' ',$date );
+                                        ?>
+                                        <td class="dateCol"><span title="<?php echo $document['date']?>"><?php echo $dateDay ?></span></td>
+                                        </tr><?php
+                                    } else {
+                                        $docids[] = $document['docid'];
+                                    }
+                                }?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <script type="text/javascript">
+                        <?php
+                        if (count($docids)) {
+                        foreach(array_chunk($docids, 100) as $i => $docs) {
+                        ?>
+                        $.ajax({
+                            type: "post",
+                            url: "/user/ajaxsubmissions",
+                            data: { group: '<?php echo $group; ?>', docids: [<?php echo implode(', ', $docs)?> ] }
+                        }).done(function( data ) {
+                            $('.table-<?php echo $group ?> tbody').append(data);
+                        });
+                        <?php
+                        }
+                        }
+                        ?>
+                    </script>
+
+                    <?php }?>
+                    <?php if (Hal_Settings_Submissions::displayIfEmpty($group)) {?>
+                        <div>
+                            <table class="table table-striped table-hover table-condensed">
+                                <tbody>
+                                <tr>
+                                    <td colspan="3">
+                                        <strong>
+                                            <!--input type="radio" name="docid" id="docid_0 "value="0" />&nbsp; -->
+                                            <input type="checkbox" class="checkbox-docid<?php echo $typdoc; ?>" name="docid" id="docid<?php echo $typdoc; ?>[]" value="0" />&nbsp;
+                                            <?php echo $this->translate('Identifiant du document') ?>&nbsp;<input type="text" name="identifiant" autocomplete="off" onfocus="$(this).prevAll('input:checkbox').click();"/>&nbsp;
+                                            <?php echo $this->translate('Mot de passe') ?>&nbsp;<input type="text" name="pwd" autocomplete="off"/>
+                                        </strong>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php }?>
+                    <div class="row">
+                        <div class="col-md-8" >
+                            <div class="btn-group">
+                                <button id="btn-tools" type="button" class="btn btn-sm btn-default dropdown-toggle doc-nb<?php echo $typdoc; ?>" data-toggle="dropdown">
+                                    <i class="glyphicon glyphicon-wrench"></i>
+                                    &nbsp;<?php echo $this->translate('Outils');?>&nbsp;
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu btn-tools-list" role="menu" >
+                                    <?php
+                                    foreach ($actions as $action) {
+                                        if ($action == 'transfert') {?>
+                                            <li class=""><a href="javascript:void(0)" onclick="return addOwnership('<?php echo $typdoc; ?>');">
+                                                    <!--i class="glyphicon glyphicon-user"></i>&nbsp;<?php echo $this->translate('Partager la propriété...')?> -->
+                                                    <?php echo $textActions[$action];?>
+                                                </a>
+                                            </li>
+                                            <?php
+                                        } else if (($action == Hal_Settings_Submissions::ACTION_DELETE) && ($group == Hal_Settings_Submissions::TYPE_ONLINE_REF)) { ?>
+                                            <li class=""><a href="javascript:void(0)" onclick="return deleteDoc();">
+                                                    <?php echo $textActions[$action];?>
+                                                </a>
+                                            </li>
+                                            <?php
+                                        } else if (($action == Hal_Settings_Submissions::ACTION_UNSHARE)) { ?>
+                                            <li name='<?php echo $action;?>' id='<?php echo $action;?><?php echo $typdoc; ?>' style="display:none;">
+                                                <a href="javascript:void(0);" onclick="$(this).closest('form').find('input.method').val('<?php echo $action;?>');$(this).closest('form').submit();">
+                                                    <?php echo $textActions[$action];?>
+                                                </a>
+                                            </li>
+                                            <?php
+                                        } else { ?>
+                                            <li name='<?php echo $action;?>' id='<?php echo $action;?><?php echo $typdoc; ?>' >
+                                                <a href="javascript:void(0);" onclick="$(this).closest('form').find('input.method').val('<?php echo $action;?>');$(this).closest('form').submit();">
+                                                    <?php echo $textActions[$action];?>
+                                                </a>
+                                            </li>
+
+                                        <?php }
+                                    }?>
+                                </ul>
+
+                            </div>
+                        </div>
+                        <div class="col-md-4"><button  type="button" onclick="document.getElementById('<?php echo $idLocal; ?>').style.maxHeight = '1000px';" >Agrandir</button></div>
+                    </div>
+                    <?php $resultat = "";
+                    if ($group == Hal_Settings_Submissions::TYPE_ONLINE_REF) {
+                        if ((empty($this->suppression)) && (empty($this->interdit)) && (empty($this->inexistant) && (!empty($this->erreur)))) {
+                            $resultat .= "<blockquote>".$this->erreur."</blockquote>";
+                        } else {
+                            if (!empty($this->suppression)) {
+                                foreach($this->suppression as $i => $docid) {
+                                    if ($i == 0) {
+                                        $resultat .=  "<blockquote class='alert alert-success'>".$this->translate("Les dépôts suivants ont été supprimés : ");
+                                    }
+                                    $resultat .=  $docid." ";
+                                }
+                                if ($i >0) {
+                                    $resultat .=  "</blockquote>";
+                                }
+                            }
+                            if (!empty($this->interdit)) {
+                                foreach($this->interdit as $i => $docid) {
+                                    if ($i == 0) {
+                                        $resultat .=   "<blockquote class='alert alert-danger'>".$this->translate("Vous n'avez pas le droit de supprimer les dépôts suivants : ");
+                                    }
+                                    $resultat .=  $docid." ";
+                                }
+                                if ($i >0) {
+                                    $resultat .=  "</blockquote>";
+                                }
+                            }
+                            if (!empty($this->inexistant)) {
+                                foreach($this->inexistant as $i => $docid) {
+                                    if ($i == 0) {
+                                        $resultat .=  "<blockquote class='alert alert-danger'>".$this->translate("Les dépôts suivants n'existent pas : ");
+                                    }
+                                    $resultat .=  $docid." ";
+                                        }
+                                        if ($i >0) {
+                                $resultat .=  "</blockquote>";
+                                        }
+                                    }
+                                }
+                                if ($resultat != "") {
+                        echo '<div class="alert alert-warning alert-fixed" id="retour">'.$resultat.'</div>';
+                                }
+                            }?>
+
+                </form>
+            </div>
+            <form id="list-docs" action="/user/docowner" method="post">
+                <input type="hidden" name="method" value="share" />
+                <input type="hidden" id="docid" name="docid" value="" />
+            </form>
+            <form id="delete-docs" action="/user/submissions" method="post">
+                <input type="hidden" name="method" value="delete" />
+                <input type="hidden" id="docid" name="docid" value="" />
+            </form>
+
+            <script type="text/javascript">
+                $(document).ready(function(){
+
+                    var documents = <?php echo json_encode($this->documents); ?>;
+                    var typdoc = '<?php echo $typdoc; ?>';
+
+                    $('.checkbox-docid<?php echo $typdoc; ?>').click(function() {
+
+                        // On récupère le numéro du document que l'on check
+                        // docid_FILE[identifiant]
+                        var identifiant = this.id;
+                        identifiant = identifiant.replace("docid<?php echo $typdoc; ?>[", "");
+                        identifiant = identifiant.replace("]", "");
+
+                        <?php if ($typdoc != '') { ?>
+                        nb<?php echo $typdoc; ?> = 0;
+                        nb<?php echo $typdoc; ?> = $('input[class="checkbox-docid<?php echo $typdoc; ?>"]:checked').length;
+                        affiche="block";
+                        var afficheUnshare = 'none';
+                        if (nb<?php echo $typdoc; ?> == 0) {
+                            text = "<i class='glyphicon glyphicon-wrench'></i>&nbsp;<?php echo $this->translate('Outils') ?>&nbsp;<span class='caret'></span>";
+                            affiche="block";
+                        } else if (nb<?php echo $typdoc; ?> == 1) {
+                            text = "<i class='glyphicon glyphicon-wrench'></i>&nbsp;<?php echo $this->translate('Pour le document sélectionné') ?>&nbsp;<span class='caret'></span>";
+                            affiche="block";
+                            afficheUnshare = "block";
+                        } else {
+                            text = "<i class='glyphicon glyphicon-wrench'></i>&nbsp;<?php echo $this->translate('Pour les ') ?><strong>" + nb<?php echo $typdoc; ?> + "</strong> <?php echo $this->translate('documents sélectionnés') ?>&nbsp;<span class='caret'></span>";
+                            affiche="none";
+                        }
+                        //document.getElementById("see<?php echo $typdoc; ?>").style.display=affiche;
+                        <?php foreach ($actions as $action) {
+
+                        // Le déposant ne peut pas déclarer 'je ne suis pas l'auteur de ce document'
+                        if ($action == 'unshare') { ?>
+                        if (documents['online<?php echo strtolower($typdoc);?>'][identifiant]['uid'] == '<?php echo Hal_Auth::getUser()->getUid(); ?>') {
+                            document.getElementById("unshare<?php echo $typdoc; ?>").style.display='none';
+                        } else {
+                            document.getElementById("unshare<?php echo $typdoc; ?>").style.display=afficheUnshare;
+                        }
+                        <?php }
+
+                        if (($action != 'transfert' ) && ($action != 'delete') && ($action != 'unshare')) {?>
+                        document.getElementById("<?php echo $action; ?><?php echo $typdoc; ?>").style.display=affiche;
+                        <?php }
+                        } ?>
+
+                        $('.doc-nb<?php echo $typdoc; ?>').html(text);
+                        <?php } ?>
+                });
+            });
+
+            function getData(typedoc, data)
+            {
+                //var data = [];
+                data.docid = [];
+                $.each($("tbody .checkbox-docid" + typedoc + ":checked"), function() {
+                        if ($(this).val() == 0) {
+                            valeur = $(this).next('input[name="identifiant"]').val();
+                            data.pwd = $(this).next('input[name="pwd"]').val();
+                            data.docid.push(valeur);
+                        }
+                        else {
+                            data.docid.push($(this).val());
+                        }
+                });
+                return data;
+            }
+             
+            function addOwnership(typedoc)
+            {
+                var data = getData(typedoc,{});
+                for (var i in data.docid) {
+                    $('#list-docs').append('<input type="hidden" name="docid[]" value="' + data.docid[i] + '" />');
+                }
+                $('#list-docs').submit();
+            }
+
+            function deleteDoc()
+            {
+                var data = getData('_REF',{});
+                for (var i in data.docid) {
+                    $('#delete-docs').append('<input type="hidden" name="docid[]" value="' + data.docid[i] + '" />');
+                }
+                $('#delete-docs').submit();
+            }
+
+        </script>
+    </fieldset>
+<?php
+            }
+    }
+
+

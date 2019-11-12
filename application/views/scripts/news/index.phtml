@@ -1,0 +1,41 @@
+<?php foreach ($this->news as $i => $news) { ?>
+	<h4><?php echo $this->translate($news['TITLE']);?></h4>
+	<blockquote><?php echo $this->translate('posté le');?> <?php echo $news['DATE_POST']?> <?php echo $this->translate('par');?> <?php $user = Hal_User::createUser($news['UID']); echo $user->getScreen_name()?>
+	</blockquote>
+	<?php if ($i == 0 ) { //Première news, on affiche tout?>	
+		<p><?php echo $this->translate($news['CONTENT']);?></p>
+		<?php if ($news['LINK']) {?>
+			<p class="right"><a href="<?php echo $news['LINK'];?>" target="_blank" rel="noopener" class="btn btn-primary btn-small"><?php echo $this->translate("En savoir plus");?></a></p>
+		<?php }?>
+	<?php } else { ?>
+		<div class="content">
+			<p class="truncate"><?php echo $this->truncate($this->translate($news['CONTENT']));?> <a href="javascript:void(0);" class="more"><b class="glyphicon glyphicon-plus-sign"></b></a></p>
+			<p class="complete" style="display:none;"><?php echo $this->translate($news['CONTENT']);?></p>
+			<?php if ($news['LINK']) {?>
+				<p class="complete right" style="display:none;"><a href="<?php echo $news['LINK'];?>" target="_blank" rel="noopener" class="btn btn-primary btn-small"><?php echo $this->translate("En savoir plus");?></a></p>
+			<?php }?>
+		</div>	
+	<?php } ?>
+<?php	
+}
+?>
+
+<script>
+	$(document).ready(function(){
+		$('a.more').click(function() {
+			$(this).closest('div.content').find('.truncate').hide();
+			$(this).closest('div.content').find('.complete').toggle();
+		});
+		
+	});
+</script>
+
+<?php
+if ($this->canEdit) {
+	?>
+	<div class="form-actions">
+		<button type="button" class="close" data-dismiss="alert">×</button>
+        <a class="btn" href="<?php echo PREFIX_URL . 'website/news'?>"><i class="glyphicon glyphicon-edit"></i>&nbsp;<?php echo $this->translate('Ajouter/Modifier une actualité')?></a>
+    </div>
+	<?php
+}

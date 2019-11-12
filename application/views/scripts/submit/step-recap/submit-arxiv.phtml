@@ -1,0 +1,72 @@
+<?php
+if (!defined('DOARXIV') || (DOARXIV===true)) {
+    ?>
+    <div id="recap-arxiv" class="alert alert-text margin-top-5">
+        <h4 class="margin-0">
+            <input type="checkbox" name="arxiv" id="arxiv" value="1"
+                <?php
+                if ($this->canTransferArxiv == 2) {
+                    echo "checked=\"true\" disabled=\"true\" data-toggle=\"tooltip\" data-original-title=\"Cette nouvelle version sera transférée sur arXiv\"";
+                } else if (!empty($this->arxivErrors)) {
+                    echo "disabled=\"true\" data-toggle=\"tooltip\" data-original-title=\"Votre dépôt ne remplit pas les conditions de transfert vers arXiv\"";
+                } else if ($this->goToArxiv) {
+                    echo "checked=\"true\"";
+                } ?>
+            >
+            <label for="arxiv"><img src="/img/arxiv.png" height="40px"/></a></label>
+            <button type="button" onclick="$('#transfertarxivdetails').toggle()"
+                    class="btn btn-default btn-sm pull-right"><?php echo $this->translate("Voir les conditions pour le transfert"); ?></button>
+        </h4>
+        <div class="collapse" id="transfertarxivdetails">
+            <hr/>
+            <div id="error-zone-arxiv" class="alert alert-danger fade in" role="alert">
+            </div>
+            <p>
+                <?php echo $this->translate("Pour pouvoir transférer sur arXiv, votre dépôt doit satisfaire les conditions suivantes :"); ?>
+                <br />
+            </p>
+            <ul>
+                <li class="<?php if (in_array(Hal_Arxiv::ERROR_RESUME, $this->arxivErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Le document doit avoir un résumé en anglais."); ?>
+                </li>
+                <li class="<?php if (in_array(Hal_Arxiv::ERROR_DOMAIN, $this->arxivErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Un des domaines choisi doit être un sous-domaine d'arXiv."); ?>
+                </li>
+                <li class="<?php if (in_array(Hal_Arxiv::ERROR_FILESIZE, $this->arxivErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Chaque fichier doit être < 3Mb et les tout < 10Mb."); ?>
+                </li>
+                <li class="<?php if (in_array(Hal_Arxiv::ERROR_NOSOURCE, $this->arxivErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Si le pdf a été généré par laTex, les sources doivent être présentes."); ?>
+                </li>
+                <li class="<?php if (in_array(Hal_Arxiv::ERROR_NOBBL, $this->arxivErrors)) {
+                    echo 'condition-notfilled';
+                } else {
+                    echo 'condition-filled';
+                } ?>">
+                    <?php echo $this->translate("Si vous utilisez bibtex, vous devez fournir le .bbl pour arXiv."); ?>
+                </li>
+            </ul>
+            <?php echo $this->translate("HAL utilise la licence arXiv suivante lors du transfert de ce papier :"); ?>
+            <a href="http://arxiv.org/licenses/nonexclusive-distrib/1.0/license.html" target="_blank"
+               rel="noopener"><?php echo $this->translate("arXiv.org perpetual, non-exclusive license to distribute this article"); ?></a>
+        </div>
+    </div>
+    <?php
+}
+?>

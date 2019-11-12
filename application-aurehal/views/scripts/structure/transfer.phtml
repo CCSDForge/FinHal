@@ -1,0 +1,139 @@
+<?php
+/**
+ * @var Hal_View $this
+ * @var $plugin Aurehal_Acl_Plugin */
+$plugin = Zend_Controller_Front::getInstance()->getPlugin('Aurehal_Acl_Plugin');
+
+/** @var Zend_Paginator $paginator*/
+$paginator = $this->paginator;
+?>
+<div class='row'>
+    <div class='col-md-12'>
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h5 class="panel-title"><?php echo $this->translate('A remplacer') ?></h5>
+            </div>
+            <div class="panel-body">
+                <?php
+                if (isset ($this->oldstruct)) {
+                    echo $this->oldstruct;
+                }
+                ?>
+            </div>
+        </div>
+        <div class="panel panel-danger">
+            <div class="panel-heading">
+                <h5 class="panel-title"><?php echo $this->translate('Sous structure(s) fermée(s)/dupliquée(s)') ?></h5>
+            </div>
+            <div class="panel-body" style="max-height: 300px; overflow: auto;">
+                <?php  foreach( $this->oldstruct->getChildren() as $child) {
+                    echo $child['struct'];
+                }?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class='row' style="margin-bottom: 25px;">
+    <div class='col-md-12'>
+        <form method='post' action='<?php echo URL . "/" .$this->controllerName . "/transfer" ?>' name='transfer' class='form_replace'>
+            <div class='row'>
+                <div class='col-md-12'>
+                    <?php include __DIR__ . "/../" . $this->partial_form ?>
+                </div>
+            </div>
+
+            <?php
+            if (isset ($this->oldstruct)) {?>
+                <input type="hidden" name="row" value="<?php  echo $this->oldstruct->getStructid(); ?>" />
+            <?php } ?>
+            <input type="hidden" name="nbResultPerPage" value="10" />
+        </form>
+    </div>
+</div>
+
+<?php
+$nb = 0;
+
+$this->paginationControl_partial = 'partials/pagination_form.phtml';
+
+if (isset ($this->paginator)) {
+    $nb = $this->paginator->getTotalItemCount();
+}
+
+if ($nb) {
+    ?>
+    <form method='post' action='<?php echo URL . "/" .$this->controllerName . "/transfer" ?>' name='transfer' class='form_replace'>
+        <?php
+
+        if (isset ($this->oldstruct)) {?>
+            <input type="hidden" name="row" value="<?php  echo $this->oldstruct->getStructid(); ?>" />
+        <?php }
+
+        foreach ($this->params as $name => $value) {
+            if (in_array($name, array('controller', 'action', 'row', 'docs', 'panel'))) continue; ?>
+            <input type='hidden' value="<?php echo $value ?>" name="<?php echo $name ?>" /> <?php
+        }
+
+        ?>
+
+        <input type="hidden" name="searching" value="1"/>
+
+        <div class='row'>
+            <div class='col-md-12'>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h5 class="panel-title"><?php echo $this->translate('Valeur de remplacement') ?></h5>
+                    </div>
+                    <div class="panel-body">
+
+                        <?php include __DIR__ . "/../partials/paginationControl2.phtml" ?>
+
+                        <div class='row'>
+                            <div class='col-md-12'>
+
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <?php
+                                        foreach ($this->head_columns as $col) {
+                                            if (end($this->head_columns) == $col) continue;
+
+
+                                            ?>
+                                            <th><?php echo $this->translate($col);?></th>
+                                            <?php
+                                        }
+                                        ?>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    <?php
+                                    $this->no_actions = true;
+                                    include __DIR__ . "/../partials/row.phtml";
+                                    ?>
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+
+                        <?php include __DIR__ . "/../partials/paginationControl2.phtml" ?>
+
+                    </div>
+                    <div class='panel-footer text-center'>
+                        <button class='btn btn-primary' name='to_confirm' type='submit' value='1'><?php echo $this->translate('Remplacer') ?></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+<?php } else if (isset($this->params['search'])) { ?>
+    <div class='alert alert-info'>
+        <?php echo $this->translate("Aucun résultat retourné.") ?>
+    </div>
+<?php } ?>

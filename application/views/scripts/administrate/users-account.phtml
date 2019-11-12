@@ -1,0 +1,6 @@
+<?php
+$this->jQuery()->addJavascriptFile(CCSDLIB . "/js/bootstrap-typeahead.js")->addJavascriptFile(CCSDLIB . '/js/jquery/ui/autocomplete.html.js');
+$this->layout()->breadcrumbs = $this->user->getFullName();
+$this->layout()->pageDescription = $this->translate("Modification du compte utilisateur");
+
+echo $this->form;

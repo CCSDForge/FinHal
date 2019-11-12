@@ -1,0 +1,20 @@
+<div id="error-zone-file" class="alert alert-danger" role="alert"></div>
+<?php
+/** @var Hal_View $this */
+if ($this->submitType == Hal_Settings::SUBMIT_INIT) { ?>
+<span id="submit-file-header"><?php echo $this->translate("submit_file_header");?></span>
+<br/>
+<br/>
+<?php } ?>
+<?php
+
+if ($this->submitType == Hal_Settings::SUBMIT_UPDATE) {
+    include __DIR__ . '/update.phtml';
+} else if (Hal_Settings::SUBMIT_MODE_DETAILED == $this->filemode) {
+    include __DIR__ . '/detailed.phtml';
+} else {
+    include __DIR__ . '/simple.phtml';
+}
+
+?>
+

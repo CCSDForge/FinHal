@@ -1,0 +1,51 @@
+<?php
+/** @var Hal_View $this
+ **/
+?>
+<div class="navbar navbar-fixed-top navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle"
+                    data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span>
+                <span class="icon-bar"></span> <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand"
+               href="https://www.ccsd.cnrs.fr/"
+            ><img alt="By CCSD"
+                  src="/img/ccsd.png"
+                  style="border:0"
+                /></a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Docs API</a></li>
+                <li class="dropdown"><a
+                            class="dropdown-toggle"
+                            data-toggle="dropdown"
+                            href="#"
+                    ><?php echo $this->translate('API Référentiels'); ?> <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/docs/ref"><?php echo $this->translate('Référentiels'); ?></a></li>
+                        <li class="divider"></li>
+                        <?php
+                        $referentiels = array(
+                            'author',
+                            'domain',
+                            'journal',
+                            'metadata',
+                            'projanr',
+                            'projeurop',
+                            'structure',
+                            'typdoc'
+                        );
+                        foreach ($referentiels as $refName) {
+                            ?>
+                            <li><a href="/docs/ref/resource/<?php echo $refName; ?>"><?php echo $this->translate('Référentiel'); ?> <strong><?php echo $this->translate('ref_' . $refName); ?></strong></a></li>
+                        <?php } ?>
+                    </ul></li>
+                <li><a href="https://support.ccsd.cnrs.fr/"><?php echo $this->translate('Support'); ?></a></li>
+            </ul>
+        </div><!-- /.nav-collapse -->
+    </div><!-- /.container -->
+</div><!-- /.navbar -->

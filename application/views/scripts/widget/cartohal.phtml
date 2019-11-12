@@ -1,0 +1,38 @@
+<?php
+$this->jQuery()->addJavascriptFile(CCSDLIB ."/cartohal/app/js/angular.js")
+    ->addJavascriptFile(CCSDLIB ."/cartohal/app/js/jquery.min.js")
+    ->addJavascriptFile(CCSDLIB ."/cartohal/app/js/print.js")
+    ->addJavascriptFile(CCSDLIB ."/cartohal/app/js/jquery.range-min.js")
+    ->addJavascriptFile(CCSDLIB ."/cartohal/app/js/leaflet/leaflet.js")
+    ->addJavascriptFile(CCSDLIB ."/cartohal/app/app.min.js")
+    ->addJavascriptFile(CCSDLIB ."/cartohal/app/js/jquery.dataTables.min.js")
+    ->addJavascriptFile(CCSDLIB ."/cartohal/app/js/dataTables.buttons.min.js")
+    ->addJavascriptFile(CCSDLIB ."/cartohal/app/js/dataTables.semanticui.min.js")
+    ->addJavascriptFile(CCSDLIB ."/cartohal/app/js/buttons.html5.min.js");
+
+/* @var Zend_View_Helper_HeadStyle */
+$this->headLink()->appendStylesheet(CCSDLIB."/cartohal/app/js/leaflet/leaflet.css", "")
+    ->appendStylesheet(CCSDLIB."/cartohal/css/semantic/dist/semantic.min.css", "")
+    ->appendStylesheet(CCSDLIB."/cartohal/css/style.css", "")
+    ->appendStylesheet(CCSDLIB."/cartohal/css/jquery.range.css", "");
+?>
+
+<div ng-app="cartoHal">
+    <search></search>
+</div>
+
+<script type="text/javascript">
+
+    var ConfigWidgetHal={
+        ApiURL: "<?php echo SOLR_API ?>" + "/search/" + "<?php echo SPACE_NAME; ?>",
+        DisplayMap: <?php echo $this->displayMap ? "true" : "false"; ?>,
+        DisplayDatatable: <?php echo $this->displayTable ? "true" : "false"; ?>,
+        DocumentType:"*",
+        query:"*",
+        DisplayTitle:false,
+        CountryField: "<?php echo $this->searchCriteria; ?>",
+        CountryField_t: "<?php echo $this->searchCriteria; ?>",
+        url_consult: "<?php if ('collection' == MODULE) {echo '/'.trim(PREFIX_URL, '/'); }?>"
+    };
+
+</script>

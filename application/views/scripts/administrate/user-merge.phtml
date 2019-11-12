@@ -1,0 +1,79 @@
+<?php $this->layout()->pageTitle = $this->translate('Fusion des profils utilisateurs HAL'); ?>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-warning">
+            <div class="panel-heading"><i class="icon glyphicon glyphicon-export"></i>&nbsp;<?php echo $this->translate('Profil utilisateur source pour la fusion'); ?><a title="Annuler" href="<?php echo $this->url(array('controller' => 'administrate', 'action' => 'users', 'q' => $this->q)); ?>" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></a></div>
+            <div class="panel-body">
+                <?php echo $this->partial('administrate/user-card.phtml', array('user' => $this->mergeFromUser)); ?>
+            </div>
+
+
+            <form id="mergeUsers" action="/administrate/merge-users" method="post">
+                <input type="hidden" name="uidFrom"  value = "<?php echo $this->escape($this->mergeFromUid) ?>">
+                <input type="hidden" name="uidTo"  value = "<?php echo $this->escape($this->mergeToUid) ?>">
+
+                <input type="hidden" name="userTable"  value = "<?php echo $this->usersTable ?>">
+                <div class="panel-footer">
+                    <p class="text-danger"><strong>&nbsp;<?php echo $this->translate("Occurences à modifier par table"); ?></strong></p>
+
+                    <?php
+                    $countLines = 0;
+                    $countTables = 0;
+                    ?>
+
+
+                    <?php if (!empty($this->tablesWithUserUID)) : ?>
+                        <ul class="list-group">
+                            <?php foreach ($this->tablesWithUserUID as $table => $countOccur) : ?>
+                                <li class="list-group-item">
+                                    <span class="badge"><?php echo $countOccur ?></span> <?php echo $table ?>
+                                    <?php if ($this->usersTable != $table) : ?>
+                                        <?php
+                                        $countLines = $countLines + $countOccur;
+                                        $countTables++;
+                                        ?>
+                                        <input type="hidden" name="tables[]"  value = "<?php echo $table ?>">
+                                    <?php endif; ?>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+
+
+                    <?php else : ?>
+                        <p class="bg-info"><?php echo $this->translate("Aucun lien trouvé dans les tables de l'application"); ?></p>
+                    <?php endif; ?>
+                    <?php if ($this->mergeAllowed === true) : ?>
+                        <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#mergeModal"><?php echo $this->translate('Fusionner'); ?>...</button>
+                    <?php endif; ?>
+                </div>
+
+            </form>
+
+
+            <?php
+            /**
+             * Modale confirmation fusion
+             */
+            include __DIR__ . '/user-merge-modal.phtml';
+            ?>
+
+
+        </div>
+    </div>
+
+    <?php if (($this->mergeToUser) && (($this->mergeFromUid != $this->mergeToUid))) : ?>
+        <div class="col-md-6">
+            <div class="panel panel-success">
+                        <div class="panel-heading"><i class="icon glyphicon glyphicon-import"></i>&nbsp;<?php echo $this->translate('Profil utilisateur conservé après la fusion'); ?><a title="Annuler" href="<?php echo $this->url(array('controller' => 'administrate', 'action' => 'users', 'mergeFromUid' => $this->mergeFromUid, 'q' => $this->q)); ?>" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></a></div>
+                    <div class="panel-body">
+
+
+                    <?php echo $this->partial('administrate/user-card.phtml', array('user' => $this->mergeToUser)); ?>
+
+
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>

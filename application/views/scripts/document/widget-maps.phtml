@@ -1,0 +1,40 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yannick
+ * Date: 26/09/2014
+ * Time: 09:42
+ *
+ * $this->document doit exister et etre un objet Hal_Document
+ *
+ */
+
+$latitude = $this->document->getMeta('latitude');
+$longitude = $this->document->getMeta('longitude');
+
+if ($latitude != '' && $longitude != '') {
+    $this->jQuery()->addJavascriptFile("//unpkg.com/leaflet@1.3.1/dist/leaflet.js");
+    $this->jQuery()->addStylesheet("//unpkg.com/leaflet@1.3.4/dist/leaflet.css");
+?>
+    <div class="widget widget-maps">
+        <h3 class="widget-header"><?php echo $this->translate('Géolocalisation') ?></h3>
+        <div class="widget-content">
+            <div id="map-canvas" style="width:100%;height:300px;"></div>
+            <script type="text/javascript">
+                var lat = <?php echo $latitude?>;
+                var lon = <?php echo $longitude?>;
+
+                macarte = L.map('map-canvas').setView([lat,lon], 8);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+                    attribution: 'données © <a href="//osm.org/copyright">OpenStreetMap</a>/ODbL - rendu <a href="//openstreetmap.fr">OSM France</a>',
+                    minZoom: 1,
+                    maxZoom: 20
+                }).addTo(macarte);
+
+                var marker = L.marker([lat, lon]).addTo(macarte);
+
+            </script>
+        </div>
+    </div>
+<?php }

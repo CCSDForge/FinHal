@@ -1,0 +1,16 @@
+#####
+# Template des paramètres basiques pour la plateforme de HAL 
+# 
+#####
+DocumentRoot /var/www/hal/sarah/public
+
+SetEnv APPLICATION_ENV development
+SetEnv CACHE_ROOT /var/www/cache/hal
+SetEnv DATA_ROOT /var/www/data/hal
+SetEnv DOCS_ROOT /var/www/docs
+
+AliasMatch ^/[A-Z0-9_-]+/default/(.*)$ /var/www/data/hal/development/collection/shared/public/$1
+AliasMatch ^/([A-Z0-9_-]+)/public/(.*)$ /var/www/data/hal/development/collection/$1/public/$2
+Alias /default /var/www/hal/data/portail/default/public
+ErrorLog "/var/log/halv3.local-error.log"
+CustomLog "/var/log/halv3.local.log" common

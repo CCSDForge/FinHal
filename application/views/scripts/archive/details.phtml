@@ -1,0 +1,119 @@
+<?php /** @var Hal_View $this */ ?>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">
+                    [<?php echo $this->document->getDocid();?>] - <?php echo strip_tags($this->document->getCitation());?>
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    <i class="glyphicon glyphicon-calendar"></i>&nbsp;<?php echo $this->translate('Historique');?>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                            <div class="panel-body">
+                                <table class="table table-condensed table-stripped">
+                                    <thead>
+                                    <tr>
+                                        <th style="width:100px;"><?php echo $this->translate('Date');?></th>
+                                        <th><?php echo $this->translate('Action');?></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach($this->history as $history) {
+                                        $statut = $history['STATUT']; ?>
+                                        <tr>
+                                            <td><?php echo str_replace(' ', '<br>', $statut) ?></td>
+                                            <td><?php echo $this->translate('archive-status-' . $statut)  ?> (code <?php echo $statut ?>) -
+                                                <small><?php echo $this->translate('archive-status-' . $statut . '-desc')  ?></small>
+                                                <?php if ($statut == Ccsd_Archive::ARCHIVE_ACCEPTEE) { ?>
+                                                    <br />IDPAC : <strong><?php echo $history['IDPAC']?></strong>
+                                                <?php } else if ($statut == Ccsd_Archive::ARCHIVE_REJETEE) { ?>
+                                                    <br /><?php echo $this->translate('Erreur');?> : <strong><?php echo $history['CODE_ERREUR']?></strong>
+                                                <?php } ?>
+
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingTwo">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    <i class="glyphicon glyphicon-file"></i>&nbsp;<?php echo $this->translate('Fichiers');?>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                            <div class="panel-body">
+                                <?php $href = PREFIX_URL . $this->document->getId();
+                                if(count($this->document->getDocVersions()) > 1) {
+                                    $href .= 'v' . $this->document->getVersion();
+                                } ?>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th><?php echo $this->translate('Fichier');?></th>
+                                            <th><?php echo $this->translate('Envoyé');?></th>
+                                            <th><?php echo $this->translate('Archivé');?></th>
+                                            <th class="text-right"><?php echo $this->translate('Action');?></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach($this->document->getFiles() as $file) {
+                                        if ($file->getType() == Hal_Settings::FILE_TYPE_SOURCES) {
+                                            continue;
+                                        }
+
+                                        $archiveFileInfo = Ccsd_Archive::getFileInfo($file->getFileid());
+                                        ?>
+                                        <tr>
+                                            <td><?php echo $file->getName(); ?></td>
+                                            <td><?php if (isset($archiveFileInfo['SEND']) && $archiveFileInfo['SEND']) { ?>
+                                                <span class="ok"><i class="glyphicon glyphicon-ok"></i></span>
+                                                <?php } else { ?>
+                                                <span class="ko"><i class="glyphicon glyphicon-remove"></i></span>
+                                                <?php } ?>
+                                            </td>
+                                            <td>
+                                                <?php if (isset($archiveFileInfo['ARCHIVED'])) { ?>
+                                                <span class="ok"><?php echo $archiveFileInfo['ARCHIVED'] ?></span>
+                                                <?php } ?>
+                                            </td>
+                                            <td class="text-right">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="<?php echo $href . '/file/' . rawurlencode($file->getName()) ?>" target="_blank" class="btn btn-default" data-toggle="tooltip" title="<?php echo $this->translate("Voir le fichier"); ?>">
+                                                        <i class="glyphicon glyphicon-eye-open"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <?php if ($this->status != Ccsd_Archive::ARCHIVE_ACCEPTEE) { ?>
+                    <a type="button" class="btn btn-primary" onclick="archiveDocument(<?php echo $this->document->getDocid(); ?>)"><i class="glyphicon glyphicon-send"></i>&nbsp;<?php echo $this->translate('Archiver');?></a>
+                <?php } ?>
+                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo $this->translate('Fermer');?></button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,40 @@
+<?php $this->layout()->pageTitle = $this->translate("Créer un compte");
+ $this->layout()->pageDescription = $this->translate("Création d'un compte sur le Service Central d'Authentification du CCSD. Le compte est valable sur HAL, Sciencesconf et Episciences");
+
+if (Ccsd_User_Models_User::ACCOUNT_CREATE_SUCCESS == $this->resultMessage) {
+
+	echo $this->message('votre compte a été créé.', 'success');
+
+	?>
+
+<div class="alert alert-info">
+	<p><?php echo $this->translate('Vous devez valider votre compte avant de pouvoir vous authentifier.'); ?></p>
+	<p><?php echo $this->translate("Nous venons de vous envoyer un courriel à l'adresse : "); ?><a
+			href="mailto:<?php echo $this->escape($this->userEmail); ?>"
+		><?php echo $this->escape($this->userEmail); ?></a>
+	</p>
+	<p>
+		<strong><?php echo $this->translate('Ce courriel contient un lien de validation sur lequel vous devez cliquer pour valider votre compte.'); ?></strong>
+	</p>
+</div>
+
+<p>
+	<a
+		href="<?php echo $this->url(array(),null,true); ?>"
+		class="btn"
+	><?php echo $this->translate("Retourner à l'accueil"); ?></a>
+</p>
+<?php
+
+}
+
+if ($this->form) {
+    echo $this->form;
+}
+
+
+
+
+
+
+

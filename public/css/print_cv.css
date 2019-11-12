@@ -1,0 +1,145 @@
+body {
+    color: #333;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 12pt;
+}
+
+.navbar {
+	display: none;
+}
+
+#container {
+	margin: 0;
+	width: 100%;
+    box-shadow: none;
+}
+
+h1, h2, h3, h4 {
+    color: #d56022;
+}
+
+a {
+    color: #346099;
+    text-decoration: none;
+}
+
+.keyword {
+	padding-right: 5pt;
+}
+
+.keyword::after {
+	content: ";";	
+}
+
+/* DOCUMENT LIST */
+.counter-doc {
+    font-size: 10pt;
+    float: right;
+}
+
+h2.nbdoc {
+    margin-top: 0;
+}
+
+h2.nbdoc span.label-primary {
+	float: right;
+    background-color: #d56022 !important;
+}
+
+.label {
+    border-radius: 0.25em;
+    color: #fff;
+    display: inline;
+    font-size: 75%;
+    font-weight: bold;
+    line-height: 1;
+    padding: 0.2em 0.6em 0.3em;
+    text-align: center;
+    vertical-align: baseline;
+    white-space: nowrap;
+}
+
+.doc-nb {
+    color: #999;
+    float: right;
+    font-size: 12pt;
+    font-weight: normal;
+}
+
+
+ul.media-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+ul.media-list li.media {
+	margin: 0;
+	padding: 10pt 0 10pt 0;
+	border-bottom: 1pt solid #ddd;
+}
+
+ul.media-list li.media a {
+	display: none;
+}
+
+
+/* WIDGET */
+.widget {
+	display: none;	
+}
+
+.widget-photo, .widget-idext {
+	display: block;
+}
+
+.widget {
+    margin: 10pt 0 30pt 0;
+    padding: 0;
+    border: 1pt solid #ddd;
+    -webkit-border-radius: 4pt;
+    -moz-border-radius: 4pt;
+    border-radius: 4pt;
+}
+.widget-header {
+    padding: 8pt 14pt;
+    margin: 0;
+    font-size: 12pt;
+    font-weight: bold;
+    line-height: 14pt;
+    background-color: #346099;
+    text-transform: uppercase;
+    color: #ffffff;
+    -webkit-border-radius: 4pt 4pt 0 0;
+    -moz-border-radius: 4pt 4pt 0 0;
+    border-radius: 4pt 4pt 0 0;
+}
+.widget-content {
+    padding: 10pt;
+    background: #fbfbfb;
+}
+.widget-footer {
+    display:none;
+}
+
+.widget-content ul{
+    list-style-type: square;
+    padding-left: 10pt;
+    margin-left:10pt;
+}
+.widget-content ul li{
+    font-size:12pt;
+}
+.widget-content a .badge {
+    font-size: 10pt;
+    font-weight: normal;
+    margin-left: 10pt;
+    background: #bbbbbb;
+}
+.widget-content a:hover .badge{
+    background: #999999;
+}
+.widget-content .overflow {
+    overflow:auto;
+    max-height:250pt;
+}

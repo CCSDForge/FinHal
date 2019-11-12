@@ -1,0 +1,66 @@
+<phpunit bootstrap="./bootstrap.php"
+         display_errors="on"
+         error_reporting="E_ALL"
+	 
+         display_startup_errors= "On"
+         colors="true"
+         verbose="true"
+>
+    <php>
+        <!-- -->
+        <includePath>../library</includePath>
+        <env name="DOCS_ROOT" value="/home/marmol/dev/CCSD/hal/tests/docs"/>
+        <env name="APPLICATION_DIR" value="application-aurehal"/>
+	<server name='HTTP_HOST' value='localhost' />
+    </php>
+    <testsuites>
+        <testsuite name="Application Aurehal Test Suite">
+            <directory>application/aurehal</directory>
+        </testsuite>
+        
+    </testsuites>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">..</directory>
+            <exclude>
+                <!-- Lib externes ou datas -->
+                <directory>../library/Zend</directory>
+                <directory>../library/ZendX</directory>
+                <directory>../library/Solarium</directory>
+                <directory>../library/Symfony</directory>
+                <directory>../library/CAS</directory>
+                <directory>../data</directory>
+                <directory>../cache</directory>
+                <directory>../docs</directory>
+
+                <!-- Current dir.. On ne couvre pas les tests eux meme! -->
+                <directory>../tests</directory>
+
+                <!-- Todo: Les nomd de classes bootstrap devraient contenir l'appli
+                     Et on devrait faire un new Bootstrap/Appli -->
+                <!-- Apres on aura le meme probleme avec les Controllers et le reste...
+                Seule facon de s'en sortir reelement, utiliser les modules de Zend -->
+                <!-- Cela permettrai egalement de loader toutes les applis pour les tester avec un seul Php
+                Pre-requis: suppression des constantes par application...en var glob -->
+                <directory>../application-halms</directory>
+                <directory>../application</directory>
+                <directory>../application-cv</directory>
+                <directory>../application-api</directory>
+
+                <!-- Ces fichiers ne supportent pas une inclusion par coverage-->
+                <directory>../public</directory>
+                <directory>../migrations</directory>
+                <directory>../scripts</directory>
+                <directory>../library/scripts</directory>
+                <file>../library/Hal/Document/createFront.php</file>
+                <file>../library/Hal/Document/createSip.php</file>
+                <file>../library/Hal/Document/createTei.php</file>
+                <file>../library/Hal/Document/loadFromTei.php</file>
+                <file>../library/Hal/Document/loadFromWs.php</file>
+                <!-- Duplicate FILE -->
+                <!-- Todo: Suppress it with YB -->
+                <file>../library/Ccsd/Website/Form/Header.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
+</phpunit>

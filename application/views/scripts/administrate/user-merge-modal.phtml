@@ -1,0 +1,45 @@
+<!-- Modal -->
+<div class="modal fade" id="mergeModal" tabindex="-1" role="dialog" aria-labelledby="mergeModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="mergeModalLabel">Confirmer la fusion de 2 profils HAL</h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <?php if ($this->mergeFromUser->getHasAccountData() == true) : ?>
+                            <?php echo $this->translate("Le profil HAL de l'utilisateur source"); ?>
+                        <?php else: ?>
+                            <?php echo $this->translate("Compte de l'utilisateur source - pas de profil HAL existant"); ?>
+                        <?php endif; ?>
+
+                    </div>
+                    <div class="panel-body">
+                       <?php echo $this->partial('administrate/user-card.phtml', array('user' => $this->mergeFromUser)); ?>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" role="alert"><?php echo $countLines . ' lignes seront modifiées dans ' . $countTables . ' tables.'; ?></div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button autofocus="autofocus" type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                <button id="mergeUsersConfirmed" form="mergeUsers" type="button" class="btn btn-primary" formmethod="post">Fusionner les données du compte et supprimer le profil utilisateur</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        $("#mergeUsersConfirmed").click(function () {
+            $("#mergeUsers").submit();
+        });
+    });
+</script>

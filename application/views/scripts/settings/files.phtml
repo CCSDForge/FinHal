@@ -1,0 +1,27 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yannick
+ * Date: 16/06/2016
+ * Time: 11:55
+ */
+
+?>
+<?php $this->layout()->pageDescription = $this->translate('Gestion fichiers de configuration')?>
+
+<?php echo $this->form ?>
+
+
+<script type="application/javascript">
+    $('#file').change(function() {
+        $.ajax({
+            url : "/settings/ajaxloadcontent",
+            type : "post",
+            data : {'fileId': $('#file option:selected').val()},
+            success : function (result) {
+                $('#content').val(result);
+            }
+        });
+    });
+    $('#file').change();
+</script>

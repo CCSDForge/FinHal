@@ -1,0 +1,119 @@
+<?php
+$this->jQuery()->addJavascriptFile("/js/document/evaluation.js");
+$this->jQuery()->addJavascriptFile("/js/document/document.js");
+$this->responsesContent = '';
+$this->showHistory = true;
+$this->moderate = true;
+?>
+<style>
+.editableform .form-control {
+	width: 400px;
+}
+</style>
+
+<form action="/moderate/documents" method="post" id="evaluate-form">
+    <?php
+    foreach ( $this->docids as $docid ) {
+        $this->document->setDocid ( $docid );
+        $this->document->load ();
+        include __DIR__ . "/documents-document.phtml";
+    }
+    ?>
+
+    <div class="form-actions text-center">
+        <select class="form-control" id="evaluation-msg">
+            <option value=""><?php echo $this->translate('Réponses prédéfinies'); ?></option>
+            <?php
+            foreach ( $this->responses as $message ) {
+                /** @var  Hal_Evaluation_Message $message */
+                $array = $message->toArray ();
+                $this->responsesContent .= '<div id="msg-' . $array ['messageid'] . '">' . $array ['message'] . '</div>';
+                ?>
+                <option value="<?php echo $array['messageid'] ?>"><?php echo $array['title'] ?></option>
+                <?php
+            }
+								?>
+        </select><br />
+        <textarea title="<?php echo $this->translate('Commentaire'); ?>" name="comment" id="comment" class="form-control" rows="3"></textarea>
+		<br />
+        <input type="hidden" name="evaluate-action"	id="evaluate-action" value="" />
+		<div class="btn-group btn-group">
+            <button type="button" class="btn btn-primary btn-action" attr-action="online">
+                <i class="glyphicon glyphicon-ok"></i>&nbsp;<?php echo $this->translate('Mettre en ligne'); ?></button>
+            <?php if (count($this->docids) == 1) { ?>
+                <button type="button" class="btn btn-default btn-action" attr-action="edit">
+                    <i class="glyphicon glyphicon-pencil"></i>&nbsp;<?php echo $this->translate('Éditer'); ?></button>
+            <?php if (Hal_Moderation::canTransfertHAL($this->document)) {?>
+            <button type="button" class="btn btn-default btn-action" attr-action="hal">
+                <i class="glyphicon glyphicon-transfer"></i>&nbsp;<?php echo $this->translate('Transférer en modération dans HAL'); ?></button>
+            <?php } ?>
+            <?php } ?>
+            <button type="button" class="btn btn-default btn-action" attr-action="update">
+                <i class="glyphicon glyphicon-send"></i>&nbsp;<?php echo $this->translate('Demander des modifications'); ?></button>
+            <?php
+            //juste pour un doc à la fois
+            if ( count($this->docids) == 1) :?>
+			<button type="button" class="btn btn-default btn-action" attr-action="validate">
+				<i class="glyphicon glyphicon-eye-close"></i>&nbsp;<?php echo $this->translate('Demander une expertise...'); ?></button>
+        </div>
+
+		<div class="btn-group btn-group" style="padding-top: 1em;">
+			<?php endif; ?>
+				
+			<button type="button" class="btn btn-default btn-action"
+				attr-action="annotate">
+				<i class="glyphicon glyphicon-comment"></i>&nbsp;<?php echo $this->translate('Annoter'); ?></button>
+
+			<button type="button" class="btn btn-default btn-action"
+				attr-action="notice" <?php if (!$this->document->isNoticeable()) { echo 'style="cursor: not-allowed;" data-toggle="tooltip" data-original-title="'.$this->translate("Un dépôt est déjà en ligne pour cet identifiant").'"';} ?>><?php echo $this->translate('Transformer en notice'); ?></button>
+			<button type="button" class="btn btn-default btn-action" attr-action="refused">
+				<i class="glyphicon glyphicon-remove"></i>&nbsp;<?php echo $this->translate('Refuser'); ?></button>
+			<button type="button" class="btn btn-default btn-action" attr-action="delete">
+				<i class="glyphicon glyphicon-trash"></i>&nbsp;<?php echo $this->translate('Supprimer'); ?></button>
+			<button type="button" class="btn btn-default btn-action" attr-action="back">
+				<i class="glyphicon glyphicon-arrow-left"></i>&nbsp;<?php echo $this->translate('Retour'); ?></button>
+		</div>
+		<div style="display: none">
+        <?php echo $this->responsesContent?>
+		</div>
+	</div>
+
+	<div id="expert-select-form"></div>
+
+
+</form>
+
+
+<script>
+
+$(document).ready(function() {
+
+    $('.btn-action').click(function() {
+
+    	var action = $(this).attr('attr-action');
+    	
+		var docid    = <?php echo $this->document->getDocid(); ?>;
+		var sid      = <?php echo $this->document->getSid(); ?>;
+		var domains  = <?php echo json_encode($this->document->getMeta('domain')); ?>;
+		var typdoc   = '<?php echo $this->document->getTypDoc(); ?>';
+		var forwardAction  = '<?php echo $this->forwardAction; ?>';
+		var sourceController   = '<?php echo Zend_Controller_Front::getInstance()->getRequest()->getControllerName(); ?>';
+        var cansubmit = true;
+		if (action ==  'validate') {
+			getExpertSelectForm(docid, sid, domains, typdoc, forwardAction, sourceController);
+			return;
+		}
+        if ((action == 'update' || action == 'annotate' || action == 'refused' || action == 'deleted') && $('#comment').val() == '') {
+            cansubmit = false;
+        }
+        if (cansubmit) {
+            $('#evaluate-action').val($(this).attr('attr-action'));
+            $('#evaluate-form').submit();
+        } else {
+
+        }
+    });
+});
+
+
+</script>

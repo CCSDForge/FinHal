@@ -1,0 +1,16 @@
+<?php if (count($this->documents)) { ?>
+    <div class="well" style="margin-top:10px;">
+        <table class="table">
+            <thead>
+            <tr><th><?php echo $this->translate("Date d'envoi")?></th><th><?php echo $this->translate('Document')?></th></tr>
+            </thead>
+            <tbody>
+            <?php foreach ($this->documents as $citation) { ?>
+                <tr><td><?php echo $citation[0] ?></td><td><?php echo $citation[1] ?></td></tr>
+            <?php } ?>
+            </tbody>
+        </table>
+    </div>
+<?php } else {?>
+    <div class="alert alert-warning alert-fixed" style="margin-top:10px;"><?php echo $this->translate('Aucune demande envoyée !');?></div>
+<?php }?>

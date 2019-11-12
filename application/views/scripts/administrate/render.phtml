@@ -1,0 +1,36 @@
+<?php
+//Pour redéfinir le titre de la page (le fil d'ariane ne doit pas être affiché)
+//$this->layout()->pageTitle = "";
+
+//Définition de la description de la page
+$this->layout()->pageDescription = "description description description description description description description description description description description description 
+description description description description description description description description description description description description description description description 
+description description description description description description description description description description description description description description description ";
+
+?>
+
+<h5>Tableau</h5>
+<table width="100%" class="table table-hover table-striped" id="mon-tableau">
+	<thead>
+		<tr>
+			<th></th>
+			<th></th>
+			<th><?php echo $this->translate('actions')?></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+	</tbody>
+</table>
+
+
+<h5>Confirm</h5>
+<span class="trigger">cliquez ici</span>
+<?php echo $this->confirm("Titre de la popup", "Contenu de la popup")
+			->setTrigger('.trigger')
+			->setJsInit('alert("Js excecuté avant ouverture");')
+			->setJsCallback("alert('Js excecuté après validation popup');"); ?>

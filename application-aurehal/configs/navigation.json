@@ -1,0 +1,31 @@
+[  {
+    "label" : "Auteurs",
+    "controller" : "author",
+    "action" : "index",
+    "resource" : "auteur-index"
+}, {
+    "label" : "Structures",
+    "controller" : "structure",
+    "action" : "index",
+    "resource" : "structure-index"
+}, {
+    "label" : "Domaines",
+    "controller" : "domain",
+    "action" : "index",
+    "resource" : "domain-index"
+}, {
+    "label" : "Revues",
+    "controller" : "journal",
+    "action" : "index",
+    "resource" : "journaux-index"
+}, {
+    "label" : "Projets ANR",
+    "controller" : "anrproject",
+    "action" : "index",
+    "resource" : "anr-index"
+}, {
+    "label" : "Projets européens",
+    "controller" : "europeanproject",
+    "action" : "index",
+    "resource" : "eur-index"
+}]

@@ -1,0 +1,37 @@
+RewriteEngine On
+
+## HALV2
+RewriteCond %{QUERY_STRING} action_todo=search_known_labo
+RewriteRule ^.*$ http://aurehal.archives-ouvertes.fr/structure [R=301,L]
+
+RewriteCond %{QUERY_STRING} action_todo=search [OR]
+RewriteCond %{QUERY_STRING} action_todo=browse [OR]
+RewriteCond %{QUERY_STRING} action_todo=register [OR]
+RewriteCond %{QUERY_STRING} action_todo=lost_pwd [OR]
+RewriteCond %{REQUEST_URI} ^/docs/([0-9]{2})/([0-9]{2})/([0-9]{2})/([0-9]{2})/([^/]+)/([^/]+) [OR]
+RewriteCond %{REQUEST_URI} ^/aut/([^/]+) [OR]
+RewriteCond %{REQUEST_URI} ^/autid/([0-9]+) [OR]
+RewriteCond %{REQUEST_URI} ^/lab/([^/]+) [OR]
+RewriteCond %{REQUEST_URI} ^/labid/([0-9]+) [OR]
+RewriteCond %{REQUEST_URI} ^/autlab/([^/]+)/([^/]+) [OR]
+RewriteCond %{REQUEST_URI} ^/([A-Z0-9_-]+)/([a-z]{2})/?$ [OR]
+RewriteCond %{REQUEST_URI} ^/affiche\_img\.php [OR]
+RewriteCond %{REQUEST_URI} ^/view\_by\_stamp\.php [OR]
+RewriteCond %{REQUEST_URI} ^/rss\.php
+RewriteRule ^.*$ proxy.php [L]
+
+RewriteCond %{QUERY_STRING} action_todo=haltools
+RewriteRule ^.*$ http://haltools-new.inria.fr/?action=export [R=301,L]
+
+RedirectMatch permanent ^/oai/oai\.php(.*)$ http://api.archives-ouvertes.fr/oai/hal/$1
+RedirectMatch permanent ^/Public/afficheRequetePubli\.php(.*)$ http://haltools.archives-ouvertes.fr/Public/afficheRequetePubli.php$1
+
+## ZF
+RewriteCond %{REQUEST_FILENAME} -s [OR]
+RewriteCond %{REQUEST_FILENAME} -l [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [NC,L]
+
+RewriteRule ^.*$ index.php [NC,L]
+
+php_value max_input_vars 2000

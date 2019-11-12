@@ -1,0 +1,67 @@
+<?php
+/**
+ * @var Hal_View $this
+ * @var Hal_Website_Navigation_Page $page
+ */
+$page = $this->page;
+$form = $page->getForm ( $this->i );
+
+$form->removeDecorator ( 'Form' );
+echo $form;
+
+if (! $page->isMultiple ()) {
+	// Page simple
+	?>
+<script>
+	$('#type option[type="<?php echo get_class($page)?>"]').attr('disabled', 'disabled');
+	</script>
+<?php }
+if ($page->isFile ()) {
+	// Pour contourner le pb de Zend_File
+    ?>
+    <script>
+        $(document).ready(function(){
+            //alert($('#page_<?php echo $this->i?> input:file').length);
+            $('#page_<?php echo $this->i?> input:file').each(function() {
+                // alert('page_<?php echo $this->i?>[' + $(this).attr('name') + ']');
+                $(this).attr('name', 'pages_<?php echo $this->i?>[' + $(this).attr('name') + ']');
+            });
+        });
+    </script>
+<?php  }
+
+if ($page->getPageClass () == 'Hal_Website_Navigation_Page_Structure' || $page->getPageClass () == 'Hal_Website_Navigation_Page_Author') { ?>
+    <script>
+        $(document).ready(function(){ <?php
+            if (is_array($page->getFilter ())) {
+            foreach ( $page->getFilter () as $structid ) {
+            $struct = new Hal_Document_Structure ( $structid );
+            $type = '';
+            if ($struct->getTypestruct()!='') {
+                $type = ' <small>[' . $this->translate ( $struct->getTypestruct() ) . ']</small>';
+            }
+            ?>
+            addAffi('#pages_<?php echo $this->i; ?>-filter', "<?php echo $this->escape($struct->getStructName()) . $type ?>", "<?php echo $structid?>");
+            <?php  }
+            } ?>
+            $('#pages_<?php echo $this->i; ?>-filter').val('');
+        });
+    </script>
+    <?php
+}
+
+/* ---- JS Collections ------*/
+if ($page->getPageClass () == 'Hal_Website_Navigation_Page_Collections')  : ?>
+    <script>
+        $(document).ready(function(){
+            <?php if (is_array($page->getFilter ()))  : ?>
+            <?php foreach ( $page->getFilter () as $collCode ) : ?>
+            <?php if ($coll = Hal_Site::exist($collCode, Hal_Site::TYPE_COLLECTION, true)) { ?>
+            addCollection('#pages_<?php echo $this->i; ?>-filter', "<?php echo $this->escape($coll->getFullname()) ?>", "<?php echo $coll->getSid() ?>", "<?php echo $coll->getShortname() ?>");
+            <?php } ?>
+            <?php endforeach; ?>
+            <?php endif; ?>
+            $('#pages_<?php echo $this->i; ?>-filter').val('');
+        });
+    </script>
+<?php endif; ?>

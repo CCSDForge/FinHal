@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# Permet de trouver les requetes trop longues issues du module de statistique
+# qui bloquent l'ensemble des utilisateur
+#
+#
+
+verbose() {
+    test 1 -eq $verbose && echo $1
+}	
+
+
+size=1250
+action=badrequest
+verbose=1
+debug=0
+
+usedb="use INFORMATION_SCHEMA"
+selectfields="ID"
+
+usage="$0
+    -c  : permet de connaitre le nombre de requetes longues
+    -l  : liste l'ensemble de requete en cours
+    -k  : tuent l'ensemble des requetes longues (apres confirmation)
+    -s  : fixe la taille de la requete longue ($size par default)
+
+    La commande sans argument liste les requetes longues"
+
+
+while getopts "s:lcdkvVh" opt; do
+    case $opt in
+        s) size="$OPTARG"
+           ;;
+        l) action=list
+           ;;
+        c) action=count
+           ;;
+	    k) action=kill
+	       ;;
+        d) debug=1
+           ;;
+	    v) verbose=1
+	       ;;
+	    V) verbose=0
+	       ;;
+	    h) echo "$usage";exit 0
+	       ;;
+	    *) echo "$usage";exit 1
+	    ;;
+    esac
+done
+
+case "X$size" in
+    X[1-9][0-9]*) : ok;;
+    *) echo "Size must be a number"
+       exit 1
+       ;;
+esac
+
+# Frist, we take the DB password
+read -s -p "Sql password: " password
+echo
+
+case $action in
+    list)
+        verbose "List of all actual request to DB"
+        echo "$usedb;SELECT $selectfields FROM PROCESSLIST WHERE COMMAND != 'Sleep'" | MYSQL_PWD="$password" mysql -u root -h dbname1
+        ;;
+    badrequest)
+        verbose "List of id of presumably bad request" 
+        echo "$usedb;SELECT $selectfields FROM PROCESSLIST WHERE COMMAND != 'Sleep' and length(INFO) > $size;" | MYSQL_PWD="$password" mysql -u root -h dbname1
+        ;;
+    count)
+        verbose "Number of request"
+        echo "$usedb;SELECT count(*) as Count FROM PROCESSLIST WHERE COMMAND != 'Sleep'" | MYSQL_PWD="$password" mysql -u root -h dbname1
+        ;;
+    kill)
+	ids=`echo "$usedb;SELECT $selectfields FROM PROCESSLIST WHERE COMMAND != 'Sleep' and length(INFO) > $size;" | MYSQL_PWD="$password" mysql --skip-column-names -u root -h dbname1 | grep -e '^[0-9]*'`
+	case "$ids" in
+	    ?*)
+	    echo
+		echo "Kill request: $ids"
+		read -p "Kill them ? (y/n): " reponse
+		case "X$reponse" in
+		    X[yYoO])
+			for p in $ids; do
+			    echo "$usedb;KILL $p" | MYSQL_PWD="$password" mysql --skip-column-names -u root -h dbname1
+			done
+			;;
+		    *)
+			echo "Ok, I do nothing... Bye"
+			;;
+		esac
+		;;
+	    *)  echo "Nothing to kill: $ids"
+		;;
+	esac
+	
+	;;
+    *)
+        echo "Bad action specified"
+        exit 1
+        ;;
+esac

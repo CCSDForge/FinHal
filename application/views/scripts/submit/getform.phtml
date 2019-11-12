@@ -1,0 +1,22 @@
+<div class="anr">
+	<blockquote>
+		<p>
+			<?php if (isset($this->anr['ACRONYME']) && $this->anr['ACRONYME'] != '') {
+				echo $this->anr['ACRONYME'] . ' - ';
+			}?>
+			<i class="anr-name"><?php echo $this->anr['TITRE']?></i>
+			<?php if ((isset($this->anr['ANNEE']) && $this->anr['ANNEE'] != '')) {
+				echo ' (' . $this->anr['ANNEE'] . ')';
+			}?>
+			<input type="hidden" name="projanr_id[]" value="<?php echo $this->anr['ANRID']?>" />
+		</p>
+		<?php if ((isset($this->anr['REFERENCE']) && $this->anr['REFERENCE'] != '')) {
+			?> <small><?php echo $this->translate('Référence') . ' : ' . $this->anr['REFERENCE']; ?></small>
+		<?php }?>
+		
+		<?php if ((isset($this->anr['INTITULE']) && $this->anr['INTITULE'] != '')) {
+			echo $this->anr['INTITULE'];
+		}?>
+
+	</blockquote>
+</div>

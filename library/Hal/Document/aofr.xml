@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:hal="http://hal.archives-ouvertes.fr">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title xml:lang="fr">HAL %%ID</title>
+            </titleStmt>
+            <publicationStmt>
+                <availability>
+                    <licence target="http://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution - NonCommercial - ShareAlike</licence><!-- licence URI and Name -->
+                </availability>
+            </publicationStmt>
+            <sourceDesc>
+                <p>HAL platform</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <listBibl>
+                <biblFull>
+                    <titleStmt>
+                        <title xml:lang="en"><!-- %%title langue en --></title>
+                        <title xml:lang="fr"><!-- %%title langue fr --></title>
+                        <title type="sub" xml:lang="fr"><!-- %%subTitle langue fr --></title>
+                        <title type="sub" xml:lang="de"><!-- %%subTitle langue de --></title>
+                        <author role="aut"><!-- author role : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:relator&wt=xml&fl=metaValue_s -->
+                        	<persName>
+                        		<forename type="first"><!-- %%firstname --></forename>
+                        		<forename type="middle"><!-- %%othername --></forename>
+                        		<surname><!-- %%lastname --></surname>
+                        	</persName>
+                            <idno type="idhal"><!-- %%IdHal --></idno><!-- http://api-preprod.archives-ouvertes.fr/ref/author/?q=*&wt=xml -->
+                            <idno type="halauthor"><!-- %%authorid --></idno><!-- http://api-preprod.archives-ouvertes.fr/ref/author/?q=*&wt=xml -->
+                        	<!-- other author Id : 'http://arxiv.org/a/','http://www.researcherid.com/rid/','http://www.idref.fr/','http://orcid.org/' -->
+                            <idno type="http://www.idref.fr/">028993659</idno><!-- name and id -->
+                            <orgName ref="#struct-%%ID STRUCTUTRE DE RECHERCHE"/><!-- %%organisme d'appartenance : http://api-preprod.archives-ouvertes.fr/ref/structure/?q=*&wt=xml -->
+                            <affiliation ref="#struct-%%ID STRUCTUTRE DE RECHERCHE"/><!-- %%affiliation : http://api-preprod.archives-ouvertes.fr/ref/structure/?q=*&wt=xml -->
+                            <affiliation ref="#local-%%ID LOCAL"/><!-- %%affiliation (non connu de HAL) -->
+                        </author>
+                        <author role="crp"><!-- author role : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:relator&wt=xml&fl=metaValue_s -->
+                        	<persName>
+                        		<forename type ="first"><!-- %%firstname --></forename>
+                        		<surname><!-- %%lastname --></surname>
+                        	</persName>
+                        	<email><!-- %%mail --></email>
+                        	<ptr type="url" target="http://url.perso" /><!-- %%url -->
+                        	<idno type="halauthor"><!-- %%authorid --></idno>
+                        </author>
+                        <funder ref="#projanr-12"/><!-- la définitions des projets ANR et Européens se fait dans text/back -->
+                        <funder ref="#projanr-1"/><!-- http://api-preprod.archives-ouvertes.fr/ref/anrProject/?q=*&wt=xml -->
+                        <funder ref="#projeurop-13387"/><!-- http://api-preprod.archives-ouvertes.fr/ref/europeanProject/?q=*&wt=xml -->
+                        <funder><!-- %%funding --></funder>
+                        <funder><!-- %%funding --></funder>
+                    </titleStmt>
+                    <editionStmt>
+                        <edition>
+                        	<date type="whenWritten"><!-- %%writingDate --></date>
+                            <ref type="file" subtype="author" target="file.pdf" n="1"><!-- type : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:fileType&fl=metaValue_s&wt=xml , subtype : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:fileSource&fl=metaValue_s&wt=xml -->
+                                <desc/><!-- description du fichier -->
+                                <date notBefore="2015-02-14"/><!-- date embargo (2 ans max) -->
+                            </ref>
+                            <ref type="annex" target="pres.ppt" subtype="presentation" n="1"><!-- subtype : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:typeAnnex&fl=metaValue_s&wt=xml -->
+                                <desc>Présentation ppt présentée à cette conf</desc><!-- description du fichier -->
+                            </ref>
+                            <ref type="annex" target="poster.pdf" subtype="poster" n="0">
+                                <desc/><!-- description du fichier -->
+                            </ref>
+                        </edition>
+                    </editionStmt>
+                    <publicationStmt>
+                        <availability>
+                            <licence target="http://creativecommons.org/licenses/by-nc/"/><!-- licence : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:licence&fl=metaValue_s&wt=xml -->
+                        </availability>
+                    </publicationStmt>
+                    <seriesStmt>
+                        <!-- liste des tampons du document -->
+                        <idno type="stamp" n="CNRS"/>
+                        <idno type="stamp" n="UNIV-PARIS5"/>
+                    </seriesStmt>
+                    <notesStmt>
+                        <note type="commentary"><!-- %%comment --></note>
+                        <note type="description"><!-- %%description --></note>
+                        <note type="audience" n="2"/><!-- %%audience : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:audience&wt=xml&fl=metaValue_s -->
+                        <note type="invited" n="1"/><!-- %%invitedCommunication : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:invitedCommunication&wt=xml&fl=metaValue_s -->
+                        <note type="popular" n="0"/><!-- %%popularLevel : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:popularLevel&wt=xml&fl=metaValue_s -->
+                        <note type="peer" n="0"/><!-- %%peerReviewing : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:peerReviewing&wt=xml&fl=metaValue_s -->
+                        <note type="proceedings" n="1"/><!-- %%proceedings : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:proceedings&wt=xml&fl=metaValue_s -->
+                        <note type="report" n="6"/><!-- %%reportType : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:reportType&wt=xml&fl=metaValue_s -->
+                        <note type="image" n="3"/><!-- %%imageType : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:imageType&wt=xml&fl=metaValue_s -->
+                        <note type="lecture" n="13"/><!-- %%lectureType : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:lectureType&wt=xml&fl=metaValue_s -->
+                    </notesStmt>
+                    <sourceDesc>
+                        <biblStruct>
+                            <analytic>
+								<title xml:lang="en"><!-- %%title langue en --></title>
+                        		<title xml:lang="fr"><!-- %%title langue fr --></title>
+                       			<title type="sub" xml:lang="fr"><!-- %%subTitle langue fr --></title>
+                        		<title type="sub" xml:lang="de"><!-- %%subTitle langue de --></title>
+                                <author role="aut"><!-- author role : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:relator&wt=xml&fl=metaValue_s -->
+                                    <persName>
+                                        <forename type="first"><!-- %%firstname --></forename>
+                                        <forename type="middle"><!-- %%othername --></forename>
+                                        <surname><!-- %%lastname --></surname>
+                                    </persName>
+                                    <idno type="idhal"><!-- %%IdHal --></idno><!-- http://api-preprod.archives-ouvertes.fr/ref/author/?q=*&wt=xml -->
+                                    <idno type="halAuthorId"><!-- %%authorid --></idno><!-- http://api-preprod.archives-ouvertes.fr/ref/author/?q=*&wt=xml -->
+                                    <!-- other author Id : 'http://arxiv.org/a/','http://www.researcherid.com/rid/','http://www.idref.fr/','http://orcid.org/' -->
+                                    <idno type="http://www.idref.fr/">028993659</idno><!-- name and id -->
+                                    <orgName ref="#struct-%%ID STRUCTUTRE DE RECHERCHE"/><!-- %%organisme d'appartenance : http://api-preprod.archives-ouvertes.fr/ref/structure/?q=*&wt=xml -->
+                                    <affiliation ref="#struct-%%ID STRUCTUTRE DE RECHERCHE"/><!-- %%affiliation : http://api-preprod.archives-ouvertes.fr/ref/structure/?q=*&wt=xml -->
+                                    <affiliation ref="#local-%%ID LOCAL"/><!-- %%affiliation (non connu de HAL) -->
+                                </author>
+                                <author role="crp"><!-- author role : http://api-preprod.archives-ouvertes.fr/ref/metadataList/?q=metaName_s:relator&wt=xml&fl=metaValue_s -->
+                                    <persName>
+                                        <forename type ="first"><!-- %%firstname --></forename>
+                                        <surname><!-- %%lastname --></surname>
+                                    </persName>
+                                    <email><!-- %%mail --></email>
+                                    <ptr type="url" target="http://url.perso" /><!-- %%url -->
+                                    <idno type="halAuthorId"><!-- %%authorid --></idno>
+                                </author>
+                            </analytic>
+                            <monogr>
+                                <idno type="nnt"><!-- %%nnt --></idno>
+                                <idno type="isbn"><!-- %%isbn --></idno>
+                                <idno type="eisbn"><!-- %%eisbn --></idno>
+                                <idno type="patentNumber"><!-- %%number --></idno>
+                                <idno type="reportNumber"><!-- %%number --></idno>
+                                <idno type="localRef"><!-- %%localReference --></idno>
+                                <idno type="halJournalId"><!-- %%journal ID : http://api-preprod.archives-ouvertes.fr/ref/journal/?q=*&fl=*&wt=xml --></idno>
+                                <idno type="issn"><!-- %%journal ISSN from journal referential --></idno>
+                                <idno type="eissn"><!-- %%journal EISSN from journal referential --></idno>
+                                <title level="j"><!-- %%journal --></title>
+                                <title level="m"><!-- %%bookTitle --></title>
+                                <title level="m"><!-- %%source [type=COMM]--></title>
+                                <title level="u"><!-- %%lectureName --></title>
+                                <meeting>
+                                	<title><!-- %%conferenceTitle --></title>
+                                	<date type="start"><!-- %%conferenceStartDate --></date>
+                                	<date type="end"><!-- %%conferenceEndDate --></date>
+                                	<settlement><!-- %%city  [type not in PATENT,IMG,MAP,LECTURE] --></settlement>
+                                	<country key="EN"/><!-- %%country  [type not in PATENT,IMG,MAP,LECTURE] -->
+                                </meeting>
+                                <respStmt>
+                                    <resp>conferenceOrganizer</resp>
+                                    <name><!-- %%conferenceOrganizer --></name>
+                                	<name><!-- %%conferenceOrganizer --></name>
+                                	<name><!-- %%conferenceOrganizer --></name>
+                                </respStmt>
+								<settlement><!-- %%city [type in PATENT,IMG,MAP,LECTURE] --></settlement>
+                                <country key="EN"/><!-- %%country  [type not in PATENT,IMG,MAP,LECTURE] -->
+                                <editor><!-- %%scientificEditor --></editor>
+                                <editor><!-- %%scientificEditor --></editor>
+                                <editor><!-- %%scientificEditor --></editor>
+                                <imprint>
+                                    <publisher><!-- %%publisher --></publisher>
+                                    <publisher><!-- %%publisher --></publisher>
+                                    <publisher><!-- %%journal Publisher from journal referential--></publisher>
+                                    <biblScope unit="serie"><!-- %%serie --></biblScope>
+                                    <biblScope unit="volume"><!-- %%volume --></biblScope>
+                                    <biblScope unit="issue"><!-- %%issue --></biblScope>
+                                    <biblScope unit="pp"><!-- %%page --></biblScope>
+                                    <date type="datePub"><!-- %%date attribute precision="unknown" --></date>
+                                    <date type="dateDefended"><!-- %%date [type = THESE, HDR, MEM] --></date>
+                                    <date type="dateEpub"><!-- %%edate --></date>
+                                </imprint>
+                                <authority type="institution"><!-- %%authorityInstitution --></authority>
+                                <authority type="institution"><!-- %%authorityInstitution --></authority>
+                                <authority type="school"><!-- %%thesisSchool --></authority>
+                                <authority type="supervisor"><!-- %%director --></authority>
+                                <authority type="supervisor"><!-- %%director --></authority>
+                                <authority type="jury"><!-- %%committee --></authority>
+                                <authority type="jury"><!-- %%committee --></authority>
+                                <authority type="jury"><!-- %%committee --></authority>
+                            </monogr>
+                            <series>
+                            	<editor><!-- %%seriesEditor --></editor>
+                            </series>
+                            <!-- tous les types possible : doi arxiv bibcode ird pubmed ads pubmedcentral irstea sciencespo oatao ensam -->
+                            <idno type="doi"><!-- %%doi --></idno>
+                            <idno type="arxiv"><!-- %%arXivId --></idno>
+							<ref type="seeAlso"><!-- %%seeAlso --></ref>
+							<ref type="seeAlso"><!-- %%seeAlso --></ref>
+							<ref type="publisher"><!-- %%publisherLink --></ref>
+							<!-- identifiants des documents reliés : images, vidéos, ... -->
+							<relatedItem type="isIllustratedBy" target="http://medihal.archives-ouvertes.fr/medihal-00002348"><!-- related description --></relatedItem>
+                        </biblStruct>
+                    </sourceDesc>
+                    <profileDesc>
+                        <langUsage>
+                            <language ident="fr"/><!-- %%language -->
+                        </langUsage>
+                        <textClass>
+                            <keywords scheme="author">
+                                <term xml:lang="en"><!-- %%keyword lang en --></term>
+                                <term xml:lang="en"><!-- %%keyword lang en --></term>
+                                <term xml:lang="fr"><!-- %%keyword lang fr --></term>
+                                <term xml:lang="fr"><!-- %%keyword lang fr --></term>
+                                <term xml:lang="fr"><!-- %%keyword lang fr --></term>
+                            </keywords>
+                            <classCode scheme="classification"><!-- %%classification --></classCode>
+                            <classCode scheme="acm"><!-- %%acm --></classCode>
+                            <classCode scheme="acm"><!-- %%acm --></classCode>
+                            <classCode scheme="mesh"><!-- %%mesh --></classCode>
+                            <classCode scheme="jel"><!-- %%jel --></classCode>
+                            <classCode scheme="jel"><!-- %%jet --></classCode>
+                            <classCode scheme="halDomain" n="phys.phys.phys-gen-ph"/><!-- %%domain : http://api-preprod.archives-ouvertes.fr/ref/domain/?wt=wml -->
+                            <classCode scheme="halDomain" n="spi.plasma"/><!-- %%domain : http://api-preprod.archives-ouvertes.fr/ref/domain/?wt=xml -->
+                            <classCode scheme="halTypology" n="ART"/><!-- %%type : http://api-preprod.archives-ouvertes.fr/ref/typdoc/?wt=xml -->
+                        </textClass>
+                        <abstract xml:lang="en"><!-- %%abstract lang en --></abstract>
+                        <abstract xml:lang="de"><!-- %%abstract lang de --></abstract>
+                        <particDesc>
+                        	<org type="consortium"><!-- %%collaboration --></org>
+                        	<org type="consortium"><!-- %%collaboration --></org>
+                        </particDesc>
+                    </profileDesc>
+                </biblFull>
+            </listBibl>
+        </body>
+        <back>
+            <listOrg type="laboratories">
+                <org type="laboratory" xml:id="struct-2568">
+                	<orgName>Centre pour la Communication Scientifique Directe</orgName>
+                	<orgName type="acronym">CCSD</orgName>
+                	<desc>
+                		<address>
+                			<addrLine>25 bd Pierre de Coubertin, 69100 Villeurbanne</addrLine>
+                			<country key="FR"/>
+                		</address>
+                		<ref type="url">http://ccsd.cnrs.fr</ref>
+                	</desc>
+                	<listRelation>
+                    	<relation type="UPS" name="UPS2275" active="#struct-100000"/>
+		                <relation active="#struct-100001"/>
+		                <relation active="#struct-100292"/>
+                    </listRelation>
+                </org>
+                <org type="institution" xml:id="struct-100000">
+                	<orgName>CNRS</orgName>
+                	<desc>
+                		<address>
+                			<country key="FR"/>
+                		</address>
+                		<ref type="url">http://www.cnrs.fr</ref>
+                	</desc>
+                </org>
+                <org type="institution" xml:id="struct-100001">
+                	<orgName>INRIA</orgName>
+                	<desc>
+                		<address>
+                			<country key="FR"/>
+                		</address>
+                		<ref type="url">http://www.inria.fr</ref>
+                	</desc>
+                </org>
+                <org type="institution" xml:id="struct-100292">
+                	<orgName>Université de Lyon</orgName>
+                	<orgName type="acronym">PRES de Lyon</orgName>
+                	<desc>
+                		<address>
+                			<country key="FR"/>
+                		</address>
+                		<ref type="url">http://www.univ-lyon.fr</ref>
+                	</desc>
+                </org>
+            </listOrg>
+            <listOrg type="projects">
+                <org type="anrProject" xml:id="projanr-12">
+                    <idno type="anr">%%REFERENCE</idno>
+                    <orgName>%%ACRONYME</orgName>
+                    <orgName type="program">%%INTITULE</orgName>
+                    <desc>%%TITRE</desc>
+                    <date type="start">%%ANNEE</date>
+                </org>
+                <org type="anrProject" xml:id="projanr-1">
+                    <idno type="anr">%ANR-05-PADD-001</idno>
+                    <orgName>VIN</orgName>
+                    <orgName type="program">Programme fédérateur Agriculture et Développement Durable</orgName>
+                    <desc>Quelles interventions publiques et privées pour réduire l'utilisation des traitements phytosanitaires dans le secteur du vin ?</desc>
+                    <date>2005</date>
+                </org>
+				<org type="europeanProject" xml:id="projeurop-13387">
+                    <idno type="program">REGPOT</idno>
+                    <idno type="number">204727</idno>
+                    <idno type="call">FP7-REGPOT-2007-1</idno>
+					<orgName>ESTSPACE</orgName>
+					<desc>Expose capacity of the Estonian Space Research and Technology through High Quality Partnership in Europe</desc>
+					<date type="start">2008-03-01</date>
+					<date type="end">2011-02-28</date>
+				</org>
+            </listOrg>
+        </back>
+    </text>
+</TEI>

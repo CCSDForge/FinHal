@@ -1,0 +1,75 @@
+<?php
+
+/**
+ * Affichage d'un auteur (dans la liste)
+ */
+/** @var Hal_View $this */
+
+$this->jQuery()->addJavascriptFile('/js/submit/index.js');
+
+$structidx = array();
+?>
+<tr class="author <?php if(!$this->author->isWellFormed()) {echo "aut-error"; }?>" id="aut_<?php echo $this->id?>" data-docauthid="<?php echo $this->docauthid!='' ? $this->docauthid : ''?>" ondrop="drop(event, this)" ondragover="allowDrop(event)">
+	<td width="10px;"><i class="glyphicon glyphicon-move handle"></i></td>
+	<td class="author-line">
+        <div class="author-name-and-fonction" style="position: relative; padding-right:150px;line-height:27px;">
+            <?php
+    $fullname = '<span class="fullname">' . $this->author->getFullname(true) . '</span>';
+    if ($this->author->getIdHal()) {
+        $fullname = '<span class="aut-idhal">' . $fullname;
+        $fullname .= ' <span class="label label-primary">' . $this->translate('IdHAL : ') . '<strong>' . $this->author->getIdhalstring() . '</strong></span>';
+    }
+
+    $fullname .= ' <span class="label label-default" id="aut_func_'.$this->id.'">' . $this->translate('relator_'.$this->author->getQuality()) . '</span>';
+
+    echo $fullname;
+    ?>
+            <div class="btn-group actions-hover col-4" style="position: absolute; right:1px; top:0;">
+                <button id="btn-tools" type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">
+                    &nbsp;<?php echo $this->translate("Pour cet auteur"); ?>&nbsp;<span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu pull-right left-centered" role="menu" aria-labelledby="btn-tools">
+                    <!--li class="dropdown-header doc-nb text-center">Pour les %s documents</li-->
+                    <!--<li class="dropdown-header doc-nb text-center">Les données valides du référentiel ne sont pas modifiables</li>-->
+                    <li class=""><a href="javascript:void(0)"
+                            <?php if ($this->author->isValidForm()) {
+                                echo  "class=\"btn-disabled\" data-toggle=\"tooltip\" data-original-title=\"".$this->translate('Les données valides du référentiel ne sont pas modifiables')."\"";
+                            } else {
+                                echo  "onclick=\"getAuthorForm(".$this->id .")\" ";
+                            }?>>&nbsp;<?php echo $this->translate("Modifier"); ?></a>
+                    </li>
+
+                    <li class=""><a href="javascript:void(0);" onclick="deleteAuthor(<?php echo $this->id ?>)">&nbsp;<?php echo $this->translate("Supprimer"); ?></a>
+                    </li>
+
+                    <li class=""><a href="javascript:void(0);" onclick="getAuthorFunctionForm(<?php echo $this->id ?>)">&nbsp;<?php echo $this->translate("Choisir la fonction"); ?></a>
+                    </li>
+                </ul>
+            </div>
+    </div>
+
+        <?php if (is_array($this->author->getStructidx())) { ?>
+            <ul style="margin:0; padding:0;">
+                <?php
+                $this->authorid = $this->id;
+                foreach ($this->author->getStructidx() as $structid) {
+                    if (!isset($this->structures[$structid])) {
+                        continue;
+                    }
+
+                    $this->structid = $structid;
+                    $this->structure = $this->structures[$structid];
+
+                    ?>
+                    <li id="aut_<?php echo $this->authorid ?>_struct_<?php echo $this->structid ?>" class="struct-focus"><?php include __DIR__ . '/structure.phtml'; ?></li>
+                <?php } ?>
+                <li id="aut_<?php echo $this->authorid ?>_struct_new" class="new-struct-hover create-author">
+                    <input type="text"  class="searchStructure input-xs" placeholder="<?php echo $this->translate('Ajouter une affiliation')?>"/>
+                </li>
+            </ul>
+            <?php
+    }
+    ?>
+    </td>
+
+</tr>

@@ -1,0 +1,6 @@
+--2018-03-22 14:58:10--  http://api.archives-ouvertes.fr/search/index/?q=marmol+bruno
+Résolution de api.archives-ouvertes.fr (api.archives-ouvertes.fr)… 193.48.96.36
+Connexion à api.archives-ouvertes.fr (api.archives-ouvertes.fr)|193.48.96.36|:80… connecté.
+requête HTTP transmise, en attente de la réponse… 403 Forbidden
+2018-03-22 14:58:10 erreur 403 : Forbidden.
+

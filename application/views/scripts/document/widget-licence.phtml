@@ -1,0 +1,40 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yannick
+ * Date: 26/09/2014
+ * Time: 09:42
+ *
+ * $this->document doit exister et etre un oblet Hal_Document
+ *
+ */
+
+$licenceid = $this->document->getLicence();
+
+if ($licenceid) {
+    $licenceinfo = Hal_Settings::getLicenceInfos($licenceid);
+    ?>
+    <div class="widget widget-licence">
+        <h3 class="widget-header"><?php echo $this->translate('Licence') ?></h3>
+        <div class="widget-content">
+            <div class="text-center">
+                <?php if (isset($licenceinfo['icon']) && is_array($licenceinfo['icon'])) {
+                foreach ($licenceinfo['icon'] as $icon) { ?>
+                    <img src="/img/licences/<?php echo $icon; ?>.png" title="<?php echo strtoupper($icon) ?>" width="32px" height="32px" />
+                <?php } ?>
+            <?php } ?>
+                <hr />
+            </div>
+            <?php if (isset($licenceinfo['url'])) {
+                $text = '<a href="' . $licenceinfo['url'] . '" target="_blank" rel="noopener">' . $text = $this->translate('licence_' . $licenceid) . '</a>';
+            } else {
+                $text = $this->translate('licence_' . $licenceid);
+            }
+            if ( strpos($licenceid, 'creativecommons') !== false ) {
+                $text = $this->translate('Distributed under a Creative Commons ') . $text . $this->translate(' 4.0 International License');
+            }
+            ?>
+            <div class="text-center"><?php echo $text;?></div>
+        </div>
+    </div>
+<?php }

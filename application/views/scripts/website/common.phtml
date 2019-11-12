@@ -1,0 +1,16 @@
+<?php
+$this->layout()->description = $this->translate("Configuration générale du site");
+
+if (!is_null($this->piwik)) {
+    ?>
+    <div class="row">
+        <label class="col-md-3" style="text-align: right;">PIWIKID</label>
+        <div class="col-md-9">
+            <input class="form-control" type="text" value="<?php echo $this->piwik?>" disabled>
+        </div>
+        <hr>
+    </div>
+    <?php
+}
+
+echo $this->form;

@@ -1,0 +1,78 @@
+<?php
+/**
+ * ================================================= CREDIT ====================================================
+ * Created by PhpStorm In CNRS-CCSD
+ * User: Zahen
+ * Date: 05/01/2017
+ * Time: 10:14
+ * =============================================================================================================
+ */
+
+/**
+ * =============================================== DESCRIPTION =================================================
+ * Widget (including buttons and title) to display an HAL document references (references.phtml)
+ * =============================================================================================================
+ */
+
+// Check if we have the hal document object and the hal document references object
+if (!$this->document instanceof Hal_Document && !$this->references instanceof Hal_Document_References) {
+    exit();
+}
+// Get the total number of the cited references
+$nbReferences = $this->references->getNbReferences();
+?>
+
+<div class="references">
+    <span class="references-title" id="references-title">
+        <?php echo $this->translate('Littérature citée') . ' [' . $nbReferences . ' ' . $this->translate('références') . '] ' ;?>
+    </span>
+    <span class="references-buttons text-center">
+        <span class="btn-group" role="group">
+            <a type="button" id="btn-view" class="btn btn-default btn-sm" onclick="viewDocReferences(<?php echo $this->document->getDocid()?>)">
+                <i class="glyphicon glyphicon-th-list"></i>&nbsp;<?php echo $this->translate('Voir');?>
+            </a>
+            <a type="button" id="btn-hide" class="btn btn-default btn-sm" onclick="hideDocReferences()">
+                <i class="glyphicon glyphicon-th-list"></i>&nbsp;<?php echo $this->translate('Masquer');?>
+            </a>
+            <a type="button" target="_blank" class="btn btn-default btn-sm" href="<?php echo '/' . $this->document->getId() . 'v' . $this->document->getVersion() . '/html_references'  ?>">
+                <i class="glyphicon glyphicon-download"></i>&nbsp;<?php echo $this->translate('Télécharger');?>
+            </a>
+        </span>
+    </span>
+    <div class="content"></div>
+</div>
+
+<script type="text/javascript">
+    // Display references
+    function viewDocReferences(docId)
+    {
+        var referencesContent = '.references .content';
+        if ($(referencesContent).is(':hidden')) {
+            $('.references #btn-view').hide();
+            $(referencesContent).toggle('slow');
+            $('.references #btn-hide').show();
+        } else {
+            $(referencesContent).html(getLoader());
+            $.ajax({
+                url: "/view/references",
+                type: "post",
+                data: {docId:docId, actionReference:'renderReferences'},
+                success: function(data) {
+                    $('.references #btn-view').hide();
+                    $(referencesContent).html(data);
+                    linkifyElem ('.references .content .linkify');
+                    $('.references #btn-hide').show();
+
+                    // Par défaut, on affiche seulement les références bien formées
+                    sortReferences('well');
+                }
+            });
+        }
+    }
+    // Hide references
+    function hideDocReferences()
+    {
+        $('.references #btn-view').show();
+        $('.references .content, .references #btn-hide').hide();
+    }
+</script>

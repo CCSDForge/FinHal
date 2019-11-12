@@ -1,0 +1,23 @@
+
+    <?php if (count($this->docs) > 0) { ?>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" onclick="$(this).closest('table').find('.checkbox-docid').prop('checked', $(this).is(':checked'));" checked="checked" /></th>
+                    <th><?php echo $this->translate("Tous / Aucun"); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($this->docs as $article) { ?>
+                    <tr>
+                        <td width="16px"><input type="checkbox" name="docs[<?php echo $this->authorid ?>][]" value="<?php echo $article['docid']; ?>" class="checkbox-docid"  checked="checked"/></td>
+                        <td><?php echo $article['citationFull_s']; ?></td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    <?php } else { ?>
+        <div class="alert alert-danger"><?php echo $this->translate("Aucun document n'est associé à cette forme auteur"); ?></div>
+    <?php } ?>
+
+

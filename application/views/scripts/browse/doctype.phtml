@@ -1,0 +1,207 @@
+<?php
+
+$this->jQuery()->addJavascriptFile('/js/browse/browse.js') ?>
+<div class="row">
+    <div class="col-md-7">
+
+
+        <?php
+
+        if (!is_array($this->docType)) {
+            echo $this->translate('Aucune donnée');
+            echo '</div></div>';
+            exit();
+        }
+
+        $searchParams['q'] = '*';
+        $searchParams['controller'] = 'search';
+        $searchParams['action'] = 'index';
+
+        foreach ($this->docType as $category => $docType) {
+
+            $url = [];
+            $url['controller'] = 'search';
+            $url['q'] = '*';
+            $url['docType_s'] = $docType["docTypesFilterQuery"];
+            ?>
+
+            <table class="table table-condensed table-hover">
+                <thead>
+                <tr class="active">
+                    <th><a data-toggle="tooltip" data-placement="right"
+                           title="<?php echo $this->translate('Documents + annexes + notices'); ?>"
+                           rel="nofollow" href="<?php echo $this->url($url, null, true); ?>">
+                            <?php echo $this->translate($category); ?>
+                        </a></th>
+                    <th style="width: 100px; text-align: right;">
+
+                        <?php
+
+
+                        $url['submitType_s'] = Hal_Document::FORMAT_FILE;
+                        echo '<a rel="nofollow" class="btn btn-primary btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Documents') . '" href="' . $this->url($url, null, true) . '">';
+                        echo '<span class="' . Hal_Settings::$submitTypeIconsClass[$url['submitType_s']] . '"></span> ';
+                        echo $docType["totalFile"];
+                        echo '</a>';
+                        ?>
+                    </th>
+                    <th style="width: 100px; text-align: right;"><?php
+                        $url['submitType_s'] = Hal_Document::FORMAT_ANNEX;
+                        echo '<a rel="nofollow" class="btn btn-info btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Annexes') . '" href="' . $this->url($url, null, true) . '">';
+                        echo '<span class="' . Hal_Settings::$submitTypeIconsClass[$url['submitType_s']] . '"></span> ';
+                        echo $docType["totalAnnex"];
+                        echo '</a>';
+
+                        ?></th>
+                    <th style="width: 100px; text-align: right;"><?php
+                        $url['submitType_s'] = Hal_Document::FORMAT_NOTICE;
+                        echo '<a rel="nofollow" class="btn btn-default btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Notices') . '" href="' . $this->url($url, null, true) . '">';
+                        echo '<span class="' . Hal_Settings::$submitTypeIconsClass[$url['submitType_s']] . '"></span> ';
+                        echo $docType["totalNotice"];
+                        echo '</a>';
+
+                        ?></th>
+                    <th style="width: 100px; text-align: right;">
+
+                        <?php
+                        unset($url['submitType_s']);
+
+                        echo '<a rel="nofollow" class="btn btn-default btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Documents ou annexes ou notices') . '" href="' . $this->url($url, null, true) . '">';
+
+                        echo $docType["total"];
+                        echo '</a>';
+
+                        ?></th>
+                </tr>
+                </thead>
+                <tbody>
+
+                <?php foreach ($docType['values'] as $subType) : ?>
+                <tr>
+
+                    <?php
+
+                    $url = [];
+                    $url['controller'] = 'search';
+                    $url['q'] = '*';
+                    $url['docType_s'] = $subType['code'];
+
+                    ?>
+
+                    <td><a rel="nofollow" data-toggle="tooltip" data-placement="right"
+                           title="<?php echo $this->translate('Documents ou annexes ou notices'); ?>"
+                           href="<?php echo $this->url($url, null, true); ?>">
+
+                            <?php echo $this->translate($subType['label']); ?>
+                        </a></td>
+
+
+                    <?php
+                    $fileCount = 0;
+                    $noticeCount = 0;
+                    $annexCount = 0;
+                    if (is_array($subType['pivot'])) {
+
+                        foreach ($subType['pivot'] as $pivotValue) {
+
+                            switch ($pivotValue['value']) {
+
+                                case Hal_Document::FORMAT_FILE:
+                                    $fileCount = $pivotValue['count'];
+                                    break;
+                                case Hal_Document::FORMAT_NOTICE:
+                                    $noticeCount = $pivotValue['count'];
+                                    break;
+                                case Hal_Document::FORMAT_ANNEX:
+                                    $annexCount = $pivotValue['count'];
+                                    break;
+                            }
+                        }
+                    }
+
+                    if ($fileCount != 0) {
+                        echo '<td style="width: 100px;text-align: right;">';
+
+                        $url = [];
+                        $url['controller'] = 'search';
+                        $url['q'] = '*';
+                        $url['docType_s'] = $subType['code'];
+                        $url['submitType_s'] = Hal_Document::FORMAT_FILE;
+
+                        echo '<a rel="nofollow" class="btn btn-primary btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Documents') . '" href="' . $this->url($url, null, true) . '">';
+                        echo '<span class="' . Hal_Settings::$submitTypeIconsClass[$url['submitType_s']] . '"></span> ';
+                        echo $fileCount;
+
+                        echo '</td>';
+                    } else {
+                        echo '<td style="width: 100px;text-align: right;">';
+                        echo '</td>';
+                    }
+
+                    if ($annexCount != 0) {
+                        echo '<td style="width: 100px;text-align: right;">';
+
+                        $url = [];
+                        $url['controller'] = 'search';
+                        $url['q'] = '*';
+                        $url['docType_s'] = $subType['code'];
+                        $url['submitType_s'] = Hal_Document::FORMAT_ANNEX;
+
+                        echo '<a rel="nofollow" class="btn btn-info btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Annexes') . '" href="' . $this->url($url, null, true) . '">';
+                        echo '<span class="' . Hal_Settings::$submitTypeIconsClass[$url['submitType_s']] . '"></span> ';
+                        echo $annexCount;
+
+                        echo '</td>';
+                    } else {
+                        echo '<td style="width: 100px;text-align: right;">';
+                        echo '</td>';
+                    }
+
+                    if ($noticeCount != 0) {
+                        echo '<td style="width: 100px;text-align: right;">';
+
+                        $url = [];
+                        $url['controller'] = 'search';
+                        $url['q'] = '*';
+                        $url['docType_s'] = $subType['code'];
+                        $url['submitType_s'] = Hal_Document::FORMAT_NOTICE;
+
+                        echo '<a rel="nofollow" class="btn btn-default btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Notices') . '" href="' . $this->url($url, null, true) . '">';
+                        echo '<span class="' . Hal_Settings::$submitTypeIconsClass[$url['submitType_s']] . '"></span> ';
+                        echo $noticeCount;
+
+                        echo '</td>';
+                    } else {
+                        echo '<td style="width: 100px;text-align: right;">';
+                        echo '</td>';
+                    }
+
+                    $url = [];
+                    $url['controller'] = 'search';
+                    $url['q'] = '*';
+                    $url['docType_s'] = $subType['code'];
+
+                    echo '<td style="width: 100px;text-align: right;">';
+
+                    echo '<a rel="nofollow" class="btn btn-default btn-xs" role="button" data-toggle="tooltip" data-placement="right" title="' . $this->translate('Documents ou annexes ou notices') . '" href="' . $this->url($url, null, true) . '">';
+
+
+                    echo $fileCount + $annexCount + $noticeCount;
+
+                    echo '</a>';
+                    echo '</td>';
+
+                    ?>
+
+
+
+                    <?php endforeach; ?>
+
+
+                </tbody>
+            </table>
+
+
+        <?php } ?>
+    </div>
+</div>

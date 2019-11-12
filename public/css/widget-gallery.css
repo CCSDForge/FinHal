@@ -1,0 +1,20 @@
+.my-gallery {
+    width: 100%;
+    text-align: center;
+}
+.my-gallery img {
+    width: 100%;
+    height: auto;
+}
+.my-gallery figure {
+    display: inline-block;
+    margin: 0 5px 5px 0;
+    width: 100px;
+}
+.my-gallery figcaption {
+    display: none;
+}
+
+.toggle-gallery {
+    float:right;
+}

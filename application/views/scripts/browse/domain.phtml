@@ -1,0 +1,27 @@
+<style>
+label, label a {font-weight:normal;}
+</style>
+<div class="row">
+	<div class="col-md-7" style="margin: 2em;">
+
+		<?php include_once __DIR__ . '/../partials/browse_type.phtml'; ?>
+
+<?php
+
+
+if ($this->domainTree !== false) {
+    $this->jQuery()
+
+        ->addJavascriptFile(CCSDLIB . "/js/bootstrap-typeahead.js");
+    echo $this->domainTree;
+} else {
+
+    echo '<p class="lead">';
+    echo $this->translate("Pas de données pour l'instant.");
+    echo '</p>';
+}
+
+?>
+
+</div>
+</div>

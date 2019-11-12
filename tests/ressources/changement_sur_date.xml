@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.tei-c.org/ns/1.0 http://api-preprod.archives-ouvertes.fr/documents/aofr-sword.xsd"
+     xmlns="http://www.tei-c.org/ns/1.0">
+  <text>
+    <body>
+      <listBibl>
+        <biblFull>
+          <titleStmt>
+            <title xml:lang="en">3D Compression</title>
+            <author role="aut">
+              <idno type="idhal" notation="string">guillaume-lavoue</idno>
+              <affiliation ref="#struct-391965"/>
+            </author>
+            <author role="aut">
+              <idno type="idhal" notation="string">florent-dupont</idno>
+              <affiliation ref="#struct-391965"/>
+            </author>
+            <author role="aut">
+              <idno type="idhal" notation="string">atilla-baskurt</idno>
+              <affiliation ref="#struct-391965"/>
+            </author>
+          </titleStmt>
+          <editionStmt>
+            <edition>
+              <date type="whenWritten">2008-04</date>
+            </edition>
+          </editionStmt>
+          <notesStmt>
+            <note type="audience" n="2"/>
+            <note type="popular" n="0"/>
+          </notesStmt>
+          <sourceDesc>
+            <biblStruct>
+              <analytic>
+                <title xml:lang="en">3D Compression</title>
+                <author role="aut">
+                  <idno type="idhal" notation="string">guillaume-lavoue</idno>
+                  <affiliation ref="#struct-391965"/>
+                </author>
+                <author role="aut">
+                  <idno type="idhal" notation="string">florent-dupont</idno>
+                  <affiliation ref="#struct-391965"/>
+                </author>
+                <author role="aut">
+                  <idno type="idhal" notation="string">atilla-baskurt</idno>
+                  <affiliation ref="#struct-391965"/>
+                </author>
+              </analytic>
+              <monogr>
+                <idno type="localRef">3415</idno>
+                <title level="m">Chapter in "3D Object Processing: Compression, Indexing and Watermarking"</title>
+                <editor>Jean-Luc Dugelay, Atilla Baskurt, Mohamed Daoudi6</editor>
+                <imprint>
+                  <publisher>Wiley</publisher>
+                  <biblScope unit="pp">45-86</biblScope>
+                  <date type="datePub">2008-04</date>
+                </imprint>
+              </monogr>
+            </biblStruct>
+          </sourceDesc>
+          <profileDesc>
+            <langUsage>
+              <language ident="en"/>
+            </langUsage>
+            <textClass>
+              <classCode scheme="halTypology" n="COUV"/>
+              <classCode scheme="halDomain" n="info"/>
+            </textClass>
+            <abstract xml:lang="en">3D compression techniques: the 3D coding and decoding schemes for reducing the size of 3D data to reduce transmission time and minimize distortion; </abstract>
+          </profileDesc>
+        </biblFull>
+      </listBibl>
+    </body>
+    <back>
+      <listOrg type="structures">
+        <org type="researchteam" xml:id="struct-391965">
+          <orgName>Modèles Multirésolution, Discrets et Combinatoires</orgName>
+          <orgName type="acronym">M2DisCo</orgName>
+        </org>
+      </listOrg>
+    </back>
+  </text>
+</TEI>

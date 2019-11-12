@@ -1,0 +1,43 @@
+[
+  {
+    "label": "menu-label-1",
+    "controller": "index",
+    "action": "index",
+    "resource": "index-index"
+  },
+  {
+    "label": "menu-label-2",
+    "controller": "submit",
+    "action": "index",
+    "resource": "submit-index"
+  },
+  {
+    "label": "menu-label-3",
+    "controller": "section",
+    "action": "browse",
+    "resource": "section-browse",
+    "pages": [
+      {
+        "label": "menu-label-4",
+        "controller": "browse",
+        "action": "doctype",
+        "resource": "browse-doctype"
+      },
+      {
+        "label": "menu-label-5",
+        "controller": "browse",
+        "action": "author",
+        "resource": "browse-author",
+        "field": "author",
+        "sort": null,
+        "filter": ""
+      }
+    ]
+  },
+  {
+    "label": "menu-label-6",
+    "controller": "search",
+    "action": "index",
+    "resource": "search-index"
+  }
+]

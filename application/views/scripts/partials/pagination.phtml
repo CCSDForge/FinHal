@@ -1,0 +1,98 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: baptiste
+ * Date: 07/01/2016
+ * Time: 16:19
+ */
+if ($this->pageCount > 1):
+    $rowsurl = '';
+    $pageurl = '';
+    foreach($_GET as $key => $value){
+        if (isset($_GET[$key]) && $key != 'rows'){
+            $rowsurl .= '&'.$key.'='.$value;
+        }
+        if (isset($_GET[$key]) && $key != 'page'){
+            $pageurl .= '&'.$key.'='.$value;
+        }
+    }
+    ?>
+    <div class="btn-group">
+        <div class="btn-group" style="margin:10px;">
+            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
+                <span class="glyphicon glyphicon-list"></span> <?php echo $this->translate('Nombre'); ?>  <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <?php
+                foreach (Hal_Settings_Search::$_numberSearchResultsArray as $paginatorNumberOfResults) {
+                    $isActive = '';
+                    if ($this->itemCountPerPage == $paginatorNumberOfResults) {
+                        $isActive = ' btn-primary active disabled';
+                    }?>
+                    <li>
+                        <a href="<?php echo '?rows='.$paginatorNumberOfResults; echo $rowsurl;?>" class="btn btn-xs <?php echo $isActive ?>">
+                            <?php
+                            echo $this->escape($paginatorNumberOfResults) . ' ' . $this->translate('résultats par page');
+                            ?>
+                        </a>
+                    </li>
+                <?php }?>
+            </ul>
+        </div>
+    <ul class="pagination pagination-sm" style="margin: 10px;">
+
+        <!-- first -->
+        <?php
+        if ($this->first != $this->current) :
+            $pageUrlParam['page'] = $this->first;
+            ?>
+            <li><a href="<?php echo '?page='.$pageUrlParam['page']; echo $pageurl;?>"><span class="glyphicon glyphicon-fast-backward"></span></a></li>
+        <?php endif; ?>
+        <!-- // first -->
+
+        <!-- Previous page link -->
+        <?php
+
+        if (isset($this->previous)) :
+            $pageUrlParam['page'] = $this->previous;
+            ?>
+
+            <li><a href="<?php echo '?page='.$pageUrlParam['page']; echo $pageurl;?>"><span class="glyphicon glyphicon-step-backward"></span></a></li>
+
+        <?php endif; ?>
+
+        <!-- Numbered page links -->
+        <?php foreach ($this->pagesInRange as $page): ?>
+            <?php
+
+            if ($page != $this->current) :
+                $pageUrlParam['page'] = $page;
+                ?>
+                <li><a href="<?php echo '?page='.$pageUrlParam['page']; echo $pageurl;?>"><?php echo $this->escape($page); ?></a></li>
+            <?php else: ?>
+                <li class="active"><span><?php echo $this->escape($page); ?></span></li>
+            <?php endif; ?>
+        <?php endforeach; ?>
+
+        <!-- Next page link -->
+        <?php
+
+        if (isset($this->next)) :
+            $pageUrlParam['page'] = $this->next;
+            ?>
+            <li><a href="<?php echo '?page='.$pageUrlParam['page']; echo $pageurl;?>"><span class="glyphicon glyphicon-step-forward"></span></a></li>
+
+        <?php endif; ?>
+
+        <!-- last -->
+        <?php
+        if ($this->last != $this->current) :
+            $pageUrlParam['page'] = $this->last;
+            ?>
+            <li><a href="<?php echo '?page='.$pageUrlParam['page']; echo $pageurl;?>"><span class="glyphicon glyphicon-fast-forward"></span></a></li>
+        <?php endif; ?>
+        <!-- // last -->
+
+    </ul>
+    </div>
+<?php endif; ?>

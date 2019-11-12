@@ -1,0 +1,30 @@
+<?php $this->layout()->pageDescription = "Gestion de votre disponibilité en tant qu'expert scientifique";?>
+
+
+
+
+<form action="/validate/availability" method="post">
+	<div class="form-actions text-center">
+<?php if ($this->isAvailable == true): ?>
+
+<div class="alert alert-success" role="alert"><?php echo $this->translate("Vous êtes actuellement <strong>disponible</strong> en tant qu'expert")?></div>
+		<input type="hidden" name="expert-action" value="terminate">
+		<button type="submit" class="btn btn-warning">
+			<span class="glyphicon glyphicon-pause" aria-hidden="true"></span>&nbsp;<?php echo $this->translate('Me rendre indisponible'); ?></button>
+
+<?php else:?>
+<div class="alert alert-warning" role="alert">
+			<?php echo $this->translate("Vous êtes actuellement <strong>indisponible</strong> en tant qu'expert")?></div>
+		<input type="hidden" name="expert-action" value="engage">
+		<button type="submit" class="btn btn-primary">
+			<span class="glyphicon glyphicon-play" aria-hidden="true"></span>&nbsp;<?php echo $this->translate('Me rendre disponible'); ?></button>
+
+<?php endif;?>
+
+
+
+	
+		
+	</div>
+</form>
+

@@ -1,0 +1,80 @@
+<?php
+if (count ( $this->documents )) {
+	$this->jQuery ()->addJavascriptFile ( CCSDLIB . "/js/jquery.dataTables.min.js" )->addJavascriptFile ( CCSDLIB . "/js/dataTables.bootstrap.js" )->addStylesheet ( CCSDLIB . '/css/dataTables.bootstrap.css' );
+	$document = new Hal_Document ();
+	$user = new Hal_User ();
+	
+	?>
+<form action="/validate/documents" method="post" id="list-documents">
+	<table class="table table-striped table-bordered" id="validate">
+		<thead>
+			<tr>
+				<th class="middle" style="width: 16px"></th>
+				<th class="middle"><?php echo $this->translate('Document'); ?></th>
+				<th class="middle"><?php echo $this->translate('Contributeur'); ?></th>
+				<th class="middle"><?php echo $this->translate('Nombre de dépôts en ligne'); ?></th>
+				<th class="middle"><?php echo $this->translate('Déposé le'); ?></th>
+				<th class="middle"><?php echo $this->translate('Portail'); ?></th>
+			</tr>
+		</thead>
+		<tbody>
+                <?php
+	
+foreach ( $this->documents as $data ) {
+		$document->setDocid ( $data ['DOCID'] );
+		$document->load ();
+		
+		$r = $user->find ( $data ['UID'] );
+		
+		?>
+                    <tr>
+				<td class="middle"><input type="radio" name="docid"
+					value="<?php echo $document->getDocid(); ?>" class="radio-docid" /></td>
+				<td class="middle"><a href="javascript:void(0);"
+					onclick="selectDocument(<?php echo $document->getDocid(); ?>)">
+                                <?php echo $document->getCitation('full'); ?>
+                            </a></td>
+				<td class="middle"><?php echo $user->getFullName(); ?></td>
+				<td class="middle"><?php echo $user->getOnlineSubmissionsNb(); ?></td>
+				<td class="middle"><?php echo $data['DATESUBMIT'] ?></td>
+				<td class="middle"><?php echo $data['SITE']; ?></td>
+			</tr>
+                <?php } ?>
+            </tbody>
+		<tfoot>
+			<tr>
+				<th></th>
+				<th colspan="5"><button type="submit" class="btn btn-primary btn-sm">
+						<i class="glyphicon glyphicon-eye-open"></i>&nbsp;<?php echo $this->translate('Voir'); ?></button>
+				</th>
+			</tr>
+		</tfoot>
+	</table>
+</form>
+
+<script>
+        $(document).ready(function(){
+            $('#validate').dataTable({
+                "iDisplayLength": 500,
+                "bLengthChange":false
+            });
+        });
+
+
+        /**
+         * Selection d'un document
+         * @param docid
+         */
+        function selectDocument(docid)
+        {
+           
+            $('#validate .radio-docid[value="' + docid + '"]').attr('checked', true);
+            $('#list-documents').submit();
+        }
+    </script>
+
+<?php } else { ?>
+<div class="alert alert-success">
+	<strong><?php echo $this->translate("Aucun article à expertiser");?></strong>
+</div>
+<?php } ?>

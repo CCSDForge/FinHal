@@ -1,0 +1,19 @@
+<!-- Modal -->
+<div class="modal fade bs-example-modal-sm in" id="claimOwnershipModal" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#claimOwnershipModal').hide();"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="mergeModalLabel"><?php echo $this->translate("Merci d'indiquer la raison de votre demande"); ?></h4>
+            </div>
+            <div class="modal-body">
+                    <textarea id='msg-content' name="comment" class="form-control" rows="2" cols="20" style="width:500px;height:150px;margin:0 auto 20px;" onfocus="$('#msg-content').removeClass('error');"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button id="confirmRequest" type="button" class="btn btn-default" onclick="$('#claimOwnershipModal').hide();">Annuler</button>
+                <button id="resetRequest" type="button" class="btn btn-primary" onclick="claimOwnership('<?php echo $this->document->getId();?>');">Envoyer la demande</button>
+            </div>
+        </div>
+    </div>
+</div>

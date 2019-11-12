@@ -1,0 +1,63 @@
+{
+    "DB":{
+        "HOST" : "127.0.0.1",
+        "NAME" : "HALV3",
+        "USER" : "xxxx",
+        "PWD" : "xxxx"
+    },
+    "CAS":{
+        "HOST" : "127.0.0.1",
+        "NAME" : "CAS_users",
+        "USER": "xxxx",
+        "PWD": "xxxxx",
+	"SERVICE": "127.0.0.1:80" 
+    },
+    "THUMB":{
+        "KEY" : "xxxxxxx",
+        "IP" : ["127.0.0.1", "127.0.0.1"]
+    },
+    "PAOL":{
+        "HOST" : "xxxxxx",
+        "NAME" : "xxxx",
+        "USER" : "xxxxxx",
+        "PWD" : "xxxxxxxxxx"
+    },
+    "ARXIV":{
+        "SERVICE" : "xxxxxxxxxxx",
+        "USERAGENT" : "xxxx",
+        "USER" : "xxxx",
+        "PWD" : "xxxxxxx"
+    },
+    "ARCHIVAGE": {
+        "HOST": "example.org",
+        "PORT": 22,
+        "USER": "halnon",
+        "PWD": "ymous",
+        "SSH_PATH": "/pac/hal/VERS/dave/",
+        "LOG_PATH": "/logs/hal-archivage/",
+        "MAIL_SERVER": "smtp.example.org",
+        "MAIL_USERNAME": "dave@example.org",
+        "MAIL_PWD": "xxxxxx",
+        "MAIL_PROTOCOL": "SSL",
+        "MAIL_ADMINISTRATOR": "hal@example.org"
+    },
+    "REFBIBLIO":{
+        "HOST" : "127.0.0.1",
+        "NAME" : "xxxxxxxxxxx",
+        "USER" : "xxxxxxxxxxx",
+        "PWD" : "xxxx"
+
+    },
+    "STATS":{
+        "HOST" : "127.0.0.1",
+        "NAME" : "xxxx",
+        "USER" : "xxxx",
+        "PWD" : "xxxx"
+    },
+    "FEATURES": {
+        "DOC_SUBMIT": true,
+        "DOC_MODERATE": true,
+        "DOC_CACHE": true,
+        "DOWNTIME_URL": "https://www.example.org/"
+    }
+}

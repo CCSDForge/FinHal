@@ -1,0 +1,12 @@
+<?php
+
+$idsExt = $this->cv->getSocialUrlExt();
+$servers = $this->cv->getSocialServerExt();
+$content = '<ul>';
+if (count($idsExt)) {
+    foreach($idsExt as $server => $id) {
+        $content .= '<li>' . ( preg_match('/^http/', $id) ? ('<a href="' . $id . '" target="_blank">' . $servers[$server] . '</a>') : ($servers[$server].': '.$id) ) . '</li>';
+    }
+}
+$content .= '</ul>';
+echo $this->widget(array('title' => $this->translate('cv_widget_socialurl'), 'content' => $content, 'class' => 'widget-'.'socialurl'));

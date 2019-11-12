@@ -1,0 +1,1454 @@
+[metas]
+
+prefixPath.prefix = "Hal_Form_"
+prefixPath.path   = "Hal/Form/"
+
+
+;; Champs citation - section Citation
+
+;Type de document
+elements.type.type = "select"
+elements.type.options.label = "docType_s"
+elements.type.options.description = ""
+elements.type.options.populate.class = "Hal_Settings"
+elements.type.options.populate.method = "getTypdocsSelect"
+elements.type.options.required = "1"
+
+;Titre
+elements.title.type = "multiTextAreaLang"
+elements.title.options.label = "title"
+elements.title.options.description = "Vous pouvez renseigner le titre en plusieurs langues : choisir la langue et cliquer sur + pour ajouter une nouvelle langue"
+elements.title.options.populate.class = 'Ccsd_Locale'
+elements.title.options.populate.method = 'getLanguage'
+elements.title.options.required = "1"
+elements.title.options.rows = "3"
+elements.title.options.length = "0"
+;elements.title.options.attr-autocomplete = "title_st"
+;elements.title.options.attr-doublon = "1"
+
+;; Autre - section 1
+
+;Partenaires
+elements.partner.type = "text"
+elements.partner.options.label = "Partenaire(s)"
+elements.partner.options.description = "Vous pouvez renseigner plusieurs partenaires : cliquer sur + pour ajouter un partenaire. Les caractères \",\" (virgule) et \";\" (point-virgule) peuvent être utilisés pour séparer une liste de partenaires."
+elements.partner.options.required = "0"
+
+;Disciplines
+elements.domain.type = "thesaurus"
+elements.domain.options.data.class = 'Hal_Settings'
+elements.domain.options.data.method = 'getDomains'
+elements.domain.options.data.args =
+elements.domain.options.tagcode = "domainCode"
+elements.domain.options.taglabel = "domainName"
+elements.domain.options.typeahead_label = "Filtrer par nom"
+elements.domain.options.typeahead_description = "Saisissez un mot pour accélérer votre recherche"
+elements.domain.options.list_title = ""
+elements.domain.options.list_values = ""
+elements.domain.options.label = "Thème"
+elements.domain.options.description = "Le thème que vous mettrez en premier, sera considéré comme le thème principal du dépôt. L'ordre des thèmes peut être changé par glissé/déposé."
+elements.domain.options.event_on_click = "domainChanged('domain');"
+elements.domain.options.option_expand_msg      = "Ajouter un thème"
+elements.domain.options.required = "1"
+elements.domain.options.prefix_translation = "domain_"
+elements.domain.options.interdisciplinarite = ""
+
+;Résumé
+elements.abstract.type = "multiTextAreaLang"
+elements.abstract.options.label = "abstract"
+elements.abstract.options.description = "Vous pouvez renseigner le résumé en plusieurs langues : choisir la langue et cliquer sur + pour ajouter une nouvelle langue"
+elements.abstract.options.populate.class = 'Ccsd_Locale'
+elements.abstract.options.populate.method = 'getLanguage'
+elements.abstract.options.required = "0"
+elements.abstract.options.rows = "9"
+elements.abstract.options.length = "0"
+
+;Mots-clés
+elements.keyword.type = "multiTextSimpleLang"
+elements.keyword.options.label = "keyword"
+elements.keyword.options.description = "Vous pouvez renseigner plusieurs mots-clés en plusieurs langues : choisir la langue et cliquer sur + pour ajouter un mot-clé dans la langue sélectionnée. Les caractères \",\" (virgule) et \";\" (point-virgule) peuvent être utilisés pour séparer une liste de mots-clés."
+elements.keyword.options.populate.class = 'Ccsd_Locale'
+elements.keyword.options.populate.method = 'getLanguage'
+elements.keyword.options.required = "0"
+elements.keyword.options.split = "1"
+elements.keyword.options.length = "0"
+;plusieurs mot clés par langue
+elements.keyword.options.pluriValues = "1"
+elements.keyword.options.attr-autocomplete = "keyword_s"
+
+;Date de publication
+elements.date.type = "date"
+elements.date.options.label = "Date de publication"
+elements.date.options.description = "Renseignez la date au format AAAA-MM-JJ ou AAAA-MM ou AAAA"
+elements.date.options.validators.0.validator = "Date"
+elements.date.options.validators.0.options.format.0 = "Y-m-d"
+elements.date.options.validators.0.options.format.1 = "Y-m"
+elements.date.options.validators.0.options.format.2 = "Y"
+elements.date.options.validators.0.options.messages = "'%value%' ne correspond pas aux formats de date indiqués ci-dessus"
+elements.date.options.required = "0"
+
+;Langue du document principal
+elements.language.type = "select"
+elements.language.options.label = "language"
+elements.language.options.description = ""
+elements.language.options.populate.class = "Ccsd_Locale"
+elements.language.options.populate.method = "getLanguage"
+elements.language.options.required = "1"
+elements.language.options.value = "en"
+
+;Identifiants exterieurs
+elements.identifier.type = "identifiant"
+elements.identifier.options.label = "Autres(s) identifiants(s)"
+elements.identifier.options.description = "Ajoutez l'identifiant <a href='http://www.doi.org/' target='_blank'>DOI</a>, <a href='http://fr.arxiv.org/' target='_blank'>arXiv</a>, <a href='http://www.ncbi.nlm.nih.gov/pubmed' target='_blank'>PubMed</a>, <a href='http://adsabs.harvard.edu/' target='_blank'>ADS</a>, etc pour lier votre dépôt aux autres bases."
+elements.identifier.options.required = "0"
+elements.identifier.options.populate.doi = "idext_doi"
+elements.identifier.options.populate.arxiv = "idext_arxiv"
+elements.identifier.options.populate.pubmed = "idext_pubmed"
+elements.identifier.options.populate.bibcode = "idext_bibcode"
+elements.identifier.options.populate.pubmedcentral = "idext_pubmedcentral"
+elements.identifier.options.populate.cern = "idext_cern"
+elements.identifier.options.populate.inspire = "idext_inspire"
+elements.identifier.options.populate.irstea = "idext_irstea"
+elements.identifier.options.populate.sciencespo = "idext_sciencespo"
+elements.identifier.options.populate.oatao = "idext_oatao"
+elements.identifier.options.populate.ird = "idext_ird"
+elements.identifier.options.populate.okina = "idext_okina"
+elements.identifier.options.populate.ensam = "idext_ensam"
+elements.identifier.options.populate.prodinra = "idext_prodinra"
+elements.identifier.options.populate.ineris = "idext_ineris"
+elements.identifier.options.populate.sh = "idext_sh"
+
+;metas supprimées pour SPM
+;elements.otherType.type = "invisible"
+;elements.subTitle.type = "invisible"
+;Interdisicplinarité (sauf pour default)
+;elements.domain_inter.type = "invisible"
+;Mots-clés MESH
+;elements.mesh.type = "invisible"
+
+;Mots-clés JEL
+;elements.jel.type = "invisible"
+
+;Date d'écriture
+;elements.writingDate.type = "date"
+;elements.writingDate.options.label = "writingDate"
+;elements.writingDate.options.description = "Renseignez la date au format AAAA-MM-JJ ou AAAA-MM ou AAAA"
+;elements.writingDate.options.required = "0"
+;elements.writingDate.options.validators.0.validator = "Date"
+;elements.writingDate.options.validators.0.options.format.0 = "Y-m-d"
+;elements.writingDate.options.validators.0.options.format.1 = "Y-m"
+;elements.writingDate.options.validators.0.options.format.2 = "Y"
+;elements.writingDate.options.validators.0.options.start = "1970"
+;elements.writingDate.options.validators.0.options.startFormat = "Y"
+;elements.writingDate.options.validators.0.options.messages = "'%value%' ne correspond pas aux formats de date indiqués ci-dessus"
+
+;Licence
+;elements.licence.type = "select"
+;elements.licence.options.populate.class = 'Hal_Settings'
+;elements.licence.options.populate.method = 'getLicencesTradCodes'
+;elements.licence.options.label = "licence"
+;elements.licence.options.description = ""
+;elements.licence.options.required = "0"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;; métadonnées dépendantes du type de document ;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Numéro National de la thèse
+;elements.nnt.type = "invisible"
+;elements.nnt.options.label = "nnt"
+;elements.nnt.options.description = "Indiquez le numéro fourni par votre organisme de délivrance"
+;elements.nnt.options.placeholder = "Exemple : 2012ICME2312"
+;elements.nnt.options.validators.0.validator = "regex"
+;elements.nnt.options.validators.0.options.pattern = "/^[0-9]{4}[A-Z]{2,4}[A-Za-z0-9]{4,6}$/"
+;elements.nnt.options.validators.0.options.messages = "'%value%' n'a pas de correspondance avec le motif (Exemple : 2012ICME2312)"
+
+;Type de rapport
+;elements.reportType.type = "invisible"
+;elements.reportType.options.label = "reportType"
+;elements.reportType.options.description = "Sélectionnez le type de votre rapport"
+;elements.reportType.options.populate.class = "Hal_Referentiels_Metadata"
+;elements.reportType.options.populate.method = "getValues"
+;elements.reportType.options.populate.args.metaname = "reportType"
+
+;Type d'image
+;elements.imageType.type = "invisible"
+;elements.imageType.options.label = "imageType"
+;elements.imageType.options.description = ""
+;elements.imageType.options.populate.class = "Hal_Referentiels_Metadata"
+;elements.imageType.options.populate.method = "getValues"
+;elements.imageType.options.populate.args.metaname = "imageType"
+
+;Journal
+;elements.journal.type = "invisible"
+;elements.journal.options.label = "journal"
+;elements.journal.options.description = ""
+;elements.journal.options.type = "journal"
+;elements.journal.options.more = "1"
+
+;Source
+;elements.source.type = "invisible"
+;elements.source.options.label = "source"
+;elements.source.options.description = ""
+
+;Crédit
+;elements.credit.type = "invisible"
+;elements.credit.options.label = "credit"
+;elements.credit.options.description = ""
+
+;Titre de l'ouvrage
+;elements.bookTitle.type = "invisible"
+;elements.bookTitle.options.label = "bookTitle"
+;elements.bookTitle.options.description = ""
+;elements.bookTitle.options.rows = "2"
+
+;ISBN
+;elements.isbn.type = "invisible"
+;elements.isbn.options.label = "isbn"
+;elements.isbn.options.description = ""
+
+;Vulgarisation (oui/non)
+;elements.popularLevel.type = "invisible"
+;elements.popularLevel.options.label = "popularLevel"
+;elements.popularLevel.options.description = ""
+;elements.popularLevel.options.populate.class = "Hal_Referentiels_Metadata"
+;elements.popularLevel.options.populate.method = "getValues"
+;elements.popularLevel.options.populate.args.metaname = "popularLevel"
+
+;Relecture (oui/non)
+;elements.peerReviewing.type = "invisible"
+;elements.peerReviewing.options.label = "peerReviewing"
+;elements.peerReviewing.options.description = ""
+;elements.peerReviewing.options.populate.class = "Hal_Referentiels_Metadata"
+;elements.peerReviewing.options.populate.method = "getValues"
+;elements.peerReviewing.options.populate.args.metaname = "peerReviewing"
+
+;Invitée (oui/non)
+;elements.invitedCommunication.type = "invisible"
+;elements.invitedCommunication.options.label = "invitedCommunication"
+;elements.invitedCommunication.options.description = ""
+;elements.invitedCommunication.options.populate.class = "Hal_Referentiels_Metadata"
+;elements.invitedCommunication.options.populate.method = "getValues"
+;elements.invitedCommunication.options.populate.args.metaname = "invitedCommunication"
+
+;Audience
+;elements.audience.type = "invisible"
+;elements.audience.options.label = "audience"
+;elements.audience.options.description = ""
+;elements.audience.options.populate.class = "Hal_Referentiels_Metadata"
+;elements.audience.options.populate.method = "getValues"
+;elements.audience.options.populate.args.metaname = "audience"
+
+;Acte (oui/non)
+;elements.proceedings.type = "invisible"
+;elements.proceedings.options.label = "proceedings"
+;elements.proceedings.options.description = 'Si vous sélectionnez "oui", le titre des actes doit être saisi dans le champ "Source" ou "Titre du volume"'
+;elements.proceedings.options.populate.class = "Hal_Referentiels_Metadata"
+;elements.proceedings.options.populate.method = "getValues"
+;elements.proceedings.options.populate.args.metaname = "proceedings"
+
+;A PARAITRE
+;elements.inPress.type = "invisible"
+;elements.inPress.options.label = "inPress"
+;elements.inPress.options.description = "Si vous choisissez l'option \"A paraître\", la date de publication ne sera plus obligatoire"
+;elements.inPress.options.required = "1"
+
+;Date approximative
+;elements.circa.type = "invisible"
+;elements.circa.options.label = "circa"
+;elements.circa.options.description = "Cocher la case si la date de prise de vue est incertaine"
+
+;Date de publication électronique
+;elements.edate.type = "invisible"
+;elements.edate.options.label = "edate"
+;elements.edate.options.description = "Renseignez la date au format AAAA-MM-JJ ou AAAA-MM ou AAAA"
+;elements.edate.options.validators.0.validator = "Date"
+;elements.edate.options.validators.0.options.format.0 = "Y-m-d"
+;elements.edate.options.validators.0.options.format.1 = "Y-m"
+;elements.edate.options.validators.0.options.format.2 = "Y"
+;elements.edate.options.validators.0.options.messages = "'%value%' ne correspond pas aux formats de date indiqués ci-dessus"
+
+;Numéro
+;elements.number.type = "invisible"
+;elements.number.options.label = "number"
+;elements.number.options.description = ""
+
+;Série
+;elements.serie.type = "invisible"
+;elements.serie.options.label = "serie"
+;elements.serie.options.description = "Renseignez le titre de la collection ou le titre du volume"
+
+;Volume
+;elements.volume.type = "invisible"
+;elements.volume.options.label = "volume"
+;elements.volume.options.description = ""
+
+;Issue
+;elements.issue.type = "invisible"
+;elements.issue.options.label = "issue"
+;elements.issue.options.description = ""
+
+;Page
+;elements.page.type = "invisible"
+;elements.page.options.label = "page"
+;elements.page.options.description = ""
+
+;Editeur commercial
+;elements.publisher.type = "invisible"
+;elements.publisher.options.label = "publisher"
+;elements.publisher.options.description = ""
+
+;Editeur commercial
+;elements.publicationLocation.type = "invisible"
+;elements.publicationLocation.options.label = "publicationLocation"
+;elements.publicationLocation.options.description = ""
+
+;Directeur de collection
+;elements.seriesEditor.type = "invisible"
+;elements.seriesEditor.options.label = "seriesEditor"
+;elements.seriesEditor.options.description = ""
+
+;Editeur scientifique
+;elements.scientificEditor.type = "invisible"
+;elements.scientificEditor.options.label = "scientificEditor"
+;elements.scientificEditor.options.description = ""
+
+;Titre de la conférence
+;elements.conferenceTitle.type = "invisible"
+;elements.conferenceTitle.options.label = "conferenceTitle"
+;elements.conferenceTitle.options.description = ""
+
+;Organisateur de la conférence
+;elements.conferenceOrganizer.type = "invisible"
+;elements.conferenceOrganizer.options.label = "conferenceOrganizer"
+;elements.conferenceOrganizer.options.description = ""
+
+;Date début conférence
+;elements.conferenceStartDate.type = "invisible"
+;elements.conferenceStartDate.options.label = "conferenceStartDate"
+;elements.conferenceStartDate.options.description = "Renseignez la date au format AAAA-MM-JJ ou AAAA-MM ou AAAA"
+;elements.conferenceStartDate.options.validators.0.validator = "Date"
+;elements.conferenceStartDate.options.validators.0.options.format.0 = "Y-m-d"
+;elements.conferenceStartDate.options.validators.0.options.format.1 = "Y-m"
+;elements.conferenceStartDate.options.validators.0.options.format.2 = "Y"
+;elements.conferenceStartDate.options.validators.0.options.messages = "'%value%' ne correspond pas aux formats de date indiqués ci-dessus"
+
+;Date fin conférence
+;elements.conferenceEndDate.type = "invisible"
+;elements.conferenceEndDate.options.label = "conferenceEndDate"
+;elements.conferenceEndDate.options.description = "Renseignez la date suivant AAAA-MM-JJ ou AAAA-MM ou AAAA"
+;elements.conferenceEndDate.options.validators.0.validator = "Date"
+;elements.conferenceEndDate.options.validators.0.options.format.0 = "Y-m-d"
+;elements.conferenceEndDate.options.validators.0.options.format.1 = "Y-m"
+;elements.conferenceEndDate.options.validators.0.options.format.2 = "Y"
+;elements.conferenceEndDate.options.validators.0.options.messages = "'%value%' ne correspond pas aux formats de date indiqués ci-dessus"
+
+;Lieu : ville
+;elements.city.type = "invisible"
+;elements.city.options.label = "city"
+;elements.city.options.description = ""
+
+;Lieu : pays
+;elements.country.type = "invisible"
+;elements.country.options.label = "country"
+;elements.country.options.description = ""
+;elements.country.options.populate.class = "Hal_Locale"
+;elements.country.options.populate.method = "getCountry"
+
+;Organisme de délivrance
+;elements.authorityInstitution.type = "invisible"
+;elements.authorityInstitution.options.label = "authorityInstitution"
+;elements.authorityInstitution.options.description = ""
+;elements.authorityInstitution.options.split = "0"
+;elements.authorityInstitution.options.attr-autocomplete = "authorityInstitution_s"
+
+;École doctorale
+;elements.thesisSchool.type = "invisible"
+;elements.thesisSchool.options.label = "thesisSchool"
+;elements.thesisSchool.options.description = ""
+;elements.thesisSchool.options.split = "0"
+;elements.thesisSchool.options.attr-autocomplete = "thesisSchool_s"
+
+;Lien publication chez l'éditeur
+;elements.publisherLink.type = "invisible"
+;elements.publisherLink.options.label = "publisherLink"
+;elements.publisherLink.options.description = ""
+
+;Directeur
+;elements.director.type = "invisible"
+;elements.director.options.label = "director"
+;elements.director.options.description = ""
+;elements.director.options.attr-autocomplete = "director_s"
+
+;Membre du jury
+;elements.committee.type = "invisible"
+;elements.committee.options.label = "committee"
+;elements.committee.options.description = ""
+;elements.committee.options.split = "0"
+;elements.committee.options.attr-autocomplete = "committee_s"
+
+;Niveau du cours
+;elements.lectureType.type = "invisible"
+;elements.lectureType.options.label = "lectureType"
+;elements.lectureType.options.description = ""
+;elements.lectureType.options.populate.class = "Hal_Referentiels_Metadata"
+;elements.lectureType.options.populate.method = "getValues"
+;elements.lectureType.options.populate.args.metaname = "lectureType"
+
+;Nom du cours
+;elements.lectureName.type = "invisible"
+;elements.lectureName.options.label = "lectureName"
+;elements.lectureName.options.description = ""
+
+;Description
+;elements.description.type = "invisible"
+;elements.description.options.label = "description"
+;elements.description.options.description = ""
+;elements.description.options.rows = "2"
+
+;Latitude
+;elements.latitude.type = "invisible"
+;elements.latitude.options.label = "latitude"
+;elements.latitude.options.description = "latitude_desc"
+;elements.latitude.options.validators.0.validator = "float"
+;elements.latitude.options.validators.0.options.locale = "en"
+;elements.latitude.options.validators.0.options.messages = "Renseigner les coordonnées au format décimal"
+;elements.latitude.options.filters.0.filter = "decimal"
+
+;Longitude
+;elements.longitude.type = "invisible"
+;elements.longitude.options.label = "longitude"
+;elements.longitude.options.description = ""
+;elements.longitude.options.validators.0.validator = "float"
+;elements.longitude.options.validators.0.options.locale = "en"
+;elements.longitude.options.validators.0.options.messages = "Renseigner les coordonnées au format décimal"
+;elements.longitude.options.filters.0.filter = "decimal"
+
+;Longueur
+;elements.length.type = "invisible"
+;elements.length.options.label = "length"
+;elements.length.options.description = "en pixel"
+
+;Largeur
+;elements.width.type = "invisible"
+;elements.width.options.label = "width"
+;elements.width.options.description = "en pixel"
+
+;Watermark
+;elements.watermark.type = "invisible"
+;elements.watermark.options.label = "watermark"
+;elements.watermark.options.description = "décocher la case si vous ne souhaitez pas ajouter le filigrane HAL à l'image"
+
+;Projection
+;elements.projection.type = "invisible"
+;elements.projection.options.label = "projection"
+;elements.projection.options.description = ""
+
+;Latitude sud ouest
+;elements.latitudeSW.type = "invisible"
+;elements.latitudeSW.options.label = "latitudeSW"
+;elements.latitudeSW.options.description = "latitudeSW_desc"
+;elements.latitudeSW.options.validators.0.validator = "float"
+;elements.latitudeSW.options.validators.0.options.locale = "en"
+;elements.latitudeSW.options.validators.0.options.messages = "Renseigner les coordonnées au format décimal"
+;elements.latitudeSW.options.filters.0.filter = "decimal"
+
+;Latitude nord est
+;elements.latitudeNE.type = "invisible"
+;elements.latitudeNE.options.label = "latitudeNE"
+;elements.latitudeNE.options.description = ""
+;elements.latitudeNE.options.validators.0.validator = "float"
+;elements.latitudeNE.options.validators.0.options.locale = "en"
+;elements.latitudeNE.options.validators.0.options.messages = "Renseigner les coordonnées au format décimal"
+;elements.latitudeNE.options.filters.0.filter = "decimal"
+
+;Longitude sud ouest
+;elements.longitudeSW.type = "invisible"
+;elements.longitudeSW.options.label = "longitudeSW"
+;elements.longitudeSW.options.description = ""
+;elements.longitudeSW.options.validators.0.validator = "float"
+;elements.longitudeSW.options.validators.0.options.locale = "en"
+;elements.longitudeSW.options.validators.0.options.messages = "Renseigner les coordonnées au format décimal"
+;elements.longitudeSW.options.filters.0.filter = "decimal"
+
+;Longitude nord est
+;elements.longitudeNE.type = "invisible"
+;elements.longitudeNE.options.label = "longitudeNE"
+;elements.longitudeNE.options.description = ""
+;elements.longitudeNE.options.validators.0.validator = "float"
+;elements.longitudeNE.options.validators.0.options.locale = "en"
+;elements.longitudeNE.options.validators.0.options.messages = "Renseigner les coordonnées au format décimal"
+;elements.longitudeNE.options.filters.0.filter = "decimal"
+
+;Echelle
+;elements.scale.type = "invisible"
+;elements.scale.options.label = "scale"
+;elements.scale.options.description = ""
+;elements.scale.options.populate.class = "Hal_Referentiels_Metadata"
+;elements.scale.options.populate.method = "getValues"
+;elements.scale.options.populate.args.metaname = "scale"
+
+;Période historique
+;elements.historicalPeriod.type = "invisible"
+;elements.historicalPeriod.options.label = "historicalPeriod"
+;elements.historicalPeriod.options.description = ""
+;elements.historicalPeriod.options.populate.class = "Hal_Referentiels_Metadata"
+;elements.historicalPeriod.options.populate.method = "getValues"
+;elements.historicalPeriod.options.populate.args.metaname = "historicalPeriod"
+
+;Fond carte
+;elements.baseMap.type = "invisible"
+;elements.baseMap.options.label = "baseMap"
+;elements.baseMap.options.description = ""
+;elements.baseMap.options.populate.class = "Hal_Referentiels_Metadata"
+;elements.baseMap.options.populate.method = "getValues"
+;elements.baseMap.options.populate.args.metaname = "baseMap"
+
+;Durée Son ou vidéo
+;elements.duration.type = "invisible"
+;elements.duration.options.label = "duration"
+;elements.duration.options.description = ""
+
+;Fréquence Son ou Video
+;elements.frequency.type = "invisible"
+;elements.frequency.options.label = "frequency"
+;elements.frequency.options.description = ""
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;             fin métadonnées dépendantes         ;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;Classification libre
+;elements.classification.type = "textarea"
+;elements.classification.options.label = "classification"
+;elements.classification.options.description = "PACS, MSC, etc."
+;elements.classification.options.required = "0"
+;elements.classification.options.rows = "2"
+
+;ACM Classification 2012
+;elements.acm2012.type = "invisible"
+;elements.acm2012.options.label = "acm2012"
+;elements.acm2012.options.description = "Renseignez des mots-clés issus de la classification <a href='http://www.acm.org/about/class/' target='_blank'>ACM 2012</a>"
+;elements.acm2012.options.required = "0"
+;elements.acm2012.options.data = APPLICATION_PATH'/../'LIBRARY""THESAURUS'acm2012.json'
+;elements.acm2012.options.typeahead_label = "Filtrer par nom"
+;elements.acm2012.options.typeahead_description = "Saisissez un mot pour accélérer votre recherche"
+;elements.acm2012.options.list_title = ""
+;elements.acm2012.options.list_values = ""
+;elements.acm2012.options.prefix_translation = "acm2012_"
+;elements.acm2012.options.option_collapse_msg    = "Réduire la liste des mots-clés ACM"
+;elements.acm2012.options.option_expand_msg      = "Ajouter un mot-clé ACM"
+;elements.acm2012.options.typeahead_height = 400
+
+;ACM Classification 1998
+;elements.acm.type = "invisible"
+;elements.acm.options.label = "acm"
+;elements.acm.options.description = "Renseignez des mots-clés issus de la classification <a href='http://www.acm.org/about/class/' target='_blank'>ACM 1998</a>"
+;elements.acm.options.required = "0"
+;elements.acm.options.data = APPLICATION_PATH'/../'LIBRARY""THESAURUS'acm.json'
+;elements.acm.options.typeahead_label = "Filtrer par nom"
+;elements.acm.options.typeahead_description = "Saisissez un mot pour accélérer votre recherche"
+;elements.acm.options.list_title = ""
+;elements.acm.options.list_values = ""
+;elements.acm.options.prefix_translation = "acm_"
+;elements.acm.options.option_collapse_msg    = "Réduire la liste des mots-clés ACM"
+;elements.acm.options.option_expand_msg      = "Ajouter un mot-clé ACM"
+;elements.acm.options.typeahead_height = 400
+
+;Commentaire
+;elements.comment.type = "textarea"
+;elements.comment.options.label = "comment"
+;elements.comment.options.description = ""
+;elements.comment.options.required = "0"
+;elements.comment.options.rows = "2"
+
+;Référence interne
+;elements.localReference.type = "multiTextSimple"
+;elements.localReference.options.label = "localReference"
+;elements.localReference.options.description = ""
+;elements.localReference.options.required = "0"
+
+;Collaboration
+;elements.collaboration.type = "multiTextSimple"
+;elements.collaboration.options.label = "collaboration"
+;elements.collaboration.options.description = ""
+;elements.collaboration.options.required = "0"
+;elements.collaboration.options.attr-autocomplete = "collaboration_s"
+
+;Url à voir aussi
+;elements.seeAlso.type = "multiTextSimple"
+;elements.seeAlso.options.label = "seeAlso"
+;elements.seeAlso.options.description = "URL de ressource(s) liée(s) à ce travail"
+;elements.seeAlso.options.required = "0"
+;elements.seeAlso.options.validators.0.validator = "regex"
+;elements.seeAlso.options.validators.0.options.pattern = "#\b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))#iS"
+;elements.seeAlso.options.validators.0.options.messages = "Veuillez entrer une URL propre (Exemple : http://www.ccsd.cnrs.fr)"
+
+;FINANCEMENT
+;elements.funding.type = "multiTextArea"
+;elements.funding.options.label = "funding"
+;elements.funding.options.description = "Origine du financement lié à ce travail"
+;elements.funding.options.required = "0"
+;elements.funding.options.rows = "2"
+
+;PROJANR
+;elements.anrProject.type = "multiReferentiel"
+;elements.anrProject.options.label = "anrProject"
+;elements.anrProject.options.description = "Indiquez le ou les projets ANR liés à ce travail"
+;elements.anrProject.options.type = "anrproject"
+;elements.anrProject.options.required = "0"
+;elements.anrProject.options.more = "1"
+
+;PROJET EUROPEEN
+;elements.europeanProject.type = "multiReferentiel"
+;elements.europeanProject.options.label = "europeanProject"
+;elements.europeanProject.options.description = "Indiquez le ou les projets Européens liés à ce travail"
+;elements.europeanProject.options.type = "europeanproject"
+;elements.europeanProject.options.required = "0"
+
+[ART : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.licence.type = "invisible"
+
+;elements.journal.type = "referentiel"
+;elements.journal.options.required = "1"
+;elements.popularLevel.type = "select"
+;elements.popularLevel.options.required = "0"
+;elements.popularLevel.options.value = "0"
+;elements.peerReviewing.type = "select"
+;elements.peerReviewing.options.required = "0"
+;elements.peerReviewing.options.value = "1"
+;elements.audience.type = "select"
+;elements.audience.options.required = "0"
+;elements.audience.options.value = "2"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.inPress.type = "checkbox"
+;elements.edate.type = "date"
+;elements.edate.options.required = "0"
+;elements.serie.type = "text"
+;elements.serie.options.label = "Titre du volume"
+;elements.serie.options.required = "0"
+;elements.volume.type = "text"
+;elements.volume.options.required = "0"
+;elements.issue.type = "text"
+;elements.issue.options.required = "0"
+;elements.page.type = "text"
+;elements.page.options.required = "0"
+;elements.publisherLink.type = "text"
+;elements.publisherLink.options.required = "0"
+
+
+[COMM : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.licence.type = "invisible"
+
+;elements.source.type = "textarea"
+;elements.source.options.required = "0"
+;elements.source.options.description = "Nom de la revue, nom de l'ouvrage, nom de la collection"
+;elements.source.options.rows = "2"
+;elements.popularLevel.type = "select"
+;elements.popularLevel.options.required = "0"
+;elements.popularLevel.options.value = "0"
+;elements.proceedings.type = "select"
+;elements.proceedings.options.required = "0"
+;elements.proceedings.options.value = "0"
+;elements.peerReviewing.type = "select"
+;elements.peerReviewing.options.required = "0"
+;elements.peerReviewing.options.value = "1"
+;elements.audience.type = "select"
+;elements.audience.options.required = "0"
+;elements.audience.options.value = "2"
+;elements.invitedCommunication.type = "select"
+;elements.invitedCommunication.options.required = "0"
+;elements.invitedCommunication.options.value = "0"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.serie.type = "text"
+;elements.serie.options.required = "0"
+;elements.volume.type = "text"
+;elements.volume.options.required = "0"
+;elements.issue.type = "text"
+;elements.issue.options.required = "0"
+;elements.page.type = "text"
+;elements.page.options.required = "0"
+;elements.publisher.type = "multiTextSimple"
+;elements.publisher.options.required = "0"
+;elements.scientificEditor.type = "multiTextSimple"
+;elements.scientificEditor.options.required = "0"
+;elements.seriesEditor.type = "multiTextSimple"
+;elements.seriesEditor.options.required = "0"
+;elements.conferenceTitle.type = "text"
+;elements.conferenceTitle.options.required = "1"
+;elements.conferenceOrganizer.type = "multiTextSimple"
+;elements.conferenceOrganizer.options.required = "0"
+;elements.conferenceStartDate.type = "date"
+;elements.conferenceStartDate.options.required = "1"
+;elements.conferenceEndDate.type = "date"
+;elements.conferenceEndDate.options.required = "0"
+;elements.city.type = "text"
+;elements.city.options.required = "1"
+;elements.country.type = "select"
+;elements.country.options.required = "1"
+;elements.country.options.value = "fr"
+;elements.publisherLink.type = "text"
+;elements.publisherLink.options.required = "0"
+;elements.publisherLink.options.label = "URL du congrès ou éditeur"
+
+[POSTER : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.licence.type = "invisible"
+
+;elements.source.type = "textarea"
+;elements.source.options.required = "0"
+;elements.source.options.description = "Nom de la revue, nom de l'ouvrage, nom de la collection"
+;elements.source.options.rows = "2"
+;elements.popularLevel.type = "select"
+;elements.popularLevel.options.required = "0"
+;elements.popularLevel.options.value = "0"
+;elements.proceedings.type = "select"
+;elements.proceedings.options.required = "0"
+;elements.proceedings.options.value = "0"
+;elements.peerReviewing.type = "select"
+;elements.peerReviewing.options.required = "0"
+;elements.peerReviewing.options.value = "1"
+;elements.audience.type = "select"
+;elements.audience.options.required = "0"
+;elements.audience.options.value = "2"
+;elements.invitedCommunication.type = "select"
+;elements.invitedCommunication.options.required = "0"
+;elements.invitedCommunication.options.value = "0"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.licence.type = "invisible"
+;elements.serie.type = "text"
+;elements.serie.options.required = "0"
+;elements.volume.type = "text"
+;elements.volume.options.required = "0"
+;elements.issue.type = "text"
+;elements.issue.options.required = "0"
+;elements.page.type = "text"
+;elements.page.options.required = "0"
+;elements.publisher.type = "multiTextSimple"
+;elements.publisher.options.required = "0"
+;elements.scientificEditor.type = "multiTextSimple"
+;elements.scientificEditor.options.required = "0"
+;elements.seriesEditor.type = "multiTextSimple"
+;elements.seriesEditor.options.required = "0"
+;elements.conferenceTitle.type = "text"
+;elements.conferenceTitle.options.required = "1"
+;elements.conferenceOrganizer.type = "multiTextSimple"
+;elements.conferenceOrganizer.options.required = "0"
+;elements.conferenceStartDate.type = "date"
+;elements.conferenceStartDate.options.required = "1"
+;elements.conferenceEndDate.type = "date"
+;elements.conferenceEndDate.options.required = "0"
+;elements.city.type = "text"
+;elements.city.options.required = "1"
+;elements.country.type = "select"
+;elements.country.options.required = "1"
+;elements.country.options.value = "fr"
+;elements.publisherLink.type = "text"
+;elements.publisherLink.options.required = "0"
+;elements.publisherLink.options.label = "URL du congrès ou éditeur"
+
+[COUV : metas]
+
+;TODO a suppr type de document supprimé
+;elements.bookTitle.type = "textarea"
+;elements.bookTitle.options.required = "1"
+;elements.popularLevel.type = "select"
+;elements.popularLevel.options.required = "0"
+;elements.popularLevel.options.value = "0"
+;elements.isbn.type = "text"
+;elements.isbn.options.required = "0"
+;elements.audience.type = "select"
+;elements.audience.options.required = "0"
+;elements.audience.options.value = "2"
+;elements.publisher.type = "multiTextSimple"
+;elements.publisher.options.required = "0"
+;elements.publicationLocation.type = "text"
+;elements.publicationLocation.options.required = "0"
+;elements.serie.type = "text"
+;elements.serie.options.required = "0"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "1"
+;elements.volume.type = "text"
+;elements.volume.options.required = "0"
+;elements.issue.type = "text"
+;elements.issue.options.required = "0"
+;elements.page.type = "text"
+;elements.page.options.required = "0"
+;elements.seriesEditor.type = "multiTextSimple"
+;elements.seriesEditor.options.required = "0"
+;elements.scientificEditor.type = "multiTextSimple"
+;elements.scientificEditor.options.required = "0"
+;elements.publisherLink.type = "text"
+;elements.publisherLink.options.required = "0"
+;elements.inPress.type = "checkbox"
+
+[OUV : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.licence.type = "invisible"
+
+;elements.popularLevel.type = "select"
+;elements.popularLevel.options.required = "0"
+;elements.popularLevel.options.value = "0"
+;elements.isbn.type = "text"
+;elements.isbn.options.required = "0"
+;elements.audience.type = "select"
+;elements.audience.options.required = "0"
+;elements.audience.options.value = "2"
+;elements.publisher.type = "multiTextSimple"
+;elements.publisher.options.required = "0"
+;elements.publicationLocation.type = "text"
+;elements.publicationLocation.options.required = "0"
+;elements.serie.type = "text"
+;elements.serie.options.required = "0"
+;elements.volume.type = "text"
+;elements.volume.options.required = "0"
+;elements.issue.type = "text"
+;elements.issue.options.required = "0"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.licence.type = "invisible"
+;elements.page.type = "text"
+;elements.page.options.required = "0"
+;elements.seriesEditor.type = "multiTextSimple"
+;elements.seriesEditor.options.required = "0"
+;elements.scientificEditor.type = "multiTextSimple"
+;elements.scientificEditor.options.required = "0"
+;elements.publisherLink.type = "text"
+;elements.publisherLink.options.required = "0"
+;elements.inPress.type = "checkbox"
+
+[DOUV : metas]
+
+;TODO a suppr type de document supprimé
+;elements.popularLevel.type = "select"
+;elements.popularLevel.options.required = "0"
+;elements.popularLevel.options.value = "0"
+;elements.isbn.type = "text"
+;elements.isbn.options.required = "0"
+;elements.audience.type = "select"
+;elements.audience.options.required = "0"
+;elements.audience.options.value = "2"
+;elements.publisher.type = "multiTextSimple"
+;elements.publisher.options.required = "0"
+;elements.publicationLocation.type = "text"
+;elements.publicationLocation.options.required = "0"
+;elements.serie.type = "text"
+;elements.serie.options.required = "0"
+;elements.volume.type = "text"
+;elements.volume.options.required = "0"
+;elements.issue.type = "text"
+;elements.issue.options.required = "0"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "1"
+;elements.inPress.type = "checkbox"
+;elements.page.type = "text"
+;elements.page.options.required = "0"
+;elements.seriesEditor.type = "multiTextSimple"
+;elements.seriesEditor.options.required = "0"
+;elements.scientificEditor.type = "multiTextSimple"
+;elements.scientificEditor.options.required = "0"
+;elements.publisherLink.type = "text"
+;elements.publisherLink.options.required = "0"
+;elements.journal.type = "referentiel"
+;elements.conferenceTitle.type = "text"
+;elements.conferenceTitle.options.required = "0"
+;elements.conferenceOrganizer.type = "multiTextSimple"
+;elements.conferenceOrganizer.options.required = "0"
+;elements.conferenceStartDate.type = "date"
+;elements.conferenceStartDate.options.required = "0"
+;elements.conferenceEndDate.type = "date"
+;elements.conferenceEndDate.options.required = "0"
+;elements.city.type = "text"
+;elements.city.options.required = "0"
+;elements.country.type = "select"
+;elements.country.options.required = "0"
+
+[OTHER : metas]
+
+;TODO a suppr type de document supprimé
+;elements.popularLevel.type = "select"
+;elements.popularLevel.options.required = "0"
+;elements.popularLevel.options.value = "0"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.journal.type = "referentiel"
+;elements.journal.options.required = "1"
+;elements.bookTitle.type = "textarea"
+;elements.bookTitle.options.required = "1"
+;elements.date.options.required = "1"
+;elements.description.type = "textarea"
+;elements.description.options.required = "1"
+;elements.page.type = "text"
+;elements.page.options.required = "0"
+;elements.publisher.type = "multiTextSimple"
+;elements.publisher.options.required = "0"
+;elements.scientificEditor.type = "multiTextSimple"
+;elements.scientificEditor.options.required = "0"
+
+[PRESSE : metas]
+
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.localReference.type = "invisible"
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.licence.type = "invisible"
+
+[THESE : metas]
+
+;TODO a suppr type de document supprimé
+;elements.title.options.validators.0.validator = "RequiredLang"
+;elements.title.options.validators.0.options.langs.0 = "fr"
+;elements.title.options.validators.0.options.min = "2"
+;elements.abstract.options.required = "1"
+;elements.abstract.options.validators.0.validator = "RequiredLang"
+;elements.abstract.options.validators.0.options.langs.0 = "fr"
+;elements.abstract.options.validators.0.options.min = "2"
+;elements.identifier.type = "invisible"
+;elements.writingDate.type = "invisible"
+;elements.keyword.options.required = "1"
+;elements.keyword.options.validators.0.validator = "RequiredLang"
+;elements.keyword.options.validators.0.options.langs.0 = "fr"
+;elements.keyword.options.validators.0.options.min = "2"
+;elements.language.options.value = "fr"
+;elements.nnt.type = "text"
+;elements.nnt.options.required = "0"
+;elements.date.type = "date"
+;elements.date.options.required = "1"
+;elements.date.options.label = "Date de soutenance"
+;elements.date.options.validators.0.options.format = "Y-m-d"
+;elements.date.options.description = "Renseignez la date suivant le format AAAA-MM-JJ"
+;elements.date.options.validators.0.options.messages = "'%value%' ne correspond pas aux formats de date indiqués ci-dessus"
+;elements.authorityInstitution.type = "multiTextSimple"
+;elements.authorityInstitution.options.required = "1"
+;elements.thesisSchool.type = "multiTextSimple"
+;elements.thesisSchool.options.required = "0"
+;elements.director.type = "multiTextSimple"
+;elements.director.options.required = "1"
+;elements.committee.type = "multiTextSimple"
+;elements.committee.options.required = "0"
+
+[HDR : metas]
+
+;TODO a suppr type de document supprimé
+;elements.identifier.type = "invisible"
+;elements.writingDate.type = "invisible"
+;elements.keyword.options.required = "1"
+;elements.keyword.options.validators.0.validator = "RequiredLang"
+;elements.keyword.options.validators.0.options.langs.0 = "fr"
+;elements.keyword.options.validators.0.options.min = "2"
+;elements.language.options.value = "fr"
+;elements.date.type = "date"
+;elements.date.options.required = "1"
+;elements.date.options.label = "Date de soutenance"
+;elements.date.options.validators.0.options.format = "Y-m-d"
+;elements.date.options.description = "Renseignez la date suivant le format AAAA-MM-JJ"
+;elements.date.options.validators.0.options.messages = "'%value%' ne correspond pas aux formats de date indiqués ci-dessus"
+;elements.authorityInstitution.type = "multiTextSimple"
+;elements.authorityInstitution.options.required = "1"
+;elements.director.type = "multiTextSimple"
+;elements.director.options.required = "1"
+;elements.director.options.label = "Président du jury"
+;elements.committee.type = "multiTextSimple"
+;elements.committee.options.required = "0"
+
+[REPORT : metas]
+
+;elements.localReference.type = "invisible"
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.licence.type = "invisible"
+
+;elements.reportType.type = "select"
+;elements.reportType.options.required = "1"
+;elements.reportType.options.value = "6"
+;elements.number.type = "text"
+;elements.number.options.label = "N° du rapport"
+;elements.number.options.required = "0"
+;elements.page.type = "text"
+;elements.page.options.required = "0"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.authorityInstitution.type = "multiTextSimple"
+;elements.authorityInstitution.options.label = "Institution"
+;elements.authorityInstitution.options.required = "1"
+
+[PATENT : metas]
+
+;TODO a suppr type de document supprimé
+;elements.licence.type = "invisible"
+;elements.number.type = "text"
+;elements.number.options.required = "1"
+;elements.number.options.label = "N° de brevet"
+;elements.country.type = "select"
+;elements.country.options.required = "1"
+;elements.country.options.value = "fr"
+;elements.page.type = "text"
+;elements.page.options.required = "0"
+;elements.date.type = "date"
+;elements.date.options.required = "1"
+
+[LECTURE : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.licence.type = "invisible"
+;elements.lectureType.type = "select"
+;elements.lectureType.options.required = "1"
+;elements.lectureType.options.value = "13"
+;elements.lectureName.type = "text"
+;elements.lectureName.options.required = "0"
+;elements.authorityInstitution.options.label = "Établissement qui délivre le cours"
+;elements.authorityInstitution.type = "multiTextSimple"
+;elements.authorityInstitution.options.required = "0"
+;elements.city.type = "text"
+;elements.city.options.required = "0"
+;elements.city.options.label = "Lieu du cours"
+;elements.country.type = "select"
+;elements.country.options.required = "1"
+;elements.country.options.value = "fr"
+;elements.date.type = "date"
+;elements.date.options.required = "0"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.validators.0.options.format = "Y-m-d"
+;elements.date.options.description = "Renseignez la date suivant le format AAAA-MM-JJ"
+;elements.date.options.validators.0.options.messages = "'%value%' ne correspond pas aux formats de date indiqués ci-dessus"
+;elements.page.type = "text"
+;elements.page.options.label = "Nombre de pages"
+;elements.page.options.required = "0"
+;elements.description.type = "textarea"
+;elements.description.options.label = "Tables des matières"
+;elements.description.options.required = "0"
+
+[IMG : metas]
+
+;TODO a suppr type de document supprimé
+;elements.identifier.type = "invisible"
+;elements.language.type = "invisible"
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.abstract.options.required = "0"
+;elements.abstract.options.label = "Description du contenu"
+;elements.keyword.options.required = "1"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de prise de vue"
+;elements.date.options.required = "1"
+;elements.circa.type = "checkbox"
+;elements.imageType.type = "select"
+;elements.imageType.options.required = "1"
+;elements.imageType.options.value = "1"
+;elements.source.type = "text"
+;elements.source.options.required = "0"
+;elements.credit.type = "text"
+;elements.credit.options.required = "0"
+;elements.latitude.type = "text"
+;elements.latitude.options.required = "0"
+;elements.longitude.type = "text"
+;elements.longitude.options.required = "0"
+;elements.city.type = "text"
+;elements.city.options.required = "0"
+;elements.country.type = "select"
+;elements.country.options.required = "1"
+;elements.country.options.value = "fr"
+;elements.length.type = "text"
+;elements.length.options.required = "0"
+;elements.width.type = "text"
+;elements.width.options.required = "0"
+;elements.watermark.type = "checkbox"
+;elements.watermark.options.value = "1"
+;elements.licence.options.required = "1"
+
+[MAP : metas]
+
+;elements.identifier.type = "invisible"
+;elements.language.type = "invisible"
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.abstract.options.required = "0"
+;elements.abstract.options.label = "Description"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.licence.type = "invisible"
+;elements.number.type = "text"
+;elements.number.options.required = "0"
+;elements.number.options.label = "Numero"
+;elements.projection.type = "text"
+;elements.projection.options.required = "0"
+;elements.latitudeSW.type = "text"
+;elements.latitudeSW.options.required = "0"
+;elements.latitudeNE.type = "text"
+;elements.latitudeNE.options.required = "0"
+;elements.longitudeSW.type = "text"
+;elements.longitudeSW.options.required = "0"
+;elements.longitudeNE.type = "text"
+;elements.longitudeNE.options.required = "0"
+;elements.city.type = "text"
+;elements.city.options.required = "0"
+;elements.country.type = "select"
+;elements.country.options.required = "1"
+;elements.country.options.value = "fr"
+;elements.scale.type = "select"
+;elements.scale.options.required = "0"
+;elements.scale.options.value = "1"
+;elements.historicalPeriod.type = "select"
+;elements.historicalPeriod.options.required = "0"
+;elements.historicalPeriod.options.value = "1"
+;elements.baseMap.type = "select"
+;elements.baseMap.options.required = "0"
+;elements.baseMap.options.value = "1"
+;elements.licence.options.required = "1"
+
+[SON : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.licence.type = "invisible"
+;elements.duration.type = "text"
+;elements.duration.options.required = "0"
+;elements.frequency.type = "text"
+;elements.frequency.options.required = "0"
+;elements.licence.options.required = "1"
+
+[VIDEO : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.licence.type = "invisible"
+;elements.duration.type = "text"
+;elements.duration.options.required = "0"
+;elements.frequency.type = "text"
+;elements.frequency.options.required = "0"
+;elements.licence.options.required = "1"
+
+[CR : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.licence.type = "invisible"
+
+[AVIS_NOTE : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.licence.type = "invisible"
+
+[SCHDIR : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.licence.type = "invisible"
+
+[INV : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.licence.type = "invisible"
+
+[ORGA_REGINT : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.licence.type = "invisible"
+
+[CORRESP : metas]
+
+;elements.writingDate.type = "invisible"
+;elements.classification.type = "invisible"
+;elements.comment.type = "invisible"
+;elements.collaboration.type = "invisible"
+;elements.seeAlso.type = "invisible"
+;elements.localReference.type = "invisible"
+;elements.funding.type = "invisible"
+;elements.anrProject.type = "invisible"
+;elements.europeanProject.type = "invisible"
+;elements.domain.options.label = "Thème"
+;elements.date.type = "date"
+;elements.date.options.label = "Date de publication"
+;elements.date.options.required = "0"
+;elements.licence.type = "invisible"
+
+
+[UNDEFINED : metas]
+
+[none : UNDEFINED]
+
+[PRESCONF : metas]
+
+[MEM : metas]
+
+[OTHERREPORT : metas]
+
+[MINUTES : metas]
+
+[NOTE : metas]
+
+[SYNTHESE : metas]
+
+[REPACT : metas]
+
+[SOFTWARE : metas]
+
+;TODO a suppr type de document supprimé
+elements.title.options.label = "name"
+elements.language.type = "invisible"
+elements.licence.type = "invisible"
+elements.abstract.options.label = "description"
+elements.abstract.options.description = "software_abstract_description"
+elements.domain.options.description = "software_domain_description"
+elements.identifier.options.description = "software_identifier_description"
+elements.writingDate.options.description = "software_writingDate_description"
+elements.acm.options.description = "Renseignez des mots-clés issus de la classification <a href='http://www.acm.org/about/class/' target='_blank'>ACM</a>"
+elements.comment.options.description = "software_comment_description"
+elements.collaboration.options.description = "collaboration_desc"
+
+elements.seeAlso.options.description = "software_seeAlso_description"
+elements.funding.options.description = "software_funding_description"
+
+;Licence logiciel
+elements.softwareLicence.type = "multiTextSimple"
+elements.softwareLicence.options.label = "softwareLicence"
+elements.softwareLicence.options.description = "softwareLicence_description"
+elements.softwareLicence.options.required = "0"
+elements.softwareLicence.options.split = "0"
+elements.softwareLicence.options.length = "0"
+elements.softwareLicence.options.attr-thesaurus = "1"
+elements.softwareLicence.options.attr-autocomplete = "spdx"
+
+;Langage de programmation
+elements.programmingLanguage.type = "multiTextSimple"
+elements.programmingLanguage.options.label = "programmingLanguage"
+elements.programmingLanguage.options.required = "0"
+elements.programmingLanguage.options.split = "0"
+elements.programmingLanguage.options.length = "0"
+elements.programmingLanguage.options.attr-autocomplete = "softProgrammingLanguage_s"
+
+;Code repository
+elements.codeRepository.type = "text"
+elements.codeRepository.options.label = "codeRepository"
+elements.codeRepository.options.description = "codeRepository_description"
+elements.codeRepository.options.required = "0"
+elements.codeRepository.options.validators.0.validator = "regex"
+elements.codeRepository.options.validators.0.options.pattern = "#\b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/)))#iS"
+elements.codeRepository.options.validators.0.options.messages = "Veuillez entrer une URL propre (Exemple : http://www.ccsd.cnrs.fr)"
+
+;Platform
+elements.platform.type = "multiTextSimple"
+elements.platform.options.label = "platform"
+elements.platform.options.description = "platform_description"
+elements.platform.options.required = "0"
+elements.platform.options.attr-autocomplete = "softPlatform_s"
+
+;Version
+elements.version.type = "text"
+elements.version.options.label = "Version"
+elements.version.options.description = "version_description"
+elements.version.options.required = "0"
+
+;Etat du développement
+elements.developmentStatus.type = "text"
+elements.developmentStatus.options.label = "developmentStatus"
+elements.developmentStatus.options.description = "developmentStatus_description"
+elements.developmentStatus.options.required = "0"
+elements.developmentStatus.options.attr-autocomplete = "softDevelopmentStatus_s"
+
+;Outil de développement
+elements.runtimePlatform.type = "multiTextSimple"
+elements.runtimePlatform.options.label = "runtimePlatform"
+elements.runtimePlatform.options.description = "runtimePlatform_description"
+elements.runtimePlatform.options.required = "0"
+elements.runtimePlatform.options.attr-autocomplete = "softRuntimePlatform_s"
+
+
+
+[info]
+
+elements.acm2012.type = "thesaurus"
+elements.acm.type = "thesaurus"
+
+[sdv]
+
+elements.mesh.type = "multiTextSimple"
+
+[qfin]
+
+elements.jel.type = "thesaurus"
+
+[shs]
+;elements.keyword.options.required = "1"
+
+[shs.eco]
+
+elements.jel.type = "thesaurus"
+
+[shs.gestion]
+
+elements.jel.type = "thesaurus"
+
+[domain]
+specific.0 = shs
+specific.1 = shs.eco
+specific.2 = shs.gestion
+specific.3 = qfin
+specific.4 = sdv
+specific.5 = info

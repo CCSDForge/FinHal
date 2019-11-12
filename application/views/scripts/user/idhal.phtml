@@ -1,0 +1,290 @@
+<?php if (!empty ($_GET['code'])){
+    $data = Hal_User::getOrcidWithToken($_GET['code']);
+}
+$this->layout()->pageDescription = $this->translate('Regroupez vos formes auteurs et créez votre IdHAL'); ?>
+
+<form class="form" action="/user/idhal" method="post" id="cv-form" onsubmit="return validFormIdHal();">
+    <h3><?php echo $this->translate("Identifiants"); ?></h3>
+    <?php
+    $idExt = $this->cv->toArray();
+    if (isset($idExt['idext'][4])){
+        $orcid = $idExt['idext'][4];
+        unset($idExt['idext'][4]);
+    } else if (isset($data['orcid'])){
+        $orcid = $data['orcid'];
+    }
+
+    $form = $this->cv->getFormIdHAL()->populate($idExt);
+    $form->removeDecorator('Form');
+    if ($this->cv->getUri() != '') {
+        $form->getElement('uri')->setAttrib('disabled', 'disabled')->setDescription('');
+    }
+
+    $hostname = parse_url(Hal_Site::getCurrentPortail()->getUrl(), PHP_URL_HOST);
+    if (isset($_SERVER['HTTPS'])) {
+        $urlredirect = 'https://' . $hostname;
+    } else {
+        $urlredirect = 'http://' . $hostname;
+    }
+
+    if (!isset($orcid)) {
+        $form->getElement('orcid')->setDescription('<a id="getorcid" class="btn btn-primary btn-sm" href="https://orcid.org/oauth/authorize?client_id=APP-O6Y5HZD2SFM7ON6Z&response_type=code&scope=/authenticate&redirect_uri='.HAL_URL.'/user/orcid?url='.$urlredirect.'">Récupérer votre ORCID en vous connectant sur le site</a>');
+    } else {
+        $form->getElement('orcid')->setValue($orcid);
+
+        $form->getElement('orcid')->setDecorators(array(
+            array('ViewHelper', array('class' => 'form-control input-sm')),
+            array('Errors', array('placement' => 'PREPEND')),
+            array('Description', array ('tag' => 'span', 'class' => 'help-block')),
+
+            array (array('openSpan' => 'HtmlTag'),   array ('tag' => 'span', 'openOnly' => true, 'class' => 'input-group-btn btn-group', 'placement' => Zend_Form_Decorator_Abstract::APPEND)),
+            array (array('openbutton' => 'HtmlTag'),    array ('tag' => 'button', 'openOnly' => true, 'class' => 'btn btn-sm btn-primary', 'onclick' => 'return deleteOrcid();', 'style' => 'border-top-left-radius:0; border-bottom-left-radius:0; height: 30px; padding-top:0; padding-bottom: 0;','placement' => Zend_Form_Decorator_Abstract::APPEND)),
+            array (array('span' => 'HtmlTag'), array('tag' => 'span', 'class' => 'glyphicon glyphicon-trash', 'placement' => Zend_Form_Decorator_Abstract::APPEND)),
+            array (array('closebutton' => 'HtmlTag'),    array ('tag' => 'button', 'closeOnly' => true, 'placement' => Zend_Form_Decorator_Abstract::APPEND)),
+            array (array('closeSpan' => 'HtmlTag'),   array ('tag' => 'span', 'closeOnly' => true,'placement' => Zend_Form_Decorator_Abstract::APPEND)),
+
+            array (array('div' => 'HtmlTag'),   array ('tag' => 'div', 'class' => 'input-group', 'style' => 'margin-bottom : 10px;')),
+            array('HtmlTag', array('tag' => 'div', 'class'  => "col-md-9")),
+            array('Label', array('tag' => 'label', 'class' => "col-md-3 control-label"))
+        ));
+    }
+    echo $form;
+    ?>
+
+    <hr />
+    <h3><?php echo $this->translate("Formes auteurs associées à votre IdHAL"); ?></h3>
+    <?php
+    $authors = $this->cv->getFormAuthors();
+    //Liste des formes auteurs déjà associées au CV
+    ?>
+    <table class="table table-striped" id="formes-authors" <?php echo count($authors) == '0' ? 'style="display:none;"' : '';?>>
+        <thead>
+        <tr>
+            <th><?php echo $this->translate('Défaut'); ?></th>
+            <th title="Identifiant unique de la forme auteur"><?php echo $this->translate('Authorid'); ?></th>
+            <th><?php echo $this->translate('Nom prénom'); ?></th>
+            <th><?php echo $this->translate('E-mail'); ?></th>
+            <th><?php echo $this->translate("Établissement employeur"); ?></th>
+            <th style="width:50px;"><?php echo $this->translate("Actions"); ?></th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($authors as $authorid => $data) { ?>
+            <tr class="author" id="tr-<?php echo $authorid ?>">
+                <td>
+                    <input type="radio" name="default" value="<?php echo $authorid ?>" <?php echo ($data['VALID'] == 'VALID' ? 'checked="checked"' : '') ?> />
+                    <input type="hidden" name="authorid[]" class="authorids" value="<?php echo $authorid ?>" />
+                </td>
+                <td><?php echo $authorid; ?></td>
+                <td><strong><?php echo Ccsd_Tools::formatAuthor($data['LASTNAME'], $data['FIRSTNAME']); ?></strong></td>
+
+                <td><?php echo $data['EMAIL']; ?></td>
+                <td><?php echo $data['STRUCTNAME']; ?></td>
+                <td style="text-align:center;">
+                    <a href="javascript:void(0);" class="author-doc" onclick="getListDoc($(this))" data-toggle="tooltip" title="<?php echo $this->translate('Consulter les documents associés à cette forme auteur'); ?>"><i class="glyphicon glyphicon-list-alt"></i></a>
+                    <a href="javascript:void(0);" onclick="removeAuthor($(this))" data-toggle="tooltip" title="<?php echo $this->translate('Retirer cette forme de mon IdHAL'); ?>"><i class="glyphicon glyphicon-remove-sign"></i></a>
+                </td>
+            </tr>
+            <tr class="author-docs" style="display:none;" id="tr-docs-<?php echo $authorid ?>">
+                <td></td>
+                <td></td>
+                <td colspan="4">
+                    <div class="list-docs" style="overflow: auto; max-height:200px;">
+
+                    </div>
+                </td>
+            </tr>
+        <?php } ?>
+        </tbody>
+    </table>
+    <div class="text-center">
+        <div class="input-group">
+            <span class="input-group-addon"><?php echo $this->translate("Ajouter des formes auteurs"); ?></span>
+            <input id="q" class="form-control" type="text" id="search" value="" />
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button" onclick="searchAuthors()"><i class="glyphicon glyphicon-search" ></i>&nbsp;<?php echo $this->translate('Rechercher les formes auteurs'); ?></button>
+            </span>
+        </div>
+        <div id="search-result" class="text-left"></div>
+    </div>
+    <hr />
+    <div class="form-actions text-center">
+        <button type="submit"  class="btn btn-primary" ><?php echo $this->translate('Enregistrer'); ?></button>
+    </div>
+ </form>
+<script type="text/javascript">
+    <!--
+    $(function() {
+        $("#cv-form").keypress(function(evenement) {
+            return (evenement.keyCode != 13);
+        });
+
+        $('#q').keypress(function( event ) {
+            if ( event.which == 13 ) {
+                searchAuthors();
+            }
+        });
+        //Tooltip
+        $('a[data-toggle="tooltip"], span[data-toggle="tooltip"]').tooltip();
+
+        //Soumission du formulaire
+        $('#cv-form').submit(function() {
+            $('#search-result').html('');
+        });
+
+
+        //Création de l'URI du chercheur
+        $('#uri').blur(function() {
+            $(this).val(permalink($(this).val()));
+            verifUid();
+        });
+
+        <?php if(isset($this->q)) {
+            ?>
+        $('#q').val("<?php echo str_replace('"', '', $this->q) ?>");
+        searchAuthors();
+        <?php } ?>
+
+        <?php if(isset($this->fullname)) {
+            ?>
+        $('#uri').val("<?php echo str_replace('"', '', $this->fullname) ?>");
+        $('#uri').blur();
+        <?php } ?>
+    });
+
+    function deleteOrcid(){
+        $('#orcid').val('');
+        return false;
+    }
+
+    function searchAuthors()
+    {
+        var data = {'q': $('#q').val(), 'authorids' : []};
+        $('#formes-authors .authorids').each(function() {
+            data.authorids.push($(this).val());
+        });
+
+
+        $.ajax({
+            url: "/user/ajaxidhalsearch",
+            type: "post",
+            data: data,
+            success: function( data ) {
+                $('#search-result').html(data);
+            }
+        });
+    }
+    function getListDoc(elem)
+    {
+        authorid = $(elem).closest('.author').find('.authorids').val();
+        if ($('#tr-docs-' + authorid).is(':visible')){
+            $('#tr-docs-' + authorid).hide();
+        } else {
+            $.ajax({
+                url: "/user/ajaxidhaldocs",
+                type: "post",
+                data: {'authorid' : authorid},
+                success: function( data ) {
+                    if (data != '') {
+                        $('#tr-docs-' + authorid).show().find('.list-docs').html(data);
+                    }
+                }
+            });
+        }
+    }
+
+    function addAuthorForm(elem)
+    {
+        elem.tooltip('destroy');
+        elem.closest('tr.author').find('td, .author-remove').show().find('.author-add').hide();
+        elem.closest('tr.author').next('tr.author-docs').find('td').show();
+        authorid = elem.closest('.author').find('.authorids').val();
+
+        $('#formes-authors>tbody').append($('#tr-' + authorid)).append($('#tr-docs-' + authorid));
+        if ($('#formes-authors>tbody').length) {
+            $('#formes-authors').show();
+        }
+    }
+    function removeAuthor(elem)
+    {
+        authorid = elem.closest('.author').find('.authorids').val();
+        $('#tr-' + authorid + ',#tr-docs-' + authorid).remove();
+    }
+
+    function validFormIdHal()
+    {
+        cleanDocList();
+        verifUid();
+        if ( !verifIdExt() ) {
+            return false;
+        }
+        return verifFormAuthor();
+    }
+
+    function verifUid()
+    {
+        if ($('#idhal').val() == '' || $('#idhal').val() == '0') {
+            $.ajax({
+                url: "/user/ajaxexisturi",
+                type: "post",
+                data: {'uri' : $('#uri').val()},
+                success: function( data ) {
+                    $('#uri').closest('.form-group').removeClass('has-error').find('.help-block.error').remove();
+                    if (data == '1') {
+                        //URI déja utilisé
+                        $('#uri').focus();
+                        $('#uri').closest('.form-group').addClass('has-error');
+                        $('<span class="help-block error"><?php echo $this->translate('Cet identifiant est déjà utilisé. Merci de le changer'); ?></span>').insertBefore('#uri');
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                }
+            });
+        }
+    }
+
+    function verifFormAuthor()
+    {
+        if ($('#formes-authors input.authorids').length > 0) {
+            return true;
+        } else {
+            message("<?php echo $this->translate("Aucune forme auteur n'a été séléctionnée")?>", 'alert-danger');
+            return false;
+        }
+    }
+
+    function cleanDocList()
+    {
+        $('#formes-authors .list-docs>table').each(function(){
+            if ($(this).find('tbody>tr').length == $(this).find('tbody .checkbox-docid:checked').length) {
+                $(this).remove();
+            }
+        });
+    }
+
+    function verifIdExt()
+    {
+        if ($('input[name="idext[3]"]').length) { // IdRef
+            if ($('input[name="idext[3]"]').val() != '' && ! $('input[name="idext[3]"]').val().match(/^[0-9]{8}[0-9X]$/)) {
+                message("<?php echo $this->translate("IdRef non valide")?>", 'alert-danger');
+                return false;
+            }
+        }
+        if ($('input[name="idext[4]"]').length) { // ORCID
+            if ($('input[name="idext[4]"]').val() != '' && ! $('input[name="idext[4]"]').val().match(/^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$/)) {
+                message("<?php echo $this->translate("ORCID non valide")?>", 'alert-danger');
+                return false;
+            }
+        }
+        if ($('input[name="idext[11]"]').length) { // ISNI
+            if ($('input[name="idext[11]"]').val() != '' && ! $('input[name="idext[11]"]').val().match(/^[0-9]{16}$/)) {
+                message("<?php echo $this->translate("ISNI non valide (Exemple : 0000118624127854)")?>", 'alert-danger');
+                return false;
+            }
+        }
+        return true;
+    }
+    //-->
+</script>

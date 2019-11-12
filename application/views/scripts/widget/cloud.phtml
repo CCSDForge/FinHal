@@ -1,0 +1,13 @@
+<?php
+/** @var Hal_View $this */
+$href = '/search/';
+if (count($this->tags)) {
+    $content = '<div class="keywords">';
+    //Récupération des 20 premiers mots pour le nuage
+    foreach (Ccsd_Tools::prepareWordCloud(array_slice($this->tags, 0, 100), 10) as $word => $coef) {
+        $content .= '<a rel="nofollow" href="' . PREFIX_URL . 'search/index/q/*/keyword_s/' . urlencode($word) . '" class="keyword keword-' . $coef . '">' . $word . '</a> ';
+    }
+    $content .= '</div>';
+
+    echo $content;
+}

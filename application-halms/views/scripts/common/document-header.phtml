@@ -1,0 +1,13 @@
+<?php // Header d'un document dans HALMS ?>
+<hr/>
+<h2 class="no-margin">
+    <?php echo $this->document->getId(true);
+
+    if (! $this->hideHistory) {
+        include __DIR__ . '/document-history.phtml';
+    } ?>
+    <div><small><strong><?php echo $this->translate('status_' . $this->docStatus);?></strong> (<?php echo $this->translate('déposé le') . ' ' . $this->document->getSubmittedDate(Zend_Date::DAY_SHORT.' '.Zend_Date::MONTH_NAME_SHORT.' '.Zend_Date::YEAR) . ' ' . $this->translate('par') . ' ' . $this->document->getContributor('fullname')?>)</small></div>
+</h2>
+<br />
+<blockquote><strong><?php echo $this->translate('Référence');?></strong> : <?php echo $this->document->getCitation('full');?></blockquote>
+<hr/>

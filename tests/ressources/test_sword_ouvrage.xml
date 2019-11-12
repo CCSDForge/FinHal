@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.tei-c.org/ns/1.0 http://api-preprod.archives-ouvertes.fr/documents/aofr-sword.xsd"
+     xmlns="http://www.tei-c.org/ns/1.0" >
+   <text>
+      <body>
+         <listBibl>
+            <biblFull>
+               <titleStmt>
+                  <title xml:lang="en">Modelling Computing Systems</title>
+                  <title type="sub" xml:lang="en">Mathematics for Computer Science</title>
+                  <author role="aut">
+                     <persName>
+                        <forename type="first">Faron</forename>
+                        <surname>Moller</surname>
+                     </persName>
+                     <affiliation ref="#struct-36731"/>
+                  </author>   
+                  <author role="aut">
+                     <persName>
+                        <forename type="first">Georg</forename>
+                        <surname>Struth</surname>
+                     </persName>
+                     <affiliation ref="#struct-205974"/>
+                  </author>    
+               </titleStmt>
+               <notesStmt>                
+                  <note type="popular" n="0" />
+                  <note type="audience" n="2"/>
+               </notesStmt>
+               <sourceDesc>
+                  <biblStruct>
+                     <analytic>
+                        <title xml:lang="en">Modelling Computing Systems</title>
+                        <title type="sub" xml:lang="en">Mathematics for Computer Science</title>
+                        <author role="aut">
+                           <persName>
+                              <forename type="first">Faron</forename>
+                              <surname>Moller</surname>
+                           </persName>
+                           <affiliation ref="#struct-36731"/>
+                        </author>   
+                        <author role="aut">
+                           <persName>
+                              <forename type="first">Georg</forename>
+                              <surname>Struth</surname>
+                           </persName>
+                           <affiliation ref="#struct-205974"/>
+                        </author>        
+                     </analytic>
+                     <monogr>
+                        <idno type="isbn">978-1-84800-321-7</idno>
+                        <idno type="eisbn">978-1-84800-322-4</idno>
+                        <title level="m">Modelling Computing Systems</title>
+                        <imprint>
+                           <publisher>Springer</publisher>
+                           <biblScope unit="serie">Undergraduate Topics in Computer Science</biblScope>
+                           <biblScope unit="volume">16</biblScope>
+                           <biblScope unit="pp">500</biblScope>
+                           <date type="datePub">2013</date>
+                        </imprint>
+                     </monogr>
+                     <ref type="publisher">http://www.springer.com</ref>
+                     <relatedItem target="/truc/chouette/bouzin.toto" type="machin">bidule</relatedItem>
+                  </biblStruct>
+               </sourceDesc>
+               <profileDesc>
+                  <langUsage>
+                     <language ident="en"/>
+                  </langUsage>
+                  <textClass>
+                     <classCode scheme="halDomain" n="info.info-mo"/>
+                     <classCode scheme="halDomain" n="math.math-oc"/>
+                     <classCode scheme="halTypology" n="OUV"/>
+                  </textClass>
+                  <abstract xml:lang="en">This engaging textbook presents the fundamental mathematics.</abstract>
+               </profileDesc>
+            </biblFull>
+         </listBibl>
+      </body>
+   </text>
+   </TEI> 

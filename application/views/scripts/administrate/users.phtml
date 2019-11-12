@@ -1,0 +1,70 @@
+<?php
+$icons = array(
+    Hal_Acl::ROLE_HALADMIN     => 'glyphicon-star',
+    Hal_Acl::ROLE_ADMIN        => 'glyphicon-cog',
+    Hal_Acl::ROLE_ADMINSTRUCT  => 'glyphicon-list-alt',
+    Hal_Acl::ROLE_VALIDATEUR   => 'glyphicon-eye-close',
+    Hal_Acl::ROLE_MODERATEUR   => 'glyphicon-eye-open',
+    Hal_Acl::ROLE_TAMPONNEUR   => 'glyphicon-tag',
+    Hal_Acl::ROLE_A_TAMPONNEUR => 'glyphicon-tag',
+);
+
+$this->layout()->pageDescription = $this->translate("Gestion des utilisateurs / privilèges");
+?>
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <form action="/administrate/users" method="get" id="form-user-list">
+
+            <div class="form-actions text-center">
+
+                <div class="input-group">
+                    <input type="text" class="form-control" name="q" value="<?php echo $this->escape($this->q) ?>"  id="q" autocomplete="off"/>
+                    <?php if ($this->mergeFromUid) : ?>
+                    <input type="hidden" name="mergeFromUid" value="<?php echo $this->escape($this->mergeFromUid); ?>">
+                    <?php endif; ?>
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="icon glyphicon glyphicon-search"></i>&nbsp;<?php echo $this->translate('Rechercher') ?>
+                        </button>
+                    </span>
+                </div>
+                <br>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<?php
+/**
+ * Fusion des comptes utilisateurs
+ */
+if ($this->mergeFromUser) {
+    include __DIR__ . '/user-merge.phtml';
+}
+?>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#q').focus();
+        $('#q').autocomplete({
+            minLength: 2,
+            html: true,
+            source: "/administrate/ajaxsearchuser",
+            select: function (event, ui) {
+                $('#q').val(ui.item.id);
+                $('#form-user-list').submit();
+                return false;
+            }
+        });
+    });
+</script>
+
+<?php
+if (isset($this->users) && count($this->users) > 0) {
+    include __DIR__ . '/users-list.phtml';
+}
+?>

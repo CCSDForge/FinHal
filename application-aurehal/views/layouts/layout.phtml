@@ -1,0 +1,142 @@
+<?php echo $this->doctype(); ?>
+<html lang="fr">
+    <head>
+        <?php if(APPLICATION_ENV != ENV_PROD) : ?>
+            <meta name="robots" content="noindex">
+        <?php endif; ?>
+        <title>AureHAL : Accès Unifié aux Référentiels HAL</title>
+        <meta charset="utf-8">
+        <meta name="description" content="AURéHAL permet d'accéder aux référentiels utilisés dans l'archive ouverte HAL.">
+        <meta name="author" content="CCSD">
+        
+        <?php
+        if ($this->headTitle()->getContainer() == '') {
+            $active = $this->nav()->findActive($this->nav()->getContainer());
+            $this->headTitle($active ? $this->translate($active['page']->getLabel()) : Zend_Registry::get('website')->getSiteName());
+        } elseif ($this->layout()->pageTitle != '') {
+            $this->headTitle($this->layout()->pageTitle);
+        }
+        echo $this->headScript()->appendScript("var lang = '" . Zend_Registry::get('Zend_Locale')->getLanguage() . "';");
+        ?>
+        <?php echo $this->headTitle()?>
+        <?php echo $this->headMeta()
+            ->appendHttpEquiv('Content-Type', 'text/html; charset=UTF-8'); ?>
+        <link rel="icon" type="type/png" href="<?php echo file_exists(SPACE . 'public/favicon.png') ? SPACE_URL . 'favicon.png' : '/img/favicon.png';?>" />
+        <?php 
+        $this->headLink()->appendStylesheet("/css/print_aurehal.css", 'print');
+        echo $this->headLink().PHP_EOL;
+
+        $this->jQuery()
+        			->addJavascriptFile(CCSDLIB ."/v3/js/bootstrap.min.js")
+			        ->addJavascriptFile(CCSDLIB ."/js/form.js")
+			        ->addJavascriptFile(CCSDLIB ."/js/datepicker/datepicker-" .Zend_Registry::get('Zend_Locale')->getLanguage()  . ".js")
+			        ->addJavascriptFile(CCSDLIB ."/js/datepicker.js")
+			        ->addJavascriptFile("/js/utile.js")
+
+                    ->addStylesheet(CCSDLIB . '/css/custom-theme/jquery-ui-1.10.0.custom.css')
+                    ->addStylesheet(CCSDLIB . '/v3/css/bootstrap.css')
+                    ->addStylesheet(CCSDLIB . '/css/ccsd.css')
+                    ->addStylesheet("/css/hal.css")
+                    ->addStylesheet("/css/aurehal.css");
+
+        //CSS spécifique au site
+        if ($this->cssFile) {
+            $this->jQuery()->addStylesheet($this->cssFile);
+        }
+
+        echo $this->jQuery()->setLocalPath(CCSDLIB . '/js/jquery/min.1.9.1.js')->enable()->setUiLocalPath(CCSDLIB . '/js/jquery/ui/min.1.10.3.js')->UiEnable();
+        ?>
+        <style>
+html {
+	position: relative;
+	min-height: 100%;
+}
+
+
+.footer {
+	bottom: 0;
+	width: 100%;
+	/* Set the fixed height of the footer here */
+	height: 140px;
+}
+</style>
+
+        <?php if ( APPLICATION_ENV == ENV_PROD): ?>
+
+        <!-- Piwik -->
+        <script type="text/javascript">
+            var _paq = _paq || [];
+            /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+            _paq.push(['trackPageView']);
+            _paq.push(['enableLinkTracking']);
+            (function() {
+                var u="//piwik-hal.ccsd.cnrs.fr/";
+                _paq.push(['setTrackerUrl', u+'piwik.php']);
+                _paq.push(['setSiteId', '217']);
+                var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+                g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+            })();
+        </script>
+        <!-- End Piwik Code -->
+        <?php endif; ?>
+
+    </head>
+
+    <body>
+        <?php $this->navbar(false, null, true, array('isLogged' => Hal_Auth::isLogged())); ?>
+
+        <div id="container" class="container<?php echo $this->containerClass;?>">
+            <div class="logo">
+            	<?php echo $this->render('common/logo.phtml'); ?>
+    		</div>
+    		<div class="row<?php echo $this->containerClass;?>">
+    			<div class="col-md-2">
+    				<?php echo $this->render('common/sidebar.phtml'); ?>
+    			</div>
+    			<div class="col-md-10">
+    				<?php if ($this->layout()->title != '') { ?>
+    				<h3><?php echo $this->translate($this->layout()->title)?></h3>
+    				<?php } ?>
+    				<div class="corps">
+						<?php if ($this->layout()->description != '') {?>
+							<blockquote><?php echo $this->translate($this->layout()->description) ?></blockquote>
+							<hr />
+						<?php }?>
+
+						<?php 
+						echo $this->layout()->content ;
+						
+						/* @var $plugin Aurehal_Acl_Plugin */
+						$plugin = Zend_Controller_Front::getInstance()->getPlugin('Aurehal_Acl_Plugin');
+					
+						?>
+						
+						
+				 		 <div class="modal " id="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+						  <div class="modal-dialog" style="width: 960px;">
+						    <div class="modal-content" >
+						      <div class="modal-header">
+						        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+						        <h4 class="modal-title" id="myModalLabel"><?php echo $this->translate("Informations") ?></h4>
+						      </div>
+						      <div class="modal-body">
+						      </div>
+						      <div class="modal-footer">
+						        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo $this->translate('Fermer') ?></button>
+						        <?php if ($plugin->isAllowed((new Zend_Controller_Request_Http())->setControllerName($this->controllerName)->setActionName('create'), false)) { ?>
+						        <button type="button" class="restore btn btn-primary" onclick="<?php echo "/" . $this->controllerName . "/create" ?>"><?php echo $this->translate('Restaurer') ?></button>
+						        <?php } ?>
+						      </div>
+						    </div>
+						  </div>
+						</div>
+						
+					
+                	</div>
+                </div>
+    		</div>
+        </div>
+
+        <?php echo $this->render('common/footer.phtml'); ?>
+    </body>
+</html>

@@ -1,0 +1,38 @@
+<?php
+
+$domains = $this->cv->getFacetDomains();
+if (count($domains)) {
+    //Récupération des disciplines
+    $graphData = array(array($this->translate('Discipline'), $this->translate('Documents')));
+    $dataList = array();
+    foreach ($domains as $domain => $nbDoc) {
+        $label = Ccsd_Tools_String::getHalDomainTranslated($domain);
+        $graphData[] = array($label, $nbDoc);
+        $dataList[] = array('code' => $domain, 'label' => $label, 'nbdoc' => $nbDoc);
+    }
+
+
+    $content = '<div class="domains">';
+    $content .= '    <div id="domain-graph" style=""></div>';
+    $content .= $this->chart(array('container' => 'domain-graph', 'content' => $graphData, 'options' => array('legend' => array('position' => 'none'))), 'PieChart');
+
+    $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste") . '</a></div>';
+    $content .= '</div>';
+    $content .= '<div class="domains-list" style="display:none;">';
+    $content .= '   <div class="overflow"><ul>';
+
+    $domains = isset($filters['primaryDomain_s']) && is_array($filters['primaryDomain_s']) ? array_keys($filters['primaryDomain_s']) : array();
+    foreach ($dataList as $domain) {
+        $link = $href;
+        if (! in_array($domain['code'], $domains)) {
+            $link .= '/primaryDomain_s/' . urlencode($domain['code']);
+        }
+        $content .= '       <li><a href="' . $link . '">' . $domain['label'] . ' <span class="badge badge-default">' . $domain['nbdoc'] . '</span></a></li>';
+    }
+    $content .= '   </ul></div>';
+    $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Graphique") . '</a></div>';
+    $content .= '</div>';
+
+    echo $this->widget(array('title' => $this->translate('cv_widget_domain'), 'content' => $content, 'class' => 'widget-'.'domain'));
+}
+?>

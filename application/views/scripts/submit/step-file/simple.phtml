@@ -1,0 +1,50 @@
+<?php /** @var Hal_View $this  */ ?>
+<div id="file-zone">
+    <div id="demo-dropzone" class="col-md-6">
+        <div id="search-message">
+            <h2>Recherche des métadonnées</h2>
+            <br />
+            <img src="/img/preloader.gif" />
+        </div>
+        <div id="demo-upload">
+            <h2 id="drop-message" class="dz-message needsclick">
+                <img src="/img/submit-step-file.png"/>
+                <br />
+                <?php echo $this->translate('upload_click');?>
+                <div><small><?php echo $this->translate('Maximum_Size') ?> : <?php echo ini_get('upload_max_filesize');?></small></div>
+            </h2>
+        </div>
+    </div>
+    <div id="idext-zone" class="col-md-6">
+        <div id="id-zone">
+            <h2><?php echo $this->translate('id_title');?></h2>
+            <span id="id-info"><?php echo $this->translate('id_info');?></span>
+            <br />
+            <br />
+            <div class="input-group">
+                <span class="input-group-btn btn-group" onlylang="1">
+                    <button id="identifiertype" class="btn btn-sm btn-default dropdown-toggle dropdown-toggle" data-toggle="dropdown" type="button">
+                        <?php echo $this->translate("idext_".$this->idtype);?>
+                    <span class="caret" style="margin-left:10px;"></span>
+                    </button>
+                    <ul id="idtype-menu" class="dropdown-menu idext-list" role="menu" value="<?php echo $this->idtype;?>">
+                        <?php foreach (Hal_Submit_Manager::getExtIdentifiers() as $extId => $placeholder) {?>
+                            <li value="<?php echo $extId;?>" class="idext-elem li-file" default="<?php echo $placeholder;?>"><?php echo $this->translate("idext_".$extId);?></li>
+                        <?php }?>
+                    </ul>
+                </span>
+                    <input id="identifier-input" class=" form-control input-sm" type="text" placeholder="<?php echo $this->idplaceholder; ?>" name="<?php echo $this->currentType; ?>" value="<?php echo $this->idext; ?>" onkeypress="if(event.key == 'Enter'){$('#metaButton').click();}">
+                </span>
+            </div>
+            <span <?php if(empty($this->idurl) || empty($this->idext)) { echo "style=\"display:none;\""; }?>><a id="idurl" href="<?php echo $this->idurl; ?>" target="_blank"><?php echo $this->idtype . ' : ' . $this->idext ?></a></span>
+            <br/>
+            <br/>
+            <div>
+                <button id="metaButton" type="button" class="btn btn-sm btn-primary" onclick="addIdExt('#identifier-input', '#idtype-menu')" data-toggle="tooltip" data-original-title="<?php echo $this->translate("Récupération des métadonnées associées à l'identifiant pour remplir votre dépôt"); ?>"><?php echo $this->translate("Récupérer les métadonnées") ?></button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<span id="step-file-footer"><?php echo $this->translate("submit_file_footer");?><a href="#" onclick="$('#change-view-button-file').click();"><?php echo $this->translate("submit_file_footer_link");?></a>. </span>
+

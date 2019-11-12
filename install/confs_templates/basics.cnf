@@ -1,0 +1,26 @@
+Define CACHE ${ROOTDIR}/cache
+Define DATA ${ROOTDIR}/data
+Define DOMAIN ccsd.cnrs.fr
+Define API_NAME api-local
+Define AUREHAL_NAME aurehal-local
+Define CV_NAME cv-local
+Define CCSDLIB_NAME ccsdlib-local
+
+DocumentRoot "${ROOTWWW}/public"
+ServerAdmin ${MAIL}
+
+AliasMatch ^/[A-Z0-9_-]+/default/(.*)$ ${ROOTWWW}/data/collection/default/public/$1
+AliasMatch ^/([A-Z0-9_-]+)/public/(.*)$ ${ROOTWWW}/data/collection/$1/public/$2
+Alias /default ${ROOTWWW}/data/portail/default/public
+
+SetEnv APPLICATION_ENV ${ENV}
+SetEnv CACHE_ROOT ${CACHE}/${PORTAIL}
+SetEnv DATA_ROOT  ${DATA}/${PORTAIL}
+SetEnv DOCS_ROOT  ${ROOTDIR}/docs
+
+
+<Directory ${ROOTWWW}/public>
+   AllowOverride All
+   Require all granted
+   #Use Protect
+</Directory>

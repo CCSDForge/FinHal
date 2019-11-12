@@ -1,0 +1,71 @@
+<?php // Actions possibles sur un document
+
+/**
+ * Les varialbes suivantes doivent être définies
+ *
+ * $this->formAction // Action du formulaire
+ * $this->document // instance de Hal_document
+ * $this->btn // Liste des actions possibles
+ *
+ */
+
+if (! isset($this->btn)) {
+    $this->btn = [];
+}
+if (! isset($this->formAction)) {
+    $this->formAction = '/administrate/index';
+}
+if (! isset($this->backLink)) {
+    $this->backLink = '/administrate';
+}
+?>
+
+<form action="<?php echo $this->formAction;?>" method="post" id="form">
+    <input type="hidden" name="docid" value="<?php echo $this->document->getDocid();?>" />
+    <input type="hidden" name="newstatus" id="status" value="" />
+    <div class="well well-halms text-center">
+        <?php if (in_array(Halms_Document::STATUS_XML_ERROR_REPORTED_AUTHOR, $this->btn)) { ?>
+            <div class="error comment-error"><?php echo $this->translate('Merci de saisir une remarque'); ?></div>
+            <textarea name="comment" id="comment" class="form-control" rows="2" cols="20" placeholder="<?php echo $this->translate('Remarques'); ?>" style="width:600px;margin:0 auto 20px;"></textarea>
+        <?php } ?>
+
+        <div class="btn-group btn-group">
+            <?php if (in_array(Halms_Document::STATUS_XML_CONTROLLED, $this->btn)) { ?>
+                <button type="submit" class="btn btn-primary btn-action" id="btn-submit" attr-action="<?php echo Halms_Document::STATUS_XML_CONTROLLED?>">
+                    <i class="glyphicon glyphicon-ok"></i>&nbsp;<?php echo $this->translate('XML valide'); ?>
+                </button>
+            <?php } ?>
+
+            <?php if (in_array(Halms_Document::STATUS_XML_FINISHED, $this->btn)) { ?>
+                <button type="submit" class="btn btn-success btn-action" id="btn-submit" attr-action="<?php echo Halms_Document::STATUS_XML_FINISHED?>">
+                    <i class="glyphicon glyphicon-ok"></i>&nbsp;<?php echo $this->translate('Prêt pour le transfert PubMed Central'); ?>
+                </button>
+            <?php } ?>
+
+            <?php if (in_array(Halms_Document::STATUS_WAIT_FOR_PMC, $this->btn)) { ?>
+                <button type="submit" class="btn btn-primary btn-action" id="btn-submit" attr-action="<?php echo Halms_Document::STATUS_WAIT_FOR_PMC?>">
+                    <i class="glyphicon glyphicon-send"></i>&nbsp;<?php echo $this->translate('Transférer sur PubMed Central'); ?>
+                </button>
+            <?php } ?>
+
+            <?php if (in_array(Halms_Document::STATUS_XML_ERROR_REPORTED_AUTHOR, $this->btn)) { ?>
+                <button type="submit" class="btn btn-danger btn-action" attr-action="<?php echo Halms_Document::STATUS_XML_ERROR_REPORTED_AUTHOR?>">
+                    <i class="glyphicon glyphicon-remove"></i>&nbsp;<?php echo $this->translate('Signaler un probleme'); ?>
+                </button>
+            <?php } ?>
+        </div>
+        <div class="btn-group btn-group">
+            <a  class="btn btn-default btn-action" href="<?php echo $this->backLink;?>">
+                <i class="glyphicon glyphicon-chevron-left"></i>&nbsp;<?php echo $this->translate('Retour'); ?>
+            </a>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(function() {
+        $('#form button').click(function(){
+            $('#status').val($(this).attr('attr-action'));}
+        );
+    });
+</script>

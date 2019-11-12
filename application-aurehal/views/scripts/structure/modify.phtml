@@ -1,0 +1,355 @@
+<style>
+
+.arrow_box { 
+	position: relative; 
+	background: #428bca; 
+	border: 4px solid #428bca; 
+	height: 60px;
+	padding-left: 33px;
+	cursor: pointer;
+}
+
+.arrow_box[disabled] { 
+	background: #ddd; 
+	border: 4px solid #ddd; 
+	
+}
+
+.arrow_box:after, .arrow_box:before { 
+	left: 100%; 
+	top: 50%; 
+	border: solid transparent; 
+	content: " "; 
+	height: 0; 
+	width: 0; 
+	position: absolute; 
+	pointer-events: none; 
+}
+
+.arrow_box:after, .arrow_box:before {
+	border-color: transparent transparent transparent #428bca; 
+}
+
+.arrow_box:before { 
+	border-width: 30px; 
+	margin-top: -30px; 
+	margin-left: 3px;
+}
+.arrow_box[disabled]:before {
+	border-left-color: white;
+}
+
+.arrow_box[disabled]:after {
+	border-left-color: #ddd;
+}
+
+.arrow_box[data-last]:after, .arrow_box[data-last]:before {
+	border-color: transparent; 
+}
+
+.arrow_box:after { 
+	border-width: 26px;
+    margin-top: -26px;
+} 
+
+.arrow_content a{
+	color: white; 
+	text-decoration: none; 
+	font-weight: bold; 
+	position: relative; 
+	top: 15px; 
+	cursor: inherit;
+	padding-left: 5px;
+}
+
+.arrow_box .badge {
+	border-radius: 50px; 
+	padding: 6px 10px; 
+	background-color: white; 
+	color: #428bca;
+	position: relative;
+	top: 15px;
+}
+
+.arrow_box[disabled] .badge {
+	color: #ddd;
+}
+
+</style>
+
+<script type='text/javascript'>
+
+function search (form) {
+
+	$.ajax({
+		type : "GET",
+		url  : "/structure/browse",
+		data : form.serialize(),
+		success : function (msg) {
+			form.find('.results').html(msg);
+			form.find('.results').find('.do_aff').click(function() {
+				if ($('.my_aff').find("#" + $(this).closest('tr').find('td:first .row:first').attr('id')).length == 0) {
+					$('.my_aff').append($(this).closest('tr').find('td:first > div').html());
+				}
+			});
+		}
+	});
+	
+}
+
+</script>
+<?php
+$id=0;
+
+if ( isset($this->structure)) {
+    $id = $this->structure->getStructId();
+} else if ( isset($this->structure_final) ) {
+    $id = $this->structure_final->getStructId();
+}
+
+if ($this->locked == 1 && !Hal_Auth::canModifyStructLock($id)){
+    if (isset ($this->message)) {
+        ?>
+        <div class='alert alert-danger'>
+            <?php echo $this->translate($this->message); ?>
+            <a href="javascript:void(0);" onclick="$(this).closest('.alert').remove();" style="cursor: pointer; float: right;"><i class="glyphicon glyphicon-remove" ></i></a>
+        </div>
+    <?php
+    }
+} else {
+?>
+<div class='row'>
+	<div class='col-xs-1 col-sm-1 col-md-1 col-lg-1'></div>
+	<div class='col-xs-3 col-sm-3 col-md-3 col-lg-3 arrow_box' style='z-index: 3;' <?php if ($this->step != 'METADATA') { echo "disabled='disabled' ";} ?>>
+		<span class='arrow_content'>
+			<span class="badge">1</span>
+			<a href='<?php if (in_array($this->step, array('PARENTS', 'RECAP'))) { echo URL . "/structure/" . Zend_Registry::get('actionName') . "/id/$id/step/METADATA"; } ?>'><?php echo $this->translate('Métadonnées') ?></a> 
+		</span>
+	</div>
+	<div class='col-xs-3 col-sm-3 col-md-3 col-lg-3 arrow_box' style='z-index: 2;' <?php if ($this->step != 'PARENTS') { echo "disabled='disabled' ";} ?>>
+		<span class='arrow_content'>
+			<span class="badge">2</span>
+			<a href='<?php if (in_array($this->step, array('RECAP'))) { echo URL . "/structure/" . Zend_Registry::get('actionName') . "/id/$id/step/PARENTS";} ?>'><?php echo $this->translate('Affiliations') ?></a>
+		</span>
+	</div>
+	<div class='col-xs-3 col-sm-3 col-md-3 col-lg-3 arrow_box' data-last=true style='z-index: 1;' <?php if ($this->step != 'RECAP') { echo "disabled='disabled' ";} ?>>
+		<span class='arrow_content'>
+			<span class="badge">3</span>
+			<a href=''><?php echo $this->translate('Récapitulatif') ?></a>
+		</span>
+	</div>
+	<div class='col-xs-1 col-sm-1 col-md-1 col-lg-1'></div>
+</div>
+
+
+<div class='row' style='margin-top: 20px;'>
+	<div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+		<?php
+			if (isset ($this->form)) {
+				echo $this->form;
+                ?>
+
+                <script type="text/javascript">
+                    $('form').submit(function() {
+                        return verifIdExt();
+                    });
+
+                    function verifIdExt()
+                    {
+                        if ($('input[name="IDEXT[3]"]').length) {
+                            if ($('input[name="IDEXT[3]"]').val() != '' && ! $('input[name="IDEXT[3]"]').val().match(/^[0-9]{8}[0-9X]$/)) {
+                                alert("<?php echo $this->translate("IdRef non valide")?>", 'alert-danger');
+                                return false;
+                            }
+                        }
+                        if ($('input[name="IDEXT[11]"]').length) {
+                            if ($('input[name="IDEXT[11]"]').val() != '' && ! $('input[name="IDEXT[11]"]').val().match(/^[0-9xX\-\\\s]{16,24}$/)) {
+                                alert("<?php echo $this->translate("ISNI non valide")?>", 'alert-danger');
+                                return false;
+                            }
+                        }
+                        if ($('input[name="IDEXT[12]"]').length) {
+                            if ($('input[name="IDEXT[12]"]').val() != '' && ! $('input[name="IDEXT[12]"]').val().match(/^[0-9]{9}[A-Z]$/)) {
+                                alert("<?php echo $this->translate("RNSR non valide")?>", 'alert-danger');
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+
+                </script>
+                <?php
+			} else if (isset ($this->structure_final)) {
+				?>
+				<h4><?php echo $this->translate ("Récapitulatif") ?></h4>
+
+                <div class='row' style='margin-top: 20px;'>
+					<div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+					<?php 
+					echo $this->structure_final->__toString(array('showParents' => true));
+					?>
+
+                    <?php if (isset($this->canSave) && $this->canSave === false) {?>
+                        <div class="alert alert-danger">
+                            <strong>
+                                <i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;<?php echo $this->translate("Modifications non autorisées"); ?>
+                            </strong><br />
+                            <?php echo $this->translate("1 ou plusieurs structures dépendent de la structure modifiée, ") ?> <strong><?php echo $this->structure_final->getStructname();?></strong><?php echo $this->translate(". Elles ne seront donc plus valides"); ?>
+                        </div>
+                    <?php } else {?>
+                    <form action="<?php echo URL . "/structure/" . Zend_Registry::get('actionName') . "/id/$id/step/RECAP";  ?>" method="post">
+                        <div class="form-actions text-center">
+                            <button style="margin-top: 15px;" class="btn btn-primary" value="Suivant" type="submit" id="save_modification" name="save_modification">
+                                <?php echo $this->translate('Enregistrer') ?>
+                            </button>
+                        </div>
+                    </form>
+                    <?php }?>
+					
+					</div>
+				</div>
+				<?php 
+			} else if (isset ($this->structure)) {
+			?>
+			<form action="<?php echo URL . "/structure/" . Zend_Registry::get('actionName') . "/id/$id/step/RECAP"; ?>" id="form-structure" method="post">
+
+				<?php
+				$typestruct = $this->structure->getTypestruct();
+				$first = true;
+				
+				if (isset ($this->parents)) {
+					$parents = $this->parents;
+					$first = false;
+				} else {
+					$parents = $this->structure->getParents();
+				}
+
+				echo $this->structure;
+				?>
+				<h4><?php echo $this->translate ("Affiliations") ?></h4>
+				<div class='my_aff'>
+				
+				<?php if (isset (Zend_Registry::get('session')->invalid_parents)) { ?>
+				<div class='alert alert-warning'>
+				<a style="cursor: pointer; float: right;" onclick="$(this).closest('.alert').remove();" href="javascript:void(0);"><i class="glyphicon glyphicon-remove"></i></a>
+				<span style='padding-bottom: 20px; display: block;'>
+				<?php echo $this->translate("Données manquantes pour ces affiliations..."); ?>
+				</span>
+				<?php foreach(Zend_Registry::get('session')->invalid_parents as $parent ) { 
+				        $o = new Ccsd_Referentiels_Structure(); $o->set($parent['struct']); echo $o;
+				} ?>
+				</div>
+				<?php
+                } 
+				if (isset ($this->message)) {
+				?>
+					<div class='alert alert-danger'>
+						<?php echo $this->translate($this->message); ?>
+						<a href="javascript:void(0);" onclick="$(this).closest('.alert').remove();" style="cursor: pointer; float: right;"><i class="glyphicon glyphicon-remove" ></i></a>
+					</div>
+				<?php 
+				} else if  ($typestruct == 'regroupinstitution') {
+					?>	<div class='alert alert-info'>
+						<?php 
+						echo $this->translate("Les structures de type Regroupement d'institutions n'ont pas d'affiliation");
+						?>
+					</div>
+					<?php 
+				} else if ($first && !(is_array($parents) && !empty($parents))) {
+					?>	<div class='alert alert-info'>
+						<?php 
+						echo $this->translate("Cette structure n'est rattachée à aucune autre structure");
+						?>
+					</div>
+					<?php 
+				}
+				
+				if (is_array($parents) && !empty($parents)) {
+					foreach ($parents as $i => &$parent) {
+						if (!$parent['struct'] instanceof Ccsd_Referentiels_Structure) {
+							$parent['struct'] = new Ccsd_Referentiels_Structure($parent['struct']);
+						}
+						?>
+						<div class='row' id='struct<?php echo $parent['struct']->getStructid() ?>'>
+							<div class='col-xs-3 col-sm-3 col-md-3 col-lg-3'>
+								<div style='position: relative; top: 20px;'>
+                                    <?php echo $this->translate("Code") ?> <i class="glyphicon glyphicon-question-sign" title="<?php echo $this->translate("Code de la structure dans l'institution concernée. Exemple: UMR5467 pour le CNRS, EA34 pour une université,..."); ?>" alt="<?php echo $this->translate("Code de la structure dans l'institution concernée. Exemple: UMR5467 pour le CNRS, EA34 pour une université,...");?>"></i> :
+									<input type='text' name="parents[<?php echo $parent['struct']->getStructid() ?>][code]" value='<?php echo $parent['code']; ?>' />
+								</div>
+							</div>
+							<div class='col-xs-8 col-sm-8 col-md-8 col-lg-8'>
+								<?php echo $parent['struct']->__toString(array("showParents" => true)); ?>
+								<input type='hidden' name="parents[<?php echo $parent['struct']->getStructid() ?>][struct]" value='<?php echo $parent['struct']->getStructid() ?>' /> 
+							</div>
+							<div class='col-xs-1 col-sm-1 col-md-1 col-lg-1'>
+								<a href='javascript:void(0);' onclick="$(this).closest('.row').remove();" style='position: relative; top: 20px;'>
+									<i class='glyphicon glyphicon-trash'></i>
+								</a>
+							</div>
+						</div>
+						<?php 
+					}
+				}
+				?>
+				</div>
+			</form>
+			<?php if  ($typestruct != 'regroupinstitution') {
+			 ?>   
+			<h5><?php echo $this->translate ("Ajouter des affiliations") ?></h5>
+			
+			<form>
+				<div class='row' style='margin-top: 20px;'>
+					<div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+						<div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+							<input type="text" class="form-control" name="critere" value='<?php echo Ccsd_Tools::ifsetor($critere, ""); ?>'>
+						</div>
+						
+						<input type='hidden' name='nbResultPerPage' value='20' />
+                        <input type='hidden' name='tri' value='valid' />
+						<input type='hidden' name='solR' value='1' />
+						<input type='hidden' name='page' value='1' />
+					
+						<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+							<select name="category" class="form-control" >
+								<?php 
+									$found = false;
+									foreach (array('researchteam', 'department', 'laboratory', 'regrouplaboratory', 'institution', 'regroupinstitution') as $v) {
+										if ($found) {
+											echo "<option value='$v' " . ($typestruct == $v ? "selected='selected'" : "") . ">" . $this->translate($v) . "</option>";
+										}
+										if ($typestruct == $v) {
+											$found = true;
+										}
+									}
+								?>
+							</select>
+						</div>
+
+						<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+						    <button class='btn btn-primary' type='button'  onclick="search($(this).closest('form'));"><?php echo $this->translate("Rechercher") ?></button>
+						</div>
+					</div>
+				</div>
+				<div class='row' style='margin-top: 20px;'>
+					<div class='col-xs-12 col-sm-12 col-md-12 col-lg-12 results'>
+					
+					</div>
+				</div>
+			</form>
+
+			<?php
+		    }
+                ?>
+                <div class="form-actions text-center">
+                    <button style="margin-top: 15px;" class="btn btn-primary" value="Suivant" type="submit" id="modify" name="modify" onclick="$('#form-structure').submit()">
+                        <?php echo $this->translate('Suivant') ?>
+                    </button>
+                </div>
+        <?php
+		}
+		?>
+	</div>
+</div>
+<?php
+}
+?>

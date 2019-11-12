@@ -1,0 +1,56 @@
+<?php
+echo $this->render('crac/index.phtml');
+?>
+<hr>
+<?php
+
+
+echo '<h4>';
+echo 'Nombre de résultats : ' . $this->numFound;
+echo '</h4>';
+
+echo '<hr>';
+$counter = 1;
+foreach ($this->results as $item) {
+    ?>
+    <div class="row">
+
+        <div class="col-md-2">
+
+            <span class="badge"><?php echo $counter;
+                $counter++; ?></span>
+            <br>
+            <span class="label label-default"><?php echo $this->translate('typdoc_' . $item['docType_s']); ?></span>
+            <br>
+            <span class="label label-primary"><?php echo $item['halId_s'] . 'v' . $item['version_i']; ?></span>
+
+
+        </div>
+        <div class="col-md-1"><span class="label label-default"><?php echo $item['producedDateY_i']; ?></span>
+
+        </div>
+        <div class="col-md-9">
+
+            <a href="/<?php echo $item['halId_s'] . 'v' . $item['version_i']; ?>"><?php echo $item['label_s']; ?></a>
+
+        </div>
+
+
+    </div>
+    <hr>
+
+    <?php
+}
+
+echo '<blockquote>';
+echo 'Requête API : ';
+echo '<a href="' . $this->escape($this->queryString) . '">' . wordwrap($this->escape($this->queryString), 200,"<br>\n", true) .'</a>';
+echo '</blockquote>';
+
+echo '<hr>';
+echo  $this->render('crac/help.phtml');
+
+
+?>
+
+

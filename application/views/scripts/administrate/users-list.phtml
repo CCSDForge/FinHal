@@ -1,0 +1,190 @@
+<hr />
+
+<?php $this->jQuery()->addJavascriptFile("/js/administrate/users-list.js"); ?>
+
+<?php
+if (count($this->users) > 20) {
+    $this->jQuery()
+            ->addJavascriptFile(CCSDLIB . "/js/jquery.dataTables.min.js")
+            ->addJavascriptFile(CCSDLIB . "/js/dataTables.bootstrap.js")
+            ->addStylesheet(CCSDLIB . '/css/dataTables.bootstrap.css');
+    ?>
+    <script>
+        $(document).ready(function () {
+            $('#list-users').dataTable({
+                "iDisplayLength": 20,
+                "bLengthChange": false,
+                "aaSorting": [[0, "desc"]]
+            });
+        });
+    </script>
+<?php } ?>
+
+
+
+<form id="form-users" action="/administrate/users" method="post">
+    <input type="hidden" name="q" id="q" value="<?php echo $this->escape($this->q) ?>" />
+    <input type="hidden" name="uid" id="uid" />
+    <input type="hidden" name="method" id="method" />
+</form>
+
+
+
+
+<?php if ( ($this->mergeFromUser) && (!$this->mergeToUser) ) : ?>
+    <h4><?php echo $this->translate('Sélectionner le profil utilisateur cible de la fusion : '); ?></h4>
+<?php endif; ?>
+
+
+<table class="table table-hover table-striped table-condensed" id="list-users">
+    <thead>
+        <tr>
+            <th width="100px"></th>
+            <th width="300px"><?php echo $this->translate('Utilisateurs'); ?></th>
+            <th><?php echo $this->translate('Privilèges'); ?></th>
+            <th width="100px" style="text-align:right;"><?php echo $this->translate('Actions'); ?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php $tooltips = array(); ?>
+        <?php foreach ($this->users as $user) { ?>
+
+            <tr <?php
+            if ($user['VALID'] == 0) {
+                echo 'class="warning"';
+            }
+            ?> style="vertical-align:middle;">
+                <td style="vertical-align:middle; text-align: center;">
+
+                    <img src="<?php echo CV_URL . '/photo/' . $this->escape($user['UID']) . '/normal' ?>" class="user-photo-normal img-thumbnail"/>
+                    <?php if ($user["HAS_HAL_ACCOUNT"] === true) : ?>
+                        <span class="label label-info">HAL</span>
+                    <?php endif; ?>
+
+                </td>
+                <td style="vertical-align:middle;">
+                    <blockquote>
+                        <p><?php echo $this->escape(Ccsd_Tools::formatUser($user['LASTNAME'], $user['FIRSTNAME'])) ?></p>
+                        <small><?php echo $this->translate('uid') . ' : ' . $this->escape($user['UID']) ?></small>
+                        <small><?php echo $this->translate('Login') . ' : ' . $this->escape($user['USERNAME']) ?></small>
+                        <small><?php echo $this->translate('Courriel') . ' : ' . $this->escape($user['EMAIL']) ?></small>
+                        <?php if ($user['CV']) : ?>
+                            <small>
+                                <a href="<?php echo CV_URL . '/' . $this->escape($user['CV']); ?>" target="_blank"><span class="glyphicon glyphicon-globe"></span>&nbsp;<?php echo $this->translate('CV') . ' : ' . $this->escape($user['CV']) ?></a>
+                            </small>
+                        <?php endif; ?>
+                    </blockquote>
+                </td>
+                <td style="vertical-align:middle;">
+                    <?php if (null !== $user['ROLES']) { ?>
+                        <ul class="list-unstyled">
+                            <?php foreach ($user['ROLES'] as $rightid => $values) {
+                                if ($rightid == Hal_Acl::ROLE_A_TAMPONNEUR) {
+                                    //Internal role: nothing to display...
+                                    continue;
+                                }?>
+
+                                <li style="margin-bottom:5px;margin-top:5px;">
+                                    <span class="label label-primary" style="font-size:12px;"><i class="glyphicon <?php echo $icons[$rightid] ?>"></i>&nbsp;<?php echo $this->translate($rightid); ?></span>
+                                    <?php
+                                    if (in_array($rightid, array(Hal_Acl::ROLE_ADMIN, Hal_Acl::ROLE_ADMINSTRUCT, Hal_Acl::ROLE_TAMPONNEUR))) {
+                                        foreach ($values as $id => $elem) {
+                                            ?>
+                                            <small class="label label-default label-right"><?php echo $elem . (Hal_Acl::ROLE_ADMINSTRUCT == $rightid ? " (" . $id . ")" : ''); ?></small>
+                                            <?php
+                                        }
+                                    } else if (in_array($rightid, array(Hal_Acl::ROLE_VALIDATEUR, Hal_Acl::ROLE_MODERATEUR))) {
+                                        foreach ($values as $id => $elem) {
+
+                                            if ((!array_key_exists('site', $elem)) AND ( array_key_exists('terminated', $elem))) {
+                                                ?><small class="label label-danger label-right"><?php echo $this->translate('Droit suspendu') ?></small><?php
+                                                continue;
+                                            }
+                                            ?>
+                                            <small class="label label-default label-right"><?php echo $elem['site'] ?>
+                                                <?php
+                                                unset($elem['site']);
+                                                if (count($elem)) {
+                                                    echo " (";
+                                                    foreach ($elem as $group => $v) {
+
+                                                        if ($group == 'terminated') {
+                                                            $val = '<span style="font-size:100%" class="label label-danger label-right">' . $this->translate('Droit suspendu') . '</span>';
+                                                            echo $val;
+                                                        } else {
+                                                            $val = implode(', ', $v);
+                                                            $val = $this->escape($val);
+                                                            echo $this->escape($group) . ' : ' . wordwrap($val, 130, '<br>') . ' ';
+                                                        }
+                                                    }
+                                                    echo ") ";
+                                                }
+                                                ?>
+                                            </small>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </li>
+                            <?php } ?>
+                        </ul>
+                    <?php } ?>
+                </td>
+
+
+
+                <td style="width:160px;text-align:right; vertical-align:middle;">
+                    <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="submitForm(<?php echo $user['UID'] ?>, 'account')"  title="<?php echo $this->translate('Modifier le compte'); ?>"><i class="glyphicon glyphicon-pencil"></i></a>&nbsp;
+                    <?php if ($user["HAS_HAL_ACCOUNT"] == true) : ?>
+                        <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="submitForm(<?php echo $user['UID'] ?>, 'rights')" title="<?php echo $this->translate('Gérer les privilèges'); ?>"><i class="glyphicon glyphicon-star"></i></a>&nbsp;
+                    <?php endif; ?>
+                    <?php if (($user['UID'] != Hal_Auth::getUid()) && ($user['USERNAME'] != 'root') && ($user['USERNAME'] != 'nobody') && ($user['USERNAME'] != 'test_ws')) : ?>
+                        <?php if ($user['VALID'] == 0) : ?>
+                            <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="validateAccount(this, <?php echo $user['UID'] ?>)" title="<?php echo $this->translate('Valider le compte CAS'); ?>"><i class="glyphicon glyphicon-ok-circle"></i></a>&nbsp;
+                        <?php else : ?>
+                            <a class="btn btn-default btn-xs" href="javascript:void(0);" onclick="terminateAccount(this, <?php echo $user['UID'] ?>)" title="<?php echo $this->translate('Désactiver le compte CAS '); ?>"><i class="glyphicon glyphicon-ban-circle"></i></a>&nbsp;
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    <?php if ((Hal_Auth::isHALAdministrator()) AND ( $user['UID'] != Hal_Auth::getUid())) { ?>
+                        <a class="btn btn-default btn-xs <?php
+                        if ($user['VALID'] == 0) {
+                            echo 'disabled';
+                        }
+                        ?>" href="<?php echo $this->url(array('controller' => 'user', 'action' => 'su', 'uid' => $user['UID'])); ?>" title="<?php echo $this->translate('Se connecter avec ce compte'); ?>"><i class="glyphicon glyphicon-user"></i></a>&nbsp;
+
+
+                        <?php if ($this->mergeFromUser) : ?>
+                            <a class="btn btn-success btn-xs <?php
+
+                            if ($user['VALID'] == 0) {
+                                echo 'disabled';
+                            }
+                            ?>" href="<?php echo $this->url(array('controller' => 'administrate', 'action' => 'users', 'q' => $this->escape($this->q), 'mergeFromUid' => $this->mergeFromUid, 'mergeToUid' => $user['UID'])); ?>" title="<?php echo $this->translate('Fusionner avec ce profil HAL'); ?>"><i class="glyphicon glyphicon-fire"></i></a>
+                           <?php else : ?>
+                            <a class="btn btn-default btn-xs <?php
+                            if (($user['VALID'] == 0) OR ($user['USERNAME'] == 'root') OR ($user['USERNAME'] == 'nobody') OR ($user['USERNAME'] == 'test_ws') ) {
+                                echo 'disabled';
+                            }
+                            ?>" href="<?php echo $this->url(array('controller' => 'administrate', 'action' => 'users', 'q' => $this->escape($this->q), 'mergeFromUid' => $user['UID'])); ?>" title="<?php echo $this->translate('Fusionner ce profil HAL'); ?>"><i class="glyphicon glyphicon-fire"></i></a>
+                            <?php endif; ?>
+                        <?php } ?>
+
+
+
+                </td>
+            </tr>
+        <?php } ?>
+    </tbody>
+</table>
+
+<?php
+$this->jQuery()->addOnLoad('$("' . implode(', ', $tooltips) . '").tooltip();');
+
+
+
+
+
+
+
+
+

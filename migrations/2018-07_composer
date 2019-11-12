@@ -1,0 +1,2 @@
+Lors du passage a composer:
+    Modifier les application.ini qui contiennent CCSDLIB_SRC pour  APPLICATION_PATH '/../vendor/ccsd/library/public/'

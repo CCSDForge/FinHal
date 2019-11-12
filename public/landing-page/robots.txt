@@ -1,0 +1,3 @@
+# Nothing to see here M. Robot
+User-agent: *
+Disallow: /

@@ -1,0 +1,298 @@
+[{
+    "label": "Mon espace",
+    "controller": "user",
+    "action": "space",
+    "resource": "user-space",
+    "privilege": "member,atamponneur,tamponneur,administrator,adminstruct,validateur,moderateur",
+    "pages": [{
+            "label": "Mes dépôts",
+            "controller": "user",
+            "action": "submissions",
+            "resource": "user-submissions",
+            "privilege": "member"
+        },
+        {
+          "label": "Lier mes ressources",
+          "controller": "user",
+          "action": "related",
+          "resource": "user-related",
+          "privilege": "member"
+        },
+        {
+            "label": "Mon profil",
+            "controller": "user",
+            "action": "index",
+            "resource": "user-index",
+            "privilege": "member"
+        },
+        {
+            "label": "Mes partages de propriétés",
+            "controller": "user",
+            "action": "docowner",
+            "resource": "user-docowner",
+            "privilege": "member"
+        },
+        {
+            "label": "Mes partages de fichiers sous embargo",
+            "controller": "user",
+            "action": "filerequest",
+            "resource": "user-filerequest",
+            "privilege": "member"
+        },
+        {
+            "label": "Mes documents sur l'espace FTP",
+            "controller": "user",
+            "action": "ftp",
+            "resource": "user-ftp",
+            "privilege": "member"
+        },
+        {
+            "label": "Mes recherches",
+            "controller": "user",
+            "action": "search",
+            "resource": "user-search",
+            "privilege": "member"
+        },
+        {
+            "label": "Ma bibliothèque",
+            "controller": "user",
+            "action": "library",
+            "resource": "user-library",
+            "privilege": "member"
+        },
+        {
+            "label": "Mes statistiques",
+            "controller": "stat",
+            "action": "user",
+            "resource": "stat-user",
+            "privilege": "member"
+        }
+    ]},
+    {
+        "label": "Privilèges",
+        "controller": "rights",
+        "action": "index",
+        "resource": "rights-index",
+        "privilege": "tamponneur,atamponneur,administrator,adminstruct,validateur,moderateur,haladmin",
+        "pages": [
+            {
+                "label": "Mes collections",
+                "controller": "user",
+                "action": "mycollections",
+                "resource": "user-collections",
+                "privilege": "tamponneur,atamponneur,administrator,haladmin"
+            },
+            {
+                "label": "Administrer les collections",
+                "controller": "collection",
+                "action": "list",
+                "resource": "collection-list",
+                "privilege": "administrator"
+            },
+            {
+                "label": "Statistiques",
+                "controller": "stat",
+                "action": "index",
+                "resource": "stat-index",
+                "privilege": "tamponneur,administrator,adminstruct"
+            },
+            {
+                "label": "Site Web",
+                "controller": "website",
+                "action": "index",
+                "resource": "website-index",
+                "privilege": "administrator",
+                "pages": [
+                    {
+                        "label": "Général",
+                        "controller": "website",
+                        "action": "common",
+                        "resource": "website-common",
+                        "privilege": "administrator"
+                    },
+                    {
+                        "label": "Apparence",
+                        "controller": "website",
+                        "action": "style",
+                        "resource": "website-style",
+                        "privilege": "administrator"
+                    },
+                    {
+                        "label": "Recherche",
+                        "controller": "website",
+                        "action": "search",
+                        "resource": "website-search",
+                        "privilege": "administrator"
+                    },
+                    {
+                        "label": "En-tête",
+                        "controller": "website",
+                        "action": "header",
+                        "resource": "website-header",
+                        "privilege": "administrator"
+                    },
+                    {
+                        "label": "Pied de page",
+                        "controller": "website",
+                        "action": "footer",
+                        "resource": "website-footer",
+                        "privilege": "administrator"
+                    },
+                    {
+                        "label": "Menu",
+                        "controller": "website",
+                        "action": "menu",
+                        "resource": "website-menu",
+                        "privilege": "administrator"
+                    },
+                    {
+                        "label": "Actualités",
+                        "controller": "website",
+                        "action": "news",
+                        "resource": "website-news",
+                        "privilege": "administrator"
+                    },
+                    {
+                        "label": "Ressources",
+                        "controller": "website",
+                        "action": "public",
+                        "resource": "website-public",
+                        "privilege": "administrator"
+                    }
+                ]
+            },
+            {
+                "label": "Patrouillage",
+                "controller": "patrol",
+                "action": "index",
+                "resource": "patrol-index",
+                "privilege": "moderateur"
+            },
+            {
+                "label": "Modération",
+                "controller": "moderate",
+                "action": "index",
+                "resource": "moderate-index",
+                "privilege": "moderateur",
+                "pages": [
+                    {
+                        "label": "Vérifier",
+                        "controller": "moderate",
+                        "action": "documents",
+                        "resource": "moderate-documents",
+                        "privilege": "moderateur"
+                    },
+                    {
+                        "label": "Réponses prédéfinies",
+                        "controller": "moderate",
+                        "action": "message",
+                        "resource": "moderate-message",
+                        "privilege": "moderateur"
+                    }
+                ]
+            },
+            {
+                "label": "Expertise",
+                "controller": "validate",
+                "action": "index",
+                "resource": "validate-index",
+                "privilege": "validateur",
+                "pages": [
+                    {
+                        "label": "Expertiser",
+                        "controller": "validate",
+                        "action": "documents",
+                        "resource": "validate-documents",
+                        "privilege": "validateur"
+                    },
+                    {
+                        "label": "Réponses prédéfinies",
+                        "controller": "validate",
+                        "action": "message",
+                        "resource": "validate-message",
+                        "privilege": "validateur"
+                    },
+                    {
+                        "label": "Gérer ma disponibilité",
+                        "controller": "validate",
+                        "action": "availability",
+                        "resource": "validate-availability",
+                        "privilege": "validateur"
+                    }
+                ]
+            },
+            {
+                "label": "Administrer",
+                "controller": "administrate",
+                "action": "index",
+                "resource": "administrate-index",
+                "privilege": "administrator",
+                "pages": [
+                    {
+                        "label": "Types de documents",
+                        "controller": "settings",
+                        "action": "typdoc",
+                        "resource": "settings-typdoc",
+                        "privilege": "haladmin"
+                    },
+                      {
+                        "label": "Documents en attente de modifications",
+                        "controller": "administrate",
+                        "action": "pending-modification",
+                        "resource": "administrate-pending-modification",
+                        "privilege": "administrator"
+                    },
+                      {
+                        "label": "Documents en attente d'expertise",
+                        "controller": "administrate",
+                        "action": "pending-validation",
+                        "resource": "administrate-pending-validation",
+                        "privilege": "haladmin"
+                    },
+                    {
+                      "label": "Documents sous embargo",
+                      "controller": "moderate",
+                      "action": "embargo",
+                      "resource": "moderate-embargo",
+                      "privilege": "administrator"
+                    },
+                    {
+                        "label": "Métadonnées",
+                        "controller": "settings",
+                        "action": "metadata",
+                        "resource": "settings-metadata",
+                        "privilege": "administrator"
+                    },
+                    {
+                        "label": "Fichiers de configurations",
+                        "controller": "settings",
+                        "action": "files",
+                        "resource": "settings-files",
+                        "privilege": "haladmin"
+                    },
+                    {
+                        "label": "Utilisateurs",
+                        "controller": "administrate",
+                        "action": "users",
+                        "resource": "administrate-users",
+                        "privilege": "administrator"
+                    },
+                    {
+                        "label": "Gestion des doublons",
+                        "controller": "administrate",
+                        "action": "doublons",
+                        "resource": "administrate-doublons",
+                        "privilege": "administrator"
+                    },
+                    {
+                        "label": "Archivage",
+                        "controller": "archive",
+                        "action": "index",
+                        "resource": "archive-index",
+                        "privilege": "haladmin"
+                    }
+                ]
+            }
+        ]
+    }
+]

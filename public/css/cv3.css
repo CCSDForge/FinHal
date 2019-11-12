@@ -1,0 +1,318 @@
+/******** Body du CV ********/
+
+html,body {
+    height:100%;
+}
+
+#container {
+    overflow: hidden;
+    min-height: 100%;
+    background: linear-gradient(to right, #00194d, #00194d 2%, white, white 52%);
+    box-shadow: 1px 1px 12px #ccc;
+}
+
+h1, h2, h3, h4 {
+    color: #00194d;
+}
+
+a {
+    color: #00194d;
+}
+
+a:hover {
+    color: #687ca2;
+    text-decoration: none;
+}
+
+hr {
+    border-top: 3px double #00194d;
+}
+
+
+/***************************/
+
+/******** Widgets ********/
+.column-widget {
+
+}
+
+.widget {
+    margin: 10px 0;
+    padding: 0px;
+    background-color: #e7e7e7;
+    border: 1px solid #093c4b;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+.widget-header {
+    padding: 8px 14px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 14px;
+    background-color: #e7e7e7;
+    text-transform: uppercase;
+    color: #00194d;
+    -webkit-border-radius: 4px 4px 0 0;
+    -moz-border-radius: 4px 4px 0 0;
+    border-radius: 4px 4px 0 0;
+    border-bottom: 1px solid #093c4b;
+}
+.widget-content {
+    padding: 10px;
+    background: #fbfbfb;
+    -webkit-border-radius: 0 0 7px 7px;
+    -moz-border-radius: 0 0 7px 7px;
+    border-radius: 0 0 7px 7px;
+}
+.widget-footer {
+    text-align:right;
+
+}
+.widget-footer a{
+    color: #00194d;
+    padding: 2px;
+    font-size: 9px;
+}
+.widget-content ul{
+    list-style-type: square;
+    padding-left: 10px;
+    margin-left:10px;
+}
+.widget-content ul li{
+    font-size:12px;
+
+}
+.widget-content a .badge {
+    font-size: 10px;
+    font-weight: normal;
+    margin-left: 10px;
+    background: #00194d;
+}
+.widget-content a:hover .badge{
+    background: #687ca2;
+
+}
+.widget-content .overflow {
+    overflow:auto;
+    max-height:250px;
+}
+
+/* Nuage de mots */
+.widget-keywords {
+
+}
+.keywords {
+    text-align: justify;
+}
+.keyword-1 {
+    font-size: 9px;
+}
+.keyword-2 {
+    font-size: 10px;
+}
+.keyword-3 {
+    font-size: 12px;
+}
+.keyword-4 {
+    font-size: 14px;
+}
+.keyword-5 {
+    font-size: 16px;
+}
+.keyword-6 {
+    font-size: 18px;
+}
+.widget-mesh {
+
+}
+
+/* Domaines */
+.widget-domain {
+
+}
+.domains {
+
+}
+
+/* Co-Auteurs */
+.widget-coauthors {
+
+}
+.coauthors {
+
+}
+.coauthors-list {
+
+}
+
+/* Export */
+.widget-export {
+
+}
+
+/* Widget Extérieur */
+.widget-ext {
+
+}
+
+/* Identifiants Chercheur */
+.widget-idext {
+
+}
+
+/* Mesh */
+.widget-mesh {
+
+}
+
+/* Consultation du CV */
+.widget-metrics {
+
+}
+
+/* Photo */
+.widget-photo {
+
+}
+
+/* Revues */
+.widget-revues {
+
+}
+.revues {
+
+}
+.revues-list {
+
+}
+
+/* Projet ANR */
+.widget-anr {
+
+}
+.anr {
+
+}
+.anr-list {
+
+}
+
+/* Projet Européen */
+.widget-europ {
+
+}
+.europ {
+
+}
+.europ-list {
+
+}
+
+/* Structures */
+.widget-structures {
+
+}
+.structures {
+
+}
+.structures-list {
+
+}
+
+/* Année de production */
+.widget-years {
+
+}
+.years {
+
+}
+.years-list {
+
+}
+
+/* Réseaux sociaux */
+.widget-socialurl {
+
+}
+/***************************/
+
+
+/******** Documents ********/
+.column-content {
+    margin-bottom: -9999px;
+    padding-bottom: 9999px;
+}
+.author-name {
+}
+.author-cv {
+    text-align:justify;
+}
+.counter-doc {
+    color : #00194d;
+    text-align:right;
+    position:absolute;
+    right:10px;top:15px;
+    font-size: 10px;
+}
+h2.nbdoc {
+    margin-top:0px;
+}
+h2.nbdoc span.label-primary {
+    background: #00194d;
+}
+.doc-group {
+    margin: 10px 0;
+    padding: 0px;
+    border: 1px solid #093c4b;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    display: flex;
+}
+.doc-header {
+    padding: 10px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 16px;
+    background-color: #e7e7e7;
+    text-transform: uppercase;
+    writing-mode: vertical-lr;
+    transform:rotate(180deg);
+    width: 3em;
+    -webkit-border-radius: 0 4px 4px 0;
+    -moz-border-radius: 0 4px 4px 0;
+    border-radius: 0 4px 4px 0;
+    border-left: 1px solid #093c4b;
+}
+.doc-group .doc-list {
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+.doc-nb {
+    float:right;
+    color:#00194d;
+    font-weight:normal;
+    text-transform: lowercase;
+    font-size: 12px;
+    padding-top: 10px;
+}
+.doc-overflow {
+    overflow: auto;
+    padding-left: 20px;
+    height : 350px;
+}
+.doc-hr {
+    margin: 5px 0;
+}
+.media {
+
+}
+.media-list {
+    padding-top: 5px;
+}
+.thumbnail {
+    width: 50px;
+}

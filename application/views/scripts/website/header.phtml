@@ -1,0 +1,117 @@
+<?php $this->jQuery()->addStylesheet(CCSDLIB . "/css/colorpicker.css")->addJavascriptFile(CCSDLIB . "/js/bootstrap-colorpicker.js")->addJavascriptFile(CCSDLIB . "/js/colorpicker.js");?>
+
+<?php $this->layout()->pageDescription = $this->translate("Personnalisez le bandeau en-tête du site")?>
+
+<div class="form-actions">
+	<button class="btn btn-default" type="button" onclick="addLogo()"><i class="glyphicon glyphicon-plus"></i>&nbsp;<?php echo $this->translate("Ajouter un élément, logo ou texte"); ?></button>
+</div>
+<form enctype="multipart/form-data" method="post" class="form-horizontal" id="header" action="<?php echo PREFIX_URL ?>website/header">
+	<table width="100%" class="table table-hover" id="tableLogo">
+	    <thead>
+	        <tr>
+	            <th width="20px"></th>
+	            <th><?php echo $this->translate('Logo'); ?></th>
+	            <th width="20px"><?php echo $this->translate('Actions'); ?></th>
+	        </tr>
+	    </thead>
+	    <tbody id="sortable">
+	    <?php foreach($this->forms as $i => $form) {
+	    	if (isset($this->errors[$i])) {
+				if ($this->errors[$i] == Ccsd_Website_Header::LOGO_IMG) {
+					$form->getElement($this->errors[$i])->addError($this->translate('Merci de déposer une image'));
+				} else {
+					$form->getElement($this->errors[$i])->setGroupErrors(array ($this->translate('Merci de renseigner toutes les langues')));
+				}
+			}
+	    	
+	    	if ($form->getElement('type')->getValue() == Hal_Website_Header::LOGO_IMG) {
+				$title = '<i class="glyphicon glyphicon-picture active"></i>&nbsp;-&nbsp;';
+				$title .= $form->getElement('img_tmp')->getValue();
+			} else {
+				$title = '<i class="glyphicon glyphicon-font active"></i>&nbsp;-&nbsp;';
+				$text = $form->getElement('text')->getValue();
+				$title .= isset($text[Zend_Registry::get('lang')]) ? $text[Zend_Registry::get('lang')]: '';
+			} ?>
+	    	<tr class="elt-logo" id="logo-<?php echo $i;?>">
+	            <td><i class="glyphicon glyphicon-move handle"></i></td>
+	            <td>
+	            	<b class="logo-title"><?php echo $title;?></b>
+	            	<div class="div-form" style="display:<?php echo (isset($this->errors[$i]) ? 'block': 'none');?>;">
+	            	<?php echo $form?>
+	            	<script> $(function() { renameInputFile("logo-<?php echo $i?>", "<?php echo $i?>[img]");}); </script>
+	            	</div>   
+	            </td>
+	            <td style="text-align:right">
+	                <a href="javascript:void(0)" onclick="toggleForm(this);" title="<?php echo $this->translate("Editer"); ?>"><i class="glyphicon glyphicon-pencil"></i></a>
+	                <a href="javascript:void(0)" class="remove-logo" data-logo="logo-<?php echo $i;?>" title="<?php echo $this->translate("Supprimer"); ?>"><i class="glyphicon glyphicon-trash"></i></a>
+	            </td>
+	        </tr>
+	    <?php }?>
+	    </tbody>
+	    <tfoot style="display:none;">
+	    	<tr>
+	            <td><i class="glyphicon glyphicon-move handle"></i></td>
+	            <td><b class="logo-title"></b><div class="div-form" style="display:none;"></div>   
+	            </td>
+	            <td style="text-align:right">
+	                <a href="javascript:void(0)" onclick="toggleForm(this);" class="link-edit" title="<?php echo $this->translate("Editer"); ?>"><i class="glyphicon glyphicon-pencil"></i></a>
+	                <a href="javascript:void(0)" class="remove-logo" data-logo="" title="<?php echo $this->translate("Supprimer"); ?>"><i class="glyphicon glyphicon-trash"></i></a>
+	            </td>
+	        </tr>
+	    </tfoot>
+	</table>
+	<div class="form-actions text-center">
+        <input type="submit" class="btn btn-primary" name="header" type="submit" value="<?php echo $this->translate("Enregistrer"); ?>">
+	</div>
+</form>
+
+<?php echo $this->confirm("Confirmation", "Souhaitez-vous supprimer le logo")
+			->setTrigger('.remove-logo')
+			->setJsInit('$("#confirm-id").val($(this).attr("data-logo"));')
+			->setJsCallback('confirmDelete();');?>
+
+<script>
+   var uniq = <?php echo count($this->forms)?>;
+
+   //Tri des logos
+   $( "#sortable" ).sortable({helper: fixHelperSortable, handle: '.handle',  items: "tr" });
+
+   //Ajout d'un logo à l'en-tête
+   function addLogo()
+   {
+	   $.ajax({
+		url: "<?php echo PREFIX_URL ?>website/ajaxheader/id/logo_" + uniq,
+		dataType: 'text',
+		success: function(data) {
+			var cloneTr = $('#tableLogo tfoot>tr').clone();
+			cloneTr.attr('id', 'logo-' + uniq);
+			cloneTr.addClass('elt-logo');
+			$('.div-form', cloneTr).html(data);
+			$('.remove-logo', cloneTr).attr('data-logo', 'logo-' + uniq);
+			$('#tableLogo tbody').append(cloneTr);
+			renameInputFile("logo-"+ uniq, "logo_" + uniq + "[img]");
+			toggleForm($("#logo-"+ uniq + " a.link-edit"));
+	   		jQuery('html,body').animate({scrollTop:jQuery("#logo-"+ uniq).offset().top},1000,'swing');
+	   		uniq++;
+		}
+	   });
+   } 
+   //Renommage de l'élément input type file (pb Zend File)
+   function renameInputFile(id, newName)
+   {
+	   $('#' + id + ' input:file').attr('name', newName);
+   }
+   
+   //Confirmation de suppression
+   function confirmDelete(elem) 
+   {
+	   $('#' + $("#confirm-id").val()).closest('tr').remove();
+   }
+
+   //Affichage du formulaire
+   function toggleForm(elem)
+   {
+	   $(elem).closest('tr').find('.div-form').toggle();
+	   setDisplayElements($(elem).closest('tr').find('.div-form'));
+   }
+</script>

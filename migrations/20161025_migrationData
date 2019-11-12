@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Script de migration des données pour sortir les données du code de l'application
+# Sarah - OCTOBRE 2016
+
+while getopts "e:" opt; do
+  case $opt in
+    e) env=$OPTARG
+       ;;
+    h) echo $usage
+       exit 0;;
+    \?)  echo "Invalid option: -$OPTARG" >&2
+	 exit 1
+    ;;
+  esac
+done
+
+case "X$env" in
+    Xproduction) dir=production; suffix='';;
+    Xpreprod)    dir=preprod; suffix='_preprod';;
+    Xtesting)    dir=testing; suffix='_test';;
+    *) echo "Bad environnement: $env"; exit 1;;
+esac
+		
+SECONDS=0;
+
+mktree() {
+    [ -d $1 ] || { mkdir $1; chown nobody:nobody $1;  }
+}
+
+mktree /data/hal/$dir
+mktree /data/hal/$dir/collection
+mktree /data/hal/$dir/portail
+mktree /data/hal/$dir/shared
+mktree /data/hal/$dir/shared/languages
+
+rsync -ravh --exclude 'default' --exclude 'cache' /sites/hal$suffix/data/collection/* /data/hal/$dir/collection/
+rsync -ravh --exclude 'default' --exclude 'cache' /sites/hal$suffix/data/portail/* /data/hal/$dir/portail/
+rsync -ravh --exclude 'metas.php' --exclude 'portails_metas.php' --exclude 'aar.php' --exclude 'acm.php' --exclude 'domains.php' --exclude 'gav.php' --exclude 'jel.php' --exclude 'pacs.php' --exclude 'typdoc.php' /sites/hal$suffix/data/portail/default/languages/* /data/hal/$dir/shared/languages/
+
+
+duration=$SECONDS
+echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
+
+
+

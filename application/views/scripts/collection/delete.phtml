@@ -1,0 +1,17 @@
+
+<h4><?php echo $this->collection->getCode(); ?><small> - <?php echo $this->collection->getName(); ?></small></h4>
+<blockquote><?php foreach ($this->collection->getNbDocTamponned() as $cat => $nb) {
+        echo $this->translate('Nombre de documents tamponnés') . '(' . $cat . ') : <span class="label label-primary">' . $nb . '</span><br>';
+    }?>
+    <small><?php echo $this->translate('Catégorie'); ?> : <?php echo $this->collection->getCategory(); ?></small>
+    <small><?php echo $this->translate('Mode'); ?> : <?php echo ($this->collection->getMode() == Hal_Site_Settings_Collection::MODE_AUTO ? '<span class="label label-success">' . $this->translate($this->collection->getMode()) . '</span>' : $this->translate($this->collection->getMode())) ?></small>
+</blockquote>
+
+<form enctype="multipart/form-data" method="post" class="form-horizontal" action="/collection/delete">
+    <input type="hidden" value="<?php echo $this->collection->getSid(); ?>" name="sid" />
+     <h5><?php echo $this->translate('Supprimer la collection ?'); ?></h5>
+    <div class="form-actions text-center">
+        <a href="/collection/list" class="btn btn-default btn-sm"><?php echo $this->translate("annuler"); ?></a>
+        <button class="btn btn-primary" type="submit"><?php echo $this->translate("Supprimer"); ?></button>
+    </div>
+</form>

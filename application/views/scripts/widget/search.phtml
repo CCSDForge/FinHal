@@ -1,0 +1,18 @@
+<?php
+    $url = PREFIX_URL.'search/index';
+    if ( $this->fq != '' ) {
+        $url .= '/?'.$this->fq;
+    }
+?>
+<form action="<?php echo $url ?>" method="post">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="input-group">
+                    <input type="text" name="q" class="form-control" autocomplete="off" placeholder="<?php echo $this->translate('Termes de recherche'); ?>">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </span>
+            </div>
+        </div>
+    </div>
+</form>

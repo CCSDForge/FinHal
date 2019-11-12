@@ -1,0 +1,89 @@
+{
+  "config": {
+
+    "secure-http": false
+  },
+  "require-dev": {
+    "phpunit/phpunit": "5.7.12",
+    "phpmd/phpmd": "@stable",
+    "phpspec/phpspec": "^4.0",
+    "elasticsearch/elasticsearch": "~6.0"
+  },
+  "repositories": [
+    {
+      "type": "package",
+      "package": {
+        "name": "ccsd/library",
+        "version": "1",
+        "source": {
+          "url": "git@gitlab.ccsd.cnrs.fr:ccsd/library.git",
+          "type": "git",
+          "reference": "preprod"
+        }
+      }
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "swordapp/swordappv2",
+        "version": "1",
+        "source": {
+          "url": "https://github.com/swordapp/swordappv2-php-library.git",
+          "type": "git",
+          "reference": "master"
+        }
+      }
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "java/pdfbox",
+        "version": "1.8.16",
+        "dist": {
+          "url": "http://mirrors.ircam.fr/pub/apache/pdfbox/1.8.16/pdfbox-app-1.8.16.jar",
+          "type": "file"
+        }
+      }
+    }
+  ],
+
+  "require": {
+    "ccsd/library": "*",
+    "swordapp/swordappv2": "*",
+    "solarium/solarium": "^5.0.2",
+    "zendframework/zendframework1": "^1.12",
+    "zendframework/zf1-extras": "*",
+    "apereo/phpcas": "^1.3.5",
+    "doctrine/orm": "*",
+    "php": ">=7.0",
+    "ext-imagick": "*",
+    "ext-dom": "*",
+    "ext-libxml" : "*",
+    "ext-bz2": "*",
+    "ext-curl": "*",
+    "ext-xsl": "*",
+    "ext-gd": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "ext-readline": "*",
+    "ext-soap": "*",
+    "ext-xml": "*",
+    "ext-simplexml": "*",
+    "ext-zip": "*",
+    "ext-ftp": "*",
+    "ext-intl": "*",
+    "ext-geoip": "*",
+    "ext-ssh2": "*",
+    "ext-posix": "*",
+    "java/pdfbox": "*",
+    "simplesamlphp/simplesamlphp":"^1.16",
+    "patrickschur/language-detection": "^3.4",
+    "sameer-shelavale/php-countries-array": "^1.0"
+  },
+  "autoload": {
+    "classmap": [
+      "vendor/ccsd/library/",
+      "vendor/swordapp/swordappv2/swordappclient.php"
+    ]
+  }
+}

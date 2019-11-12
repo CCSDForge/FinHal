@@ -1,0 +1,135 @@
+<TEI version="1.1"
+     xmlns="http://www.tei-c.org/ns/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.tei-c.org/ns/1.0  http://api.archives-ouvertes.fr/documents/aofr-sword.xsd">
+  <text>
+    <body>
+      <listBibl>
+        <biblFull>
+          <titleStmt>
+            <title xml:lang="en">Ceci est mon beau logiciel avec plein de métadonnées</title>
+            <author role="aut">
+              <persName>
+                <forename type="first">Yannick</forename>
+                <surname>L'Barborini</surname>
+              </persName>
+              <email type="md5">e575e8b9d7db56565665b15faddf154f</email>
+              <email type="domain">gmail.com</email>
+              <idno type="halauthorid">1188190</idno>
+              <affiliation ref="#struct-413106"/>
+            </author>
+            <editor role="depositor">
+              <persName>
+                <forename>Yannick</forename>
+                <surname>L'Barborini</surname>
+              </persName>
+              <email type="md5">e575e8b9d7db56565665b15faddf154f</email>
+              <email type="domain">gmail.com</email>
+            </editor>
+          </titleStmt>
+          <publicationStmt>
+            <availability status="restricted">
+              <licence target="https://fedoraproject.org/wiki/Licensing/Bahyph">Bahyph License</licence>
+              <licence target="http://creativecommons.org/licenses/by/4.0/legalcode">Creative Commons Attribution 4.0</licence>
+              <licence>Licence non connue</licence>
+            </availability>
+          </publicationStmt>
+          <seriesStmt/>
+          <notesStmt>
+            <note type="platform">macOS</note>
+            <note type="platform">Windows 10</note>
+            <note type="version">1.154.215</note>
+            <note type="programmingLanguage">java</note>
+            <note type="programmingLanguage">javascript</note>
+            <note type="programmingLanguage">nodejs</note>
+          </notesStmt>
+          <sourceDesc>
+            <biblStruct>
+              <analytic>
+                <title xml:lang="en">Ceci est mon beau logiciel avec plein de métadonnées</title>
+                <author role="aut">
+                  <persName>
+                    <forename type="first">Yannick</forename>
+                    <surname>L'Barborini</surname>
+                  </persName>
+                  <email type="md5">e575e8b9d7db56565665b15faddf154f</email>
+                  <email type="domain">gmail.com</email>
+                  <idno type="halauthorid">1188190</idno>
+                  <affiliation ref="#struct-413106"/>
+                </author>
+              </analytic>
+              <monogr>
+                <imprint/>
+              </monogr>
+              <ref type="seeAlso">https://github.com/truc</ref>
+            </biblStruct>
+          </sourceDesc>
+          <profileDesc>
+            <langUsage>
+              <language ident="en">English</language>
+            </langUsage>
+            <textClass>
+              <keywords scheme="author">
+                <term xml:lang="en">mot 1</term>
+                <term xml:lang="en">mot 2</term>
+                <term xml:lang="en">mot 3</term>
+                <term xml:lang="en">mot 4</term>
+              </keywords>
+              <classCode scheme="classification">classification</classCode>
+              <classCode scheme="halDomain" n="sdu.envi">Sciences of the Universe [physics]/Continental interfaces, environment</classCode>
+              <classCode scheme="halDomain" n="nlin.nlin-cd">Nonlinear Sciences [physics]/Chaotic Dynamics [nlin.CD]</classCode>
+              <classCode scheme="halDomain" n="sdv.bc.bc">Life Sciences [q-bio]/Cellular Biology/Subcellular Processes [q-bio.SC]</classCode>
+              <classCode scheme="halTypology" n="SOFTWARE">Software</classCode>
+            </textClass>
+            <abstract xml:lang="en">descriptif de mon merveilleux logiciel avec plein de métadonnées</abstract>
+          </profileDesc>
+        </biblFull>
+      </listBibl>
+    </body>
+    <back>
+      <listOrg type="structures">
+        <org type="laboratory" xml:id="struct-413106" status="VALID">
+          <orgName>Centre pour la Communication Scientifique Directe</orgName>
+          <orgName type="acronym">CCSD</orgName>
+          <date type="start">2014-04-01</date>
+          <desc>
+            <address>
+              <addrLine>Bât Centre de Calcul IN2P3/CNRS21 Avenue Pierre de CoubertinCS70202F-69627 VILLEURBANNE CEDEX</addrLine>
+              <country key="FR"/>
+            </address>
+            <ref type="url">http://ccsd.cnrs.fr</ref>
+          </desc>
+          <listRelation>
+            <relation name="UMS3668" active="#struct-388064" type="direct"/>
+            <relation active="#struct-303067" type="direct"/>
+            <relation active="#struct-300009" type="direct"/>
+          </listRelation>
+        </org>
+        <org type="institution" xml:id="struct-388064" status="VALID">
+          <orgName>CNRS</orgName>
+          <desc>
+            <address>
+              <country key="FR"/>
+            </address>
+          </desc>
+        </org>
+        <org type="institution" xml:id="struct-303067" status="VALID">
+          <orgName>Université de Lyon</orgName>
+          <desc>
+            <address>
+              <country key="FR"/>
+            </address>
+          </desc>
+        </org>
+        <org type="institution" xml:id="struct-300009" status="VALID">
+          <orgName>INRIA</orgName>
+          <desc>
+            <address>
+              <country key="FR"/>
+            </address>
+            <ref type="url">http://www.inria.fr</ref>
+          </desc>
+        </org>
+      </listOrg>
+    </back>
+  </text>
+</TEI>

@@ -1,0 +1,193 @@
+<?php
+$this->layout()->pageTitle = $this->translate('Lier la ressource');
+if (!isset($this->docid)) {
+    ?>
+    <form enctype="multipart/form-data" method="post" class="form-horizontal"
+          action="<?php echo PREFIX_URL?>user/related">
+        <input type="hidden" id="uid" name="uid" value="<?php echo Hal_Auth::getUid();?>"/>
+        <div class="row" style="margin-left:0; margin-right:0;">
+            <label for="search-docid"><?php echo $this->translate("Identifiant du document"); ?></label>
+            <input type="text" class="form-control search-docid" id="search-docid" name="search-docid"
+                   placeholder="<?php echo $this->translate("Identifiant du document"); ?>">
+        </div>
+        <input type="hidden" id="docid" name="docid"/>
+        <div class="form-actions text-center">
+            <button class="btn btn-primary" type="submit"><?php echo $this->translate("Lier les ressources"); ?></button>
+        </div>
+    </form>
+    <script type="text/javascript">
+        $(function() {
+            $('.search-docid').autocomplete({
+                minLength: 2,
+                html: true,
+                source: function(request, response){
+                    var data = {
+                        term: request.term,
+                        uid: $('#uid').val()
+                    }
+                    console.log(data);
+                    $.ajax({
+                        url: "/user/ajaxsearchdoc",
+                        type: "post",
+                        dataType: "json",
+                        data: data,
+                        success: function(data) {
+                            response($.map(data, function(item) {
+                                return {id: item.id, docid: item.docid, label: item.label}
+                            }));
+                        }
+                    });
+                },
+                select: function( event, ui ) {
+                    $(this).val(ui.item.id);
+                    $("#docid").val(ui.item.docid);
+                    return false;
+                }
+            })
+        });
+
+    </script>
+<?php
+} else {?>
+<div class="alert alert-info alert-fixed"><?php echo $this->reference; ?></div>
+<form action="<?php echo PREFIX_URL?>user/related" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="docid" value="<?php echo $this->docid ?>" />
+
+    <table class="table list-relations">
+        <thead>
+        <tr>
+            <th width="200px"><?php echo $this->translate('Relation');?></th>
+            <th width="300px;"><?php echo $this->translate('Identifiant HAL');?></th>
+            <th><?php echo $this->translate('Commentaire');?></th>
+            <th width="20px"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach($this->related as $related) { ?>
+            <tr>
+                <td>
+                    <select class="form-control" name="related[RELATION][]">
+                        <?php foreach($this->dcRelation as $key => $value) { ?>
+                            <option value="<?php echo $key ?>" <?php echo ($key == $related['RELATION'] ? 'selected="selected"' : ''); ?>><?php echo $this->translate($value) ?></option>
+                        <?php } ?>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control relation-id" name="related[IDENTIFIANT][]" placeholder="<?php echo $this->translate('Identifiant HAL'); ?>" value="<?php echo $related['IDENTIFIANT'];?>"/></td>
+                <td><input type="text" class="form-control relation-comment" name="related[INFO][]" placeholder="<?php echo $this->translate('Commentaire'); ?>" value="<?php echo $related['INFO'];?>"/></td>
+                <td>
+                    <button type="button" class="btn btn-primary relation-rm" onclick="rmRelation(this)"><i class="glyphicon glyphicon-trash"></i></button>
+                    <button type="button" class="btn btn-primary relation-add" onclick="addRelation(this)" style="display:none;"><i class="glyphicon glyphicon-plus"></i></button>
+                </td>
+            </tr>
+        <?php } ?>
+        <tr>
+            <td>
+                <select class="form-control" name="related[RELATION][]">
+                    <?php foreach($this->dcRelation as $key => $value) { ?>
+                        <option value="<?php echo $key ?>"><?php echo $this->translate($value) ?></option>
+                    <?php } ?>
+                </select>
+            </td>
+            <td><input type="text" class="form-control relation-id" name="related[IDENTIFIANT][]" placeholder="<?php echo $this->translate('Identifiant HAL'); ?>"/></td>
+            <td><input type="text" class="form-control relation-comment" name="related[INFO][]" placeholder="<?php echo $this->translate('Commentaire'); ?>"/></td>
+            <td>
+                <button type="button" class="btn btn-primary relation-rm" onclick="rmRelation(this)" style="display:none;"><i class="glyphicon glyphicon-trash"></i></button>
+                <button type="button" class="btn btn-primary relation-add" onclick="addRelation(this)"><i class="glyphicon glyphicon-plus"></i></button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div id="upload-errors" class="alert alert-danger fade in" style="display:none;">
+        <button type="button" class="close" onclick="$(this).parent().hide();">&times;</button>
+        <span class="content"><?php echo $this->translate("L'Identifiant HAL doit être de la forme suivante : hal-00000001");?></span>
+    </div>
+    <style>
+        .shadow-error{
+            border-color: #b94a48 !important;
+        }
+        .shadow-error:focus{
+            box-shadow: 0 1px 1px rgba(185, 74, 72, 0.075) inset, 0 0 8px rgba(185, 74, 72, 0.6) !important;
+            outline: 0 none !important;
+        }
+    </style>
+    <script type="text/javascript">
+        function addRelation(elem)
+        {
+            var clone = $(elem).closest('tr').clone();
+            clone.find('.relation-add').hide();
+            clone.find('.relation-rm').show();
+            var select = $(elem).closest('tr').find('select').val();
+            $(elem).closest('tr').find('input, select').val('');
+            $(elem).closest('tr').find('.relation-id').removeClass('shadow-error');
+            clone.find('select').val(select);
+            $(clone).insertBefore($(elem).closest('tr'));
+            autocomplete(clone);
+        }
+        function rmRelation(elem)
+        {
+            $(elem).closest('tr').remove();
+        }
+        $(function() {
+            var $existRow=$(".list-relations").find('tr');
+            autocomplete($existRow);
+        });
+
+        function autocomplete($row){
+            $row.find('.relation-id').autocomplete({
+                minLength: 2,
+                html: true,
+                source: function(request, response){
+                    $.ajax({
+                        url: "/user/ajaxsearchdoc",
+                        type: "post",
+                        dataType: "json",
+                        data: {term: request.term},
+                        success: function(data) {
+                            response($.map(data, function(item) {
+                                return {id: item.id, label: item.label}
+                            }));
+                        }
+                    });
+                },
+                select: function( event, ui ) {
+                    $(this).val(ui.item.id);
+                    $(this).removeClass("ui-autocomplete-loading");
+                    $(this).closest('tr').find('.relation-comment').focus();
+                    return false;
+                }
+            })
+        }
+
+        $('form').submit(function(e) {
+            var reg = "";
+            var bool = false;
+
+            $('.relation-id').each(function(){
+                reg = new RegExp("^[a-z0-9]+[_-][0-9]{8}$","g");
+                val = $(this).val();
+
+                if (!reg.test(val) && val != '') {
+                    e.preventDefault();
+                    $(this).addClass('shadow-error');
+                    $('#upload-errors').show();
+                    setTimeout(function() {$("#upload-errors").fadeOut(500);},8000);
+                } else {
+                    $(this).removeClass('shadow-error');
+                    bool = true;
+                }
+            });
+
+            if (bool == false){
+                e.preventDefault();
+            }
+
+        });
+
+
+    </script>
+
+    <div class="form-actions text-center" style="clear: left;">
+        <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-save"></i>&nbsp;<?php echo $this->translate('Enregistrer');?></button>
+    </div>
+</form>
+<?php }?>

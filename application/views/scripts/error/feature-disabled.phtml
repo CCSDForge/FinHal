@@ -1,0 +1,26 @@
+<div class="jumbotron">
+    <h2><span class="glyphicon glyphicon-pause"
+              aria-hidden="true"></span><?php echo $this->translate("Fonctionnalité désactivée"); ?></h2>
+    <p><?php echo $this->translate("La fonctionnalité à laquelle vous essayez d'accéder a été désactivée par l'administrateur du site."); ?></p>
+
+
+    <?php
+
+    $downTimeUrl = Hal_Settings_Features::getDowntimeUrl();
+    if ($downTimeUrl != '') {
+        echo '<p>';
+        echo $this->translate("Informations concernant les maintenances planifiées :");
+        echo '</p>';
+
+        echo '<p>';
+        echo '<a class="btn btn-primary btn-lg" href="' . $downTimeUrl . '" role="button" target="_blank">';
+        echo $this->translate("Maintenances planifiées");
+        echo '</a>';
+        echo '</p>';
+    }
+    ?>
+
+
+</div>
+
+

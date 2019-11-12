@@ -1,0 +1,145 @@
+<?php
+/** @var Hal_View $this */
+
+$typdocs = $this->typdocs;
+
+?><style>
+
+    .typdoc label.type {margin-top:0; margin-bottom: 0;}
+    .type {margin: 0;}
+
+</style>
+<script type='text/javascript'>
+    /**
+     * @param e  noeud recevant le click (button)
+     * @param f  string: typdoc_<id du type>
+     */
+    function show(e, f) {
+    // e = noeud recevant le click (button)
+    // f = chaine typdoc_id
+	$('.btn-showing').removeClass('btn-danger').addClass('btn-success');
+	$(e).removeClass('btn-success').addClass('btn-danger');
+	var $elem = $('.meta'); // hide all table of metas (in fact, only one is not hidden)
+	$elem.hide();
+	$elem.closest('tr').hide();
+	var $alertNode = $('.alert-info');
+	$alertNode.hide();
+	var $node = $('#' + f);
+	$node.show();  // show the good table
+	$node.closest('tr').show();
+	$alertNode.show();
+}
+</script>
+<div class="row">
+	<div class="col-md-6">
+		<table class="table table-condensed table-hover typdoc">
+            <thead>
+                <tr>
+                    <th style="width:10%"><h4><?php echo $this->translate('Catégorie')?></h4></th>
+                    <th style="width:30%"><h4><?php echo $this->translate('Type')?></h4></th>
+                </tr>
+            </thead>
+			<tbody>
+    		<?php
+            foreach ($typdocs as $typdoc) { ?>
+				<tr>
+			        <td>
+				        <span class='category'>
+			        	<?php echo $this->translate($typdoc['label'])?>
+				        </span>
+			        </td>
+			        <td>
+				        <?php 
+				        if (isset($typdoc['children']) && is_array($typdoc['children'])) { ?>
+				        <table style="width:100%">
+		            	   <tbody>
+		            			<?php 
+							    foreach ($typdoc['children'] as $type) { ?>   
+		                    		<tr>
+		   		                        <td>
+		                            		<div class="type">
+		                                		<label><span><?php echo $this->translate($type['label'])?></span></label>
+		                            		</div>
+		                        		</td>
+		                        		<td style="width:5%">
+				                            <button class='btn btn-xs btn-success btn-showing' onclick='show(this, "typdoc_<?php echo $type['id']; ?>");' style='float: right;'>Voir</button>
+				                        </td>
+		                    		</tr>
+		                		<?php }?>
+		                	</tbody>
+		            	</table>        
+						<?php } ?>
+					</td>
+				</tr>
+			<?php } ?>
+	    	</tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <div class='alert alert-info' style='display : none;'>
+            <?php echo $this->translate("Attention : l'ajout d'un domaine est susceptible de modifier cette liste."); ?>
+        </div>
+    	<table class="table table-condensed table-hover typdoc">
+            <thead>
+                <tr>
+                    <th><h4><?php echo $this->translate('Métadonnées')?></h4></th>
+                </tr>
+            </thead>
+			<tbody>
+			<?php
+            foreach ($typdocs as $typdoc) { ?>
+				<tr style='display: none;'>
+					<td style='border-top: none;'>
+						<?php 
+				        if (isset($typdoc['children']) && is_array($typdoc['children'])) { 
+							foreach ($typdoc['children'] as $type) {
+							?>
+					        <table class="meta" id='typdoc_<?php echo $type['id']; ?>' style='display: none;'>
+			            	   <tbody>
+			            			<?php 
+										$ini = Hal_Ini::file_merge(array (DEFAULT_CONFIG_PATH . INSTANCEPREFIX . '/meta.ini' => $type['id'], SPACE . CONFIG . 'meta.ini' => $type['id']), array ('section_default' => 'metas'));
+	
+										$form = new Ccsd_Form();
+								        $form->setAttrib('class', 'form-horizontal');
+								        $form->setMethod('post');
+								        $form->setAttrib('enctype', 'multipart/form-data');
+								        $form->setOptions ($ini)->setName('HAL_SUBMIT');
+								        $form->getElement('type')->setValue($type['id']);
+								        
+								        foreach ($form->getElements() as $element) {
+											if ($element instanceof Zend_Form_SubForm ||
+												$element instanceof Zend_Form_DisplayGroup ||
+												$element instanceof Ccsd_Form_Element_Hidden ||
+												$element instanceof Ccsd_Form_Element_Hr ||
+												$element instanceof Zend_Form_Element_Button ||
+												$element instanceof Ccsd_Form_Element_Invisible ||
+												$element instanceof Ccsd_Form_Element_Hr ||
+												$element instanceof Ccsd_Form_Element_Submit) continue;
+										?>   
+			                    		<tr>
+			                    			<td style="width:20%;text-align:left;<?php echo $element->isRequired() ? "font-weight: bold" : "font-style: italic;" ?>"><?php echo $element->getName(); ?></td>
+			   		                        <td style="width:30%;text-align:left;<?php echo $element->isRequired() ? "font-weight: bold" : "font-style: italic;" ?>"><?php echo $element->getLabel(); ?></td>
+			   		                        <td style="text-align:center">
+			   		                        	<?php 
+			   		                        	echo $this->translate ($element->getType())
+			   		                        	?>
+			   		                        </td>
+			                        		<td style="width:20%;text-align:right;<?php echo $element->isRequired() ? "font-weight: bold" : "font-style: italic;" ?>"><?php echo $element->isRequired() ? $this->translate("Obligatoire") : $this->translate("Optionnel"); ?></td>
+			                    		</tr>
+			                    		
+			                    		<?php } ?>
+			                	</tbody>
+			            	</table>        
+							<?php 
+							}
+						} else { ?>
+						<!-- section metas -->
+						<?php } ?>
+					</td>
+				</tr>
+			<?php } ?>
+            </tbody>
+        </table>
+
+    </div>
+</div>

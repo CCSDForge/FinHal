@@ -1,0 +1,163 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: yannick
+ * Date: 26/09/2014
+ * Time: 09:42
+ *
+ * $this->document doit exister et etre un objet Hal_Document
+ *
+ */
+/** @var Hal_View $this */
+
+if ($this->document->existFile()) {
+    $this->readEmbargo = Hal_Auth::isHALAdministrator() || Hal_Auth::isAdministrator() || Hal_Auth::getUid() == $this->document->getContributor('uid') || in_array(Hal_Auth::getUid(), $this->document->getOwner()) || Hal_Document_Filerequest::canRead($this->document->getDocid(), Hal_Auth::getUid());
+    $href = $this->document->getPortailUrl() . '/' . $this->document->getId();
+    if(count($this->document->getDocVersions()) > 1) {
+        $href .= 'v' . $this->document->getVersion();
+    }
+    ?>
+    <div class="widget widget-files">
+        <h3 class="widget-header">
+            <?php
+            if ( $this->document->getFormat() == Hal_Document::FORMAT_ANNEX ) {
+                echo $this->translate($this->document->getFileNb() == 1 ? 'Annexe' : 'Annexes');
+            } else {
+                echo $this->translate($this->document->getFileNb() == 1 ? 'Fichier' : 'Fichiers');
+            }
+            ?>
+        </h3>
+        <div class="widget-content">
+            <?php $displayAnnex = true; ?>
+            <?php $default = $this->document->getDefaultFile(); ?>
+            <?php if ($default !== false) {
+                $displayAnnex = false;
+                $embargo = !$default->canRead();
+
+                if ($embargo && !$this->readEmbargo) {
+                    ?>
+                    <div class="alert alert-danger text-center" style="margin-bottom:0px;">
+                        <h5><i class="glyphicon glyphicon-lock"></i>&nbsp;<?php echo $this->translate("Document sous embargo");?></h5>
+                        <?php echo $this->translate('Fichier visible le');?> : <strong><?php echo ( $default->getDateVisible() == '9999-12-31' ) ? $this->translate('jamais') : $default->getDateVisible();?></strong>
+                        <br /><br />
+                        <?php if ( !Hal_Auth::isLogged() ) { ?>
+                            <a href="javascript:void(0);" onclick="$('#form-login').submit();"><?php echo $this->translate("Connectez-vous pour demander l'accès au fichier");?></a>
+                        <?php } else { ?>
+                            <?php if ( !Hal_Document_Filerequest::haveRequest($this->document->getDocid(), Hal_Auth::getUid()) ) { ?>
+                                <?php if ( Hal_Document_Filerequest::alreadyRejected($this->document->getDocid(), Hal_Auth::getUid()) ) { ?>
+                                    <span style="color:#666;"><i class="glyphicon glyphicon-ban-circle"></i>&nbsp;<i><?php echo $this->translate("Votre demande d'accès au fichier a été refusée");?></i></span>
+                                <?php } else { ?>
+                                <div id="embargo-msg">
+                                    <button class="btn btn-primary btn-sm" onclick="sendContibutorRequest()"><i class="glyphicon glyphicon-envelope"></i>&nbsp;<?php echo $this->translate("Demander l'accès au fichier")?></button>
+                                </div>
+                                <script>
+                                    function sendContibutorRequest()
+                                    {
+                                        $.ajax({
+                                            type: "post",
+                                            url: "<?php echo PREFIX_URL?>user/ajaxfileaccess",
+                                            data: {docid: <?php echo $this->document->getDocid()?>},
+                                            success: function(data) {
+                                                if (data=='true') {
+                                                    message("<?php echo $this->translate('Votre demande a été envoyée au déposant');?>", "alert-success");
+                                                }
+                                                $('#embargo-msg').html("<span style=\"color:#666;\"><i class=\"glyphicon glyphicon-info-sign\"></i>&nbsp;<i><?php echo $this->translate("Votre demande d'accès au fichier a été envoyée aux propriétaires du document");?></i></span>");
+                                            }
+                                        });
+                                    }
+                                </script>
+                                <?php } ?>
+                            <?php } else { ?>
+                                <span style="color:#666;"><i class="glyphicon glyphicon-info-sign"></i>&nbsp;<i><?php echo $this->translate("Votre demande d'accès au fichier a été envoyée aux propriétaires du document");?></i></span>
+                            <?php } ?>
+                        <?php } ?>
+                    </div>
+                    <?php
+                } else { ?>
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <?php
+
+                            if ($default->getImagette() == 0) {
+                                $imgSrc = 'http://thumb.ccsd.cnrs.fr/img/small/file.png';
+                            } else {
+                                $imgSrc = $default->getImagetteUrl();
+                            }
+                            ?>
+                            <a href="<?php echo $href . $this->document->getUrlMainFile(); ?>" target="_blank">
+                                <img src="<?php echo $imgSrc?>" border="0" class="img-thumbnail"/>
+                            </a>
+                        </div>
+                        <div class="col-md-8">
+                            <?php if ($embargo) { ?>
+                                <div class="label label-danger" style="white-space: normal; display:inline-block"><i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;<?php echo $this->translate('Fichier visible le');?> : <strong><?php echo ( $default->getDateVisible() == '9999-12-31' ) ? $this->translate('jamais') : $default->getDateVisible();?></strong></div>
+                            <?php } else { ?>
+                                <a href="<?php echo $href . $this->document->getUrlMainFile(); ?>" target="_blank" data-toggle="tooltip" title="<?php echo $default->getName().' - '.$default->getSize(); ?>"><?php echo Ccsd_Tools::truncate($default->getName(), 30); ?></a>
+                            <?php } ?>
+
+                            <?php if ($default->getOrigin()!= '') { ?>
+                                <div><?php
+                                    if ( in_array(1309, $this->document->getCollectionIds()) ) {
+                                        echo $this->translate('fileSource_public_star');
+                                    } else {
+                                        echo $this->translate('fileSource_public_' . $default->getOrigin());
+                                    }
+                                ?></div>
+                            <?php } ?>
+                            <?php if ($default->getComment()!= '') { ?>
+                                <hr />
+                                <div><i><?php echo $default->getComment(); ?></i></div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                <?php } ?>
+        <?php } ?>
+
+            <?php $files = $this->document->getFilesByType(Hal_Settings::FILE_TYPE, true);
+            if (count($files)) {
+                $displayAnnex = false;
+                ?>
+                <hr />
+                <div>
+                    <ul style="list-style-type: none;padding:0;">
+                        <?php foreach($files as $file) {
+                            $this->file = $file;
+                            $this->href = '';
+
+                            ?>
+                            <li>
+                                <?php  include 'row-file.phtml' ;?>
+                            </li>
+                        <?php } ?>
+                    </ul>
+                </div>
+            <?php } ?>
+
+            <?php $filesAnnex = $this->document->getFilesAnnex();
+            if (count($filesAnnex)) {  ?>
+                <?php if (! $displayAnnex) { ?>
+                    <hr />
+                    <div id="list-files-link" class="more-data">
+                        <a href="javascript:void(0)" onclick="displayDiv('#list-files', '#list-files-link')" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-plus-sign"></i>&nbsp;<?php echo $this->translate('Voir les fichiers annexes') ?></a>
+                    </div>
+                <?php } ?>
+                <div id="list-files" <?php echo ! $displayAnnex ? 'style="display:none;"' : '' ?>>
+                    <ul style="list-style-type: none;padding:0;">
+                        <?php foreach($filesAnnex as $file) {
+                            $this->file = $file;
+                            $this->href = '';
+                            ?>
+                            <li>
+                                <?php  include 'row-file.phtml' ;?>
+                            </li>
+                            <?php
+                        } ?>
+                    </ul>
+                    <?php if (! $displayAnnex) { ?>
+                        <a href="javascript:void(0)" onclick="displayDiv('#list-files', '#list-files-link')" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-minus-sign"></i>&nbsp;<?php echo $this->translate('Masquer les fichiers annexes') ?></a>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+        </div>
+    </div>
+<?php }

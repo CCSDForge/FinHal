@@ -1,0 +1,45 @@
+<?php
+    $url = PREFIX_URL.'searchAdv/index';
+    if ( $this->fq != '' ) {
+        $url .= '/?'.$this->fq;
+    }
+?>
+<form action="<?php echo $url ?>" method="post">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="input-group">
+                    <input type="text" name="q" class="form-control" autocomplete="off" placeholder="<?php echo $this->translate('Termes de recherche'); ?>">
+                    <input  type="text" name="q" class="form-control" placeholder="<?php echo $this->translate('Termes de recherche'); ?>"
+                        data-src="default"
+                        accesskey="4"
+                        id="q"
+                        pattern=".{0,300}"
+                        title="300 caractères max."
+                        x-webkit-speech
+                        style="min-width: 200px;"
+                        tabindex="1"
+                        value="<?php if (array_key_exists('q', $this->parsedSearchParams)) {
+                            echo $this->escape($this->parsedSearchParams['q']);
+                        } ?>"
+                    >
+
+                <div class="input-group-btn">
+
+                    <button
+                            name="submit"
+                            type="submit"
+                            class="btn btn-primary"
+                    >
+                        <span class="glyphicon glyphicon-search"></span>&nbsp;<?php echo $this->translate('Rechercher'); ?>
+                    </button>
+
+                    <a href="//doc.archives-ouvertes.fr/rechercher-simple-avancee/" class="btn btn-default"
+                       target="_blank" rel="noopener"><span class="glyphicon glyphicon-question-sign"></span></a>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>
+

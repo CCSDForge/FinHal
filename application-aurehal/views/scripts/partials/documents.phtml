@@ -1,0 +1,336 @@
+<?php 
+
+
+
+if (count(array_filter($this->documents)) > 0) {
+	
+	$labels = array (
+		'regroupinstitution' => 'danger',
+		'institution' => 'danger',
+		'regrouplaboratory'  => 'warning',
+		'laboratory'  => 'warning',
+		'department'  => 'success',
+		'researchteam'=> 'primary'
+	);
+?>
+<style type='text/css'>
+.chevron {
+	position: absolute; 
+	top: -2px; 
+	right: 19px; 
+	padding: 13px; 
+	cursor: pointer; 
+	transform: rotate(90deg); 
+	-ms-transofmr: rotate(90deg); 
+	-webkit-transform: rotate(90deg);
+	-moz-transform: rotate(90deg);
+	border-bottom: 1px solid #dddddd;
+}
+
+.chevron:hover {
+	-moz-box-shadow: inset -2px -2px 4px -3px #7d7d7d;
+	-webkit-box-shadow: inset -2px -2px 4px -3px #7d7d7d;
+	-o-box-shadow: inset -2px -2px 4px -3px #7d7d7d;
+	box-shadow: inset -2px -2px 4px -3px #7d7d7d;
+}
+
+.panel-articles {
+	display: none;	
+}
+
+.panel-articles .row:hover {
+	background-color: #f7f8e9;
+}
+
+/*.panel-articles .row .controls:hover i.glyphicon-check:before {
+  	content: "\e157";
+}
+
+.panel-articles .row .controls:hover i.glyphicon-unchecked:before {
+  	content: "\e067";
+}*/
+
+.panel-show {
+	display: block;
+}
+
+.panel-show-icon {
+	transform: rotate(270deg); 
+	-ms-transofmr: rotate(270deg); 
+	-webkit-transform: rotate(270deg);
+	-moz-transform: rotate(270deg);
+	border-top: 1px solid #dddddd;	
+}
+
+.panel-show-icon:hover {
+	-moz-box-shadow: inset 2px 2px 4px -3px #7d7d7d ! important;
+	-webkit-box-shadow: inset 2px 2px 4px -3px #7d7d7d ! important;
+	-o-box-shadow: inset 2px 2px 4px -3px #7d7d7d ! important;
+	box-shadow: inset 2px 2px 4px -3px #7d7d7d ! important;
+}
+
+.panel-heading .text-muted {
+	float: right;
+	margin-right: 33px;
+}
+
+.legend span{
+	color: #959595;
+    font-size: 12px;
+    font-weight: 700;
+    left: 15px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    top: 15px;
+    position: absolute;
+}
+
+.legend a{
+    color: #959595!important;
+    float: right;
+    font-size: 12px;
+    font-weight: 700;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    text-decoration: none !important;
+}
+
+.citation {
+	text-align : justify;
+}
+
+.unknown {
+	color: #a30000;
+    font-size: 10px;
+    font-weight: 700;
+    left: 15px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+</style>
+<script type='text/javascript'>
+$(document).ready(function() {
+
+	$('.chevron').off('click').on('click', function () {
+		$(this).closest('.panel').find('.panel-body').toggleClass('panel-show');
+		$(this).toggleClass('panel-show-icon');
+	});
+	
+	$(this).off('click').on('click', '.panel-articles .controls .glyphicon', function () {
+		update (this);
+	});
+	
+	$('#tous').off('click').on('click', function () {
+		toutCocher(this);
+	});
+	
+	function update (i) {
+		var a = $(i).closest('.row').attr('data-objid'),
+	    	d = $(i).closest('.row').attr('data-docid'),
+	    	c = $(i).hasClass('glyphicon-check') ? 'glyphicon-unchecked' : 'glyphicon-check';
+
+    	$(i).closest('.articles').find('.row[data-objid="' + a + '"][data-docid="' + d + '"] .controls').find('i').removeClass('glyphicon-unchecked').removeClass('glyphicon-check').addClass(c);
+
+    	$(i).closest('.articles').find('.row[data-objid="' + a + '"][data-docid="' + d + '"]').closest('.panel').each(function (i) {
+    		var e = $(this).find('.panel-body .controls .glyphicon-check').length,
+		    	f = $(this).find('.panel-body .controls .glyphicon').length,
+		    	g = "Tous";
+
+			if (e == 0) {
+				g = "Aucun";
+			} else if (e != f) {
+				g = e + "/" + f
+			}
+
+			$(this).attr('data-uncheck', g == "Tous" ? false : true);
+            $('#tous').prop("checked", g == "Tous" ? true : false);
+			$(this).find('.panel-heading .info').html(g);
+        });
+
+		var uncheck = false;
+		$(i).closest('.articles').find('.panel').each(function (i) {
+			if ($(this).attr('data-uncheck') == "true") {
+				uncheck = true;
+			}
+		});
+
+		if (uncheck) {
+			$(i).closest('.articles').find('.panel .input_documents').each(function (i) {
+				var clone = $(this).clone();
+				
+				$(clone).attr('id', $(clone).attr('name').replace("[", "_").replace("]", "").replace("[", "_").replace("]", "") );
+				$(clone).val(($(this).parent().find('i').hasClass('glyphicon-check') ? "1" : "0"));	
+
+				if ($(".form_replace").find('#' + $(clone).attr("id")).length) {
+					$(".form_replace").find('#' + $(clone).attr("id")).replaceWith(clone);
+				} else {		
+					$(".form_replace").append(clone);
+				}
+			});
+		} else {
+			$(i).closest('.articles').find('.panel .input_documents').each(function (i) {
+				$(".form_replace").find('#' + $(this).attr('name').replace("[", "_").replace("]", "").replace("[", "_").replace("]", "")).remove();
+			});
+		}
+	}
+
+	$(this).on('click', '.legend .hiding', function() {
+		var self = this;
+		$(this).closest('.articles').find('section').slideUp("linear", function () {
+			$(self).hide();
+			$(self).parent().find('.showing').show();
+			var clone = $(self).closest('.legend').find('input').clone();
+			$(clone).val(0);
+			if ($(".form_replace").find('input[name="panel\[' + $(self).closest('.legend').attr('data-objid') + '\]"]').length) {
+				$(".form_replace").find('input[name="panel\[' + $(self).closest('.legend').attr('data-objid') + '\]"]').replaceWith(clone);
+			} else {		
+				$(".form_replace").append(clone);
+			}
+		});		
+	});
+
+	$(this).on('click', '.legend .showing', function() {
+		var self = this;
+		$(this).closest('.articles').find('section').slideDown('linear', function () {
+			$(self).hide();
+			$(self).parent().find('.hiding').show();
+			var clone = $(self).closest('.legend').find('input').clone();
+			$(clone).val(1);
+			if ($(".form_replace").find('input[name="panel\[' + $(self).closest('.legend').attr('data-objid') + '\]"]').length) {
+				$(".form_replace").find('input[name="panel\[' + $(self).closest('.legend').attr('data-objid') + '\]"]').replaceWith(clone);
+			} else {		
+				$(".form_replace").append(clone);
+			}
+		});
+	});
+
+    function toutCocher() {
+        if ($('#tous').is(':checked')) {
+            $('#tous').closest('div.panel-articles').find('div.row div.controls i.glyphicon').removeClass('glyphicon-check').addClass('glyphicon-unchecked');
+        }   
+        else { 
+            $('#tous').closest('div.panel-articles').find('div.row div.controls i.glyphicon').removeClass('glyphicon-unchecked').addClass('glyphicon-check'); 
+        }
+        $(this).closest('div.panel-articles').find('div.row div.controls i').each(update(this));
+    }
+});
+
+</script>
+<?php $panel = isset($this->panel[$this->id]) && $this->panel[$this->id]; ?>
+<div class='articles'>
+	<div style='padding-top: 50px;' class='legend' data-objid="<?php echo $this->id ?>">
+		<span><?php echo $this->translate("-- Documents impactés par la fusion --") ?></span>
+		<a class='hiding'  <?php if (!$panel)  echo "style='display: none;'"; ?> href='javascript:void(0);'>[ <?php echo $this->translate("Cacher") ?> ]</a>
+		<a class='showing' <?php if ($panel)   echo "style='display: none;'"; ?> href='javascript:void(0);'>[ <?php echo $this->translate("Voir") ?> ]</a>
+		<input type='hidden' name='panel[<?php echo $this->id ?>]' value='<?php echo $panel ? "1" : "0" ?>' />
+		<script type='text/javascript'>
+		$(document).ready(function() {
+			$('.articles').find('section').<?php echo $panel ? "show" : "hide"?>();
+			$('.articles').find('.legend .<?php echo $panel ? "showing" : "hiding"?>').trigger('click');
+		});
+		</script>
+	</div>
+	<section>
+		<?php foreach($this->documents as $structid => $articles) { ?>
+			<?php if (!empty ($articles)) { ?>
+			<div class='row'>
+				<div class='col-xs-12 col-md-12'>
+					<div class="panel panel-default" data-uncheck='false'>
+		  				<div class="panel-heading">
+		  					<?php
+			  				if ($structid) {
+								?>
+								<a href="/structure/read/id/<?php echo $structid ?>" target="_blank" alt='<?php echo $this->translate($this->relations[$structid]['type']) ?>' title='<?php echo $this->translate($this->relations[$structid]['type']) ?>'>
+			  					<?php 
+								echo $this->relations[$structid]['name'];
+			  				} else {
+								?>
+								<i class='glyphicon glyphicon-warning-sign' style='color: #a30000; font-size: 10px;';></i>
+								<span class='unknown'>
+								<?php 
+								echo $this->translate ("Sans structures de recherche");
+								?>
+								</span>
+								<?php 
+							}
+			  				?>
+			  				</a>
+			  				<span class='info text-muted'>
+			  				<?php echo $this->translate('Tous'); ?>
+			  				</span>
+							<div class='chevron'>
+								<i class='glyphicon glyphicon-chevron-right'></i>
+							</div>
+		  				</div>
+		  				<div class="panel-body panel-articles">
+                            
+                            <div class="input-group">
+                                <span class="input-group-addon" style="border-left-width: 0px; padding-left: 0px; border-bottom-width: 0px; border-top-width: 0px; background-color: inherit;">
+ 		                             <input type="checkbox" id="tous" checked="checked" onchange="$(this).closest('div.panel-articles').find('div.row div.controls i').trigger('click');">
+ 								</span>
+								<input type="text" readonly="readonly" disabled='disabled' value="Tous/Aucun" class="form-control" style="border-width: 0px; background-color: inherit;">
+                            </div>
+
+							<?php foreach ($articles as $article) { ?>
+							<div class='row' style='padding: 3px 0;' data-objid="<?php echo $this->id ?>" data-docid="<?php echo $article['docid']; ?>">
+								<div class='col-xs-offset-1 col-xs-1 col-md-offset-1 col-md-1 controls'>
+									<?php 
+									if (!(Zend_Controller_Front::getInstance()->getRequest()->isXmlHttpRequest() && isset($this->{"OBJID_" . $this->id}))) {
+										if (isset ($this->{"OBJID_" . $this->id}[$article['docid']]) && !$this->{"OBJID_" . $this->id}[$article['docid']]) {
+											?>
+											<script type='text/javascript'>
+											$(document).ready(function() {
+												$('.articles').find('.row[data-objid="' + <?php echo $this->id ?> + '"][data-docid="' + <?php echo $article['docid'] ?> + '"] .controls').find('i').each(function() {
+													$(this).trigger('click');
+													return false;
+												});
+											});
+											</script>
+											<?php 
+											unset ($this->{"OBJID_" . $this->id}[$article['docid']]);
+										}
+									}
+									?>
+									<i class='glyphicon glyphicon-check' style='cursor: pointer'></i>
+									<input type="hidden" name="docs[<?php echo $this->id ?>][<?php echo $article['docid']; ?>]" value="1" class="input_documents"/>
+								</div>
+								<div class='col-xs-8 col-md-8 citation'>
+									<?php if ($article['format'] == Hal_Document::FORMAT_FILE || $article['format'] == Hal_Document::FORMAT_ANNEX) { ?>
+						            <i class="glyphicon glyphicon-file" title="<?php echo $this->translate($article['format'])?>"></i>
+						            <?php } ?>
+						            <?php
+						            if (isset ($article['citation'])) {
+						            	echo $article['citation']; 
+						            } else {
+										echo $this->translate('Aucune citation...');
+									}
+						            ?>
+								</div>
+								<div class='col-xs-offset-1 col-xs-1 col-md-offset-1 col-md-1'>
+									<?php if (isset ($article['ref_url'])) { ?>
+									<a href='<?php echo $article['ref_url']?>' target='_blank'>
+										<i class='glyphicon glyphicon-eye-open'></i>
+									</a>
+									<?php } ?>
+								</div>
+							</div>
+							<?php } ?>
+		  				</div>
+					</div>	
+				</div>
+			</div>
+			<?php } ?>
+		<?php } ?>
+	</section>
+</div>
+<?php 
+} else { 
+?>
+<div class="alert alert-danger" style='margin-top: 15px;'>
+	<button data-dismiss="alert" class="close" type="button" onclick="$(this).closest('.alert').remove();">×</button>
+    <?php echo $this->translate("Aucun document n'est associé à cet objet"); ?>
+</div> 
+<?php
+}

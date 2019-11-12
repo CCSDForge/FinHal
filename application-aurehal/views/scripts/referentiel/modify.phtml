@@ -1,0 +1,46 @@
+<?php
+$this->jQuery()->addJavascriptFile(CCSDLIB . '/js/jquery/ui/autocomplete.html.js');
+
+if (isset ($this->form)) {
+    echo $this->form;
+} else {
+?>
+<?php if (isset ($this->info)) { ?>
+<div class='alert alert-info'>
+<?php echo str_replace("?", $this->id, $this->translate($this->info)); ?>
+</div>
+<?php } ?>
+
+<?php if (isset ($this->obj)) echo $this->obj; ?>
+
+<?php if (isset ($this->info_2)) { ?>
+<div class='alert alert-warning'>
+<?php echo $this->translate($this->info_2); ?>
+</div>
+<?php } ?>
+<?php } ?>
+
+<script>
+    $('#ORGANISM').autocomplete({
+        minLength: 2,
+        html: true,
+        source: function(request, response){
+            $.ajax({
+                url: "/ajax/ajaxsearchstructure",
+                dataType: "json",
+                data: {term: request.term, type: 'institution'},
+                success: function(data) {
+                    response($.map(data.response.docs, function(item) {
+                        return {id: item.docid, label: item.label_html}
+                    }));
+                }
+            });
+        },
+        focus: function() {return false;},
+        select: function( event, ui ) {
+            $('#ORGANISM').val(strip_tags(ui.item.label));
+            $('#STRUCTID').val(ui.item.id);
+            return false;
+        }
+    });
+</script>

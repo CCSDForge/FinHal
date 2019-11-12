@@ -1,0 +1,105 @@
+<div class="">
+    <div class="well">
+        <form action="/administrate/index" id="form" method="post">
+            <div class="row">
+                <div class="col-md-4">
+                    <span class="halms-color"><?php echo $this->translate('Filtrer par statut') ?></span>
+                    <select name="status" class="form-control">
+                        <?php foreach($this->docStatus as $status) {
+                            $selected = $status == $this->defaultDocStatus ? 'selected="selected"' : '';
+                            ?>
+                            <option value="<?php echo $status ?>" <?php echo $selected?>><?php echo $this->translate('status_' . $status) ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <span class="halms-color"><?php echo $this->translate('Accéder par identifiant') ?></span>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="q" id="q" placeholder="<?php echo $this->translate('docid ou identifiant') ?>" <?php echo isset($this->q) ? 'value="' . $this->q .'"' : ''?>>
+                          <span class="input-group-btn">
+                            <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                          </span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <span class="halms-color"><?php echo $this->translate("Limiter l'affichage") ?></span>
+                    <select name="limit" class="form-control">
+                        <?php foreach($this->limit as $limit) {
+                            $selected = $limit == $this->defaultLimit ? 'selected="selected"' : '';
+                            if ($limit == 0) {
+                                $label = $this->translate('Tous');
+                            } else {
+                                $label = $limit;
+                            }
+
+                            ?>
+                            <option value="<?php echo $limit ?>" <?php echo $selected?>><?php echo $label ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+    <?php if ($this->message) {?>
+        <div class="alert alert-danger alert-hidden" role="alert" style="margin-top:20px;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <strong><i class="glyphicon glyphicon-info-sign"></i></strong>&nbsp;<?php echo $this->translate($this->message); ?>
+        </div>
+        <script type="text/javascript">
+            $(function() {
+                setTimeout(function() {
+                    $('.alert-hidden').fadeOut();
+                }, 3000);
+            });
+        </script>
+    <?php }?>
+    <?php if (count($this->documents)) {
+        //Zend_Debug::dump($this->documents);
+        ?>
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th><?php echo $this->translate('Identifiant') ?></th>
+                    <th><?php echo $this->translate('Document') ?></th>
+                    <?php if ($this->defaultDocStatus == Halms_Document::STATUS_INITIAL_EMBARGO) { ?>
+                        <th><?php echo $this->translate('Message') ?></th>
+                    <?php } ?>
+                    <th style="width:80px;"><?php echo $this->translate('Date') ?></th>
+                    <th><?php echo $this->translate('Action') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($this->documents as $data) {
+                    $document = Hal_Document::find($data['DOCID']);
+                    if (!$document instanceof Hal_Document) continue;
+                    ?>
+                    <tr>
+                        <td style="vertical-align:middle;"><span class="label label-default" style="background-color:#368291;font-weight: normal;font-size: 12px;"><?php echo $document->getId(true);?></span></td>
+                        <td><?php echo $document->getCitation('full');?></td>
+                        <?php if ($this->defaultDocStatus == Halms_Document::STATUS_INITIAL_EMBARGO) { ?>
+                            <th><?php echo $data['COMMENT'] ?></th>
+                        <?php } ?>
+                        <td style="vertical-align:middle;"><?php echo $data['DATEMODIF'] ?></td>
+                        <td style="vertical-align:middle;" class="text-right"><div class="btn-group btn-group-sm" role="group">
+                                <a href="/administrate/index/docid/<?php echo $document->getDocid()?>"  class="btn btn-primary" data-toggle="tooltip" title="<?php echo $this->translate("Editer"); ?>">
+                                    <i class="glyphicon glyphicon-pencil"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    <?php } else { ?>
+        <div class="alert alert-danger" role="alert"><i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;<?php echo $this->translate('Aucun document'); ?></div>
+    <?php } ?>
+</div>
+
+<script type="text/javascript">
+    $(function() {
+        $('select').change(function(){
+            $('#q').val('');
+            $('#form').submit();}
+        );
+    });
+</script>

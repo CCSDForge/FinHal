@@ -1,0 +1,217 @@
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><?php echo $this->translate("Demandes d'accès envoyées");?></h3>
+    </div>
+    <div class="panel-body">
+        <blockquote><?php echo $this->translate("Listes des dépôts où vous avez demandé l'accès au fichier sous embargo");?></blockquote>
+        <?php if (count($this->docidsIHaveRequested) > 0) { ?>
+            <div class="well" style="margin-top:10px;">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th><?php echo $this->translate('Document')?></th>
+                        <th class="text-right"><?php echo $this->translate('Date'); ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($this->docidsIHaveRequested as $request) { ?>
+                        <tr>
+                            <td>
+                                <?php
+                                    $document = Hal_Document::find($request['DOCID']);
+                                    if ( $document instanceof Hal_Document ) {
+                                        echo $document->getCitation( 'full' );
+                                    }
+                                ?>
+                            </td>
+                            <td class="text-right" nowrap="nowrap">
+                                <?php
+                                echo Ccsd_Tools::formatDate($request['DATECRE']);
+                                ?>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php } else { ?>
+            <div class="alert alert-warning alert-fixed"><?php echo $this->translate('Aucune demande envoyée !');?></div>
+        <?php } ?>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><?php echo $this->translate("Demandes d'accès reçues");?></h3>
+    </div>
+    <div class="panel-body">
+        <blockquote><?php echo $this->translate("Acceptez/refusez les demandes d'accès au fichier sous embargo faites pour vos dépôts");?></blockquote>
+        <?php if (count($this->docidsRequestToMe) > 0) {
+            $user = new Hal_User();
+            ?>
+            <div id="filerequest" class="well">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th><?php echo $this->translate('Utilisateur'); ?></th>
+                        <th><?php echo $this->translate('Document'); ?></th>
+                        <th class="text-right"><?php echo $this->translate('Date'); ?></th>
+                        <th class="text-right"><?php echo $this->translate('Actions'); ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($this->docidsRequestToMe as $request) {
+                        $document = Hal_Document::find($request['DOCID']);
+                        if ( $document instanceof Hal_Document ) {
+                            $user->find($request['UID']);
+                        ?>
+                        <tr id="filerequest-<?php echo $request['DOCID']?>-<?php echo $request['UID']?>">
+                            <td style="vertical-align:middle" nowrap="nowrap">
+                                <img class="user-photo-thumb" alt="Photo de l'utilisateur" src="<?php echo  CV_URL . '/photo/' . $request['UID'] . '/thumb'; ?>" style="width:16px;"/>
+                                <?php echo $user->getFullName(); ?>
+                            </td>
+                            <td style="vertical-align:middle"><?php echo $document->getCitation('full'); ?></td>
+                            <td class="text-right" nowrap="nowrap">
+                                <?php
+                                echo Ccsd_Tools::formatDate($request['DATECRE']);
+                                ?>
+                            </td>
+                            <td style="vertical-align:middle" class="text-right" nowrap="nowrap">
+                                <button type="button" class="btn btn-primary btn-xs" onclick="acceptFileRequest(<?php echo $request['DOCID']?>, <?php echo $request['UID']?>);">
+                                    <i class="glyphicon glyphicon-ok"></i>&nbsp;
+                                    <?php echo $this->translate('Accepter'); ?>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-xs" onclick="refusedFileRequest(<?php echo $request['DOCID']?>, <?php echo $request['UID']?>);">
+                                    <i class="glyphicon glyphicon-remove"></i>&nbsp;
+                                    <?php echo $this->translate('Refuser'); ?>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php } ?>
+                    <?php } ?>
+                    </tbody>
+                </table>
+                <hr />
+            </div>
+            <script language="Javascript">
+                //<!--
+                /**
+                 * Refus d'une demande
+                 * @param docid
+                 * @param uid
+                 */
+                function refusedFileRequest(docid,uid)
+                {
+                    sentClaim(docid, uid, 0);
+                }
+                /**
+                 * Acceptation d'une demande
+                 * @param docid
+                 * @param uid
+                 */
+                function acceptFileRequest(docid,uid)
+                {
+                    sentClaim(docid, uid, 1);
+                }
+
+                /**
+                 * Envoi de la demande
+                 * @param docid
+                 * @param uid
+                 * @param type
+                 */
+                function sentClaim(docid,uid,accept)
+                {
+                    $.ajax({
+                        url: "/user/filerequest",
+                        type: "post",
+                        data: {docid: docid, uid: uid, accept:accept},
+                        success: function( data ) {
+                            if ( data == 'true' ) {
+                                $('#filerequest-' + docid + '-' + uid).remove();
+                                if ($('#filerequest>table>tbody>tr').length == 0) {
+                                    $('#filerequest').hide();
+                                    $('#filerequest-empty').show();
+                                }
+                                message('<?php echo $this->translate('La demande est traitée'); ?>', 'success');
+                            }
+                        }
+                    });
+                }
+                //-->
+            </script>
+        <?php } else { ?>
+            <script language="Javascript">
+                $(function(){
+                    $('#filerequest-empty').show();
+                });
+            </script>
+        <?php } ?>
+        <div id="filerequest-empty" class="alert alert-warning alert-fixed" style="display:none"><?php echo $this->translate('Aucune demande reçue !');?></div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><?php echo $this->translate("Historiques des demandes");?></h3>
+    </div>
+    <div class="panel-body">
+        <blockquote><?php echo $this->translate("Listes des dépôts où vous avez reçu une réponse à votre demande d'accès au fichier sous embargo");?></blockquote>
+        <?php if (count($this->docidsHistory) > 0) {
+            $user = new Hal_User();
+        ?>
+            <div class="well" style="margin-top:10px;">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th><?php echo $this->translate('Document')?></th>
+                        <th class="text-right"><?php echo $this->translate('Date'); ?></th>
+                        <th class="text-right"><?php echo $this->translate('Accès'); ?></th>
+                        <th class="text-right"><?php echo $this->translate('Utilisateur'); ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php $users = []; foreach ($this->docidsHistory as $request) { ?>
+                        <tr>
+                            <td>
+                                <?php
+                                $document = Hal_Document::find($request['DOCID']);
+                                if ( $document instanceof Hal_Document ) {
+                                    echo $document->getCitation( 'full' );
+                                }
+                                ?>
+                            </td>
+                            <td class="text-right" nowrap="nowrap">
+                                <?php
+                                echo Ccsd_Tools::formatDate($request['DATELOG']);
+                                ?>
+                            </td>
+                            <?php
+                            $tag = ( substr($request['MESG'], 0, 6) == 'accept' ) ? "<i style='background:none;border:0;' class='glyphicon glyphicon-ok-circle alert-success'></i>" : "<i style='background:none;border:0;' class='glyphicon glyphicon-ok-circle alert-danger'></i>";
+                            preg_match('/^(accept|rejection):\s*([0-9]+)/', $request['MESG'], $match);
+                            if ( !array_key_exists($match[2], $users) ) {
+                                $user->find((int)$match[2]);
+                                $users[$match[2]] = $user->getFullName();
+                            }
+                            ?>
+                            <td class="text-right" nowrap="nowrap">
+                                <?php
+                                echo $tag;
+                                ?>
+                            </td>
+                            <td class="text-right" nowrap="nowrap">
+                                <?php
+                                echo $users[$match[2]];
+                                ?>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php } else { ?>
+            <div class="alert alert-warning alert-fixed"><?php echo $this->translate('Aucun dépôt !');?></div>
+        <?php } ?>
+    </div>
+</div>

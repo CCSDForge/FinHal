@@ -1,0 +1,28 @@
+<?php
+/**
+ * @var Hal_View $this
+ * Created by PhpStorm.
+ * User: baptiste
+ * Date: 07/12/2015
+ * Time: 15:09
+ */
+if (isset($this->data['DOCID']))      {$docid       = $this->data['DOCID'];      } else {$docid       = (string)$this->docid;}
+if (isset($this->data['DATESUBMIT'])) {$datesubmit  = $this->data['DATESUBMIT']; } else {$datesubmit  = (string)$this->datesubmit;}
+if (isset($this->data['DATEVISIBLE'])){$datevisible = $this->data['DATEVISIBLE'];} else {$datevisible = (string)$this->datevisible;}
+?>
+<span id="file<?php echo $this->file->getFileid();?>" class="file<?php echo $docid?>" style="<?php if (isset($this->data['DOCID'])){?>display:none;<?php } else { ?>display:block;<?php }?>"><?php include __DIR__.'/../document/row-file.phtml';
+    if ($this->file->getDateVisible() > date('Y-m-d')) {?>
+    <a href="javascript:void(0);" data-toggle="tooltip" onclick="delFileEmbargo(<?php echo $this->file->getFileid();
+    ?>, <?php echo Hal_Auth::getUid()?>, <?php echo $docid?>)" data-original-title="<?php echo $this->translate("Mettre en ligne");
+    ?>" id="filevalid<?php echo $this->file->getFileid()?>" class="btn btn-xs btn-primary">
+            <i class="glyphicon glyphicon-ok"></i>
+        </a>
+    <a href="javascript:void(0);" data-toggle="tooltip" onclick="getFileCalendar(<?php echo $this->file->getFileid();
+    ?>, <?php echo Hal_Auth::getUid()?>, <?php echo $docid?>, '<?php echo date('Y-m-d', strtotime('+2 years', strtotime($datesubmit)))
+    ?>', '<?php echo $datevisible?>')" id="emb_<?php echo $this->file->getFileid()?>" class="btn btn-xs btn-default">
+        <i class="glyphicon glyphicon-calendar"></i>
+    </a>
+    <?php
+    }
+?>
+</span>

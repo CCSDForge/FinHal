@@ -1,0 +1,23 @@
+<?php
+$critere = Zend_Controller_Front::getInstance()->getRequest()->getParam('critere');
+$category = Zend_Controller_Front::getInstance()->getRequest()->getParam('category');
+$critere = $this->escape($critere);
+?>
+
+<div class="input-group col-xs-5 col-sm-5 col-md-5 col-lg-5">
+    <span class='input-group-addon'><?php echo $this->translate('Remplacer les éléments par...') ?></span>
+    <input type="text" class="form-control" name="critere" value="<?php echo Ccsd_Tools::ifsetor($critere, ""); ?>">
+</div>
+
+<div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+    <select name="category" class="form-control">
+        <?php foreach (['*', 'regroupinstitution', 'institution', 'regrouplaboratory', 'laboratory', 'department', 'researchteam'] as $v) { ?>
+            <?php echo "<option value='$v' " . ($category == $v ? "selected='selected'" : "") . ">$v</option>"; ?>
+        <?php } ?>
+    </select>
+</div>
+
+<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+    <button name='search' class='btn btn-primary'
+            value='Rechercher'><?php echo $this->translate("Rechercher") ?></button>
+</div>

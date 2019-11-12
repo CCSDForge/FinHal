@@ -1,0 +1,81 @@
+/* 
+    Created on : 11 mai 2016, 13:50:06
+    Author     : clément
+*/
+body {
+  color : #000000;
+  background : #ffffff;
+  font-family : "Times New Roman", Times, serif;
+  font-size : 12pt;
+  margin: auto!important;
+}
+
+.navbar, .col-md-3, .footer-contact, .footer-ccsd, .col-md-2, .modal, .logo-title, a.btn.btn-primary{ 
+   display: none;
+}
+ 
+.table > tbody > tr > td {
+    border-top: 1px solid #ddd;
+    line-height: 1.42857;
+    padding: 8px;
+}
+
+.table tbody tr.success td .badge {
+    color: green;
+} 
+
+.table tbody tr td a {
+    color: #000000;
+}
+
+.table tbody tr.danger td .badge {
+    color: red;
+
+}
+
+.table tbody tr.warning td .badge {
+    color: orange;
+}
+
+div small {
+    display : block;
+}
+
+div.col-xs-11 {
+    margin-left : 1cm;
+}
+
+div.col-xs-12 {
+    margin-left : 0cm;
+}
+
+div.col-xs-1, div.bounds {
+    width: 1cm;
+    min-width: 1cm;
+    min-height: 1px;
+    float: left;
+}
+
+/*div.col-xs-1::before {
+    content: "\200B";
+}*/
+
+div.col-xs-1:empty::after
+{
+    content: '.';
+    visibility: hidden;
+}
+
+span.label.label-default.code {
+    background-color: white;
+}
+
+div.col-xs-10 {
+	margin-left : 2cm;
+
+}
+
+div.col-xs-9 {
+	margin-left : 3cm;
+}
+

@@ -1,0 +1,70 @@
+# HAL robots.txt
+# If you want to download lots of metadata, please use our API at https://api.archives-ouvertes.fr/
+# The API is far more efficient for metadata harvesting
+# To learn more, please contact hal-support@ccsd.cnrs.fr
+
+User-Agent: *
+<?php
+/** @var Hal_View_Text $this */
+if (APPLICATION_ENV == ENV_PROD) {
+    $pathsToDissallow = [
+        '/RePEc/',
+        '/search/',
+        '/*/search/',
+        '/*/browse/last',
+        '/browse/last',
+        '/*/browse/latest-publications',
+        '/browse/latest-publications',
+        '*/tei',
+        '*/rdf',
+        '*/bibtex',
+        '*/dc',
+        '*/endnote',
+        '*/json',
+        '/ping',
+        '/login',
+        '/submit',
+        '/user',
+        '/error'
+    ];
+
+    foreach ($pathsToDissallow as $path) {
+        echo "Disallow: $path\n" ;
+    }
+
+    echo 'User-agent: SemanticScholarBot' . PHP_EOL;
+    echo 'Crawl-delay: 10' . PHP_EOL;
+
+    // https://megaindex.com/crawler
+    echo 'User-agent: MegaIndex.ru' . PHP_EOL;
+    echo 'Disallow: /' . PHP_EOL;
+
+    echo 'User-agent: megaindex.com' . PHP_EOL;
+    echo 'Disallow: /' . PHP_EOL;
+
+    // https://fr.semrush.com/bot/
+    echo 'User-agent: SemrushBot' . PHP_EOL;
+    echo 'Disallow: /' . PHP_EOL;
+
+    echo 'User-agent: SemrushBot-SA' . PHP_EOL;
+    echo 'Disallow: /' . PHP_EOL;
+
+    // http://seekport.com/ SEO bot
+    echo 'User-agent: Seekport Crawler';
+    echo 'Disallow: /' . PHP_EOL;
+
+    // http://ltx71.com/
+    echo 'User-agent: ltx71 - (http://ltx71.com/)';
+    echo 'Disallow: /' . PHP_EOL;
+
+    // https://ahrefs.com/robot
+    echo 'User-agent: AhrefsBot' . PHP_EOL;
+    echo 'Disallow: /' . PHP_EOL;
+
+    echo "# Sitemap\n";
+    echo "Sitemap: $this->sitemapUrl";
+} else {
+    echo "Disallow: *\n";
+}
+
+?>

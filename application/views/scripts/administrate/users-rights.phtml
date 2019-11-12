@@ -1,0 +1,242 @@
+<?php
+/** Hal_View $this */
+$this->jQuery()->addJavascriptFile(CCSDLIB . '/js/jquery/ui/autocomplete.html.js')->addJavascriptFile('/js/administrate/user-rights.js') ;
+$icons = array (
+		Hal_Acl::ROLE_HALADMIN    => 'glyphicon-star',
+		Hal_Acl::ROLE_ADMIN       => 'glyphicon-cog',
+		Hal_Acl::ROLE_ADMINSTRUCT => 'glyphicon-list-alt',
+		Hal_Acl::ROLE_VALIDATEUR  => 'glyphicon-eye-close',
+		Hal_Acl::ROLE_MODERATEUR  => 'glyphicon-eye-open',
+		Hal_Acl::ROLE_TAMPONNEUR  => 'glyphicon-tag'
+);
+$this->layout ()->breadcrumbs = $this->user->getFullName ();
+$this->layout ()->pageDescription = $this->translate ( "Gestion des privilèges" ) . ' : <a href="/administrate/users/q/' . $this->user->getUid () . '"><strong>' . $this->user->getFullName () . '</strong></a> <small>UID : ' . $this->user->getUid () . '</small>';
+$form = new Ccsd_Form ();
+?>
+<form class="form-inline" action="/administrate/users" method="post">
+	<input type="hidden" name="q" value="<?php echo $this->q ?>" /> <input
+		type="hidden" name="save" value="" /> <input type="hidden"
+		name="method" value="rights" /> <input type="hidden" name="uid"
+		value="<?php echo $this->user->getUid(); ?>" />
+    <?php /**
+						 * gestionnaire de structure
+						 */ ?>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<i class="glyphicon <?php echo $icons[Hal_Acl::ROLE_ADMINSTRUCT]?>"></i>&nbsp;<?php echo $this->translate(Hal_Acl::ROLE_ADMINSTRUCT); ?></div>
+		<div class="panel-body">
+			<p>
+                <label for="struct" style="display:none">Saisir la structure</label>
+				<input type="text" class="form-control" id="struct"
+					placeholder="<?php echo $this->translate("Commencez à saisir le nom d'une structure") ?>" />
+			</p>
+
+			<script type="text/javascript">
+                $(function() {
+                <?php foreach($this->user->getRoles(Hal_Acl::ROLE_ADMINSTRUCT) as $structid => $label) {?>
+                    addLabelElement("<?php echo Hal_Tools::stringFilter($label) . ' (' . $structid . ')' ?>", "roles[adminstruct][]", "<?php echo $structid ?>", "#structures");
+                <?php }?>
+                });
+            </script>
+		</div>
+		<div id="structures" class="panel-footer"></div>
+	</div>
+    <?php /**
+					 * Gestionnaire de collection
+					 */ ?>
+    <div class="panel panel-default">
+		<div class="panel-heading">
+			<i class="glyphicon <?php echo $icons[Hal_Acl::ROLE_TAMPONNEUR]?>"></i>&nbsp;<?php echo $this->translate(Hal_Acl::ROLE_TAMPONNEUR); ?></div>
+		<div class="panel-body">
+			<p><label for="collection" style="display:none">Saisir la collection</label>
+				<input type="text" class="form-control" id="collection"
+					placeholder="<?php echo $this->translate("Commencez à saisir le nom d'une collection") ?>" />
+			</p>
+			<script type="text/javascript">
+                $(function() {
+                    <?php foreach($this->user->getRoles(Hal_Acl::ROLE_TAMPONNEUR) as $sid => $label) {?>
+                    addLabelElement("<?php echo $label ?>", "roles[tamponneur][]", "<?php echo $sid ?>", "#collections");
+                    <?php }?>
+                });
+            </script>
+		</div>
+		<div id="collections" class="panel-footer"></div>
+	</div>
+    <?php
+    /** Valideur scientifique */
+    if ($this->isHalAdmin) { ?>
+        <div class="panel panel-default">
+		<div id="<?php echo Hal_Acl::ROLE_VALIDATEUR?>" class="panel-heading">
+			<i class="glyphicon <?php echo $icons[Hal_Acl::ROLE_VALIDATEUR]?>"></i>&nbsp;<?php echo $this->translate(Hal_Acl::ROLE_VALIDATEUR). ' / ' . $this->translate('Expert'); ?>
+            	<button type="button"
+				class="pull-right terminate btn btn-default btn-xs"
+				id="terminate-<?php echo Hal_Acl::ROLE_VALIDATEUR?>">
+				<i class="glyphicon glyphicon-pause"></i>&nbsp;<?php echo $this->translate('Désactiver'); ?></button>
+		</div>
+		<div class="panel-body">
+			<div class="col-md-3">
+				<label for="validateur-sid"><?php echo $this->translate('Instance'); ?></label>
+				<select class="form-control" id="validateur-sid">
+					<option value="0"><?php echo $this->translate('Toutes'); ?></option>
+                     <?php foreach ($this->instances as $sid => $siteName) : ?>
+                     	<option value="<?php echo $sid; ?>"><?php echo $siteName; ?></option>
+                     <?php endforeach;?>
+                </select>
+            </div>
+			<div class="col-md-3">
+				<label for="validateur-group"><?php echo $this->translate('Critère'); ?></label>
+				<select class="select-group form-control" id="validateur-group">
+					<option value=""></option>
+					<option value="domain"><?php echo $this->translate('Domaine');?></option>
+					<option value="typdoc"><?php echo $this->translate('Type de document');?></option>
+					<option value="sql"><?php echo $this->translate('Requête SQL');?></option>
+				</select>
+			</div>
+			<div class="col-md-3">
+				<label for="validateur-value"><?php echo $this->translate('Valeur'); ?></label>
+				<input type="text" class="form-control" id="validateur-value"
+					disabled />
+			</div>
+			<div class="col-md-2" style="margin-top: 20px;">
+				<button id="validateur-add" class="btn btn-default" type="button"
+					onclick="addCritere('validateur');">
+					<i class="glyphicon glyphicon-plus"></i>
+				</button>
+			</div>
+		</div>
+		<div id="validateur-list" class="panel-footer"></div>
+        </div>
+        <?php /** Modérateur */	?>
+        <div class="panel panel-default">
+            <div id="<?php echo Hal_Acl::ROLE_MODERATEUR?>"
+                 class="select-group panel-heading">
+                <i class="glyphicon <?php echo $icons[Hal_Acl::ROLE_MODERATEUR]?>"></i>&nbsp;<?php echo $this->translate(Hal_Acl::ROLE_MODERATEUR) . ' / ' . $this->translate('Modérateur'); ?>
+                <button type="button"
+                        class="pull-right terminate btn btn-default btn-xs"
+                        id="terminate-<?php echo Hal_Acl::ROLE_MODERATEUR ?>">
+                    <i class="glyphicon glyphicon-pause"></i>&nbsp;<?php echo $this->translate('Désactiver'); ?></button>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="moderateur-sid"><?php echo $this->translate('Instance'); ?></label>
+                        <select class="form-control" id="moderateur-sid">
+                            <option value="0"><?php echo $this->translate('Toutes'); ?></option>
+                            <?php foreach ($this->instances as $sid => $siteName) : ?>
+                                <option value="<?php echo $sid; ?>"><?php echo $siteName; ?></option>
+                            <?php endforeach;?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="moderateur-group"><?php echo $this->translate('Critère'); ?></label>
+                        <select class="select-group form-control" id="moderateur-group">
+                            <option value=""></option>
+                            <option value="domain"   ><?php echo $this->translate('Domaine');?></option>
+                            <option value="typdoc"   ><?php echo $this->translate('Type de document');?></option>
+                            <option value="structure"><?php echo $this->translate('Structure');?></option>
+                            <option value="sql"      ><?php echo $this->translate('Requête SQL');?></option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="moderateur-value"><?php echo $this->translate('Valeur'); ?></label>
+                        <input type="text" class="form-control" id="moderateur-value"
+                               disabled />
+                    </div>
+
+                    <div class="col-md-2" style="margin-top: 20px;">
+                        <button id="moderateur-add" class="btn btn-default" type="button"
+                                onclick="addCritere('moderateur');">
+                            <i class="glyphicon glyphicon-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="moderateur-list" class="panel-footer"></div>
+        </div>
+    <?php } ?>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="glyphicon <?php echo $icons[Hal_Acl::ROLE_ADMIN]?>"></i>&nbsp;<?php echo $this->translate(Hal_Acl::ROLE_ADMIN); ?></div>
+        <div class="panel-body">
+            <?php
+            $element = $form->createElement ( 'select', 'administrator', array (
+                'multiOptions' => array (
+                    '0' => 'Non',
+                    '1' => 'Oui'
+                ),
+                'value' => array_key_exists ( SITEID, $this->user->getRoles ( Hal_Acl::ROLE_ADMIN ) ),
+                'belongsTo' => 'roles'
+            ) );
+            echo $element;
+            ?>
+        </div>
+    </div>
+    <div class="form-actions text-center">
+        <button class="btn btn-primary" type="submit">
+            <?php echo $this->translate('Enregistrer'); ?>
+        </button>
+    </div>
+</form>
+<div id="label-html" style="display: none;">
+    <span class="label label-primary">
+        <input type="hidden" name="" value="" /> &nbsp;
+        <a href="javascript:void(0)"  onclick="$(this).closest('.label').remove()" style="color: #ffffff;"><i
+                    class="glyphicon glyphicon-remove"></i></a>
+    </span>&nbsp;
+</div>
+
+<div id="label-html-terminated" style="display: none;">
+    <span class="label label-danger"> <input type="hidden" name="" value="" />
+        &nbsp;<a href="javascript:void(0)"
+                 onclick="engageUser($(this).siblings().attr('data-right'));$(this).closest('.label').remove();"
+                 style="color: #ffffff;"><i class="glyphicon glyphicon-play"></i></a>
+    </span>&nbsp;
+</div>
+<?php
+/**
+ * Rempli la liste des droits via JS pour valideur SCI + TECH
+ * 
+ * @param array $rightData        	
+ * @param string $rightName        	
+ */
+function populateRightViaJS($rightData, $rightName) {
+	foreach ( $rightData as $sid => $data ) {
+        if ($sid === 0) {
+            $sitename = "Tous les sites";
+        } else {
+            $col = Hal_Site::loadSiteFromId($sid);
+
+            if ($col === null) {
+                Ccsd_Tools::panicMsg(__FILE__, __LINE__, "Pb database: Collection id $sid not found but found in user right");
+                continue;
+            }
+            $sitename = $col->getSite();
+        }
+		$nbItems = count ( $data );
+		foreach ( $data as $group => $values ) {
+			if (is_array ( $values )) {
+				foreach ( $values as $id => $value ) {
+                    echo PHP_EOL . 'addLabelElement("' . $sitename . ' [' . $sid . '] - ' . $group . ':' . wordwrap($id , 200, '<br>') . '", "roles[' . $rightName . '][' . $sid . '][' . $group . '][]", "' . $id . '", "#' . $rightName . '-list");';
+				}
+			}
+			if ($nbItems == 1) {
+				if ($group == 'terminated') {
+					echo PHP_EOL . "terminateUser('" . $rightName . "');";
+				} else {
+					echo PHP_EOL . 'addLabelElement("' . $values . ' [' . $sid . ']", "roles[' . $rightName . '][' . $sid . '][][]", "", "#' . $rightName . '-list");';
+				}
+			}
+		}
+	}
+}
+?>
+<script>
+    $(function() {
+        /** Valideur scientifique zfg */
+        <?php  populateRightViaJS($this->user->getRoles ( Hal_Acl::ROLE_VALIDATEUR ), 'validateur'); ?>
+        /**  Modérateur */
+        <?php  populateRightViaJS($this->user->getRoles ( Hal_Acl::ROLE_MODERATEUR ), 'moderateur'); ?>
+    });
+</script>

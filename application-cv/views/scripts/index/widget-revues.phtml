@@ -1,0 +1,37 @@
+<?php
+
+$revues = $this->cv->getFacetRevues();
+if (count($revues)) {
+    $rvids = isset($filters['journalId_i']) && is_array($filters['journalId_i']) ? array_keys($filters['journalId_i']) : array();
+    //Récupération des coauteurs
+    $listPrinc = $listSec = '';
+    $count = 0;
+    foreach ($revues as $revue) {
+        $link = $href;
+        if (in_array($revue['journalid'], $rvids)) {
+            $filters['journalId_i'][$revue['journalid']]['value'] = $revue['name'];
+        } else {
+            $link .= '/journalId_i/' . $revue['journalid'];
+        }
+        $elem = '<li><a href="' . $link . '" >' . $revue['name'] . ' <span class="badge badge-default">' . $revue['nbdoc'] . '</span></a></li>';
+        if ($count < 10) {
+            $listPrinc .= $elem;
+        } else {
+            $listSec   .= $elem;
+        }
+        $count ++;
+    }
+    $content = '<div class="revues">';
+    $content .= '   <ul>' . $listPrinc . '</ul>';
+    if ($listSec != '') {
+        $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste complète") . '</a></div>';
+        $content .= '</div>';
+        $content .= '<div class="revues-list" style="display:none;">';
+        $content .= '   <div class="overflow"><ul>' . $listPrinc . $listSec . '</ul></div>';
+        $content .= '   <div class="widget-footer"><a href="javascript:void(0);" onclick="displayDiv(this)">&#155; ' . $this->translate("Liste principale") . '</a></div>';
+    }
+    $content .= '</div>';
+
+    echo $this->widget(array('title' => $this->translate('cv_widget_revues'), 'content' => $content, 'class' => 'widget-'.'revues'));
+}
+

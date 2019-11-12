@@ -1,0 +1,29 @@
+<?php
+/** @var Hal_View $this */
+?><div>
+ 	<table style="width:100%">
+   		<tr>
+	    	<td style="width:20px"><i class="glyphicon glyphicon-move"></i></td>
+	    	<td class="page-label">
+                <?php if ($this->page->isFolder()) {?>
+                    <i class="glyphicon glyphicon-folder-open"></i>
+                <?php } else { ?>
+                    <i class="glyphicon glyphicon-file"></i>
+                <?php } ?>
+                &nbsp;<?php echo $this->page->getLabel(Zend_Registry::get('lang'))?>&nbsp;
+    		    <div class="div-plus" style="<?php echo (isset($this->pagesDisplay[$this->i]) && $this->pagesDisplay[$this->i]) ? 'display:block;' : 'display:none;'?>">
+    	    	   	<hr />
+    	    		<div id="form-<?php echo $this->i;?>">
+    	    		<?php include __DIR__ . "/menu-page-form.phtml"; ?>
+    	    		</div>
+    	    	</div>
+    		</td>
+    		<td style="width:70px">
+    		    <div class="pull-right">
+    		    	<a href="#" onclick="return false;" class="editPage" ><i class="glyphicon glyphicon-pencil"></i></a>
+                	<a href="javascript:void(0)" class="remove-page"  title="<?php echo $this->translate("Supprimer"); ?>"><i class="glyphicon glyphicon-trash"></i></a>
+	           	</div>
+	    	</td>
+   		</tr>
+   	</table>
+</div>

@@ -1,0 +1,92 @@
+<?php $graphData = array(array($this->translate('Date'), $this->translate('Nombre')));?>
+<div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div id="div-graph-<?php echo $this->category; ?>" style="width:100%; height:400px;"></div>
+            <div id="div-table-<?php echo $this->category; ?>" style="display:none; margin:20px;">
+                <div class="panel panel-default" style="overflow: auto; max-height:300px">
+                    <div class="panel-body">
+                        <table class="table stripped table-condensed table-hover">
+                            <thead>
+                            <tr>
+                                <th><?php echo $graphData[0][0]; ?></th>
+                                <th class="text-right"><?php echo $graphData[0][1]; ?></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            $csv = implode(';', $graphData[0]) . "_SEP_";
+                            $count = 0;
+                            foreach($this->data['data'] as $date => $nb) {
+                                if ($this->cumul) {
+                                    $count += $nb;
+                                    $nb = $count;
+                                }
+                                $row = array((string)$date, (int)$nb);
+                                $graphData[] = $row;
+                                $csv .= implode(';', $row) . "_SEP_";
+                                ?>
+                                <tr>
+                                    <td class="text-left"><?php echo $date; ?></td>
+                                    <td class="text-right"><strong><?php echo $nb; ?></strong></td>
+                                </tr>
+                            <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top:20px;">
+                <div class="col-md-4">
+                    <div class="btn-group">
+                        <?php foreach($this->charts as $chartType) { ?>
+                            <button type="button" id="<?php echo $chartType ?>" class="btn btn-default btn-stat-result btn-chart <?php echo ($chartType == $this->chart) ? 'active' : '' ?>">
+                                <img src="/img/charts/<?php echo $chartType ?>.png" width="16px" height="16px"/>
+                            </button>
+                        <?php } ?>
+                        <button class="btn btn-default" onclick="showDataTable($(this), '<?php echo $this->category; ?>');"><img src="/img/charts/table.png" width="16px" height="16px"/></button>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="input-group group-sm form-group query-save">
+                        <input type="text" class="form-control" name="query-label" placeholder="<?php echo $this->translate('Nom de la requête') ?>">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" onclick="saveQuery('<?php echo $this->category; ?>')"><i class="glyphicon glyphicon-save"></i></button>
+                    </span>
+                    </div>
+                    <form action="<?php echo PREFIX_URL ; ?>stat/index" method="post" onsubmit="return deleteQuery('<?php echo $this->category; ?>');">
+                        <input type="hidden" name="method" value="delete" />
+                        <input type="hidden" name="qid" value="" />
+                        <button class="btn btn-default query-del" type="submit"><i class="glyphicon glyphicon-trash"></i>&nbsp;<?php echo $this->translate('Supprimer la requête'); ?></button>
+                    </form>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-group">
+                        <button class="btn btn-default" onclick="exportCSV('<?php echo $this->category; ?>');"><i class="glyphicon glyphicon-export"></i>&nbsp;<?php echo $this->translate('Exporter'); ?></button>
+                    </div>
+                </div>
+            </div>
+            <?php if ($this->data['total'] > $this->data['nb']) { ?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="alert alert-warning">
+                            <strong><i class="glyphicon glyphicon-info-sign"></i>&nbsp;<?php echo $this->translate('Les chiffres concernent ') . $this->data['nb'] . $this->translate(' ressources sur un total de ') . $this->data['total']; ?></strong>
+                        </div>
+                    </div>
+                </div>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+
+<textarea id="csv-<?php echo $this->category; ?>" style="display:none;"><?php echo $csv; ?></textarea>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.btn-chart').click(function() {loadResult($(this).attr('id'))});
+    });
+</script>
+
+<?php echo $this->chart(array('container' => 'div-graph-' . $this->category, 'content' => $graphData, 'options' => array('legend' => array('position' => 'none'))), $this->chart, true);
+
+

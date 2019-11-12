@@ -1,0 +1,32 @@
+<?php
+$renderName = strtolower($this->document->getTypdoc() . '.phtml');
+
+if (is_file(SPACE . 'render/' . $renderName)) {
+    //Vue pour le type de document défini pour le portail
+    $renderScript = SPACE . 'render/' . $renderName;
+} else if (is_file(__DIR__ . '/../document/' . $renderName)) {
+    //Vue par défaut pour le type de document
+    $renderScript = __DIR__ . '/../document/' . $renderName;
+} else if (is_file(SPACE . 'render/default.phtml')) {
+    //Vue défault défini pour le portail
+    $renderScript = SPACE . 'render/default.phtml';
+} else {
+    //Vue défaut
+    $renderScript = __DIR__ . '/../document/default.phtml';
+}
+
+if (! $this->document->isOnline()) { ?>
+<br />
+<div class="alert alert-warning alert-dismissable">
+	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+	<strong><?php echo $this->translate('Attention !'); ?></strong> <?php echo $this->translate("Le document n'est pas en ligne !"); ?>
+    </div>
+<?php }
+
+include_once $renderScript;
+
+if (Hal_Auth::isLogged()) {
+    include_once $renderScript = __DIR__ . '/../document/actions.phtml';
+}
+
+include_once __DIR__ . '/../document/metas_header.phtml';

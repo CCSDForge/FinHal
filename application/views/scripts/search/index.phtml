@@ -1,0 +1,71 @@
+<?php
+/**
+ * @var Hal_View $this
+ */
+$this->layout()->pageTitle = $this->translate('Recherche par documents');
+
+if ($this->exportUriList['rss'] != '') {
+    $this->headLink()->appendAlternate($this->exportUriList['rss'], 'application/rss+xml', $this->translate('Flux de syndication') . ' RSS');
+}
+
+if ($this->exportUriList['atom']!='') {
+    $this->headLink()->appendAlternate($this->exportUriList['atom'], 'application/atom+xml', $this->translate('Flux de syndication') . ' Atom');
+}
+
+$this->jQuery()
+    ->addJavascriptFile('/js/search/autocomplete.js')
+    ->addJavascriptFile('/js/search/search.js');
+
+?>
+<div class="row">
+    <?php if ($this->results) :?>
+    <div class="col-md-3">
+        <?php include 'partials/search_facets.phtml';
+        $class="col-md-9" ?>
+    </div>
+    <?php else: ?>
+    <?php  $class="col-md-10  col-md-offset-1" ?>
+    <?php endif; ?>
+    <div class="<?php echo $class ?>">
+        <?php
+        // col-md-offset-3
+        include 'partials/search_form.phtml'; ?>
+
+        <button <?php if ($this->searchType == 'advanced') : ?> style="display: none;"
+        <?php endif; ?> id="search-advanced" type="button"
+                        class="btn btn-link btn-xs pull-right">
+            <span class="glyphicon glyphicon-plus"></span>&nbsp;<?php echo $this->translate('Recherche avancée'); ?>&hellip;
+        </button>
+
+        <button <?php if (($this->searchType == 'simple') OR ($this->searchType == null)) : ?>
+            style="display: none;" <?php endif; ?> id="search-simple" type="button"
+                                                       class="btn btn-link btn-xs pull-right">
+            <span class="glyphicon glyphicon-plus"></span>&nbsp;<?php echo $this->translate('Recherche simple'); ?>&hellip;
+        </button>
+        <br>
+
+        <?php echo $this->formAdvanced; ?>
+    </div> <!-- div col-md-10 ou 9 -->
+
+    <div id="helpText" class="col-md-9"></div>
+
+    <?php if ($this->results) : ?>
+        <?php if ($this->numFound == 0) : ?>
+            <div class="col-md-9 col-md-offset-3">
+                <p class="lead">
+                    <?php echo $this->translate ( 'Aucun résultat' );?>
+                </p>
+            </div>
+            <?php return null; ?>
+        <?php endif;?>
+
+        <div class="col-md-9">
+            <?php if ($this->instance == 'spm') {
+                include 'partials/spm_search_results.phtml';
+                } else {
+                include 'partials/search_results.phtml';
+                } ?>
+        </div>
+    <?php endif;?>
+</div><!-- div class row -->
+

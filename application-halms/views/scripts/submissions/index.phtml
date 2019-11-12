@@ -1,0 +1,52 @@
+
+
+<div class="well halms-well">
+    <?php if (count($this->documents)) { ?>
+        <table class="table table-hover table-striped">
+            <thead>
+            <tr>
+                <th><?php echo $this->translate('Etat') ?></th>
+                <th><?php echo $this->translate('Identifiant') ?></th>
+                <th><?php echo $this->translate('Document') ?></th>
+                <th style="width:150px;"><?php echo $this->translate('Statut') ?></th>
+                <th style="width:80px;"><?php echo $this->translate('Date') ?></th>
+                <th><?php echo $this->translate('Action') ?></th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach($this->documents as $data) {
+                $document = Hal_Document::find($data['DOCID']);
+                if (!$document instanceof Hal_Document) continue;
+                ?>
+                <tr>
+                    <td style="vertical-align:middle;"><img src="/img/halms-<?php echo Halms_Document::getStateImg($data['DOCSTATUS'])?>.png" /> </td>
+                    <td style="vertical-align:middle;"><span class="label label-default" style="background-color:#368291;font-weight: normal;font-size: 12px;"><?php echo $document->getId(true);?></span></td>
+                    <td><?php echo $document->getCitation('full');?></td>
+                    <td style="vertical-align:middle;"><strong><?php echo $this->translate('status_' . $data['DOCSTATUS']) ?></strong></td>
+                    <td style="vertical-align:middle;"><?php echo $data['DATEMODIF'] ?></td>
+                    <td style="vertical-align:middle;" class="text-right"><div class="btn-group btn-group-sm" role="group">
+                            <?php if ($data['DOCSTATUS'] == Halms_Document::STATUS_XML_CONTROLLED) { ?>
+                                <a href="/submissions/index/docid/<?php echo $document->getDocid()?>"  class="btn btn-primary" data-toggle="tooltip" title="<?php echo $this->translate("Editer"); ?>">
+                                    <i class="glyphicon glyphicon-pencil"></i>
+                                </a>
+                            <?php } else { ?>
+                                <a href="/submissions/index/docid/<?php echo $document->getDocid()?>"  class="btn btn-default" data-toggle="tooltip" title="<?php echo $this->translate("Consulter"); ?>">
+                                    <i class="glyphicon glyphicon-eye-open"></i>
+                                </a>
+                            <?php }  ?>
+                        </div>
+                    </td>
+                </tr>
+            <?php } ?>
+            </tbody>
+        </table>
+    <?php } else { ?>
+        <div class="alert alert-danger" role="alert">
+            <i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;
+            <?php echo $this->translate('Aucun document dans HALMS'); ?>
+        </div>
+        <div class="well text-center">
+            <a href="<?php echo HALURL;?>/submit" class="btn btn-primary"><i class="glyphicon glyphicon-file"></i>&nbsp;<?php echo $this->translate('Déposer un article dans HAL'); ?></a>
+        </div>
+    <?php } ?>
+</div>
