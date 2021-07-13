@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * serveur SWORD de l'application HAL
  */
 
@@ -9,9 +9,6 @@ class Hal_Sword_Server
     const COMP_GROBID = 'grobid';
     const COMP_IDEXT = 'idext';
     const COMP_AFFILIATION = 'affiliation';
-
-    const LOADFILTER_NOAFFIL = 'noaffiliation';
-    const LOADFILTER_FLAG_NOAFFIL = 1;
     /**
      * caractère pour séparer un type de serveur de sa valeur dans l'entête http on-behalf-of
      * eg login|test;uid|1;idhal|mon-idhal-dupond
@@ -23,7 +20,6 @@ class Hal_Sword_Server
      * @var array
      */
     static public $onBehalf_AllowedExtId = ['login', 'uid', 'idhal', 'orcid'];
-    static public $validationErrorOutput = '';
 
     protected $name = null;
     protected $title = null;
@@ -66,14 +62,9 @@ class Hal_Sword_Server
     private $_repec = false;
     private $_oai = false;
     private $_completion = false;
-    private $_loadFilter = 0;
 
     private $_type = 'import';
 
-    /**
-     * Hal_Sword_Server constructor.
-     * @param int $uid
-     */
     public function __construct($uid = 0)
     {
         $this->name = 'HAL SWORD API Server';
@@ -101,11 +92,7 @@ class Hal_Sword_Server
 
     // Merge de la meta "Keyword" trouvée automatiquement dans la meta à conserver. 
     // La variable @param : $tokeepmetas est modifiée par référence dans la fonction
-    /**
-     * @param string $code
-     * @param string $message
-     * @return string
-     */
+
     public function error($code, $message = '')
     {
         if (in_array($code, array_keys($this->swordErrors))) {
@@ -152,22 +139,20 @@ class Hal_Sword_Server
             return '';
         }
     }
+
     /**
      * Handle the SWORD request
-     * @param Zend_Controller_Request_Http
+     * @param Zend_Controller_Request_Abstract
      * @param Hal_Site portail de dépôt
      * @return string xml
      * @throws Zend_Controller_Request_Exception
-     * @throws Zend_Db_Adapter_Exception
      */
     public function handle(Zend_Controller_Request_Http $request, Hal_Site $website)
     {
         $hasmoved = null;
         // portail de dépôt
         $this->instance = $website->getSid();
-        $this->instanceName = $website->getShortName();
-
-        $currentIdent = null;
+        $this->instanceName = $website->getSiteName();
         // vérification de l'entête In-Progress par rapport à la conf
         $inProgress = (string)$request->getHeader('In-Progress');
         if ($inProgress == 'true' && $this->progess == 'false') {
@@ -189,7 +174,7 @@ class Hal_Sword_Server
                 echo $this->error('TargetOwnerUnknown', 'Username or UID or User External identifier "' . htmlspecialchars(trim($onBehalfOf)) . '" is unknown by the server');
                 exit;
             }
-            $this->owner = array_merge($this->owner, $resOnBehalf);
+            $this->owner = array_merge($this->owner,$resOnBehalf);
             unset($resOnBehalf);
         }
         // Entête spécifique HAL : Export-To-Arxiv, Export-To-PMC, Hide-For-RePEc et Hide-In-OAI
@@ -199,12 +184,6 @@ class Hal_Sword_Server
         $this->_oai = (string)$request->getHeader('Hide-In-OAI');
         $this->_completion = (string)$request->getHeader('X-Allow-Completion');
         $this->_type = (string)$request->getHeader('Submit-Type');
-        $loadFilterHeader = (string)$request->getHeader('LoadFilter');
-
-        // Parsing des options
-        if (strpos($loadFilterHeader, self::LOADFILTER_NOAFFIL) !== false) {
-            $this->_loadFilter |= self::LOADFILTER_FLAG_NOAFFIL;
-        }
 
         // switch suivant verbe HTTP : GET, POST, PUT ou DELETE
         if ($request->isGet()) { // récupération du status de la ressource ArticleStatusStruct
@@ -250,9 +229,9 @@ class Hal_Sword_Server
                 header('Content-Type: text/xml; charset=utf-8');
                 $pwd = '';
                 if ($this->uid == $article->getContributor('uid') || in_array($this->uid, $article->getOwner())) {
-                    $pwd = 'password' . '="' . Ccsd_Tools_String::xmlSafe($article->getPwd()) . '"';
+                    $pwd = ' password' . '="' . Ccsd_Tools_String::xmlSafe($article->getPwd()) . '"';
                 }
-                echo '<?xml version="1.0" encoding="utf-8"?>' . PHP_EOL . '<document id="' . $article->getId() . '" version="' . $article->getVersion() . '" ' . $pwd . '>' . PHP_EOL . $xml . PHP_EOL . '</document>';
+                echo '<?xml version="1.0" encoding="utf-8"?>' . PHP_EOL . '<document id="' . $article->getId() . '" version="' . $article->getVersion() . '"' . $pwd . '>' . PHP_EOL . $xml . PHP_EOL . '</document>';
             } else {
                 echo $this->error('ErrorBadRequest', 'No data can be found ; paper Id does not match a document');
             }
@@ -314,7 +293,6 @@ class Hal_Sword_Server
             exit;
         }
 
-        // Arrivee ici seulement apres un PUT ou POST
         // récupération du format XML du dépôt et vérification par rapport à la conf
         $xPackaging = $request->getHeader('Packaging');
         if ($xPackaging === false) {
@@ -360,7 +338,7 @@ class Hal_Sword_Server
                     $this->content = new DOMDocument();
                     $this->content->substituteEntities = true;
                     $this->content->preserveWhiteSpace = false;
-                    set_error_handler('\Ccsd\Xml\Exception::HandleXmlError');
+                    set_error_handler('Ccsd_Xml_Exception::HandleXmlError');
                     $this->content->loadXML($body);
                     restore_error_handler();
                 } catch (Exception $e) {
@@ -467,13 +445,9 @@ class Hal_Sword_Server
                 if (isset($mapping[$system])) {
                     return __DIR__ . '/xsd/' . $mapping[$system];
                 }
-                if (isset($public) && isset($mapping[$public])) {
-                    return __DIR__ . '/xsd/' . $mapping[$public];
-                }
                 if (is_file($system)) {
                     return $system;
                 }
-                return false;
             }
         );
 
@@ -483,26 +457,14 @@ class Hal_Sword_Server
         } else {
             $schema = 'aofr.xsd';
         }
-        try {
-            set_error_handler("\Ccsd\Xml\Exception::validateErrorHandler");
-            @$this->content->schemaValidate(__DIR__ . '/xsd/' . $schema);
-        } catch (\Ccsd\Xml\Exception $e) {
-                echo $this->error('ErrorContent', 'The supplied XML description does not validate the AOfr schema...' . "\n\n" . $e->getMessage());
-                exit;
-        } finally {
-            restore_error_handler();
+        if (!@$this->content->schemaValidate(__DIR__ . '/xsd/' . $schema)) {
+            /** ZMO : add the new schema */
+            echo $this->error('ErrorContent', 'The supplied XML description does not validate the AOfr schema');
+            exit;
         }
-        try {
-            $teiOptions = [];
-            // Certains site de synchronisation ecrasent joyeusement les affiliation modifiees par les admin pour un retour a leur valeur d'origine.
-            // Dans ce cas, on ne load pas les affiliation en provenance de la TEI.
-            if ($currentIdent && (($this->_loadFilter & self::LOADFILTER_FLAG_NOAFFIL) || in_array(Hal_Auth::getUid(), []) )) {
-                $teiOptions = [Hal_Document_Tei::LOAD_AFFIL_OPT => false];
-            }
-            // devrait appeler un constructeur plutot que de modifier article deja initialise!!!
-            // Avec cela, on ecrase joyeusement toute les initialisation faite...
-            $article->loadFromTEI($this->content, PATHTEMPIMPORT, $this->instanceName, $teiOptions);
 
+        try {
+            $article->loadFromTEI($this->content, PATHTEMPIMPORT, $this->instanceName);
             $type = Hal_Settings::SUBMIT_INIT;
             if ($article->getDocid() != 0) {
                 $formatBeforeUpdate = $article->getFormat();
@@ -573,7 +535,7 @@ class Hal_Sword_Server
                             if (array_key_exists(0, $authorArticle) && $docAuthor->isConsideredSameAuthor($authorArticle[0])) {
                                 continue;
                             }
-                            $article->addAuthor($docAuthor);
+                            $authoridx = $article->addAuthor($docAuthor);
                         }
                     }
                 }
@@ -589,7 +551,7 @@ class Hal_Sword_Server
                 }
             }
 
-            if (is_array($this->owner) && count($this->owner)) {
+            if (count($this->owner)) {
                 $article->setOwner($this->owner);
             }
             if ($article->getTypeSubmit() != Hal_Settings::SUBMIT_UPDATE) {
@@ -662,18 +624,12 @@ class Hal_Sword_Server
                         exit;
                     }
                 }
-
-                // JB correction ticket #61 gitlab
-                // La sauvegarde du fichier ne transmettait pas l'information du déposant
-                // Donc l'information ne pouvait être logger en fin de chaîne
-                // Et c'était du coup toujours le contributeur qui était loggé
-
-                $article->save($this->uid);
+                $article->save();
 
                 if ($article->getDocid() && count($article->getCollections())) {
                     /** @var Hal_Site_Collection $col */
                     foreach ($article->getCollections() as $col) {
-                        Hal_Document_Collection::add($article->getDocid(), $col, $this->uid, false);
+                        Hal_Document_Collection::add($article->getDocid(), $col->getSid(), $this->uid, false);
                     }
                 }
                 if (count($this->owner)) {
@@ -731,8 +687,9 @@ class Hal_Sword_Server
      * @param string $onBehalfOf
      * @return array|bool
      */
-    public function handleOnBehalf($onBehalfOf = '')
+    public function handleOnBehalf($onBehalfOf = false)
     {
+
         if (!$onBehalfOf) {
             return false;
         }
@@ -740,6 +697,7 @@ class Hal_Sword_Server
         $userInfo = $this->processOnBehalfOfHeader($onBehalfOf);
 
         $owners = [];
+        $halUser = new Hal_User();
         $userMapper = new Ccsd_User_Models_UserMapper();
         $userUID = false;
 
@@ -843,15 +801,6 @@ class Hal_Sword_Server
         return self::$onBehalf_AllowedExtId;
     }
 
-    /**
-     * @param int[] $ids
-     * @return array
-     * @uses Ccsd_Dataprovider_Arxiv
-     * @uses Ccsd_Dataprovider_Crossref
-     * @uses Ccsd_Dataprovider_Datacite
-     * @uses Ccsd_Dataprovider_Ird
-     * ...
-     */
     private function getAutoCompletedMetas($ids)
     {
         $metas = array();
@@ -860,10 +809,9 @@ class Hal_Sword_Server
 
             // On récupère le dataprovider correspondant au type d'identifiant envoyé
             $class = Hal_Settings::$_idtypeToDataProvider[$id];
-            $config = \Hal\Config::getInstance();
+
             if (class_exists ($class)) {
-                /** @var Ccsd_Dataprovider $o */
-                $o = new $class(Zend_Db_Table_Abstract::getDefaultAdapter(), $config);
+                $o = new $class(Zend_Db_Table_Abstract::getDefaultAdapter());
 
                 // Si la méthode getDocument retourne null, on peut récupérer l'erreur mais il ne s'agit pas d'une erreur majeure
                 // On ne renvoie donc pas d'erreur HTTP
@@ -890,6 +838,7 @@ class Hal_Sword_Server
      * SWORD service document
      * @param Ccsd_Externdoc[] $tomergemetas
      * @param Ccsd_Externdoc[] $tokeepmetas
+     * @return string xml
      */
 
     private function mergeKeywordMetas($tomergemetas, &$tokeepmetas)
@@ -908,7 +857,6 @@ class Hal_Sword_Server
     /**
      * @param Ccsd_Externdoc[] $metas
      * @return Hal_Document_Author[]
-     * @throws Exception
      */
     private function getAutoCompletedAuthors($metas)
     {
@@ -931,11 +879,6 @@ class Hal_Sword_Server
         return $authors;
     }
 
-    /**
-     * @param Hal_Document $article
-     * @param int $authoridx
-     * @param Hal_Document_Author $docAuthor
-     */
     protected function addAuthorAffiliation($article, $authoridx, $docAuthor)
     {
         if ($authoridx !== false) {
@@ -964,13 +907,6 @@ class Hal_Sword_Server
         }
     }
 
-    /**
-     * @param string $identifiant
-     * @param string $pwd
-     * @param string $version
-     * @param string $url
-     * @return string
-     */
     public function entry($identifiant, $pwd, $version, $url)
     {
         header('Content-Type: application/atom+xml');
@@ -984,10 +920,7 @@ class Hal_Sword_Server
             $xml->appendChild($root);
             $root->appendChild($xml->createElement('title', 'Accepted media deposit to HAL'));
             $root->appendChild($xml->createElement('id', $identifiant));
-            $cdata   = $xml->createCDATASection($pwd);
-            $pwdElem = $xml->createElement('hal:password', '');
-            $pwdElem -> appendChild($cdata);
-            $root->appendChild($pwdElem);
+            $root->appendChild($xml->createElement('hal:password', $pwd));
             $root->appendChild($xml->createElement('hal:version', $version));
             $root->appendChild($xml->createElement('updated', date('c')));
             $root->appendChild($xml->createElement('summary', 'A media deposit was stored in the HAL workspace'));

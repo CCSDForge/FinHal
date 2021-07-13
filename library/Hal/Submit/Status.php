@@ -62,7 +62,15 @@ class Hal_Submit_Status
     public function getTypdocs($doctype, $extension = "")
     {
         if (in_array($this->_submitType, [Hal_Settings::SUBMIT_UPDATE, Hal_Settings::SUBMIT_REPLACE, Hal_Settings::SUBMIT_ADDFILE, Hal_Settings::SUBMIT_ADDANNEX, Hal_Settings::SUBMIT_MODERATE])) {
-            return array_diff(Hal_Settings::getTypdocsAvailable(), Hal_Settings::getTypdocAssociated($doctype));
+            //CGU spécifiques pour le portail SPM
+            $oInstance = \Hal\Instance::getInstance('');
+            if ($oInstance->getName() == 'halspm') {
+                // tous les changements de type de document sont autorisés
+                //return Hal_Settings::getTypdocsAvailable('halspm');
+                return array();
+            } else {
+                return array_diff(Hal_Settings::getTypdocsAvailable(), Hal_Settings::getTypdocAssociated($doctype));
+            }
         } else {
             return Hal_Settings::getTypdocsFiltered($extension);
         }

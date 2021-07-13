@@ -9,7 +9,7 @@ class Hal_Search_Solr_Api extends Ccsd_Search_Solr_Search
 {
 
     const MAX_ROWS = 10000;
-    const MAX_EXPORT_ROWS = 1000;
+    const MAX_EXPORT_ROWS = 2000;
     const MAX_EXPORT_ROWS_FEEDS = 50;
     const MAX_FACETS = 10000;
     const MAX_NUMBER_OF_AUTHORS_IN_FEEDS = 1;
@@ -155,7 +155,7 @@ class Hal_Search_Solr_Api extends Ccsd_Search_Solr_Search
                 $xml .= $docs [self::LABEL_XML_TEI];
             }
         }
-        return $xml . '</listOrg>' . PHP_EOL;
+        return $xml = '</listOrg>' . PHP_EOL;
 
     }
 
@@ -932,6 +932,9 @@ class Hal_Search_Solr_Api extends Ccsd_Search_Solr_Search
                 $file = $portail->getPathname() . DIRECTORY_SEPARATOR . CONFIG . 'typdoc.json';
                 if (is_file($file)) {
                     foreach (Zend_Json::decode(file_get_contents($file)) as $hal_typdoc) {
+                        if ($hal_typdoc['type'] == 'changeColumn') {
+                            continue;
+                        }
                         if ($hal_typdoc['type'] == 'category') {
                             foreach ($hal_typdoc['children'] as $typdoc) {
                                 $tableauTypdoc[$typdoc['id']] = $typdoc['label'];
@@ -979,6 +982,9 @@ class Hal_Search_Solr_Api extends Ccsd_Search_Solr_Search
     {
         $tableauTypdoc = [];
         foreach (Hal_Settings::getTypdocs($instance) as $hal_typdoc) {
+            if ($hal_typdoc['type'] == 'changeColumn') {
+                continue;
+            }
             if ($hal_typdoc['type'] == 'category') {
                 foreach ($hal_typdoc['children'] as $typdoc) {
                     $tableauTypdoc[$typdoc['id']] = $typdoc['label'];

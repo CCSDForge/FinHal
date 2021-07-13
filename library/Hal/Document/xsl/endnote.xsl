@@ -61,7 +61,7 @@
 				<xsl:when test="$type='PATENT'">
 					<xsl:text>Patent</xsl:text>
 				</xsl:when>
-				<xsl:when test="$type='THESE' or $type='HDR' or $type='HDR'">
+				<xsl:when test="$type='THESE' or $type='HDR'">
 					<xsl:text>Thesis</xsl:text>
 				</xsl:when>
 				<xsl:when test="$type='LECTURE'">

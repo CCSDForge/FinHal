@@ -164,8 +164,7 @@ class Hal_Submit_Step_File extends Hal_Submit_Step
     {
         parent::updateValidity($document, $type);
 
-        //Interdire de déposer aucun fichier
-        if ((Hal_Settings::SUBMIT_REPLACE == $type && 0 == count($document->getFiles())) || (Hal_Settings::SUBMIT_MODIFY == $type && 0 == count($document->getFiles()) && $document->getStatus() == 1 && $document->getVersion() >= 2)) {
+        if (Hal_Settings::SUBMIT_REPLACE == $type && 0 == count($document->getFiles())) {
             $this->_validity = false;
         }
     }

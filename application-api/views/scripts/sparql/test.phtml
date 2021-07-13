@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<html lang="en">
+<html>
 <head>
-    <title>Page de test pour Hal SparQl</title>
     <script src="<?php echo CCSDLIB . '/js/d3.min.js' ?>"></script>
     <script src="<?php echo CCSDLIB . '/js/d3sparql.js' ?>"></script>
     <script>
@@ -21,13 +20,12 @@
                 "width": 1000,
                 "height": 750,
                 "selector": "#result"
-            };
+            }
             d3sparql.forcegraph(json, config)
         }
     </script>
-    <!-- customize CSS -->
     <style>
-
+        <!-- customize CSS -->
     </style>
 </head>
 <body onload="render(d3json)">

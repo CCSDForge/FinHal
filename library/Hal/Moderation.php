@@ -39,10 +39,12 @@ class Hal_Moderation {
                 'UID'
 		))  ->from ( array ('s' => Hal_Site::TABLE), 'SITE' )
             ->from ( array ('u' => 'USER'), array('SCREEN_NAME', 'NBDOCVIS', 'NBDOCSCI', 'NBDOCREF' ))
-            ->joinLeft(array ('l' => Hal_Document_Logger::TABLE), "d.DOCID=l.DOCID AND LOGACTION='askmodif'",'LOGACTION' )
+            ->from ( array ('m' => Hal_Document_Metadatas::TABLE_META), null )
+            ->from ( array ('l' => Hal_Document_Logger::TABLE), null )
             ->where ( 'u.UID=d.UID' )
             ->where ( 'd.SID=s.SID' )
-            ->group( 'd.DOCID'); // Ne pas dupliquer les documents si plusieurs Log, ou auteurs sont affiliees a la structures!;
+            ->where ( 'd.DOCID=m.DOCID' )
+            ->where ( 'd.DOCID=l.DOCID' );
 
         if ($filterHalAuth) {
 			if ($privilege == Hal_Acl::ROLE_MODERATEUR) {
@@ -137,8 +139,7 @@ class Hal_Moderation {
 	private function addModeratorFilters($sql, $docstatus) {
 		$sqlWhere = false;
 		$condOr = $condAnd = array ();
-        $addFromDocMetadata = false;
-        $addFromForAffiliation = false;
+
 		foreach ( Hal_Auth::getModerateurDetails () as $sid => $details ) {
 			if (count ( $details )) {
 				foreach ( $details as $metaname => $values ) {
@@ -148,30 +149,24 @@ class Hal_Moderation {
                         $mysql = str_replace ( 'UID', 'd.UID', $mysql );
 
                         $sql->where ( $mysql );
-                        if (preg_match('/METANAME/', $mysql)) {
-						    $addFromDocMetadata = true;
-                        }
+
                         continue;
 					}
 					foreach ( $values as $value ) {
 						if ($metaname == 'typdoc') {
-                            $condition = '(';
-                            if ($sid != 0) {
-                                $condition .= 'd.SID = ' . $sid . ' AND ';
-                            }
-                            if (substr($value, 0, 1) == '-') {
-                                $value = str_replace('-', '', $value);
-                                $condition .= 'TYPDOC != "' . $value . '")';
-                                $condAnd [] = $condition;
-                            } else {
-                                $condition .= 'TYPDOC = "' . $value . '")';
-                                $condOr [] = $condition;
-                            }
-                        } elseif ($metaname == 'structure') {
-						    $addFromForAffiliation = true;
-						    $sql->where('das.STRUCTID IN (?)', $value);
+							$condition = '(';
+							if ($sid != 0) {
+								$condition .= 'd.SID = ' . $sid . ' AND ';
+							}
+							if (substr ( $value, 0, 1 ) == '-') {
+								$value = str_replace ( '-', '', $value );
+								$condition .= 'TYPDOC != "' . $value . '")';
+								$condAnd [] = $condition;
+							} else {
+								$condition .= 'TYPDOC = "' . $value . '")';
+								$condOr [] = $condition;
+							}
 						} else {
-						    $addFromDocMetadata = true;
 							$condition = '(';
 							if ($sid != 0) {
 								$condition .= 'd.SID = ' . $sid . ' AND ';
@@ -234,14 +229,6 @@ class Hal_Moderation {
 			$sql->where ( $where, $docstatus );
 		}
 
-        if ($addFromDocMetadata) {
-            $sql->from ( array ('m' => Hal_Document_Metadatas::TABLE_META), null )->where ( 'd.DOCID=m.DOCID' );
-        }
-        if ($addFromForAffiliation) {
-            $sql -> from ( array ('da' => 'DOC_AUTHOR'), null)     -> where("da.DOCID=d.DOCID");
-            $sql -> from ( array ('das' => 'DOC_AUTSTRUCT'), null) -> where("das.DOCAUTHID=da.DOCAUTHID");
-
-        }
 		return $sql;
 	}
 
@@ -321,7 +308,6 @@ class Hal_Moderation {
      * @return array
      */
     public function getSites() {
-        return Hal_Site::search();
         $db = Zend_Db_Table_Abstract::getDefaultAdapter ();
 
         $sql = $db->select()

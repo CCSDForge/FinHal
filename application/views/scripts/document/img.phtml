@@ -13,39 +13,20 @@ if (! (isset($this->document) && $this->document instanceof Hal_Document) ) {
     <?php if ($this->document->getId()) { ?>
         <div class="btn-group dropdown">
             <button type="button" class="btn btn-danger"><?php echo $this->document->getId(); ?>, <?php echo $this->translate('version') . ' ' . $this->document->getVersion(); ?></button>
-            <?php if (is_array($this->document->getDocVersions()) && count($this->document->getDocVersions()) > 1) {
-                if (MODULE != SPACE_COLLECTION) {
-                    $url = PREFIX_URL;
-                } else {
-                    $site = Hal_Site::getCurrentPortail();
-                    $url  = $site->getUrl() .'/';
-                }?>
+            <?php if (is_array($this->document->getDocVersions()) && count($this->document->getDocVersions()) > 1) { ?>
                 <?php // liens vers les autres versions  ?>
                 <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
                     <span class="caret"></span>
                 </button>
-                <ul class="dropdown-menu pull-right" style="margin:0px" role="menu">
-                    <?php
-                    foreach ($this->document->getDocVersions() as $version) {
-                        if ($version['VERSION'] == $this->document->getVersion()) { continue; }
-                        if ($version['DOCSTATUS'] != 11 && $version['DOCSTATUS'] != 111) {
-                            if (!Hal_Document_Acl::canView($this->document)) {
-                                continue;
-                            } else {
-                                ?>
-                                <li title="<?php echo $this->document->statusToString($version['DOCSTATUS']);?>"><a style="font-style:italic; color: grey;" href="<?php echo $url . $this->document->getId() . 'v' . $version['VERSION'] ?>"><?php echo $this->translate('version') . ' ' . $version['VERSION']; ?></a>
-                                </li>
-                                <?php
-                            }
-                        } else {
-                            ?>
-                            <li><a href="<?php echo $url . $this->document->getId() . 'v' . $version['VERSION'] ?>"><?php echo $this->translate('version') . ' ' . $version['VERSION']; ?></a></li>
-                            <?php
-                        }
-                    } ?>
+                <ul class="dropdown-menu pull-right" role="menu">
+                    <?php foreach (array_keys($this->document->getDocVersions()) as $version) {
+                        if ($version == $this->document->getVersion()) {
+                            continue;
+                        } ?>
+                        <li><a href="<?php echo PREFIX_URL . $this->document->getId() . 'v' . $version ?>"><?php echo $this->translate('version') . ' ' . $version; ?></a></li>
+                    <?php } ?>
                 </ul>
-                <?php
-            } ?>
+            <?php } ?>
         </div>
     <?php } ?>
 

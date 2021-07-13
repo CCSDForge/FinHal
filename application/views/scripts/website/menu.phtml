@@ -1,12 +1,5 @@
-<?php
-$this->jQuery()->addJavascriptFile(CCSDLIB . "/js/jquery/ui/nestedSortable.js")
-    ->addJavascriptFile(CCSDLIB . "/js/wysihtml5-0.js")
-    ->addJavascriptFile(CCSDLIB . "/js/bootstrap-wysihtml5.js")
-    ->addStylesheet(CCSDLIB . "/css//bootstrap-wysihtml5.css")
-    ->addJavascriptFile(CCSDLIB . '/js/jquery/ui/autocomplete.html.js');
-
-$this->layout()->pageDescription = $this->translate("Ajout/suppression de nouvelles pages dans le site")
-?>
+<?php $this->jQuery()->addJavascriptFile(CCSDLIB . "/js/jquery/ui/nestedSortable.js")->addJavascriptFile(CCSDLIB . "/js/wysihtml5-0.js")->addJavascriptFile(CCSDLIB . "/js/bootstrap-wysihtml5.js")->addStylesheet(CCSDLIB . "/css//bootstrap-wysihtml5.css")->addJavascriptFile(CCSDLIB . '/js/jquery/ui/autocomplete.html.js');?>
+<?php $this->layout()->pageDescription = $this->translate("Ajout/suppression de nouvelles pages dans le site")?>
 <style>
 .sortable {
 	margin: 0;

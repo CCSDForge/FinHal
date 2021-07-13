@@ -5,8 +5,6 @@
   },
   "require-dev": {
     "phpunit/phpunit": "5.7.12",
-    "phpmd/phpmd": "@stable",
-    "phpspec/phpspec": "^4.0",
     "elasticsearch/elasticsearch": "~6.0"
   },
   "repositories": [
@@ -16,7 +14,7 @@
         "name": "ccsd/library",
         "version": "1",
         "source": {
-          "url": "git@gitlab.ccsd.cnrs.fr:ccsd/library.git",
+          "url": "https://gitlab.ccsd.cnrs.fr/ccsd/library.git",
           "type": "git",
           "reference": "preprod"
         }
@@ -40,7 +38,7 @@
         "name": "java/pdfbox",
         "version": "1.8.16",
         "dist": {
-          "url": "http://mirrors.ircam.fr/pub/apache/pdfbox/1.8.16/pdfbox-app-1.8.16.jar",
+          "url": "https://archive.apache.org/dist/pdfbox/1.8.16/pdfbox-app-1.8.16.jar",
           "type": "file"
         }
       }
@@ -50,9 +48,9 @@
   "require": {
     "ccsd/library": "*",
     "swordapp/swordappv2": "*",
-    "solarium/solarium": "^5.0.2",
-    "zendframework/zendframework1": "^1.12",
-    "zendframework/zf1-extras": "*",
+    "solarium/solarium": "*",
+    "shardj/zf1-future": "^1.19",
+    "shardj/zf1-extras-future": "^1.12",
     "apereo/phpcas": "^1.3.5",
     "doctrine/orm": "*",
     "php": ">=7.0",
@@ -61,7 +59,6 @@
     "ext-libxml" : "*",
     "ext-bz2": "*",
     "ext-curl": "*",
-    "ext-xsl": "*",
     "ext-gd": "*",
     "ext-json": "*",
     "ext-mbstring": "*",
@@ -70,15 +67,12 @@
     "ext-xml": "*",
     "ext-simplexml": "*",
     "ext-zip": "*",
-    "ext-ftp": "*",
     "ext-intl": "*",
     "ext-geoip": "*",
     "ext-ssh2": "*",
     "ext-posix": "*",
     "java/pdfbox": "*",
-    "simplesamlphp/simplesamlphp":"^1.16",
-    "patrickschur/language-detection": "^3.4",
-    "sameer-shelavale/php-countries-array": "^1.0"
+    "ezyang/htmlpurifier": "^4.13"
   },
   "autoload": {
     "classmap": [

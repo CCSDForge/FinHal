@@ -41,7 +41,7 @@ class modifAffiliationInNotices extends Hal_Script {
                     $line = strtok("\n\r");
                     continue;
                 }
-                $line = trim($line);
+                trim($line);
                 if (!preg_match('/^\d+$/', $line)) {
                     fwrite(STDERR,  "Incorrect line ($lineNumber): $line\n");
                     $line = strtok("\n\r");

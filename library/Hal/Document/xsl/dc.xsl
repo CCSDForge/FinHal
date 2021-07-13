@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xsl:stylesheet
-        xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
-        xmlns:dc="http://purl.org/dc/elements/1.1/"
-        xmlns:tei="http://www.tei-c.org/ns/1.0"
-        version="1.0">
-  <xsl:output method="xml" indent="yes" encoding="UTF-8"  omit-xml-declaration="yes" />
+<xsl:stylesheet xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+xmlns:dc="http://purl.org/dc/elements/1.1/"
+xmlns:tei="http://www.tei-c.org/ns/1.0" version="1.0">
+  <xsl:output method="xml" indent="yes" encoding="UTF-8"
+  omit-xml-declaration="yes" />
   <!-- Pour les affiliations -->
   <xsl:key name="affiliation"
-       match="/tei:TEI/tei:text/tei:body/tei:listBibl/tei:biblFull/tei:titleStmt/tei:author/tei:affiliation"
-       use="@ref" />
-
+  match="/tei:TEI/tei:text/tei:body/tei:listBibl/tei:biblFull/tei:titleStmt/tei:author/tei:affiliation"
+  use="@ref" />
   <xsl:param name="currentDate" />
   <xsl:variable name="currentYear">
     <xsl:value-of select="substring-before($currentDate,'-')" />
@@ -24,16 +22,11 @@
   <xsl:variable name="currentDay">
     <xsl:value-of select="substring-after($currentmonthday,'-')" />
   </xsl:variable>
-
   <xsl:template match="/">
     <xsl:apply-templates />
   </xsl:template>
-
   <xsl:template match="tei:TEI">
-    <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
-               xmlns:dc="http://purl.org/dc/elements/1.1/"
-               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-               xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/  http://www.openarchives.org/OAI/2.0/oai_dc.xsd http://purl.org/dc/elements/1.1/  http://dublincore.org/schemas/xmls/qdc/2008/02/11/dc.xsd">
+    <oai_dc:dc>
       <dc:publisher>HAL CCSD</dc:publisher>
       <xsl:apply-templates select="tei:text/tei:body/tei:listBibl/tei:biblFull" />
       <xsl:apply-templates select="tei:text/tei:back/tei:listOrg[@type='projects']/tei:org" />
@@ -41,12 +34,14 @@
   </xsl:template>
   <xsl:template match="tei:biblFull">
     <!-- calcul du type HAL -->
-    <xsl:variable name="type" select="./tei:profileDesc/tei:textClass/tei:classCode[@scheme='halTypology']/@n" />
-
-    <xsl:apply-templates select="tei:titleStmt/tei:title"  mode="biblFull" />
+    <xsl:variable name="type"
+    select="./tei:profileDesc/tei:textClass/tei:classCode[@scheme='halTypology']/@n" />
+    <xsl:apply-templates select="tei:titleStmt/tei:title"
+    mode="biblFull" />
     <xsl:apply-templates select="tei:titleStmt/tei:author" />
     <!-- affiliation pas dans author pour éviter les doublons -->
     <xsl:for-each select="tei:titleStmt/tei:author/tei:affiliation[generate-id() = generate-id(key('affiliation',@ref)[1])]">
+
       <xsl:apply-templates select="." />
     </xsl:for-each>
     <!--  funding : contrat, financement hors projets -->
@@ -97,16 +92,22 @@
   <xsl:template match="tei:author">
     <dc:creator>
       <xsl:value-of select="tei:persName/tei:surname" />
-      <xsl:text>, </xsl:text>
+      <xsl:text>
+, 
+</xsl:text>
       <xsl:value-of select="tei:persName/tei:forename[@type='first']" />
       <xsl:if test="string-length(tei:persName/tei:forename[@type='middle'])!=0">
-      <xsl:text>, </xsl:text>
+
+        <xsl:text>
+, 
+</xsl:text>
         <xsl:value-of select="./tei:forename[@type='middle']" />
       </xsl:if>
     </dc:creator>
   </xsl:template>
   <!-- dc:description : comment, description, ... -->
   <xsl:template match="tei:note[@type='commentary']|tei:note[@type='description']|tei:note[@type='lecture']">
+
     <dc:description>
       <xsl:value-of select="." />
     </dc:description>
@@ -116,12 +117,16 @@
     <xsl:choose>
       <xsl:when test="@n=2">
         <dc:description>
-          <xsl:text>International audience</xsl:text>
+          <xsl:text>
+International audience
+</xsl:text>
         </dc:description>
       </xsl:when>
       <xsl:when test="@n=3">
         <dc:description>
-          <xsl:text>National audience</xsl:text>
+          <xsl:text>
+National audience
+</xsl:text>
         </dc:description>
       </xsl:when>
       <xsl:otherwise />
@@ -203,17 +208,23 @@
     <dc:identifier>
       <xsl:choose>
         <xsl:when test="./@type='patentNumber'">
-          <xsl:text>Patent N°: </xsl:text>
+          <xsl:text>
+Patent N° : 
+</xsl:text>
         </xsl:when>
         <xsl:when test="./@type='reportNumber'">
-          <xsl:text>Report N°: </xsl:text>
+          <xsl:text>
+Report N° : 
+</xsl:text>
         </xsl:when>
         <xsl:when test="./@type='halId'" />
         <xsl:when test="./@type='halUri'" />
         <xsl:when test="./@type='file'" />
         <xsl:otherwise>
           <xsl:value-of select="translate(./@type, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')" />
-          <xsl:text>: </xsl:text>
+          <xsl:text>
+ : 
+</xsl:text>
         </xsl:otherwise>
       </xsl:choose>
       <xsl:choose>
@@ -250,13 +261,17 @@
   </xsl:template>
   <xsl:template match="tei:idno" mode="issn">
     <dc:source>
-      <xsl:text>ISSN: </xsl:text>
+      <xsl:text>
+ISSN: 
+</xsl:text>
       <xsl:value-of select="." />
     </dc:source>
   </xsl:template>
   <xsl:template match="tei:idno" mode="eissn">
     <dc:source>
-      <xsl:text>EISSN: </xsl:text>
+      <xsl:text>
+EISSN: 
+</xsl:text>
       <xsl:value-of select="." />
     </dc:source>
   </xsl:template>
@@ -280,7 +295,9 @@
             <xsl:value-of select="$lang" />
           </xsl:attribute>
           <xsl:value-of select="../tei:title[@xml:lang=$lang][not(@type)]" />
-          <xsl:text>: </xsl:text>
+          <xsl:text>
+ : 
+</xsl:text>
           <xsl:value-of select="." />
         </dc:title>
       </xsl:when>
@@ -360,15 +377,21 @@
 
         <dc:subject>
           <xsl:value-of select="translate(./@scheme, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')" />
-          <xsl:text>: </xsl:text>
+          <xsl:text>
+ : 
+</xsl:text>
           <xsl:value-of select="." />
         </dc:subject>
       </xsl:when>
       <xsl:when test="./@scheme='halDomain'">
         <dc:subject>
-          <xsl:text>[</xsl:text>
+          <xsl:text>
+[
+</xsl:text>
           <xsl:value-of select="translate(./@n, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')" />
-          <xsl:text>]</xsl:text>
+          <xsl:text>
+] 
+</xsl:text>
           <xsl:value-of select="." />
         </dc:subject>
       </xsl:when>
@@ -381,58 +404,80 @@
         <xsl:choose>
           <xsl:when test="@n='ART'">
             <dc:type>
-              <xsl:text>info:eu-repo/semantics/article</xsl:text>
+              <xsl:text>
+info:eu-repo/semantics/article
+</xsl:text>
             </dc:type>
           </xsl:when>
           <xsl:when test="@n='THESE'">
             <dc:type>
-              <xsl:text>info:eu-repo/semantics/doctoralThesis</xsl:text>
+              <xsl:text>
+info:eu-repo/semantics/doctoralThesis
+</xsl:text>
             </dc:type>
           </xsl:when>
           <xsl:when test="@n='PRESCONF' or @n='POSTER' or @n='COMM'">
 
             <dc:type>
-              <xsl:text>info:eu-repo/semantics/conferenceObject</xsl:text>
+              <xsl:text>
+info:eu-repo/semantics/conferenceObject
+</xsl:text>
             </dc:type>
           </xsl:when>
           <xsl:when test="@n='OUV' or @n='DOUV'">
             <dc:type>
-              <xsl:text>info:eu-repo/semantics/book</xsl:text>
+              <xsl:text>
+info:eu-repo/semantics/book
+</xsl:text>
             </dc:type>
           </xsl:when>
           <xsl:when test="@n='COUV'">
             <dc:type>
-              <xsl:text>info:eu-repo/semantics/bookPart</xsl:text>
+              <xsl:text>
+info:eu-repo/semantics/bookPart
+</xsl:text>
             </dc:type>
           </xsl:when>
           <xsl:when test="@n='LECTURE'">
             <dc:type>
-              <xsl:text>info:eu-repo/semantics/lecture</xsl:text>
+              <xsl:text>
+info:eu-repo/semantics/lecture
+</xsl:text>
             </dc:type>
           </xsl:when>
           <xsl:when test="@n='UNDEFINED'">
             <dc:type>
-              <xsl:text>info:eu-repo/semantics/preprint</xsl:text>
+              <xsl:text>
+info:eu-repo/semantics/preprint
+</xsl:text>
             </dc:type>
           </xsl:when>
           <xsl:when test="@n='REPORT'">
             <dc:type>
-              <xsl:text>info:eu-repo/semantics/report</xsl:text>
+              <xsl:text>
+info:eu-repo/semantics/report
+</xsl:text>
             </dc:type>
           </xsl:when>
           <xsl:when test="@n='PATENT'">
             <dc:type>
-              <xsl:text>info:eu-repo/semantics/patent</xsl:text>
+              <xsl:text>
+info:eu-repo/semantics/patent
+</xsl:text>
             </dc:type>
           </xsl:when>
           <xsl:when test="@n='MEM'">
             <dc:type>
-              <xsl:text>info:eu-repo/semantics/masterThesis</xsl:text>
+              <xsl:text>
+info:eu-repo/semantics/masterThesis
+</xsl:text>
             </dc:type>
           </xsl:when>
           <xsl:otherwise>
             <dc:type>
-              <xsl:text>info:eu-repo/semantics/other</xsl:text>
+              <xsl:text>
+info:eu-repo/semantics/other
+</xsl:text>
             </dc:type>
           </xsl:otherwise>
         </xsl:choose>
@@ -474,51 +519,76 @@
   <xsl:template match="tei:org[@type='anrProject']">
     <dc:contributor>
       <xsl:if test="not(contains(tei:idno[@type='anr'],'ANR'))">
-        <xsl:text>ANR: </xsl:text>
+        <xsl:text>
+ANR : 
+</xsl:text>
       </xsl:if>
       <xsl:for-each select="./tei:orgName|tei:idno[@type='anr']|./tei:desc">
+
         <xsl:value-of select="." />
         <xsl:if test="not(position() = last())">,</xsl:if>
       </xsl:for-each>
       <xsl:if test="string-length(./tei:date[@type='start'])!=0">
-        <xsl:text>(</xsl:text>
+        <xsl:text>
+(
+</xsl:text>
         <xsl:apply-templates select="./tei:date[@type='start']"
         mode="year" />
-        <xsl:text>)</xsl:text>
+        <xsl:text>
+)
+</xsl:text>
       </xsl:if>
     </dc:contributor>
   </xsl:template>
   <!-- europeanProject-->
   <xsl:template match="tei:org[@type='europeanProject']">
     <dc:contributor>
-      <xsl:text>European Project: </xsl:text>
+      <xsl:text>
+European Project : 
+</xsl:text>
       <xsl:for-each select="./tei:orgName|tei:idno[@type='program']|tei:idno[@type='number']|tei:idno[@type='call']">
 
         <xsl:value-of select="." />
         <xsl:if test="not(position() = last())">,</xsl:if>
       </xsl:for-each>
       <xsl:if test="string-length(./tei:date[@type='start'])!=0">
-        <xsl:text>(</xsl:text>
+        <xsl:text>
+(
+</xsl:text>
         <xsl:apply-templates select="./tei:date[@type='start']"
         mode="year" />
-        <xsl:text>)</xsl:text>
+        <xsl:text>
+)
+</xsl:text>
       </xsl:if>
     </dc:contributor>
     <xsl:if test="tei:idno[@type='number']!=''">
       <dc:relation>
-        <xsl:text>info:eu-repo/grantAgreement/</xsl:text>
+        <xsl:text>
+info:eu-repo/grantAgreement/
+</xsl:text>
         <!-- program = EC:FP7:CODE ou XX::CODE ou CODE -->
         <xsl:if test="contains(tei:idno[@type='program'], ':')">
           <xsl:value-of select="substring-before(tei:idno[@type='program'], ':')" />
-          <xsl:text>/</xsl:text>
+          <xsl:text>
+/
+</xsl:text>
           <xsl:value-of select="substring-before(substring-after(tei:idno[@type='program'], ':'), ':')" />
         </xsl:if>
-        <xsl:text>/</xsl:text>
+        <xsl:text>
+/
+</xsl:text>
         <xsl:value-of select="tei:idno[@type='number']" />
-        <xsl:text>/EU</xsl:text>
-        <xsl:text>/</xsl:text>
+        <xsl:text>
+/EU
+</xsl:text>
+        <xsl:text>
+/
+</xsl:text>
         <xsl:value-of select="tei:desc" />
-        <xsl:text>/</xsl:text>
+        <xsl:text>
+/
+</xsl:text>
         <xsl:value-of select="tei:orgName" />
       </dc:relation>
     </xsl:if>
@@ -537,13 +607,20 @@
   <xsl:template match="tei:org" mode="structure">
     <xsl:value-of select="./tei:orgName[not(@type)]" />
     <xsl:if test="string-length(./tei:orgName[@type='acronym'])!=0">
-      <xsl:text> (</xsl:text>
+
+      <xsl:text>
+ (
+</xsl:text>
       <xsl:value-of select="./tei:orgName[@type='acronym']" />
-      <xsl:text>)</xsl:text>
+      <xsl:text>
+)
+</xsl:text>
     </xsl:if>
     <!-- calcul d'abord de la variable avec toutes les struct d'une branche -->
     <xsl:if test="./tei:listRelation">
-      <xsl:text> ; </xsl:text>
+      <xsl:text>
+ ; 
+</xsl:text>
       <xsl:for-each select="./tei:listRelation/tei:relation">
         <xsl:apply-templates select="." mode="affiche" />
         <xsl:if test="not(position() = last())">-</xsl:if>
@@ -554,9 +631,13 @@
     <xsl:variable name="structid">
       <xsl:value-of select="substring-after(./@active,'#')" />
     </xsl:variable>
-    <xsl:text>[</xsl:text>
+    <xsl:text>
+[
+</xsl:text>
     <xsl:value-of select="$structid" />
-    <xsl:text>]</xsl:text>
+    <xsl:text>
+]
+</xsl:text>
     <xsl:apply-templates select="//tei:back/tei:listOrg[@type='structures']/tei:org[@xml:id=$structid]/tei:listRelation" />
   </xsl:template>
   <xsl:template match="tei:relation" mode="affiche">
@@ -565,7 +646,9 @@
     </xsl:variable>
     <xsl:if test="./@type='UMR'">
       <xsl:value-of select="./@name" />
-      <xsl:text>: </xsl:text>
+      <xsl:text>
+ : 
+</xsl:text>
     </xsl:if>
     <xsl:apply-templates select="//tei:back/tei:listOrg[@type='structures']/tei:org[@xml:id=$structid]"
     mode="structure" />
@@ -576,9 +659,13 @@
       <xsl:variable name="structid">
         <xsl:value-of select="substring-after(./@active,'#')" />
       </xsl:variable>
-      <xsl:text>[</xsl:text>
+      <xsl:text>
+[
+</xsl:text>
       <xsl:value-of select="$structid" />
-      <xsl:text>]</xsl:text>
+      <xsl:text>
+]
+</xsl:text>
       <xsl:apply-templates select="//tei:back/tei:listOrg[@type='structures']/tei:org[@xml:id=$structid]/tei:listRelation" />
     </xsl:for-each>
   </xsl:template>
@@ -593,7 +680,9 @@
           <xsl:when test="not(string-length($country)=0) and not(string-length($town)=0)">
 
             <xsl:value-of select="$town" />
-            <xsl:text>, </xsl:text>
+            <xsl:text>
+, 
+</xsl:text>
             <xsl:value-of select="$country" />
           </xsl:when>
           <xsl:when test="not(string-length($country)=0)">

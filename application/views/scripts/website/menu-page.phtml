@@ -1,9 +1,7 @@
-<?php
-/** @var Hal_View $this */
-?><div>
- 	<table style="width:100%">
+<div>
+ 	<table width="100%">
    		<tr>
-	    	<td style="width:20px"><i class="glyphicon glyphicon-move"></i></td>
+	    	<td width="20px"><i class="glyphicon glyphicon-move"></i></td>
 	    	<td class="page-label">
                 <?php if ($this->page->isFolder()) {?>
                     <i class="glyphicon glyphicon-folder-open"></i>
@@ -18,7 +16,7 @@
     	    		</div>
     	    	</div>
     		</td>
-    		<td style="width:70px">
+    		<td width="70px">
     		    <div class="pull-right">
     		    	<a href="#" onclick="return false;" class="editPage" ><i class="glyphicon glyphicon-pencil"></i></a>
                 	<a href="javascript:void(0)" class="remove-page"  title="<?php echo $this->translate("Supprimer"); ?>"><i class="glyphicon glyphicon-trash"></i></a>

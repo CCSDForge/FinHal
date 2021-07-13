@@ -10,7 +10,7 @@
  * Pour s'intégrer au code de Hal_Document, Hal_Document_Metadatas crée les Hal_Meta à partir d'un tableau et inversement
  */
 
-class Hal_Document_Metadatas implements IteratorAggregate
+class Hal_Document_Metadatas
 {
     /**
      * Tableau des Hal_Document_Meta
@@ -26,12 +26,6 @@ class Hal_Document_Metadatas implements IteratorAggregate
     protected $_db;
 
     /**
-     * @return ArrayIterator|Traversable
-     */
-    public function getIterator() {
-        return new ArrayIterator($this->_metas);
-    }
-    /**
      */
     public function __construct()
     {
@@ -39,19 +33,13 @@ class Hal_Document_Metadatas implements IteratorAggregate
     }
 
     /**
-     * @param string $name
-     * @return bool
-     */
-    public function exists($name) {
-        return array_key_exists($name, $this->_metas);
-    }
-    /**
      *  Chargement des métadonnées depuis la base
      * @param $docid
           */
     public function load($docid)
     {
         $db = $this->_db;
+
         // Chargement des métadonnées
         $sql = $db->select()
             ->from(self::TABLE_META)
@@ -68,12 +56,6 @@ class Hal_Document_Metadatas implements IteratorAggregate
             $linkext = Hal_Document_Meta_LinkExt::load($identifiers);
             if ($linkext !== null) {
                 $this->addMetaObj($linkext);
-            }
-            // Chargement des données de recherche
-            // $researchdata = Hal_Document_Meta_Researchdata::load($identifiers);
-            $researchdata = null;
-            if ($researchdata !== null) {
-                $this->addMetaObj($researchdata);
             }
         }
 
@@ -142,14 +124,13 @@ class Hal_Document_Metadatas implements IteratorAggregate
      * @param $source
      * @param $modifUid
      * @param $status
-     * @uses Hal_Document_Meta_Abstract
      */
     public function createMeta($key, $value, $group, $source, $modifUid, $status = 0) {
 
 
         // Il faut que la valeur existe, qu'elle ne soit pas vide "" ou [] mais si c'est 0 que ça puisse fonctionner
         if (isset($key) && isset($value)
-            && array_key_exists($key, Hal_Document_Meta_Metalist::key2class())
+            && key_exists($key, Hal_Document_Meta_Metalist::key2class())
             && (! Ccsd_Tools::isEmpty($value))) {
             $metaClass = 'Hal_Document_Meta_' . ucfirst(Hal_Document_Meta_Metalist::key2class()[$key]);
 
@@ -225,6 +206,7 @@ class Hal_Document_Metadatas implements IteratorAggregate
     public function addMetasFromDB($dbMetas)
     {
         foreach ($dbMetas as $row) {
+
             $key = $row['METANAME'];
             $value = $row['METAVALUE'];
             $group = $row['METAGROUP'];
@@ -249,13 +231,11 @@ class Hal_Document_Metadatas implements IteratorAggregate
 
     /**
      * Transformation des métas en tableau à x profondeur
-     * @deprecated  utiliser getHalMeta()
-     *          Attention, toutefois, HalMeta ne rends pas de valeur par defaut si la meta n'existe pas
      * @param $name
      * @param bool $group
      * @return array|string
      */
-    public function getMeta($name = null, $group = false)
+    public function getMeta($name = '', $group = false)
     {
 
         // On rend la métadonnée filtrée
@@ -270,7 +250,7 @@ class Hal_Document_Metadatas implements IteratorAggregate
             return $metaClass::getDefaultValue($group);
 
         // On rend une string vide si le filtre choisi n'est pas une métadonnée connue
-        } else if ($name) {
+        } else if ($name != '') {
             return "";
 
         // On rend l'intégralité des métadonnées sous forme de tableau
@@ -337,7 +317,6 @@ class Hal_Document_Metadatas implements IteratorAggregate
     }
 
     /**
-     * @deprecated
      * POURRA ETRE SUPPRIMEE c'est simplement pour faciliter la transition dans Hal_Document
      */
     public function toArray()

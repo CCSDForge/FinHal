@@ -4,6 +4,7 @@
  * Used by default Vhost
  */
 ?>
+
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
 <head>
@@ -13,22 +14,30 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="Content-Language" content="fr">
 
-    <link rel="stylesheet" href="//static.ccsd.cnrs.fr/v3/css/bootstrap.min.css" type="text/css"
+    <link rel="stylesheet" href="//static.ccsd.cnrs.fr/v3/css/bootstrap.min.css?3_20170925" type="text/css"
           media="screen">
-    <link rel="stylesheet" href="//static.ccsd.cnrs.fr/css/ccsd.css" type="text/css" media="screen">
+    <link rel="stylesheet" href="//static.ccsd.cnrs.fr/css/ccsd.css?3_20170925" type="text/css" media="screen">
 
     <style>
     <?php
     $cssPath = __DIR__ . '/../css/hal.css';
+
     if (is_readable($cssPath)) {
         echo file_get_contents($cssPath);
     }
     ?>
     </style>
-    <script type="text/javascript" src="//static.ccsd.cnrs.fr/js/jquery/min.1.9.1.js?"></script>
-    <script type="text/javascript" src="//static.ccsd.cnrs.fr/v3/js/bootstrap.min.js?"></script>
+
+
+
+    <script type="text/javascript" src="//static.ccsd.cnrs.fr/js/jquery/min.1.9.1.js?3_20170925"></script>
+
+    <script type="text/javascript" src="//static.ccsd.cnrs.fr/v3/js/bootstrap.min.js?3_20170925"></script>
+
+
 </head>
 <body>
+
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-header ">
         <button type="button" class="navbar-toggle" data-toggle="collapse"
@@ -39,8 +48,8 @@
         <div class="logo-ccsd">
             <a class="brand" href="https://www.ccsd.cnrs.fr/"
                title="Centre pour la communication Scientifique directe"><img
-                        alt="CCSD"
-                        src="//static.ccsd.cnrs.fr/img/logo-ccsd-navbar.png" /></a>
+                        src="//static.ccsd.cnrs.fr/img/logo-ccsd-navbar.png"
+                        border="0"/></a>
         </div>
     </div>
     <div class="collapse navbar-collapse" id="nav-services">
@@ -64,20 +73,29 @@
             <li class=""><a href="https://www.sciencesconf.org">Sciencesconf.org</a></li>
             <li><a href="https://support.ccsd.cnrs.fr">Support</a></li>
         </ul>
+
+
     </div>
 </div>
-<?php if ((!isset($_SERVER['HTTPS'])) || ($_SERVER['HTTPS'] == null)) {
+
+
+<?php if ((!isset($_SERVER['HTTPS'])) || ($_SERVER['HTTPS'] == null)) {
     $scheme = 'http';
 } else {
     $scheme = 'https';
 }
+
 $filteredHostname = filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 ?>
+
+
 <div id="container" class="container">
     <div class="jumbotron" style="margin-top: 1em">
         <h1 style="font-size:200%;">Le portail HAL</h1>
         <h2><?php echo '<strong>' . $scheme . '</strong>://' . $filteredHostname; ?> n'est pas accessible</h2>
     </div>
+
+
     <?php if ($scheme == 'https') {
         echo '<div class="alert alert-success" role="alert" style="font-size:130%;">';
         echo "<p>Il est possible que ce portail n'ait pas encore été configuré en <code>HTTP<strong>S</strong></code>. ";
@@ -88,18 +106,27 @@ $filteredHostname = filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_FULL_SPECI
         echo '</div>';
     }
     ?>
+
     <div class="alert alert-success" role="alert" style="font-size:130%;">
         <p>Vous pouvez vérifier que ce portail existe dans la liste des portails :</p>
-        <p><a class="btn btn-primary" href="https://hal.archives-ouvertes.fr/browse/portal">Liste des portails HAL</a>
+        <p>
+            <a class="btn btn-primary" href="https://hal.archives-ouvertes.fr/browse/portal">Liste des portails
+                HAL</a>
         </p>
     </div>
+
+
     <div class="alert alert-info" role="alert" style="font-size:130%;">
         <p>Si vous pensez que c'est une erreur, merci de contacter le support :
             <a href="mailto:hal.support@ccsd.cnrs.fr">hal.support@ccsd.cnrs.fr</a>
         </p>
 
     </div>
+
+
 </div>
+
+
 <div class="footer footer-default">
     <div class="footer-contact">
         <h4>Contact</h4>
@@ -108,9 +135,10 @@ $filteredHostname = filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_FULL_SPECI
     </div>
     <div class="footer-ccsd">
         <a href="//ccsd.cnrs.fr" onclick="this.target='_blank'"><img
-                    src="//static.ccsd.cnrs.fr/img/logo-ccsd-footer.jpg"
+                    src="//static.ccsd.cnrs.fr/img/logo-ccsd-footer.jpg" border="0"
                     width="200" alt="Logo CCSD"/></a>
     </div>
 </div>
+
 </body>
 </html>

@@ -6,11 +6,20 @@
  * Time: 16:28
  */
 
-class Hal_Instance
-{
+namespace Hal;
 
+/**
+ * Class Instance
+ * @package Hal
+ */
+abstract class Instance
+{
     /**
-     * @var Hal_Instance
+     * @var array
+     */
+    private static $_name2classe = [];
+    /**
+     * @var Instance
      * @access private
      * @static
      */
@@ -48,18 +57,22 @@ class Hal_Instance
      * si elle n'existe pas encore puis la retourne.
      *
      * @param string $sName : nom de l'instance
-     * @return Hal_Instance
+     * @return Instance
+     * @throws \Exception
      */
-    public static function getInstance($sName)
+    public static function getInstance($sName = '')
     {
         // on est sur l'instance SPM par défaut
-        if (!isset($sName) || !is_string($sName) || $sName == '') {
-            $sName = 'hal';
-        }
         if (is_null(self::$monInstance)) {
-            self::$monInstance = new Hal_Instance($sName);
+            if ($sName == '') {
+                $sName = 'hal';
+            }
+            if (!array_key_exists($sName, self::$_name2classe)) {
+                throw new \Exception("Name instance $sName is not defined!");
+            }
+            $class = '\\Hal\\Instance\\' . self::$_name2classe[$sName];
+            self::$monInstance = new $class($sName);
         }
-
         return self::$monInstance;
     }
 
@@ -72,6 +85,22 @@ class Hal_Instance
         return $this->name;
     }
 
+    /**
+     * @param $name
+     * @param $className
+     * @throws \Exception
+     */
+    public static function register($name, $className)
+    {
+        if (array_key_exists($name, self::$_name2classe)) {
+            \Ccsd_Tools::panicMsg(__FILE__, __LINE__, "Name instance $name is redefined!");
+            throw new \Exception("Name instance $name is redefined!");
+        }
+        self::$_name2classe[$name] = $className;
+    }
 }
 
-?>
+foreach (glob(__DIR__."/Instance/*.php") as $filename)
+{
+    require_once($filename);
+}

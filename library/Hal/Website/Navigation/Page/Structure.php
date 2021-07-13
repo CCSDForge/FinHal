@@ -36,9 +36,9 @@ class Hal_Website_Navigation_Page_Structure extends Hal_Website_Navigation_Page
     /**
      * Filtre utilisateur
      *
-     * @var array[]
+     * @var string[]
      */
-    protected $_filter = [];
+    protected $_filter = '';
     /**
      *
      * @var boolean
@@ -59,8 +59,6 @@ class Hal_Website_Navigation_Page_Structure extends Hal_Website_Navigation_Page
         'filter' => 'setFilter',
         'sort'   => 'setSort'
     ];
-
-    protected $_constraintUniq = true;
 
     /**
      * Formulaire
@@ -160,16 +158,12 @@ class Hal_Website_Navigation_Page_Structure extends Hal_Website_Navigation_Page
 
     /**
      * Initialisation du filtre
-     * @param string []|string   (chaine avec les filtres separes par ;)
+     * @param string []|string  (string[] ou '')
      */
-    public function setFilter($filter = [])
+    public function setFilter($filter = '')
     {
-        if (is_string($filter)) {
-            if ($filter == '') {
-                $filter = [];
-            } else {
-                $filter = explode(';', $filter);
-            }
+        if ((!is_array($filter)) && ($filter != '')) {
+            $filter = explode(';', $filter);
         }
         $this->_filter = $filter;
     }
@@ -331,7 +325,7 @@ class Hal_Website_Navigation_Page_Structure extends Hal_Website_Navigation_Page
         if ($this->getSort() != '') {
             $params ['sort'] = $this->getSort();
         }
-        if ($this->getFilter() != []) {
+        if ($this->getFilter() != '') {
             $params ['filter'] = $this->getFilter();
         }
 
@@ -345,7 +339,7 @@ class Hal_Website_Navigation_Page_Structure extends Hal_Website_Navigation_Page
      */
     protected function hasFilter()
     {
-        if (!empty($this->getFilter ())) {
+        if ($this->getFilter() != '') {
             return true;
         }
         return false;

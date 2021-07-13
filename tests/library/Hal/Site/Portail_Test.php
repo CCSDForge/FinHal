@@ -32,7 +32,7 @@ class Hal_Site_Portail_Test extends PHPUnit_Framework_TestCase
     public function testConstruction()
     {
         $this->assertEquals(Hal_Site::TYPE_PORTAIL, $this->_portail->getType());
-        $this->assertEquals('Test', $this->_portail->getShortname());
+        $this->assertEquals('Test', $this->_portail->getSite());
         $this->assertEquals('Test en cours', $this->_portail->getName());
     }
 

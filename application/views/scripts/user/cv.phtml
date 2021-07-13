@@ -53,6 +53,9 @@
         <?php
         $typdocs = array();
         foreach(Hal_Settings::getTypdocs() as $typdoc) {
+            if ( isset($typdoc['type']) && $typdoc['type'] == 'changeColumn' ) {
+                continue;
+            }
             if (isset($typdoc['children']) && is_array($typdoc['children'])) {
                 foreach($typdoc['children'] as $stypdoc) {
                     $typdocs[] = $stypdoc['id'];

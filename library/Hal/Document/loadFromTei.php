@@ -332,7 +332,7 @@ if ($entries->length == 1) {
                         $this->_metas['circa'] = '1';
                     }
                 } else if ($type == 'dateDefended') {
-                    if (in_array($this->getTypdoc(), array('THESE', 'HDR', 'MEM', 'ETABTHESE'))) {
+                    if (in_array($this->getTypdoc(), array('THESE', 'HDR', 'MEM'))) {
                         $meta = 'date';
                     }
                 } else if ($type == 'dateEpub') {

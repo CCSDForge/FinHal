@@ -1,6 +1,4 @@
-<?php
-/** @var Hal_View $this */
-echo $this->doctype('XHTML1_RDFA'); ?>
+<?php echo $this->doctype('XHTML1_RDFA'); ?>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="<?php echo Zend_Registry::get('Zend_Locale')->getLanguage(); ?>">
 <head>
     <?php if(APPLICATION_ENV != ENV_PROD) : ?>

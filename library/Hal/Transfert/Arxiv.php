@@ -30,9 +30,6 @@ class Hal_Transfert_Arxiv extends Hal_Transfert {
     protected $pwd        = ARXIV_PWD;
 
     protected $filenamePrefix = "arxiv-";
-    /** @var Hal_Document */
-    protected $document = null;
-    protected $documentCategories = null;
 
     protected $name       = "arXiv";
 
@@ -164,13 +161,12 @@ class Hal_Transfert_Arxiv extends Hal_Transfert {
             throw new Hal_Transfert_Exception(Hal_Transfert_Response::INTERNAL, 'Uploaded metadata failed...');
         }
     }
-
     /**
      * @return string
      */
     protected function getSwordCollection() {
         $document = $this -> document;
-        return Hal_Arxiv::document2archive($document);
+        return Hal_Arxiv::getArXivSwordCollection($document);
     }
 
     /**
@@ -238,7 +234,6 @@ class Hal_Transfert_Arxiv extends Hal_Transfert {
             $entry->appendChild($xml->createElement('id', $document->_identifiant));
             $entry->appendChild($xml->createElement('updated', $document->getSubmittedDate('c')));
             $author = $xml->createElement('author');
-            // TODO Need to be in conf file!
             $author->appendChild($xml->createElement('name', 'HAL'));
             $author->appendChild($xml->createElement('email', 'hal@ccsd.cnrs.fr'));
             $entry->appendChild($author);
@@ -277,7 +272,7 @@ class Hal_Transfert_Arxiv extends Hal_Transfert {
                 $cat = $xml->createElement(($i == 0) ? 'arxiv:primary_category' : 'category');
                 $cat->setAttribute('scheme', 'http://arxiv.org/terms/arXiv/');
                 $cat->setAttribute('label', $category);
-                $cat->setAttribute('term', 'http://arxiv.org/terms/arXiv/' . $category);
+                $cat->setAttribute('term', 'http://arxiv.org/terms/arXiv/' . $code);
                 $entry->appendChild($cat);
                 if ($i++ > 3) { // 4 domaines max sur arXiv
                     break;
@@ -370,7 +365,7 @@ class Hal_Transfert_Arxiv extends Hal_Transfert {
     /**
      * Retourne l'ensemble des categories Arxiv pour l'article
      * Sauf dans le cas d'une mise a jour sur Arxiv, dans ce cas,
-     * seule la category principale (la premiere) est retournee
+     * seule la category prinvipale (la premiere) est retournee
      * @return string[]
      */
     public function getArxivCategories()
@@ -380,7 +375,7 @@ class Hal_Transfert_Arxiv extends Hal_Transfert {
             if (APPLICATION_ENV != ENV_PROD) {
                 return [ 'test.soft' => 'Test Soft'];
             }
-            $categories = Hal_Arxiv::haldomaines2arxivsubjects($document->getDomains());
+            $categories = Hal_Arxiv::getDomains2ArxivCategories($document->getDomains());
 
             if ($document->getVersion() == 1 || $this->getOldTransferts() == []) {
                 return $categories;
@@ -484,7 +479,6 @@ class Hal_Transfert_Arxiv extends Hal_Transfert {
     }
 
     /**
-     * @deprecated
      * Equivalence de code arxiv
      * @param string $code
      * @return string
@@ -502,7 +496,6 @@ class Hal_Transfert_Arxiv extends Hal_Transfert {
     }
 
     /**
-     * @deprecated
      * Retourne le tableau code_arxiv => Libelle anglais du domaine arxiv
      * @param string[] $domains
      * @return string[]

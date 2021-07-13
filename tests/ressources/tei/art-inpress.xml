@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<TEI version="1.1"
-     xmlns="http://www.tei-c.org/ns/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://www.tei-c.org/ns/1.0 http://api.archives-ouvertes.fr/documents/aofr-sword.xsd">
+<TEI xmlns:hal="http://hal.archives-ouvertes.fr" xmlns="http://www.tei-c.org/ns/1.0">
     <text>
         <body>
             <listBibl>
@@ -42,7 +40,7 @@
                         <note type="audience" n="2">internationale</note>
                         <note type="popular" n="0">non</note>
                         <note type="peer" n="1">oui</note>
-                        <note type="other" n="2">oui</note>
+                        <note type="other" n="2"></note>
                     </notesStmt>
                     <sourceDesc>
                         <biblStruct>
@@ -81,14 +79,13 @@
                             <monogr>
                                 <idno type="issn">0028-646X</idno>
                                 <idno type="eissn">1469-8137</idno>
-                                <editor>John woe, Jackie Chan, Calamity James</editor>
                                 <imprint>
                                     <biblScope unit="volume">199</biblScope>
                                     <biblScope unit="issue">4</biblScope>
                                     <biblScope unit="pp">936-947</biblScope>
-                                    <!-- Utilise dans des tests -->
-                                    <date type="datePub" subtype="inPress">2019</date>
+                                    <date type="datePub" subtype="inPress"></date>
                                 </imprint>
+                                <editor>John woe, Jackie Chan, Calamity James</editor>
                             </monogr>
                         </biblStruct>
                     </sourceDesc>
@@ -107,7 +104,7 @@
                             <classCode scheme="halTypology" n="ART"/>
                             <classCode scheme="halDomain" n="sdv"/>
                         </textClass>
-                        <abstract xml:lang="en"><p>The developing seed essentially relies on external
+                        <abstract xml:lang="en">The developing seed essentially relies on external
                             oxygen to fuel aerobic respiration, but it is currently unknown how
                             oxygen diffuses into and within the seed, which structural pathways are
                             used and what finally limits gas exchange. By applying synchrotron X-ray
@@ -126,7 +123,7 @@
                             and histological methods. We conclude that the size and
                             inter-connectivity of void spaces are major determinants of gas exchange
                             potential, and locally affect the respiratory activity of a developing
-                            seed</p></abstract>
+                            seed</abstract>
                     </profileDesc>
                 </biblFull>
             </listBibl>
@@ -140,7 +137,7 @@
                         </address></desc>
                 </org>
                 <org type="institution" xml:id="localStruct-02">
-                    <orgName>Leibniz Inst Plant Genet &amp;amp; Crop Plant Res IPK, D-06466 Gatersleben,
+                    <orgName>Leibniz Inst Plant Genet &amp; Crop Plant Res IPK, D-06466 Gatersleben,
                         Germany</orgName>
                     <desc><address>
                             <country key="de"/>

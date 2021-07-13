@@ -89,6 +89,7 @@ class Hal_Website_Navigation_Page_Author extends Hal_Website_Navigation_Page_Str
         }
 		return $this->_form;
 	}
+
 	/**
 	 * (non-PHPdoc)
 	 * @param string $_action
@@ -99,22 +100,27 @@ class Hal_Website_Navigation_Page_Author extends Hal_Website_Navigation_Page_Str
 		if ($this->hasFilter ()) {
 			$_action .= '-structure';
 		}
+
 		$this->_action = $_action;
+
 		return $this;
 	}
     /**
      * Retourne le tri de l'utilisateur
      */
-    public function getSort() {
+    public function getSort()
+    {
         return $this->_sort;
     }
+
     /**
      * Définit le tri de l'utilisateur
      *
      * @param string $_sort
      * @return Hal_Website_Navigation_Page_Author
      */
-    public function setSort($_sort = 'index') {
+    public function setSort($_sort = 'index')
+    {
         $this->_sort = $_sort;
         return $this;
     }
@@ -122,34 +128,42 @@ class Hal_Website_Navigation_Page_Author extends Hal_Website_Navigation_Page_Str
      *
      * @return string
      */
-    public function getField() {
+    public function getField()
+    {
         return $this->_field;
     }
+
     /**
      *
      * @param string $_field
      * @return Hal_Website_Navigation_Page_Author
      */
-    public function setField($_field) {
+    public function setField($_field)
+    {
         $this->_field = $_field;
         return $this;
     }
+
     /**
      * Retourne le filtre
      *
      * @return string[]
      */
-    public function getFilter() {
+    public function getFilter()
+    {
         return $this->_filter;
     }
+
     /**
      * Initialisation du filtre
      * @param string []|string  (string[] ou '')
      */
-    public function setFilter($filter = '') {
+    public function setFilter($filter = '')
+    {
         if ((!is_array($filter)) && ($filter != '')) {
             $filter = explode(';', $filter);
         }
         $this->_filter = $filter;
     }
+
 }

@@ -1,17 +1,16 @@
 <?php
-/** @var Hal_View $this */
 $this->jQuery()
     ->addJavascriptFile(CCSDLIB ."/js/jquery.dataTables.min.js")
     ->addJavascriptFile(CCSDLIB ."/js/dataTables.bootstrap.js")
     ->addStylesheet(CCSDLIB . '/css/dataTables.bootstrap.css');
 
-$this->layout()->breadcrumbs = $this->collection->getShortname();
+$this->layout()->breadcrumbs = $this->collection->getCode();
 $halUser = new Hal_User();
 
 $fullcritere = Hal_Site_Collection::getFullCritere($this->collection->getSid());
 ?>
 
-<h4><?php echo $this->collection->getShortName() ?><small> - <?php echo $this->collection->getFullname() ?></small></h4>
+<h4><?php echo $this->collection->getCode() ?><small> - <?php echo $this->collection->getName() ?></small></h4>
 <hr>
 <h5><?php echo $this->translate('Informations sur la collection'); ?></h5>
 <div class="row">
@@ -47,16 +46,14 @@ $fullcritere = Hal_Site_Collection::getFullCritere($this->collection->getSid());
                     <td><?php echo $this->translate('Critère de la collection'); ?></td>
                     <td><?php echo $this->collection->getCritere(); ?></td>
                 </tr>
-                <?php
-                /** @var Hal_Site_Collection[] $collectionsSup */
-                $collectionsSup = $this->collection->getParents();
+                <?php $collectionsSup = $this->collection->getParents();
                 if (count($collectionsSup) > 0) {
                     ?>
                     <tr>
                         <td><?php echo $this->translate('Collections supérieures'); ?></td>
                         <td>
                             <?php foreach ($collectionsSup as $collectionSup) {?>
-                                <span class="label label-primary"><?php echo $collectionSup->getShortname();?></span>&nbsp;
+                                <span class="label label-primary"><?php echo $collectionSup->getCode();?></span>&nbsp;
                             <?php } ?>
                         </td>
                     </tr>
@@ -66,9 +63,7 @@ $fullcritere = Hal_Site_Collection::getFullCritere($this->collection->getSid());
                     </tr>
                 <?php
                 } ?>
-                <?php
-                /** @var Hal_Site_Collection[] $collectionsInf */
-                $collectionsInf = $this->collection->getCollectionsInf();
+                <?php $collectionsInf = $this->collection->getCollectionsInf();
                 if (count($collectionsInf) > 0) {
                     ?>
                     <tr>
@@ -98,10 +93,10 @@ $fullcritere = Hal_Site_Collection::getFullCritere($this->collection->getSid());
         <div id="graph" style=""></div>
         <?php echo $this->chart(array('container' => 'graph', 'content' => $graphData, 'options' => array('legend' => array('position' => 'none'))), 'PieChart'); ?>
         <hr />
-        <a href="<?php echo '/' . $this->collection->getShortname();?>" class="btn btn-primary" target="_blank"><i class="glyphicon glyphicon-globe"></i>&nbsp;<?php echo $this->translate('Accéder à la collection'); ?></a>
+        <a href="<?php echo PREFIX_URL . $this->collection->getCode();?>" class="btn btn-primary" target="_blank"><i class="glyphicon glyphicon-globe"></i>&nbsp;<?php echo $this->translate('Accéder à la collection'); ?></a>
         <br />
         <br />
-        <a href="<?php echo '/' . $this->collection->getShortname() . '/stat/index' ;?>" class="btn btn-primary" target="_blank"><i class="glyphicon glyphicon-stats"></i>&nbsp;<?php echo $this->translate('Accéder aux statistiques'); ?></a>
+        <a href="<?php echo '/' . $this->collection->getCode() . '/stat/index' ;?>" class="btn btn-primary" target="_blank"><i class="glyphicon glyphicon-stats"></i>&nbsp;<?php echo $this->translate('Accéder aux statistiques'); ?></a>
     </div>
 </div>
 

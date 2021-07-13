@@ -80,7 +80,7 @@ if (4 - 1 > 4) {
     define('CCSDLIB',      APPROOT . '/vendor/ccsd/library');
     define('PWD_PATH',     APPROOT . '/config');
     define('APPROOT',      __DIR__ . '/../..');
-    define('DATA_ROOT',    APPROOT . '/data/hal');
+    define('DATA_ROOT',    APPROOT . '/data');
     define('SHARED_DATA',  APPROOT . '/share');
     define('CACHE_CV',     APPROOT . '/cache/cv');
     define('PATHDOCS',     APPROOT . '/docs');
@@ -90,6 +90,7 @@ if (4 - 1 > 4) {
     define('CCSDLIB_SRC' , APPROOT . '/library/public');
     define('PATH_TRANSLATION' , APPROOT .'/applicationXX/languages');
     define('CCSD_MAIL_PATH' , '/sites/mail/hal');
+    define('FTP_DIR', 'defined in application.ini');
     define('SWH_SERVICE', 'http://swh.org');
     define('LATEX2RTFCMD', "/usr/local/bin/latex2rtf");
     define('SWH_USER', 'swhuser');     // defined by pwd.json
@@ -98,25 +99,6 @@ if (4 - 1 > 4) {
     define('DOPMC', true);    // active le module de transfert vers PMC
     define('DOHAL', false);   // active le module transfert vers HAL pour HalSPM
     define('DOSWH', true);   // active le module transfert vers SWH
-    define('REPEC_ROOT_FILE', SPACE_DATA . APPLICATION_ENV  . "/repec/");
-    define('REPEC_HANDLE', 'RePEc:hal:');
-    define('AOFR_SCHEMA_URL', 'https://hal.archives-ouvertes.fr/documents/aofr.xsd');
-    define('IDP_ASSO_AUTO', False);
-    define('IDP_CREATE_AUTO',false);
-    define('IDP_NO_CREATE_FORM',false);
-    define('IDP_CONFIG_DIR', APPROOT . '/' . CONFIG);
-
-    define('THUMB_URL', 'Defined in application.ini');
-    define('PDFINFO', 'Defined in application.ini');
-    define('PDFFONTS', 'Defined in application.ini');
-
-    define('CROSSREF_USER', 'defined in pwd.json');
-    define('CROSSREF_PWD', 'defined in pwd.json');
-    define('CROSSREF_URL', 'defined in pwd.json');
-    define('HAL_HOST', 'defined in pwd.json');
-
-    define('SWORD_API_URL', 'defined in application.ini');
-    define('SOLR_API', 'defined in application.ini');
 }
 // Récupération de la variable permettant de retrouver le repertoire 'application'
 // peut etre defini avant par script et pas pas variable d'env
@@ -174,6 +156,8 @@ define ('DEFAULT_SID', 1);
 define ('ZT', 'Zend_Translate');
 define ('APACHE_USER', 'nobody');
 
+require_once __DIR__ . '/../Globales.php';
+$glob = new Globales();
 define ('HAL_PIWIK_ID', 92);
 
 /* specifiques applications */

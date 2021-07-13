@@ -149,16 +149,15 @@ class WidgetController extends Hal_Controller_Action
         $query  = 'q=*%3A*';
         $query .= '&start=0&rows=0&wt=phps&omitHeader=true&facet=true&facet.field=submitType_s';
         if (($main = Hal_Site_Settings_Portail::getMainTypdocs()) != '') {
-            $cond = preg_replace('/,/' , ' OR ', $main);
+            $cond = preg_replace('/,',' OR ',$main);
             $query .= '&fq=docType_s:'.urlencode('('.$cond.')');
         }
-        $res = [];
         try {
             $res = Hal_Tools::solrCurl($query, 'hal', 'select', true);
-            $res = unserialize($res);
         } catch (Exception $exc) {
             error_log($exc->getMessage(), 0);
         }
+        $res = unserialize($res);
         if (isset($res['facet_counts']['facet_fields']['submitType_s'])) {
             $counter = $res['facet_counts']['facet_fields']['submitType_s'];
             $nb = 0;
@@ -194,15 +193,10 @@ class WidgetController extends Hal_Controller_Action
     public function searchWidget($cacheFilename)
     {
         $filters = [];
-        $res = Hal_Settings::getConfigFile(Hal_Website_Search::CHECKED_FILTER_FILE);
+        $res = Hal_Settings::getConfigFile('solr.hal.checkedFilters.json');
         foreach (['filter_dt' => 'docType_s', 'filter_st' => 'submitType_s'] as $key => $field) {
             if (isset($res[$key]) && $res[$key] != '') {
-                if (is_array($res[$key])) {
-                    $filters = $res[$key];
-                } else {
-                    $filters = explode(',', $res[$key]) ;
-                }
-                foreach ($filters as $filter) {
+                foreach (explode(',', $res[$key]) as $filter) {
                     $filters[] = $field . '[]=' . $filter;
                 }
             }

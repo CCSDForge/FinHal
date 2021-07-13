@@ -15,9 +15,11 @@
     <div class="widget-content ref-biblio">
         <?php $values =  $this->document->getReuse();
         if (isset($values)) { ?>
-        <?php echo $this->document->getMainTitle().' - '.Ccsd_Tools::ifsetor($values['auteur'], $values['auteur'], '').Ccsd_Tools::ifsetor($values['arboEntites'], $values['arboEntites'], '').' - '.Zend_Registry::get('Zend_Translate')->translate('Données originales téléchargées depuis')
-            .' <a href = "'. $this->document->getUri(true). '">'.$this->document->getUri().' </a> '.Zend_Registry::get('Zend_Translate')->translate('mise à jour du').' '.$values['datePubli']; ?>
-        <br>© Licence ouverte / open licence
+        <?php echo $this->document->getMainTitle().'. <br> '.
+                Ccsd_Tools::ifsetor($values['auteur'], $values['auteur'], '').' <br> '.
+                Zend_Registry::get('Zend_Translate')->translate('Document original téléchargé depuis')
+            .' <a href = "'. $this->document->getUri(true). '">'.$this->document->getUri().' </a> '.Zend_Registry::get('Zend_Translate')->translate(' mise à jour du').' '.$values['datePubli']; ?>
+            © <a href = https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf>Licence ouverte v 2.0</a>
         <?php } ?>
 
     </div>

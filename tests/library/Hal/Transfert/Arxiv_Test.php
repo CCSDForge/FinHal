@@ -117,7 +117,7 @@ class Hal_Transfert_Arxiv_Test extends PHPUnit_Framework_TestCase
      */
     public function invokePrivateMethod($object, $methodName, $args) {
         $method = $this -> setPublicMethodForTest($object, $methodName);
-        return $method -> invokeArgs($object, $args);
+        $method -> invokeArgs($object, $args);
     }
 
 
@@ -197,37 +197,5 @@ class Hal_Transfert_Arxiv_Test extends PHPUnit_Framework_TestCase
         return [
             1 => [ self::$doc_OnHold[0], ['result' => Hal_Transfert_Response::WARN, 'reason' => 'On hold sur ArXiv', 'regexp-alternate' => '/https?:/', 'regexp-edit' => '|https?://arxiv.org/sword-app/edit/\d*.atom|']]
         ];
-    }
-
-    public function test_delete() {
-        $t = new Hal_Transfert_Arxiv(30);
-        $this->invokePrivateMethod($t, "load", array(30));
-        $t->save();
-
-        $t->delete();
-
-        $t = new Hal_Transfert_Arxiv(30);
-        $this->assertFalse($this->invokePrivateMethod($t, "load", array(30)));
-    }
-
-    public function test_changeDocid() {
-        // Initialisation: On veut un document 30 et pas de 31
-        $t = new Hal_Transfert_Arxiv(30);
-        $this->invokePrivateMethod($t, "load", array(30)); // des fois qu'il existe...
-        $cible = new Hal_Transfert_Arxiv(31);
-        if ($this->invokePrivateMethod($cible, "load", array(31))) {
-            $cible->delete();
-        }
-        $testUrl = "http://test.de/transfert/doc30";
-        $t->setPendingUrl($testUrl);
-        $t->save();
-        // On test le chgment maintenant
-        Hal_Transfert_Arxiv::changeDocid(30,31);
-        $t = new Hal_Transfert_Arxiv(30);
-        $this->assertFalse($this->invokePrivateMethod($t, "load",  array(30)));  // le document 30 ne doit plus exister
-        $t = new Hal_Transfert_Arxiv(31);
-        $this->assertTrue($this->invokePrivateMethod($t, "load",  array(31)));     // Le document 31 existe: transfert reussi
-        $this->assertEquals($testUrl, $t->getPendingUrl());
-
     }
 }

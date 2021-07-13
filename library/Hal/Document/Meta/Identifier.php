@@ -15,7 +15,6 @@ class Hal_Document_Meta_Identifier extends Hal_Document_Meta_Complex
      * @param int     $docid
      * @param int       $sid
      * @param int[] $metaids
-     * @throws Zend_Db_Adapter_Exception
      */
     public function save($docid, $sid, &$metaids = null)
     {
@@ -40,9 +39,10 @@ class Hal_Document_Meta_Identifier extends Hal_Document_Meta_Complex
 
     /**
      * @param int    $docid
+     * @param string $group
      * @return Hal_Document_Meta_Identifier
      */
-    static function load($docid) {
+    static function load($docid, $group=null) {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         $sql = $db->select()
             ->from(self::TABLE_COPY)
@@ -75,6 +75,7 @@ class Hal_Document_Meta_Identifier extends Hal_Document_Meta_Complex
      * @param int $docid identifiant du dépôt hal
      * @param string $code serveur exterieur
      * @param string $localid identifiant sur serveur eterieur
+     * @throws Zend_Db_Adapter_Exception
      * @todo: devrait correspondre a une fct de modif de l'objet puis save...
      */
     static public function addIdExtDb($docid, $code, $localid)
@@ -85,13 +86,9 @@ class Hal_Document_Meta_Identifier extends Hal_Document_Meta_Complex
             'LOCALID' => (string)$localid,
             'DATECRE' => date('Y-m-d H:i:s')
         );
-        if ($localid == '') {
-            // On enregistre pas un identifiant vide!
-            return ;
-        }
         try {
             Zend_Db_Table_Abstract::getDefaultAdapter()->insert(self::TABLE_COPY, $bind);
-        } catch (Zend_Db_Adapter_Exception $e) {
+        } catch (Zend_Db_Statement_Exception $e) {
             // Deja enregistree, pas grave...
         }
     }

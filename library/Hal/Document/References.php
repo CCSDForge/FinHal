@@ -69,7 +69,6 @@ class Hal_Document_References
     protected $_db                   = null;
     protected $_domDoc               = null;
     protected $_docReferences        = [];
-    /** @var string[][]  tableau de table raw  */
     protected $_loadedReferences     = [];
     protected $_referenceXPaths      = [
         self::TITLE_ANALYTIC  => '/xmlns:biblStruct/xmlns:analytic/xmlns:title',
@@ -160,12 +159,8 @@ class Hal_Document_References
 
     /**
      * Get ref id(s) by doc id
-     * @param int $docId
-     * @param string $refStatus
-     * @param int $pid
-     * @param int $limitNumber
+     * @param $docId
      * @return array
-     * @throws Zend_Db_Statement_Exception
      */
     public static function getRefIdsByDocId($docId, $refStatus, $pid, $limitNumber)
     {
@@ -177,8 +172,7 @@ class Hal_Document_References
             return [];
         }
         $sql = $db->select()->from(self::DOC_REFERENCES, self::REFID)
-            ->where(self::PID . ' = ?', $pid)
-            ->where(self::DOCID . ' = ?', $docId);
+            ->where(self::PID . ' = ?', $pid);
         return $db->fetchCol($sql);
     }
 
@@ -636,23 +630,24 @@ class Hal_Document_References
 
     /**
      * return the value of an element HTML
-     * @param string $html
-     * @param string $className
+     * @param $html
+     * @param $type
      * @return string
      */
-    public function getElementByClassName($html, $className)
+    public function getElementByClassName($html, $type)
     {
         $results = '';
         $dom = new DomDocument('1.0', self::UTF8);
         $dom->loadHTML(utf8_decode($html));
         $finder = new DomXPath($dom);
+        $className = $type;
         $nodes = $finder->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' $className ')]");
         if ($nodes->length > 0) {
             foreach ($nodes as $node) {
                 $results = $node->nodeValue;
             }
         }
-        return trim($results);
+        return $results;
     }
 
     /**
@@ -796,7 +791,8 @@ class Hal_Document_References
         foreach($references as $ref) {
 
             $refId = $ref['REFID'];
-            $xml= $ref[self::REFXML_ORIGINAL];
+
+            $xml= $ref["REFXML_ORIGINAL"];
 
             $dom = new DOMDocument();
             $dom->loadXML((string)$xml);
@@ -1203,7 +1199,7 @@ class Hal_Document_References
      */
     public function getLinkExt($id)
     {
-        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $db = Hal_Db_Adapter_ReferenceBiblio::getAdapter();
         $sql =  $db->select()->distinct()
             ->from('DOC_LINKEXT', 'URL')
             ->where("LINKID = ?", $id);

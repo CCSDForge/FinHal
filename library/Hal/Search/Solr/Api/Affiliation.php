@@ -24,7 +24,7 @@ class Hal_Search_Solr_Api_Affiliation
             return '';
         }
 
-        $str_ss_ponct = str_replace(['?', ',', '.', ':', ';', '!', '-', '/'], ' ', $str);
+        $str_ss_ponct = str_replace(array('?', ',', '.', ':', ';', '!', '-', '/'), ' ', $str);
         return preg_replace('/\s{2,}/', ' ', $str_ss_ponct);
     }
 
@@ -245,7 +245,7 @@ class Hal_Search_Solr_Api_Affiliation
             $affiAcronym = $HALAuteurAffi->getAcronym();
             $name = self::drop_accent_and_lower($affiName);
             $acronym = self::drop_accent_and_lower($affiAcronym);
-            $listSimilarLabels = [];
+            $listSimilarLabels = array();
             if (!is_null($name)) {
                 $listSimilarLabels[] = $name;
             }
@@ -455,7 +455,7 @@ class Hal_Search_Solr_Api_Affiliation
                             }
                             //on va chercher les affiliations si on n'avait pas au départ l'id de l'affiliation
                             if (empty($affiHALdocid)) {
-                                $structArray = [];
+                                $structArray = array();
                                 $idStruct = self::calcStructIdFromElement($refStruct);
                                 $structArray[] = $idStruct;
                                 $res['knownlabids'] = $structArray;
@@ -507,7 +507,7 @@ class Hal_Search_Solr_Api_Affiliation
         $str = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $str);
         // Supprimer tout le reste
         $str = preg_replace('#&[^;]+;#', '', $str);
-        $str = str_replace(['æ', 'Æ', 'œ', 'Œ', 'ý', 'ÿ', 'Ý', 'ç', 'Ç', 'ñ', 'Ñ'], ['ae', 'AE', 'oe', 'OE', 'y', 'y', 'Y', 'c', 'C', 'n', 'N'], $str);
+        $str = str_replace(array('æ', 'Æ', 'œ', 'Œ', 'ý', 'ÿ', 'Ý', 'ç', 'Ç', 'ñ', 'Ñ'), array('ae', 'AE', 'oe', 'OE', 'y', 'y', 'Y', 'c', 'C', 'n', 'N'), $str);
         $str = strtolower($str);
 
         return $str;
@@ -578,7 +578,7 @@ class Hal_Search_Solr_Api_Affiliation
      * ==> recherche de <back> de cette affiliation
      * retour : Node xml de la structure dans le <back>
      * @param DOMXPath $xpath
-     * @param string $refStruct : id d'une structure
+     * @param string $refStruct: id d'une structure
      * @return null
      */
     public function getAffiNodeByRef($xpath, $refStruct)
@@ -728,11 +728,9 @@ class Hal_Search_Solr_Api_Affiliation
 
         $listeDocSolrArr = unserialize($listeDocSolr);
 
-
-        if ((!array_key_exists('response', $listeDocSolrArr)) || ($listeDocSolrArr['response']['numFound'] <= 0)) {
+        if (array_key_exists('response', $listeDocSolrArr) && $listeDocSolrArr['response']['numFound'] <= 0) {
             return null;
         }
-
 
         $res = null;
         //on a trouvé des documents
@@ -862,13 +860,13 @@ class Hal_Search_Solr_Api_Affiliation
                 || (!is_null($idHalauthor) && $idHalauthor == $idHalauthorCourant)
             ) {
                 //c'est le bon auteur, a-t'il des affiliations
-                $arrIdStruct = [];
+                $arrIdStruct = array();
                 $affiliations = $authorElt->getElementsByTagName('affiliation');
                 if ($affiliations->length > 0) {
                     /**
-                     * on a trouvé cet auteur avec au moins une affiliation
+                    * on a trouvé cet auteur avec au moins une affiliation
                      * @var DOMElement $affiElt
-                     */
+                    */
                     foreach ($affiliations as $affiElt) {
                         $refStruct = $affiElt->getAttribute('ref');
                         $idStruct = self::calcStructIdFromElement($refStruct);
@@ -960,8 +958,8 @@ class Hal_Search_Solr_Api_Affiliation
      * @param string $name
      * @param string $address
      * @param string $type
-     * @return array|bool
      * @deprecated
+     * @return array|bool
      */
     public
     function findStructures($name, $address = null, $type = null)
@@ -1033,8 +1031,8 @@ class Hal_Search_Solr_Api_Affiliation
      * @param array $arrayOfAuthors array of author docids
      * @param string $keywords
      * @param string $date
-     * @return false|array array of structure docids + name + score
      * @deprecated
+     * @return false|array array of structure docids + name + score
      */
     public
     function findAuthorsAffiliationsInDocuments(array $arrayOfAuthors, $keywords = null, $date = null)
@@ -1095,8 +1093,8 @@ class Hal_Search_Solr_Api_Affiliation
     /**
      * Returns an array of structure info extracted from facet buckets
      * @param array $facetsArr
-     * @return array array of structure info
      * @deprecated
+     * @return array array of structure info
      */
     private
     function extractStructFromFacetBucket(array $facetsArr)
@@ -1121,8 +1119,8 @@ class Hal_Search_Solr_Api_Affiliation
     /**
      * Format affiliations to return one deduplicated list of author forms affiliations
      * @param array $affiliations
-     * @return array affiliations from documents sorted by score
      * @deprecated
+     * @return array affiliations from documents sorted by score
      */
     public
     function formatAuthorsAffiliationList(array $affiliations)
@@ -1156,8 +1154,8 @@ class Hal_Search_Solr_Api_Affiliation
      * Merge Authors and Affiliations
      * @param array $authors
      * @param array $affiliations
-     * @return array merged Authors and Affiliations with scores
      * @deprecated
+     * @return array merged Authors and Affiliations with scores
      */
     public
     function mergeAuthorsAffiliations(array $authors, array $affiliations)
@@ -1176,9 +1174,9 @@ class Hal_Search_Solr_Api_Affiliation
 
     /**
      * Find author Forms in authors repository
+     * @deprecated
      * @param array $params
      * @return array|boolean
-     * @deprecated
      */
     public
     function findAuthorForms($params)
@@ -1212,10 +1210,10 @@ class Hal_Search_Solr_Api_Affiliation
 
     /**
      * Find authors in author repository according to their fullname
-     * @param string $fullname
-     * @return array|boolean
      * @deprecated
      * @repository REF_AUTHOR
+     * @param string $fullname
+     * @return array|boolean
      */
     private
     function findAuthorFormsByFullName($fullname, $email = null)
@@ -1249,12 +1247,12 @@ class Hal_Search_Solr_Api_Affiliation
 
     /**
      * Find authors in author repository according to their lastname,  firstname, middlename
+     * @deprecated
+     * @repository REF_AUTHOR
      * @param string $lastname
      * @param string $firstname
      * @param string $middlename
      * @return array|boolean
-     * @deprecated
-     * @repository REF_AUTHOR
      */
     private
     function findAuthorFormsByNames($lastname = null, $firstname = null, $middlename = null, $email = null)

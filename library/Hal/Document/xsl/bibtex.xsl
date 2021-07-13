@@ -70,7 +70,7 @@
 				<xsl:when test="$type='UNDEFINED'">
 					<xsl:text>unpublished</xsl:text>
 				</xsl:when>
-				<xsl:when test="$type='THESE' or $type='HDR' or $type='ETABTHESE'">
+				<xsl:when test="$type='THESE' or $type='HDR'">
 					<xsl:text>phdthesis</xsl:text>
 				</xsl:when>
 				<xsl:when test="$type='LECTURE'">
@@ -461,9 +461,9 @@
 		<xsl:text>},</xsl:text>
 	</xsl:if>
 </xsl:template>
-<!-- type THESE ou HDR ou ETABTHESE-->
+<!-- type THESE ou HDR-->
 <xsl:template match="tei:classCode" mode="type">
-	<xsl:if test="./@n='THESE' or ./@n='HDR' or ./@n='ETABTHESE'">
+	<xsl:if test="./@n='THESE' or ./@n='HDR'">
 		<xsl:text>&#xA;  TYPE = {</xsl:text>
 		<xsl:call-template name="affiche_val">
 			<xsl:with-param name="val"><xsl:value-of select="." /></xsl:with-param>

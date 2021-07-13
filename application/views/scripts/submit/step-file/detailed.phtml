@@ -14,6 +14,10 @@
                     <input id="fileupload" type="file" name="files[]" multiple>
                 </span>
             </div>
+            <?php
+            if (!defined('USE_UPLOAD_BY_URL') || USE_UPLOAD_BY_URL)
+            {
+            ?>
             <div class="col-md-5">
                 <div class="input-group">
                     <input type="text" class="form-control" id="download-url" placeholder="<?php echo $this->translate("Saisir l'adresse URL du fichier à récupérer")?>">
@@ -22,8 +26,9 @@
                     </span>
                 </div>
             </div>
-
-            <?php if (count($this->ftp)) { ?>
+            <?php
+            }
+            if (count($this->ftp)) { ?>
             <div class="col-md-4">
                 <button class="btn btn-default" onclick="displayFtp('<?php echo $this->translate("Sélectionner les fichiers depuis l\'espace FTP")?>');" type="button" id="btn-ftp">
                     <i class="glyphicon glyphicon-hdd"></i>

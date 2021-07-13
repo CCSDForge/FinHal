@@ -1,0 +1,13 @@
+[{
+  "controller": "index", "action" : "index", "menulabel" : "menu-label-0","follow" : "yes"
+}, {
+  "controller" : "search", "action" : "index", "menulabel" : "menu-label-1", "follow" : "yes"
+}, {
+  "controller" : "browse", "action" : "structure", "menulabel" : "menu-label-3", "follow" : "yes"
+}, {
+  "controller" : "browse", "action" : "doctype", "menulabel" : "menu-label-4", "follow" : "yes"
+}, {
+  "controller" : "browse", "action" : "domain", "menulabel" : "menu-label-5", "follow" : "yes"
+}, {
+  "controller" : "view", "action" : "index", "menulabel" : "","follow" : "yes"
+}] 

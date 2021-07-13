@@ -54,7 +54,6 @@ return array(
     'Ajouter une affiliation' => 'Add an affiliation',
     'Pour cette structure' => 'For this structure',
     'Voir les détails' => 'See the details',
-    'The uploaded file exceeds the post_max_size directive in php.ini' => 'The uploaded file exceeds the max authorized size (' . ini_get('post_max_size') . ')',
 
     'Votre dépôt n\'est pas encore complet !' => 'Your submission is not yet complete.',
     'Pour pouvoir transférer sur arXiv, votre dépôt doit satisfaire les conditions suivantes :' => 'To transfer your document on arXiv, your submission needs to comply with the following conditions:',
@@ -71,7 +70,6 @@ return array(
     'Le fichier principal doit être un fichier auteur.' => 'The main file must be an author file.',
     'Voir les conditions pour le transfert' => 'See the conditions for the transfer',
 
-    'Si votre document comporte beaucoup d\'auteurs, le processus de récupération peut prendre un peu de temps. Merci pour votre patience.' => 'If your document has many authors, the recovery process may take a little time. Thank you for your patience.',
     'Dépôt de fichier - Quels sont vos droits ?' => 'File submission - What are your rights ?',
     'Vous déposez le fichier téléchargé depuis le site de l’éditeur ?' => 'Do you transfer the file downloaded from the editor site ?',
     'Votre fichier contient un scan de la version publiée ?' => 'Is your file a scan of the published version ?',
@@ -125,6 +123,8 @@ return array(
     'Vous devez renseigner les mots-clés en français et anglais. Si la thèse n\'est pas écrite en français, renseigner les mots-clés dans la langue originale et ajouter les mots-clés en français.' => 'You must enter the keywords in french and english. If your thesis is not written in french, please fill up the field in the original language and the keywords translated in french.',
     'Description du contenu' => 'Content description',
     'Vous pouvez renseigner le résumé en plusieurs langues : choisir la langue et cliquer sur + pour ajouter une nouvelle langue' => 'You can add the abstract in multiple languages : choose the language and click on + to add a new abstract',
+    'latitude_desc' => '',
+    'latitudeSW_desc' => '',
     'en pixel' => 'in px',
     'décocher la case si vous ne souhaitez pas ajouter le filigrane HAL à l\'image' => 'uncheck if you don\'t want to add the HAL watermark to the image',
     'URL de ressource(s) liée(s) à ce travail' => 'URL to related ressources',

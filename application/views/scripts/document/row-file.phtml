@@ -12,10 +12,12 @@
 /** @var Hal_Document_File $file */
 
 $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerName();
+
 $name = $this->file->getName();
 if ($this->file->getDefault() || ($this->file->getType() == Hal_Settings::FILE_TYPE_ANNEX && $this->file->getDefaultannex())) {
     $name = '<strong>' . $name . '</strong>';
 }
+
 $visible = $this->file->canRead();
 if ($visible || $this->readEmbargo) {
     if (!$this->href) {
@@ -27,13 +29,13 @@ if ($visible || $this->readEmbargo) {
     }
     if ($controller == 'moderate' && $this->file->getDefault() && $this->document->getTypDoc() == "IMG") {
         ?>
-        <img src="<?php echo $this->href;?>" alt="Le document" style="height:auto; max-width:400px"/>
+        <img src="<?php echo $this->href;?>" style="height:auto; max-width:400px"/>
         <?php
     }
     if ($this->file->getImagette() == 0) {
         $icon = '<i class="glyphicon glyphicon-file"></i>';
     } else {
-        $icon = '<img alt="image miniature du document" src="' . $this->file->getImagetteUrl('thumb') . '" border="0" class="img-thumbnail"/>';
+        $icon = '<img src="' . $this->file->getImagetteUrl('thumb') . '" border="0" class="img-thumbnail"/>';
     }
     ?>
     <a href="<?php echo $this->href ;?>" onclick="window.open($(this).attr('href'), 'popup', 'status=no');return false;" target="_blank" data-toggle="tooltip" title="<?php echo $this->file->getSize(); ?>"><?php echo $icon ?>&nbsp;<?php echo $name; ?></a>
@@ -64,16 +66,14 @@ if (! $visible) { ?>
 <?php } ?>
 
 <?php
-if ($controller == 'moderate'
-    && ($this->file->getDefault() || (
-            $this->file->getType() == Hal_Settings::FILE_TYPE_ANNEX
-            && $this->file->getDefaultannex()))
-    && $this->document->getStatus() == Hal_Document::STATUS_TRANSARXIV) {
+if ($controller == 'moderate' && ($this->file->getDefault() || ($this->file->getType() == Hal_Settings::FILE_TYPE_ANNEX && $this->file->getDefaultannex())) && $this->document->getStatus() == Hal_Document::STATUS_TRANSARXIV)
+{
     $table = Hal_Document_File::get_PDF_info($this->file->getPath());
     ?>
     <span class="label label-warning" id="info"><?php echo $this->translate('Info Transfert ArXiv') ?></span>
     <div id="infofile" style="display:none">
-        <table class="table table-condensed table-bordered"><?php
+        <table class="table table-condensed table-bordered">
+            <?php
             foreach ($table as $key => $value) { ?>
                 <tr>
                 <td style="background:#f8f8f8; text-align:right"><?php echo $key; ?></td>

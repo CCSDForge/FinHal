@@ -35,3 +35,4 @@ RewriteRule ^.*$ - [NC,L]
 RewriteRule ^.*$ index.php [NC,L]
 
 php_value max_input_vars 2000
+

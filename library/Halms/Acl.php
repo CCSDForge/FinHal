@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class Halms_Acl
+ */
 class Halms_Acl extends Ccsd_Acl
 {
     /**
@@ -10,7 +13,7 @@ class Halms_Acl extends Ccsd_Acl
     const ROLE_MEMBER       =    'member';
     const ROLE_ADMINHALMS  =    'halmsadmin';
 
-    public function __construct($file = null)
+    public function __construct()
     {
         /**
 		 * Héritage entre les rôles
@@ -20,7 +23,7 @@ class Halms_Acl extends Ccsd_Acl
             self::ROLE_MEMBER      =>    self::ROLE_GUEST,   
             self::ROLE_ADMINHALMS  =>    self::ROLE_MEMBER
         );
-        parent::__construct($file);
+        parent::__construct();
 
     }
     

@@ -7,11 +7,6 @@
  * Time: 15:47
  */
 
-/**
- * Class Globales
- * @deprecated : La plupart des constantes sont maintenants directement associee aux Sites
- * Plus besoin d'inventer un mecanisme de constantes
- */
 class Globales extends Ccsd_Globales
 {
     public function init() {

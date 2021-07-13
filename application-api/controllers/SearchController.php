@@ -24,8 +24,7 @@ class SearchController extends Zend_Controller_Action
         if ($webSite === false) {
             $this->redirect('/docs/search/');
         }
-        /* pas forcement un portail */
-        Hal_Site::setCurrent($webSite);
+
         Zend_Registry::set('website', $webSite);
         $this->_loadDefaultFilters = true;
         $this->getRequest()->setActionName('index');
@@ -34,19 +33,9 @@ class SearchController extends Zend_Controller_Action
     }
 
     /**
-     *
+     * Teste si le portail ou la collection existe
      * @param string $site
      * @return bool|Hal_Site
-     */
-
-
-    /**
-     * Teste si le portail ou la collection existe
-     *
-     * @param string $site
-     * @return bool|false|Hal_Site|string
-     * @throws Zend_Exception
-     * @todo: a mettre dans Hal_Site... Rien a faire ici!
      */
     private function isValidWebsite($site)
     {
@@ -76,34 +65,86 @@ class SearchController extends Zend_Controller_Action
     }
 
 
-    /**
-     * Récupération des structures d'un auteur ([firstName_t], lastName_t, [email_s])
-     * Possibilité de fournir une date (producedDateY_i) permettant de reduire la recherche à Y Possibilité de fournir un ecart permettant d'élargir la recherche à Y ± deviation
-     * @throws Zend_Json_Exception
+    /*
+     * Récupération des structures d'un auteur ([firstName_t], lastName_t, [email_s]) Possibilité de fournir une date (producedDateY_i) permettant de reduire la recherche à Y Possibilité de fournir un ecart permettant d'élargir la recherche à Y ± deviation
      */
-    public function authorstructureAction()
+
+    public
+    function authorstructureAction()
     {
         $this->_helper->layout()->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
+        $structIds = array();
 
         $params = $this->getRequest()->getParams();
         if (!isset ($params ['lastName_t'])) {
             $this->redirect('/docs/search');
         }
+        // 1 - récupération des formes auteurs
+        $query = "fq=lastName_t:" . urlencode($params ['lastName_t']);
+        if (isset ($params ['firstName_t'])) {
+            $query .= "&fq=firstName_t:" . urlencode($params ['firstName_t']);
+        }
+        if (isset ($params ['email_s'])) {
+            $query .= "&fq=email_s:" . urlencode($params ['email_s']);
+        }
+        $query .= "&rows=100&fl=docid&wt=phps";
+        $result = unserialize(Ccsd_Tools::solrCurl($query, 'ref_author', 'apiselect'));
+        if (isset ($result ['response'] ['docs']) && is_array($result ['response'] ['docs']) && count($result ['response'] ['docs'])) {
+            // 2 - pour chaque forme auteur, on récupère ces affiliations
+            foreach ($result ['response'] ['docs'] as $authId) {
+                $query = "fq=authId_i:" . $authId ['docid'];
+                if (isset ($params ['producedDateY_i'])) {
+                    if (isset ($params ['deviation'])) {
+                        $query .= "&fq=producedDateY_i:" . urlencode("[" . (( int )$params ['producedDateY_i'] - ( int )$params ['deviation']) . ' TO ' . (( int )$params ['producedDateY_i'] + ( int )$params ['deviation']) . "]");
+                    } else {
+                        $query .= "&fq=producedDateY_i:" . ( int )$params ['producedDateY_i'];
+                    }
+                }
+                $query .= "&facet=true&facet.field=authIdHasPrimaryStructure_fs&facet.prefix=" . $authId ['docid'] . Ccsd_Search_Solr::SOLR_FACET_SEPARATOR . "&facet.mincount=1";
+                $query .= "&start=0&rows=0&wt=phps";
+                $result = unserialize(Ccsd_Tools::solrCurl($query, 'hal', 'apiselect'));
+                if (isset ($result ['facet_counts'] ['facet_fields'] ['authIdHasPrimaryStructure_fs']) && is_array($result ['facet_counts'] ['facet_fields'] ['authIdHasPrimaryStructure_fs']) && count($result ['facet_counts'] ['facet_fields'] ['authIdHasPrimaryStructure_fs'])) {
+                    foreach (array_keys($result ['facet_counts'] ['facet_fields'] ['authIdHasPrimaryStructure_fs']) as $s) {
+                        $data = explode(Ccsd_Search_Solr::SOLR_JOIN_SEPARATOR, $s);
+                        if (isset ($data [1])) {
+                            $dataS = explode(Ccsd_Search_Solr::SOLR_FACET_SEPARATOR, $data [1]);
+                            if (count($dataS) == 2 && !array_key_exists($dataS [0], $structIds)) {
+                                $structIds [$dataS [0]] = (new Ccsd_Referentiels_Structure ($dataS [0]))->getXML(false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-        $outputFormat = $this->getRequest()->getParam('wt', 'json');
+        $xml = "<?xml version='1.0' encoding='UTF-8'?>\n";
+        $xml .= "<response>\n";
+        $xml .= '<result name="response" start="0" numFound="' . count($structIds) . '">' . "\n";
+        foreach ($structIds as $struct) {
+            $xml .= $struct;
+        }
 
+        $xml .= "</result>\n";
+        $xml .= "</response>";
 
-        $affiliation = new Hal_Search_Solr_Api_Authorstructure($params);
-        $affiliation->outputStructuresList($outputFormat);
-
+        switch (Ccsd_Tools::ifsetor($params ['wt'], 'json')) {
+            case "xml" :
+                header('Content-Type: text/xml; charset=utf-8');
+                echo $xml;
+                break;
+            default :
+                header('Content-Type: application/json; charset=utf-8');
+                echo Zend_Json::fromXml($xml);
+        }
     }
 
     /*
      * Récupération des structures d'un auteur
      */
 
-    public function affiliationAction()
+    public
+    function affiliationAction()
     {
         $this->_helper->layout()->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
@@ -114,12 +155,10 @@ class SearchController extends Zend_Controller_Action
         }
 
         //Récupère un tableau avec toutes les informations nécessaires
-        $affiliation = Hal_Search_Solr_Search_Affiliation::rechAffiliation($params, true);
+        $affiliation = Hal_Search_Solr_Search::rechAffiliation($params, true);
 
         //Tri et formate en XML les affiliations récupérées
-        $structIdsOrdered = Hal_Search_Solr_Search_Affiliation::sortAndXMLAffiliation($affiliation, $params);
-
-
+        $structIdsOrdered = Hal_Search_Solr_Search::sortAndXMLAffiliation($affiliation, $params);
 
         // 8 - Création de l'XML final
         $xml = "<?xml version='1.0' encoding='UTF-8'?>\n";
@@ -131,30 +170,29 @@ class SearchController extends Zend_Controller_Action
         $xml .= "</result>\n";
         $xml .= "</response>";
 
-
-        if ($this->getRequest()->getParam('wt', 'json') == 'xml') {
-            header('Content-Type: text/xml; charset=utf-8');
-            echo $xml;
-        } else {
-            header('Content-Type: application/json; charset=utf-8');
-            echo Zend_Json::fromXml($xml);
+        switch (Ccsd_Tools::ifsetor($params ['wt'], 'json')) {
+            case "xml" :
+                header('Content-Type: text/xml; charset=utf-8');
+                echo $xml;
+                break;
+            default :
+                header('Content-Type: application/json; charset=utf-8');
+                echo Zend_Json::fromXml($xml);
         }
-
-
     }
-
 
     /**
      * Recherche API
-     * @throws Zend_Date_Exception
-     * @throws Zend_Feed_Exception
+     *
+     * @return mixed
      */
-    public function indexAction()
+    public
+    function indexAction()
     {
         $this->_helper->layout()->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
 
-        $allowedWt = [
+        $allowedWt = array(
             'json',
             'xml',
             'xml-tei',
@@ -165,7 +203,7 @@ class SearchController extends Zend_Controller_Action
             'atom',
             'endnote',
             'rtf'
-        ];
+        );
 
         $rawQuery = $_SERVER ['QUERY_STRING'];
 
@@ -256,7 +294,8 @@ class SearchController extends Zend_Controller_Action
     /**
      * Méthode pour permettre aux anciens HALV2 flux RSS de fonctionner dans HALV3
      */
-    public function rssAction()
+    public
+    function rssAction()
     {
         $this->_helper->layout()->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
@@ -282,7 +321,7 @@ class SearchController extends Zend_Controller_Action
         $query ['fq'] = null;
         $limit = '';
         $sort = '&sort=submittedDate_tdate+desc';
-        $query ['typeDoc'] = [];
+        $query ['typeDoc'] = array();
 
         foreach ($p as $pName => $pValue) {
 
@@ -334,7 +373,7 @@ class SearchController extends Zend_Controller_Action
                     if ($pValue != null) {
 
                         if (is_array($pValue)) {
-                            $query ['q'] [] = 'collCode_s:(' . urlencode(implode(' OR ', $pValue)) . ')';
+                            $query ['q'] [] = 'collCode_s:(' . urlencode(explode(' OR ', $pValue)) . ')';
                         } else {
                             $query ['q'] [] = 'collCode_s:(' . urlencode($pValue) . ')';
                         }
@@ -450,10 +489,11 @@ class SearchController extends Zend_Controller_Action
      * Convertit les types de doc halv2 => halv3 pour les flux RSS
      *
      * @deprecated uniquement pour la migration des fils RSS
-     * @param string $typeDoc
-     * @return array
+     * @param unknown $typeDoc
+     * @return string
      */
-    private function convertRssTypeDoc($typeDoc)
+    private
+    function convertRssTypeDoc($typeDoc)
     {
         if ($typeDoc == 'ART_ACL') {
             $query [] = '(docType_s:ART AND peerReviewing_s:1 AND popularLevel_s:0)';
@@ -484,19 +524,18 @@ class SearchController extends Zend_Controller_Action
         } else if ($typeDoc == 'COURS') {
 
             $query [] = '(docType_s:LECTURE)';
-        } else if (in_array($typeDoc, [
+        } else if (in_array($typeDoc, array(
             'POSTER',
             'MEM',
             'DOUV',
             'THESE',
             'HDR',
-            'ETABTHESE',
             'REPORT',
             'PATENT',
             'IMG',
             'OTHER',
             'UNDEFINED'
-        ])) { // type de documents inchangé
+        ))) { // type de documents inchangé
             $query [] = '(docType_s:' . $typeDoc . ')';
         } else {
             $query [] = '(docType_s:UNDEFINED)';

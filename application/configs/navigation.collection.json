@@ -3,30 +3,8 @@
     "controller" : "rights",
     "action" : "index",
     "resource" : "rights-index",
-    "privilege" : "tamponneur,atamponneur,haladmin",
-    "pages": [
-        {
-            "label": "Mes collections",
-            "controller": "user",
-            "action": "mycollections",
-            "resource": "user-mycollections",
-            "privilege": "tamponneur,atamponneur,administrator,haladmin"
-        },
-        {
-            "label": "Gerer la collection",
-            "controller": "user",
-            "action": "collections",
-            "resource": "user-collections",
-            "privilege": "tamponneur,administrator,haladmin"
-        },
-        {
-            "label": "Administrer les collections",
-            "controller": "collection",
-            "action": "list",
-            "resource": "collection-list",
-            "privilege": "administrator"
-        },
-        {
+    "privilege" : "tamponneur,haladmin",
+    "pages": [ {
         "label": "Statistiques",
         "controller": "stat",
         "action": "index",

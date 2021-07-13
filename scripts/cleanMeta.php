@@ -170,21 +170,9 @@ foreach ( ['AUTHORID'=>'REF_AUTHOR', 'STRUCTID'=>'REF_STRUCTURE', 'ANRID'=>'REF_
 //doublon de données
 $nb = 0;
 $docids = array();
-$sql = $dbHALV3->query('select *, count(*) as NUM from DOC_METADATA where 1 group by DOCID,METANAME,METAVALUE,METAGROUP having NUM>1');
+$sql = $dbHALV3->query('select *, count(*) as NUM from DOC_METADATA where 1 group by DOCID,METANAME,METAVALUE having NUM>1');
 foreach ( $sql->fetchAll() as $row ) {
-    $metagroup = $row['METAGROUP'];
-    if (is_string($metagroup)) {
-        $condGroup = "METAGROUP = '$metagroup'";
-    } elseif (!$metagroup) {
-        $condGroup = 'METAGROUP IS NULL';
-    } else {
-        println("Warning: METAGROUP = $metagroup (ni chaine ni null)");
-    }
-    $docid = (int) $row['DOCID'];
-    $metanameStr = '"'  .$row['METANAME'].   '"';
-    $metavalueStr = '"'  . addslashes($row['METAVALUE']).   '"';
-    $nb = $row['NUM']-1;
-    $dbHALV3->exec("DELETE from DOC_METADATA where DOCID=$docid  and METANAME=$metanameStr and $condGroup and METAVALUE=$metavalueStr limit $nb");
+    $dbHALV3->exec('DELETE from DOC_METADATA where DOCID='.$row['DOCID'].' and METANAME="'.$row['METANAME'].'" and METAVALUE="'.addslashes($row['METAVALUE']).'" limit '.($row['NUM']-1));
     $nb++;
     $docids[] = $row['DOCID'];
 }

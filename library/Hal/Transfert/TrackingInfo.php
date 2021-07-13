@@ -46,9 +46,6 @@ class Hal_Transfert_TrackingInfo {
     /** @var string  // error message for Arxiv */
     private $error;
 
-    /** @var string */
-    private $comment = '';
-
     /** @var  Hal_Transfert  Pour avoir acces aux definitions du transporteur */
     private $transfertManager;
     /**
@@ -74,8 +71,6 @@ class Hal_Transfert_TrackingInfo {
         $this -> trackingUrl  = (string) $xmlResponse -> $trackingIdTag;
         $this -> status       = (string) $xmlResponse -> $statusTag;
         $this -> error        = (string) $xmlResponse -> $errorTag;
-        $this -> comment      = (string) $xmlResponse -> $commentTag;
-
         $this -> xml          = $xmlString;
 
         $this -> transfertManager = $manager;
@@ -93,8 +88,8 @@ class Hal_Transfert_TrackingInfo {
         curl_setopt ( $Curl, CURLOPT_USERAGENT, 'Curl' );
         curl_setopt ( $Curl, CURLOPT_URL, $url );
         curl_setopt ( $Curl, CURLOPT_RETURNTRANSFER, 1 );
-        curl_setopt ( $Curl, CURLOPT_CONNECTTIMEOUT, 12 );
-        curl_setopt ( $Curl, CURLOPT_TIMEOUT, 30 );
+        curl_setopt ( $Curl, CURLOPT_CONNECTTIMEOUT, 10 );
+        curl_setopt ( $Curl, CURLOPT_TIMEOUT, 10 );
         curl_setopt ( $Curl, CURLOPT_USERPWD, $manager->getUser() . ':' . $manager->getPwd() );
         $return = curl_exec($Curl);
 

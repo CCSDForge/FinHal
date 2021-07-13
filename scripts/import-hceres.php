@@ -42,7 +42,7 @@ if (ENV == 'LOCAL') {
     $loadReferentiel = false;
     $loadReport = true;
 } else if (ENV == 'PREPROD') {
-    $db = new Zend_Db_Adapter_Pdo_Mysql(['host' => 'localhost', 'username' => 'root', 'password' => 'password', 'dbname'   => 'HALV3_PREPROD']);
+    $db = new Zend_Db_Adapter_Pdo_Mysql(['host' => 'ccsddb04.in2p3.fr', 'username' => 'root', 'password' => 'e+d<HAL', 'dbname'   => 'HALV3_PREPROD']);
     $loadReferentiel = false;
     $loadReport = true;
 }

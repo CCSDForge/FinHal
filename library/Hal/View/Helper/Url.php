@@ -9,7 +9,11 @@ class Hal_View_Helper_Url extends Zend_View_Helper_Url {
 				return parent::url ( $urlOptions, $name, $reset, $encode );
 			}
 		}
-
+        if ($encode === true) {
+            $amp = "&";
+        } else {
+            $amp = '&';
+        }
 		if ($urlOptions == array ()) {
 			$urlOptions = array (
 					'controller' => Zend_Controller_Front::getInstance ()->getRequest ()->getControllerName (),
@@ -29,7 +33,7 @@ class Hal_View_Helper_Url extends Zend_View_Helper_Url {
 		foreach ( $this -> multioptions as $option  ) {
             if (isset($urlOptions [$option])) {
                 $url .= $sep . $urlOptions [$option];
-                $sep = "&";
+                $sep = $amp;
             }
             unset($urlOptions [$option]);
 		}
@@ -41,7 +45,7 @@ class Hal_View_Helper_Url extends Zend_View_Helper_Url {
         foreach ( $urlOptions as $option => $value ) {
             //Réécriture des paramètres en ?q=valeur&test=1 (> /q/valeur/test/1)
             $url .= $sep . $option . '=' . $value;
-            $sep = '&';
+            $sep = $amp;
 		}
 
 		return $url;

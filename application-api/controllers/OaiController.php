@@ -19,7 +19,6 @@ class OaiController extends Zend_Controller_Action
                 $this->redirect('/docs/oai/');
             }
             Zend_Registry::set('website', $website);
-            Hal_Site::setCurrentPortail($website);
             $website -> registerSiteConstants();
             $this->indexAction();
         }

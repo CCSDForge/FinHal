@@ -9,12 +9,12 @@ println('> Début du script: '. date("H:i:s", $timestart));
 
 //DB
 $dbUser = 'root';
-$dbPwd = 'password';
-$dbHost = 'localhost';
+$dbPwd = 'e+d<HAL';
+$dbHost = 'ccsddb04.in2p3.fr';
 $dbName = 'HALV3';
-$dbHostThumb = 'localhost';
+$dbHostThumb = 'ccsddb03.in2p3.fr';
 $dbNameThumb = 'thumb';
-$dbHostSolr = 'localhost';
+$dbHostSolr = 'ccsddb04.in2p3.fr';
 $dbNameSolr = 'SOLR_INDEX';
 
 $dbSOLR = new PDO('mysql:host='. $dbHostSolr .';dbname='. $dbNameSolr, $dbUser, $dbPwd, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));

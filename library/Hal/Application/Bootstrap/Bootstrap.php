@@ -7,7 +7,7 @@
 class Hal_Application_Bootstrap_Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 
     protected function _initApplicationName() {
-        Hal_Instance::getInstance(getenv('INSTANCE'));
+        \Hal\Instance::getInstance(getenv('INSTANCE'));
         //error_log('Panic: Function _initApplicationName not defined in subclass');
         //exit(1);
     }

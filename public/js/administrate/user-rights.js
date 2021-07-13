@@ -59,16 +59,15 @@
         	selectId = $(this).attr('id');
         	selectId = selectId.replace('-group', '-value');
     		 switch ( this.value ) {
-                 case 'domain':
-                 case 'structure':
-                 case 'typdoc':
-                 case 'sql':
-                     $('#' + selectId ).prop( "disabled", false );
-                     break;
-                 default:
-                     $('#' + selectId ).prop( "disabled", true );
-                     break;
-             }
+    		 case 'domain':
+    		 case 'typdoc':
+    		 case 'sql':
+				$('#' + selectId ).prop( "disabled", false );
+    		     break;
+    		 default:
+     			$('#' + selectId ).prop( "disabled", true );
+    			 break;
+    		 }
     	});
     	
 

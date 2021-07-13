@@ -17,13 +17,6 @@ class SwordController extends Zend_Controller_Action
 
     public function init()
     {
-
-        if (Hal_Settings_Features::hasDocSubmit() === false) {
-            header('HTTP/1.1 503 Service Unavailable');
-            header('Retry-After: 3600'); // plz come back in 1 hour
-            exit;
-        }
-
         // authentification HTTP Basic
         $authBasic = new Ccsd_Auth_Check();
         if (! $authBasic->Basic()) {
@@ -60,7 +53,6 @@ class SwordController extends Zend_Controller_Action
                 }
 
                 $this->_site->registerSiteConstants();
-                Hal_Site::setCurrentPortail($this->_site);
                 Zend_Registry::set('website', $this->_site);
                 if ( preg_match('#/([a-z0-9]+[_-][0-9]{8})(v([0-9]+))?$#', $_SERVER['REQUEST_URI'], $match) ) {
                     $this->forward('index', null, null, array('identifiant'=>$match[1], 'version'=>Ccsd_Tools::ifsetor($match[3], 0)));
@@ -76,7 +68,6 @@ class SwordController extends Zend_Controller_Action
                 }
                 $this->_site = Hal_Site::loadSiteFromId($article->getSid());
                 $this->_site->registerSiteConstants();
-                Hal_Site::setCurrentPortail($this->_site);
                 Zend_Registry::set('website', $this->_site);
                 $this->forward('index', null, null, array('identifiant'=>$article->getId(), 'version'=>$article->getVersion()));
             } else {

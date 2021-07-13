@@ -98,11 +98,16 @@ $(document).ready(function() {
 		var typdoc   = '<?php echo $this->document->getTypDoc(); ?>';
 		var forwardAction  = '<?php echo $this->forwardAction; ?>';
 		var sourceController   = '<?php echo Zend_Controller_Front::getInstance()->getRequest()->getControllerName(); ?>';
-        var cansubmit = true;
+   	
+    	
+    	
 		if (action ==  'validate') {
 			getExpertSelectForm(docid, sid, domains, typdoc, forwardAction, sourceController);
 			return;
 		}
+        
+        var cansubmit = true;
+        
         if ((action == 'update' || action == 'annotate' || action == 'refused' || action == 'deleted') && $('#comment').val() == '') {
             cansubmit = false;
         }

@@ -16,7 +16,7 @@ if (file_exists(__DIR__ . "/loadHalHeader.php")) {
 
 define('LABINTEL_ROOT_FILE', '/sites/labintelhal/current/');
 
-$docType = ['ART'=>'ART', 'COMM'=>'COL', 'POSTER'=>'COL', 'PRESCONF'=>'COL', 'OUV'=>'OUV', 'COUV'=>'COV', 'DOUV'=>'OUV', 'PATENT'=>'BRE', 'THESE'=>'TRU', 'HDR'=>'TRU', 'MEM'=>'TRU', 'ETABTHESE'=>'TRU'];
+$docType = ['ART'=>'ART', 'COMM'=>'COL', 'POSTER'=>'COL', 'PRESCONF'=>'COL', 'OUV'=>'OUV', 'COUV'=>'COV', 'DOUV'=>'OUV', 'PATENT'=>'BRE', 'THESE'=>'TRU', 'HDR'=>'TRU', 'MEM'=>'TRU'];
 
 if ($opts->date == false) {
     $date = date('Y-m-d', strtotime('-1 day'));

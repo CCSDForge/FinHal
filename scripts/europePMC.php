@@ -21,271 +21,267 @@
  */
 
 // ================================================== SCRIPT ====================================================
-if (file_exists(__DIR__ . '/../vendor/autoload.php'))
-    require_once __DIR__ . '/../vendor/autoload.php';
 
-require_once __DIR__ . "/../library/Hal/Script.php";
+//<editor-fold desc="Constants and parameters">
+
+// Define the path into xml files folder
+define("EUROPEPMC_ROOT_FILE",__DIR__."/europePMC_folder/");
 
 // Define the time zone
 date_default_timezone_set("Europe/Paris");
 
-if (4 < 1+1) {
-    /** @see file ../config/pwd.json */
-    define('EUROPEPMC_FOLDER', 'euroPmc'); // relead defined in pwd.json: EUROPEPMC section
-    define('EUROPEPMC_HOST', 'europmc.uk');
-    define('EUROPEPMC_USER', 'pmcuser');
-    define('EUROPEPMC_PWD', 'theEuroPMCpwd');
+// Get the user input (CLN)
+$localopts = array(
+    'beginDate|s-s' => 'Date de début (défault : premier jour du mois précédent)',
+    'endDate|f-s'   => 'Date de fin (défault : dernier jour du mois précédent)',
+    'noTransfer|t'  => 'Ne pas transférer le fichier au serveur EuropePMC (défault : tranférer)',
+    'zipXML|z'      => 'Zipper le ficheir XML (défault : ne pas zipper)'
+);
+
+// Define the HAL header
+require_once(__DIR__ . "/loadHalHeader.php");
+
+// Define the interval of date by default (last month)
+$month_ini = new DateTime("first day of last month");
+$month_end = new DateTime("last day of last month");
+
+// Processing the user input
+$beginDate  = isset($opts->beginDate)   ? $opts->beginDate  : $month_ini->format('Y-m-d');
+$endDate    = isset($opts->endDate)     ? $opts->endDate    : $month_end->format('Y-m-d');
+$noTransfer = isset($opts->noTransfer);
+$zipXML     = isset($opts->zipXML);
+
+// Allow debug in case of verbose | in CLI : (-v) = (-d)
+if ($verbose) {
+    $debug = true;
 }
 
-/**
- * Class EuroPmc
- */
-class EuroPmc extends Hal_Script {
-    /* Hal_script car besoin des PATH applicatif ! */
-
-    protected $options = array(
-        'beginDate|s-s' => 'Date de début (défault : premier jour du mois précédent)',
-        'endDate|f-s'   => 'Date de fin (défault : dernier jour du mois précédent)',
-        'noTransfer|t'  => 'Ne pas transférer le fichier au serveur EuropePMC (défault : tranférer)',
-        'zipXML|z'      => 'Zipper le fichier XML (défault : ne pas zipper)'
-    );
-
-    /**
-     * @param string $date
-     * @param string $format
-     * @return bool
-     */
-    function validateDate($date, $format = 'Y-m-d') {
-        $d = DateTime::createFromFormat($format, $date);
-        return $d && $d->format($format) == $date;
+// Check if the dates are valid and follow the correct format
+if(!validateDate($beginDate) || !validateDate($endDate)) {
+    if($debug) {
+        debug('', '??? RE-ENTER A VALID DATES RESPECTING THE FOLLOWING FORMAT (YYYY-MM-DD)', 'red');
     }
+    exit;
+}
+//</editor-fold>
 
-    /**
-     * @param $zipName
-     * @param $files
-     * @return string
-     * @throws Exception
-     */
-    private function createZip($zipName, $files) {
-        $zip = new ZipArchive();
-        if ($zip->open($zipName, ZipArchive::CREATE)) {
-            foreach ($files as $localFilePath => $remoteFileName) {
-                $zip->addFile($localFilePath, $remoteFileName);
-            }
-            $zip->close();
-            return $zipName;
-        } else {
-            throw new Exception("CANNOT ZIP THE XML FILE: $zipName");
-        }
-    }
+//<editor-fold desc="Processing - solr request, create DOM elements, xml file and transfer to europePMC">
+// Get the date of today
+$today = date("Y-m-d_H-i-s");
 
-    /**
-     * @param string $uploadFile
-     * @param string $localFilePath
-     * @throws Exception
-     */
-    private function transfert2PMC($uploadFile,$localFilePath) {
-        // Connecting at EUROPE PMC Server
-        $this->debug('>>> Connecting at EUROPE PMC FTP Server');
-        if (!($ftpStream = @ftp_connect(EUROPEPMC_HOST))) {
-            throw new Exception('??? CANNOT CONNECT TO ' . EUROPEPMC_HOST . ' (CHECK HOST NAME !)');
-        }
-        // Opening the session
-        $this->debug('>>> Connected as ' . EUROPEPMC_USER . '@' . EUROPEPMC_HOST);
-        if (!($result = @ftp_login($ftpStream, EUROPEPMC_USER, EUROPEPMC_PWD))) {
-            $this->displayError('??? CANNOT CONNECT AS ' . EUROPEPMC_USER . ' (CHECK USERNAME AND/OR PASSWORD !)');
-            exit(1);
-        }
-        // Turn on passive mode transfers
-        @ftp_pasv($ftpStream, true);
-
-        // Upload File
-        if (@!ftp_put($ftpStream, $uploadFile, $localFilePath, FTP_BINARY)) {
-            $this->displayError('??? CANNOT UPLOAD THE FILE !');
-            exit(1);
-        }
-        $this->debug('>>> File uploaded successfully');
-
-        //Closing the session
-        $this->debug('>>> Closing FTP connection');
-        @ftp_close($ftpStream);
-    }
-
-    /**
-     * @param Zend_Console_Getopt $opts
-     * @throws Exception
-     */
-    public function main($opts)
-    {
-        // Define the interval of date by default (last month)
-        $month_ini = new DateTime("first day of last month");
-        $month_end = new DateTime("last day of last month");
-
-        $this->need_user('apache');
-        // Processing the user input
-
-        $beginDate  = $opts->getOption('beginDate');
-        if (!$beginDate) {
-            $beginDate = $month_ini->format('Y-m-d');
-        }
-        $endDate    = $opts->getOption('endDate');
-        if (!$endDate) {
-            $endDate   = $month_end->format('Y-m-d');
-        }
-
-        $noTransfer = isset($opts->noTransfer);
-        $zipXML     = isset($opts->zipXML);
-
-        // Define the path into xml files folder
-        $EUROPEPMC_ROOT_DIR=SPACE_DATA . "/europePMC_folder";
-
-        // Check if the dates are valid and follow the correct format
-        if (!$this->validateDate($beginDate) || !$this->validateDate($endDate)) {
-            $this->displayError('??? RE-ENTER A VALID DATES RESPECTING THE FOLLOWING FORMAT (YYYY-MM-DD)');
-            exit(1);
-        }
-        // Get the date of today
-        $today = date("Y-m-d_H-i-s");
-
-        $this->debug('>>> XML Export to EuropePMC [date = " . $today . "]');
-
-        // Solr request
-        $solrRequest = "q=*&
+// Debug
+if ($debug) {
+    debug('', '>>> XML Export to EuropePMC [date = " . $today . "]', 'blue');
+}
+// Solr request
+$solrRequest = "q=*&
                 fq=status_i:11&
                 fq=submitType_s:file&
                 fq=pubmedId_s:*&
-                fq=submittedDate_tdate:" . urlencode("[" . $beginDate . "T00:00:00Z TO " . $endDate . "T23:59:59Z]") . "&
+                fq=submittedDate_tdate:" . urlencode("[".$beginDate."T00:00:00Z TO ".$endDate."T23:59:59Z]") . "&
                 wt=phps&
                 fl=title_s&
                 fl=uri_s&
                 fl=pubmedId_s&
                 rows=10000&
-                sort=" . urlencode('submittedDate_s asc');
+                sort=".urlencode('submittedDate_s asc');
 
-        // Delete spaces from solr request
-        $solrRequest = preg_replace('/\s+/', '', $solrRequest);
+// Delete spaces from solr request
+$solrRequest = preg_replace('/\s+/', '', $solrRequest);
 
-        // Create the folder that will contain XML file, if it doesn't exist
-        if (!file_exists($EUROPEPMC_ROOT_DIR)) {
-            if (!mkdir($EUROPEPMC_ROOT_DIR)) {
-                $this->displayError("Can't mkdir: $EUROPEPMC_ROOT_DIR");
-                exit(1);
-            }
-        }
-
-        $localFileName = "hal_$today";
-        $localFilePath = "$EUROPEPMC_ROOT_DIR/$localFileName.xml";
-        $zipFilePath   = "$EUROPEPMC_ROOT_DIR/$localFileName.zip";
-
-        if ($file = fopen($localFilePath, "w")) {
-            $this->debug('>>> Opening XML file : ' . $localFilePath);
-        } else {
-            $this->displayError('??? CANNOT OPEN THE XML FILE : ' . $localFilePath);
-            exit(1);
-        }
-
-
-        // PHP Unserialize of solr request
-        try {
-            $this->debug('>>> Solr Request : get [title, url, pubmed_id] of Hal documents that have a pubmed_id and fulltext during a defined date interval');
-            $this->debug("Solr request use: $solrRequest");
-            $res = unserialize(Ccsd_Tools::solrCurl($solrRequest));
-        } catch (Exception $e) {
-            $this->println('??? CANNOT PERFORM THE SOLR REQUEST');
-            $this->println($e->getMessage());
-            exit;
-        }
-
-        // If there are results
-        $nbdocs = $res["response"]["numFound"];
-        if (! $nbdocs ||  ($nbdocs == 0)) {
-            $this->debug('??? THERE ARE NO MATCHING RESULTS (CHECK YOUR DATES !)');
-            exit(0);
-        }
-
-        $this->debug(">>> HAL documents [numFound = $nbdocs]");
-        $this->debug('>>> Creating DOM elements');
-
-        // Create DOM document
-        $doc = new DomDocument("1.0", "utf-8");
-        // Set properties of this DOM document
-        $doc->preserveWhiteSpace = false;
-        $doc->formatOutput = true;
-        // Create comment to precise the interval of dates
-        $doc->appendChild($doc->createComment("Getting HAL docs from " . $beginDate . "T00:00:00 To " . $endDate . "T23:59:59"));
-        // Create the element Links
-        $links = $doc->createElement("links");
-        // Loop on all element retrieved by solr request
-        foreach ($res["response"]["docs"] as $d) {
-            $link = $doc->createElement("link");
-            // Set the attribut providerId of the link element to 1331
-            $link->setAttribute("providerId", "1331");
-            $resource = $doc->createElement("resource");
-            $title = $doc->createElement("title");
-            $url = $doc->createElement("url");
-            $record = $doc->createElement("record");
-            $source = $doc->createElement("source");
-            // Create the element id
-            $id = $doc->createElement("id");
-            foreach ($d["title_s"] as $str) {
-                // Set the value of the element title
-                $titleText = $doc->createTextNode($str);
-                $title->appendChild($titleText);
-                $resource->appendChild($title);
-            }
-            // Set the value of the element title
-            $urlText = $doc->createTextNode($d["uri_s"]);
-            $url->appendChild($urlText);
-            $resource->appendChild($url);
-            // Set the value of the element source
-            $sourceText = $doc->createTextNode("MED");
-            $source->appendChild($sourceText);
-            $record->appendChild($source);
-            // Set the value of the element id
-            $idText = $doc->createTextNode($d["pubmedId_s"]);
-            $id->appendChild($idText);
-            $record->appendChild($id);
-            $link->appendChild($resource);
-            $link->appendChild($record);
-            $links->appendChild($link);
-        }
-        $doc->appendChild($links);
-        $xml_string = $doc->saveXML();
-        $this->debug('>>> Creating/Updating europePMC_folder');
-
-        // Create and save the XML File
-        $this->debug('>>> Writing XML data');
-        fputs($file, $xml_string);
-        $this->debug('>>> Closing XML file');
-        fclose($file);
-
-        $uploadFileRad = "/" . EUROPEPMC_FOLDER . "/hal_$today";
-        $uploadFile = "$uploadFileRad.xml";
-
-        // Zipping XML file or not
-        if ($zipXML) {
-            try {
-                $this->createZip($zipFilePath, [ $localFilePath => "$localFileName.xml" ] );
-                $uploadFile = "$uploadFileRad.zip";
-            } catch (Exception $e) {
-                $this->displayError($e->getMessage());
-                exit(1);
-            }
-        }
-        // $uploadFile is either the xml or the zip file now
-        if (!$noTransfer) {
-            try {
-                $this->transfert2PMC($uploadFile, $localFilePath);
-            } catch (Exception $e) {
-                $this->displayError($e->getMessage());
-                exit(1);
-            }
-        }
-        // Debug
-        $this->debug('>>> All Process Finished Successfully');
+// PHP Unserialize of solr request
+try {
+    $res = unserialize(Ccsd_Tools::solrCurl($solrRequest));
+    if ($debug) {
+        debug('>>> Solr Request : get [title, url, pubmed_id] of Hal documents that have a pubmed_id and fulltext during a defined date interval');
     }
+} catch (Exception $e) {
+    if ($debug) {
+        debug('', '??? CANNOT PERFORM THE SOLR REQUEST', 'red');
+    }
+    exit;
 }
 
+// If there are results
+if (isset($res["response"]["numFound"]) && $res["response"]["numFound"] > 0) {
 
-$script = new EuroPmc();
-$script->run();
+    // Debug
+    if ($debug) {
+        debug('>>> HAL documents [numFound = " . $res["response"]["numFound"] . "]');
+        debug('>>> Creating DOM elements');
+    }
+
+    // Create DOM document
+    $doc = new DomDocument("1.0", "utf-8");
+    // Set properties of this DOM document
+    $doc->preserveWhiteSpace = false;
+    $doc->formatOutput = true;
+    // Create comment to precise the interval of dates
+    $doc->appendChild($doc->createComment("Getting HAL docs from ".$beginDate."T00:00:00 To ".$endDate."T23:59:59"));
+    // Create the element Links
+    $links = $doc->createElement("links");
+    // Loop on all element retrieved by solr request
+    foreach ($res["response"]["docs"] as $d) {
+        // Create the element link
+        $link = $doc->createElement("link");
+        // Set the attribut providerId of the link element to 1331
+        $link->setAttribute("providerId", "1331");
+        // Create the element resource
+        $resource = $doc->createElement("resource");
+        // Create the element title
+        $title = $doc->createElement("title");
+        // Create the element url
+        $url = $doc->createElement("url");
+        // Create the element record
+        $record = $doc->createElement("record");
+        // Create the element source
+        $source = $doc->createElement("source");
+        // Create the element id
+        $id = $doc->createElement("id");
+        foreach ($d["title_s"] as $str) {
+            // Set the value of the element title
+            $titleText = $doc->createTextNode($str);
+            $title->appendChild($titleText);
+            $resource->appendChild($title);
+        }
+        // Set the value of the element title
+        $urlText = $doc->createTextNode($d["uri_s"]);
+        $url->appendChild($urlText);
+        $resource->appendChild($url);
+        // Set the value of the element source
+        $sourceText = $doc->createTextNode("MED");
+        $source->appendChild($sourceText);
+        $record->appendChild($source);
+        // Set the value of the element id
+        $idText = $doc->createTextNode($d["pubmedId_s"]);
+        $id->appendChild($idText);
+        $record->appendChild($id);
+        $link->appendChild($resource);
+        $link->appendChild($record);
+        $links->appendChild($link);
+    }
+    $doc->appendChild($links);
+    $xml_string = $doc->saveXML();
+
+    // Create the folder that will contain XML file, if it doesn't exist
+    if (!file_exists(EUROPEPMC_ROOT_FILE)) {
+        mkdir(EUROPEPMC_ROOT_FILE);
+    }
+    // Debug
+    if ($debug) {
+        debug('>>> Creating/Updating europePMC_folder');
+    }
+    // Create and save the XML File
+    $fileName = EUROPEPMC_ROOT_FILE."hal_".$today.".xml";
+    if ( $file = fopen($fileName, "w") ) {
+        // Debug
+        if ($debug) {
+            debug('>>> Opening XML file : ' . $fileName);
+        }
+        fputs($file,$xml_string);
+        //Debug
+        if ($debug) {
+            debug('>>> Writing XML data');
+        }
+        // Close XML file
+        fclose($file);
+        // Debug
+        if ($debug) {
+            debug('>>> Closing XML file');
+        }
+    } else {
+        if ($debug) {
+            debug('', '??? CANNOT OPEN THE XML FILE : '. $fileName, 'red');
+        }
+        exit;
+    }
+
+    // Zipping XML file or not
+    if ($zipXML) {
+        $fileName = EUROPEPMC_ROOT_FILE."hal_".$today.".zip";
+        $zip = new ZipArchive();
+        if($zip->open($fileName, ZipArchive::CREATE))
+        {
+            $zip->addFile(EUROPEPMC_ROOT_FILE."hal_".$today.".xml","hal_".$today.".xml");
+            $zip->close();
+            $uploadFile = "/" . EUROPEPMC_FOLDER . "/hal_".$today.".zip";
+            if ($debug) {
+                debug('>>> Zipping XML file');
+            }
+        } else {
+            if ($debug) {
+                debug('', '??? CANNOT ZIP THE XML FILE', 'red');
+            }
+            exit;
+        }
+    } else {
+        $uploadFile = "/" . EUROPEPMC_FOLDER . "/hal_".$today.".xml";
+    }
+
+    if(!$noTransfer) {
+        // Connecting at EUROPE PMC Server
+        if($ftpStream = @ftp_connect(EUROPEPMC_HOST)) {
+            // Debug
+            if ($debug) {
+                debug('>>> Connecting at EUROPE PMC FTP Server');
+            }
+        } else {
+            // Debug
+            if ($debug) {
+                debug('', '??? CANNOT CONNECT TO ' . EUROPEPMC_HOST . ' (CHECK HOST NAME !)', 'red');
+            }
+            exit;
+        }
+        // Opening the session
+        if ($result = @ftp_login($ftpStream, EUROPEPMC_USER, EUROPEPMC_PWD)) {
+            // Debug
+            if ($debug) {
+                debug('>>> Connected as ' . EUROPEPMC_USER . '@' . EUROPEPMC_HOST);
+            }
+        } else {
+            // Debug
+            if ($debug) {
+                debug('', '??? CANNOT CONNECT AS ' . EUROPEPMC_USER . ' (CHECK USERNAME AND/OR PASSWORD !)', 'red');
+            }
+            exit;
+        }
+        // Turn on passive mode transfers
+        @ftp_pasv($ftpStream, true);
+
+        // Upload File
+        if(@!ftp_put($ftpStream, $uploadFile, $fileName, FTP_BINARY)) {
+            // Debug
+            if ($debug) {
+                debug('', '??? CANNOT UPLOAD THE FILE !', 'red');
+            }
+            exit;
+        } else {
+            // Debug
+            if ($debug) {
+                debug('>>> File uploaded successfully');
+            }
+        }
+        //Closing the session
+        @ftp_close($ftpStream);
+        if ($debug) {
+            debug('>>> Closing FTP connection');
+        }
+    }
+    // Debug
+    if ($debug) {
+        debug('', '>>> All Process Finished Successfully', 'blue');
+    }
+} else {
+    // Debug
+    if ($debug) {
+        debug('', '??? THERE ARE NO MATCHING RESULTS [numFound = ' . $res["response"]["numFound"] . '] (CHECK YOUR DATES !)', 'red');
+    }
+}
+//</editor-fold>
+
+//<editor-fold desc="Function : validate Date Format">
+function validateDate($date, $format = 'Y-m-d') {
+    $d = DateTime::createFromFormat($format, $date);
+    return $d && $d->format($format) == $date;
+}
+//</editor-fold>

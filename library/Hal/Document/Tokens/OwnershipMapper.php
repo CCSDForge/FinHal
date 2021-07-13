@@ -7,15 +7,10 @@
  */
 class Hal_Document_Tokens_OwnershipMapper
 {
-    static protected $_tableName = 'Hal_Document_Tokens_OwnershipTable';
     /** @var Zend_Db_Table_Abstract  */
     protected $_dbTable;
 
-    /**
-     * @param string|Zend_Db_Table_Abstract $dbTable
-     * @return Hal_Document_Tokens_OwnershipMapper
-     * @throws Exception
-     */
+    /** @param Zend_Db_Table_Abstract $dbTable*/
     public function setDbTable ($dbTable)
     {
         if (is_string($dbTable)) {
@@ -30,12 +25,11 @@ class Hal_Document_Tokens_OwnershipMapper
 
     /**
      * @return Zend_Db_Table_Abstract
-     * @throws Exception
      */
-    private function getDbTable ()
+    public function getDbTable ()
     {
         if (null === $this->_dbTable) {
-            $this->setDbTable(self::$_tableName);
+            $this->setDbTable('Hal_Document_Tokens_OwnershipTable');
         }
         return $this->_dbTable;
     }
@@ -45,7 +39,6 @@ class Hal_Document_Tokens_OwnershipMapper
      *
      * @param Hal_Document_Tokens_Ownership $userTokens
      * @return int Dernier ID de token enregistré
-     * @throws Exception
      */
     public function save (Hal_Document_Tokens_Ownership $userTokens)
     {
@@ -68,7 +61,6 @@ class Hal_Document_Tokens_OwnershipMapper
      * @param string $token
      * @param Hal_Document_Tokens_Ownership $userTokens
      * @return null|Hal_Document_Tokens_Ownership
-     * @throws Exception
      */
     public function findByToken ($token, Hal_Document_Tokens_Ownership $userTokens)
     {
@@ -76,12 +68,16 @@ class Hal_Document_Tokens_OwnershipMapper
         if (0 == count($result)) {
             return null;
         }
+
+
         $row = $result->current();
+
         $userTokens->setUid($row->UID)
             ->setDocid($row->DOCID)
             ->setToken($row->TOKEN)
             ->setTime_modified($row->TIME_MODIFIED)
             ->setUsage($row->USAGE);
+
         return $userTokens;
     }
 
@@ -90,7 +86,6 @@ class Hal_Document_Tokens_OwnershipMapper
      *
      * @param string $token
      * @param Hal_Document_Tokens_Ownership $userTokens
-     * @throws Exception
      */
     public function delete ($token, Hal_Document_Tokens_Ownership $userTokens)
     {

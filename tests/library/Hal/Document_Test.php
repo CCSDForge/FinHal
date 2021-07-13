@@ -484,7 +484,7 @@ class Document_Test extends PHPUnit_Framework_TestCase
                 '/\\\\end\{document\}/'    // Le document est fini
             ] ],
             2 => [__DIR__.'/../../ressources/test_sword_ouvrage.xml', [
-                '/Faron Moller, Georg Struth. [^\.]*\. Springer, 16, pp.500, 2013, Undergraduate Topics in Computer Science, 978-1-84800-321-7/'
+                '/Faron Moller, Georg Struth. [^\.]*\. Springer, 16, pp.500, 2013, Undergraduate Topics in Computer Science, 978-1-84800-321-7. \\\\textless\{\}http:\/\/www.springer.com\\\\textgreater\{\}\}/'
             ] ],
             3 => [__DIR__.'/../../ressources/test_sword_preprint_multilingual.xml',[
                 '/setCJKmainfont/',
@@ -569,13 +569,6 @@ class Document_Test extends PHPUnit_Framework_TestCase
         $this -> assertRegExp('|<dc:rights>info:eu-repo/semantics/OpenAccess|', $dcstring);
     }
 
-    public function testgetDocidFromId() {
-        $id='hal-01184451';
-        $document = new Hal_Document(0, $id,0, true );
-        $docid = $document->getDocidFromId('hal-00956573');
-        $this -> assertEquals(1174371, $docid);
-    }
-
     public function testgetRacineCache_s()
     {
         $this->assertEquals(realpath(__DIR__."/../../cache/development/docs/00/18/83/58/"), realpath(Hal_Document::getRacineCache_s(188358)));
@@ -585,27 +578,6 @@ class Document_Test extends PHPUnit_Framework_TestCase
 
         $docpourri = new Hal_Document("trucpourri");
         $this->assertEquals(false, $docpourri->get('phps'));
-
-    }
-
-    public function testDoublonResearcher() {
-        $id='1000014';
-        $document = new Hal_Document($id,'', 0, true );
-        $copy = $document->getIdsCopy();
-        $docidsForId = [$id];
-        $this -> assertNotEquals([], Hal_Document_Doublonresearcher::getDoublonsOnIds($copy, $docidsForId));
-
-        $id='449842';
-        $document = new Hal_Document($id,'', 0, true );
-        $copy = $document->getIdsCopy();
-        $docidsForId = [$id];
-        $this -> assertEquals([], Hal_Document_Doublonresearcher::getDoublonsOnIds($copy, $docidsForId));
-
-        $id='301205';
-        $document = new Hal_Document($id,'', 0, true );
-        $copy = $document->getIdsCopy();
-        $docidsForId = [$id];
-        $this -> assertNotEquals([], Hal_Document_Doublonresearcher::getDoublonsOnIds($copy, $docidsForId));
 
     }
 }

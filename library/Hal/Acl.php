@@ -13,8 +13,7 @@ class Hal_Acl extends Ccsd_Acl
 	const ROLE_GUEST        =    'guest';
     const ROLE_MEMBER       =    'member';
     const ROLE_ADMIN        =    'administrator';
-    const ROLE_A_TAMPONNEUR =    'atamponneur'; // n'est pas le tamponneur de cette collection mais peut tamponner pour une collection
-    const ROLE_TAMPONNEUR   =    'tamponneur';  // Est le tamponneur de cette collection
+    const ROLE_TAMPONNEUR   =    'tamponneur';
     const ROLE_ADMINSTRUCT  =    'adminstruct';
     const ROLE_VALIDATEUR   =    'validateur';
     const ROLE_MODERATEUR   =    'moderateur';
@@ -23,7 +22,9 @@ class Hal_Acl extends Ccsd_Acl
 
     /**
      * Hal_Acl constructor.
-     * @throws Zend_Config_Exception
+     *
+     * Lecture du fichier ACL de l'application
+     * Et merge avec un fichier de configuration lie a l'instance/application
      */
     public function __construct()
     {
@@ -34,8 +35,7 @@ class Hal_Acl extends Ccsd_Acl
             self::ROLE_GUEST       =>    null,
             self::ROLE_MEMBER      =>    self::ROLE_GUEST,
             self::ROLE_ADMIN       =>    self::ROLE_MEMBER,
-            self::ROLE_A_TAMPONNEUR=>    self::ROLE_MEMBER,
-            self::ROLE_TAMPONNEUR  =>    self::ROLE_A_TAMPONNEUR,
+            self::ROLE_TAMPONNEUR  =>    self::ROLE_MEMBER,
             self::ROLE_ADMINSTRUCT =>    self::ROLE_MEMBER,
             self::ROLE_VALIDATEUR  =>    self::ROLE_MEMBER,
             self::ROLE_MODERATEUR  =>    self::ROLE_MEMBER,
@@ -45,8 +45,14 @@ class Hal_Acl extends Ccsd_Acl
         parent::__construct();
         
         //Ressources à rajouter dans les ACL
-        $config = new Zend_Config_Ini(APPLICATION_PATH . '/configs/acl.ini');
-        $this->_defaultAcl = $config->toArray();
+        try {
+            $config = Hal_Ini::file_merge([
+                APPLICATION_PATH . '/configs/acl.ini' => null,
+                CONFIGDIR . APPLICATION_DIR . '/acl.ini' => null
+            ]);
+            $this->_defaultAcl = $config;
+        } catch (Zend_Config_Exception $e) {
+            $this->_defaultAcl = [];
+        }
     }
-    
 }

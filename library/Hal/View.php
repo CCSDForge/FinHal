@@ -115,12 +115,8 @@
  * @property string   $iconwarning
  * @property int      $i
  * @property bool     $canChange
- * @property Ccsd_Referentiels_Journal $journal
- * @property Hal_Website_Navigation_Page $page
- * @property bool[] $pagesDisplay
  *
- * @property Hal_Site_Collection   $collection
- * @property Hal_Site_Collection[] $collections
+ *
  * ----------------- Step Meta view : @see Hal_Submit_Step_Meta ------------------
  * @property bool     $metamode
  *
@@ -137,13 +133,11 @@
  *              !!!!  We found also a array of [ $id => fullname ]
  * @property Hal_Document_Structure[] $structures
  *
- * @method documents ($id, $class)
- *    @see Aurehal_View_Helper_Documents::documents
  * Todo: better support Specific method for subclass
  *       Having a function getStepAuthor return the good class is better than returning just generic Step class
  * @method setAuthorOrder(array $authors)
  * @method jwplayer(array $options)
- *     @see Ccsd_View_Helper_Jwplayer
+ *     @see View_Helper_Jwplayer
  *
  * Dans Ccsd_Referentiels_Europeanproject
  * @property string identifier
@@ -151,10 +145,8 @@
  * @property bool $options
  * @property Ccsd_Form_Element_Referentiel $item
  *
- * @property string resultMessage
- *
- * @property array[] resultAuth   : tableau d'authentification reussi... pas encore d'objet associe :-(
- * @property string $url
+ * @method string url(array $urlOptions = array(), $name = null, $reset = false, $encode = true)
+ * @see Hal_View_Helper_Url::url
  */
 class Hal_View extends Ccsd_View {
 

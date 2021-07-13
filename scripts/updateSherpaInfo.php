@@ -47,8 +47,6 @@ foreach ( $arrayOfJournal as $journal ) {
     $romeo = sherpaRomeoAPI($journal['ISSN']);
     if ( count($romeo) ) {
         $bind = [];
-        // On prefere garder le titre et le publisher car le chercheur connait cela, pas l'Issn.
-        // S'il se trompe dans l'Issn, on aurait perdu l'information importante
         /*if ($romeo['jname'] != $journal['JNAME'] ) {
             $bind['JNAME'] = $romeo['jname'];
         }

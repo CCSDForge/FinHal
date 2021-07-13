@@ -17,9 +17,6 @@ $this->layout()->pageDescription = $this->translate("Liste des collections de l'
             </div>
             <div class="col-lg-6">
                 <a href="/collection/create" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i>&nbsp;<?php echo $this->translate('Créer une collection') ?></a>
-                <?php if ($this->isHalAdmin) { ?>
-                <a href="/collection/duplicate" class="btn btn-default">&nbsp;<?php echo $this->translate('Dupliquer une collection') ?></a>
-                <?php } ?>
             </div>
         </div>
     </div>

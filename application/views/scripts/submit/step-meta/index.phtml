@@ -1,7 +1,5 @@
-<?php
-/** @var Hal_View $this  */
 
-$this->jQuery()->addJavascriptFile('/js/submit/domain.js')
+<?php $this->jQuery()->addJavascriptFile('/js/submit/domain.js')
     ->addJavascriptFile(CCSDLIB . '/js/jquery/ui/autocomplete.html.js')
     ->addJavascriptFile(CCSDLIB . "/js/bootstrap-typeahead.js");?>
 
@@ -11,15 +9,6 @@ $this->jQuery()->addJavascriptFile('/js/submit/domain.js')
 <div class="col-md-12">
     <div id="myForm" class="row">
         <div class="render">
-            <?php
-            $doctypeIntro = '';
-            if ($this->document) {
-                $doctypeIntro = $this->document->getDoctypeIntro();
-            }
-            if ($doctypeIntro != '') { ?>
-                <div class="doctypeIntro"><?php echo $this->document->getDoctypeIntro(); ?> </div>
-                <?php
-            } ?>
             <form id="form_meta">
                 <?php echo $this->form; ?>
             </form>

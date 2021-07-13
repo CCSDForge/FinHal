@@ -7,7 +7,7 @@
  */
 
 // Non standard en general: choix de la ss-application
-putenv('APPLICATION_DIR=application-halms');
+define('APPLICATION_DIR', 'application-halms');
 
 /* Environnements */
 $listActions = array('dcl', 'pmc', 'hal', 'generate');

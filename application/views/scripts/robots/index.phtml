@@ -35,32 +35,6 @@ if (APPLICATION_ENV == ENV_PROD) {
     echo 'User-agent: SemanticScholarBot' . PHP_EOL;
     echo 'Crawl-delay: 10' . PHP_EOL;
 
-    // https://megaindex.com/crawler
-    echo 'User-agent: MegaIndex.ru' . PHP_EOL;
-    echo 'Disallow: /' . PHP_EOL;
-
-    echo 'User-agent: megaindex.com' . PHP_EOL;
-    echo 'Disallow: /' . PHP_EOL;
-
-    // https://fr.semrush.com/bot/
-    echo 'User-agent: SemrushBot' . PHP_EOL;
-    echo 'Disallow: /' . PHP_EOL;
-
-    echo 'User-agent: SemrushBot-SA' . PHP_EOL;
-    echo 'Disallow: /' . PHP_EOL;
-
-    // http://seekport.com/ SEO bot
-    echo 'User-agent: Seekport Crawler';
-    echo 'Disallow: /' . PHP_EOL;
-
-    // http://ltx71.com/
-    echo 'User-agent: ltx71 - (http://ltx71.com/)';
-    echo 'Disallow: /' . PHP_EOL;
-
-    // https://ahrefs.com/robot
-    echo 'User-agent: AhrefsBot' . PHP_EOL;
-    echo 'Disallow: /' . PHP_EOL;
-
     echo "# Sitemap\n";
     echo "Sitemap: $this->sitemapUrl";
 } else {

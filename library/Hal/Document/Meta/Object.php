@@ -50,16 +50,6 @@ class Hal_Document_Meta_Object extends Hal_Document_Meta_Simple
     }
 
     /**
-     * Idem but even not overwriting
-     * @param bool $group
-     * @return mixed
-     */
-    public final function getValueObj($group = false)
-    {
-        return $this->_value;
-    }
-
-    /**
      * @param Hal_Document_Meta_Object $newMeta
      */
     public function merge($newMeta)

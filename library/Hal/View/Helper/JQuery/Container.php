@@ -64,11 +64,9 @@ class Hal_View_Helper_JQuery_Container extends ZendX_JQuery_View_Helper_JQuery_C
         // check if url has parameters
         $urlParsed = parse_url($url, PHP_URL_QUERY);
         if ((isset($urlParsed)) && ($urlParsed != null)) {
-            $separator = '&';
+            $separator = '&amp;';
         }
-
         return $url . $separator . Hal_Settings::getApplicationVersion();
-
     }
 
 

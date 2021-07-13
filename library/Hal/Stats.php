@@ -167,9 +167,8 @@ class Hal_Stats {
             $solrResult = Ccsd_Tools::solrCurl($query, 'hal', 'select', 29);
         } catch (Exception $exc) {
             error_log($exc->getMessage());
-            $solrResult = [];
-            $solrResult ['response'] ['numFound'] = 0;
         }
+
 
         $solrResult = unserialize ( $solrResult );
 

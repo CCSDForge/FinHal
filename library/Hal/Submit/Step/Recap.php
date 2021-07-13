@@ -75,20 +75,24 @@ class Hal_Submit_Step_Recap extends Hal_Submit_Step
         $view->type = $type;
         $view->typdocLabel = "typdoc_".$document->getTypDoc();
 
-        // Recherche de doublon du document sur les identifiants
-        $doublons = array_keys(Hal_Document_Doublonresearcher::doublon($document));
+        $oInstance = \Hal\Instance::getInstance('');
+        // on ne recherche pas les doublons éventuels pour HalSPM
+        if ($oInstance->getName() != 'halspm') {
+            // Recherche de doublon du document sur les identifiants
+            $doublons = array_keys(Hal_Document_Doublonresearcher::doublon($document));
 
-        // On considère qu'un doublon trouvé sur les identifiants est plus probablement un doublon qu'un doublon sur le titre
-        if (count($doublons)) {
-            $view->doublonID = $doublons[0];
-            $doublonDoc = Hal_Document::find(0, $view->doublonID);
-            $view->doublonCit = $doublonDoc->getCitation('full');
-        } else {
-            // Recherche de doublon sur le titre
-            $titleDoublons = Hal_Document_Doublonresearcher::getDoublonsOnTitle($document);
-            if (count($titleDoublons)) {
-                $view->doublonID = $titleDoublons[0]['docid'];
-                $view->doublonCit = $titleDoublons[0]['citationFull_s'];
+            // On considère qu'un doublon trouvé sur les identifiants est plus probablement un doublon qu'un doublon sur le titre
+            if (count($doublons)) {
+                $view->doublonID = $doublons[0];
+                $doublonDoc = Hal_Document::find(0, $view->doublonID);
+                $view->doublonCit = $doublonDoc->getCitation('full');
+            } else {
+                // Recherche de doublon sur le titre
+                $titleDoublons = Hal_Document_Doublonresearcher::getDoublonsOnTitle($document);
+                if (count($titleDoublons)) {
+                    $view->doublonID = $titleDoublons[0]['docid'];
+                    $view->doublonCit = $titleDoublons[0]['citationFull_s'];
+                }
             }
         }
 
@@ -98,7 +102,6 @@ class Hal_Submit_Step_Recap extends Hal_Submit_Step
         $view->error = (!$this->_validity && $verifValidity) ? "Votre dépôt n'est pas encore complet !" : "";
 
         //CGU spécifiques pour le portail SPM
-        $oInstance = Hal_Instance::getInstance('');
         if ($oInstance->getName() == 'halspm') {
             $view->cgu = 'En déposant ce document, vous concédez au « réutilisateur » un droit non exclusif et gratuit de libre « réutilisation » de l’« information » 
                 à des fins commerciales ou non, dans le monde entier et pour une durée illimitée, dans les conditions exprimées par la licence ouverte/open licence version 2.0. 
@@ -133,10 +136,10 @@ class Hal_Submit_Step_Recap extends Hal_Submit_Step
         $transfertArxivAsked = isset($params['arxiv']);
 
         $transfertArxiv = $transfertArxivAsked && ($transfert ->canShowTransfert() > 0);
-        if ($transfertArxiv || ($transfert->getRemoteId() != null)) {
-            $transfert ->save();
-        } else {
+        if (!$transfertArxiv) {
             $transfert ->delete();
+        } else {
+            $transfert -> save();
         }
         $document->setTransfertArxiv($transfertArxiv);
         $document->setTransfertPMC(isset($params['pubmedcentral']) && $params['pubmedcentral']);

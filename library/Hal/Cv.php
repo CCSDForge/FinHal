@@ -34,7 +34,7 @@ class Hal_Cv
     /**
      * Table des identifiants exterieurs du chercheur
      */
-    const TABLE_IDHAL_IDEXT = 'REF_IDHAL_IDEXT';
+    const TABLE_IDEXT = 'REF_IDHAL_IDEXT';
     /**
      * Table des serveurs exterieurs
      */
@@ -145,6 +145,12 @@ class Hal_Cv
      * @var null
      */
     protected $_solrResult = null;
+
+    /**
+     * Retour du curl solR
+     * @var null
+     */
+    public $_createSolr = null;
 
     /**
      * Nom du fichier de cache
@@ -265,17 +271,19 @@ class Hal_Cv
                         $row['EMAIL_DOMAIN'] = Hal_Document_Author::getDomainFromEmail($row['EMAIL']);
                     }
 
+
                     $this->_authors[$row['AUTHORID']] = $row;
+
+
 
                     if ($row['VALID'] == 'VALID') {
                         $this->_current = $row['AUTHORID'];
                     }
                 }
-                // TODO: Ne faire qu'une seule requete et partager ensuite suivant (A,AS) et (U)
-                // Question: Le SORT est-il vraiment utile?: Pour avoir les serveur toujours dans le meme ordre pour la presentation???
+
                 //Récupération des identifiants exterieurs
                 $sql = $db->select()
-                    ->from(['i'=>self::TABLE_IDHAL_IDEXT], array('i.SERVERID', 'i.ID'))
+                    ->from(['i'=>self::TABLE_IDEXT], array('i.SERVERID', 'i.ID'))
                     ->joinLeft(['s' => self::TABLE_SERVEREXT], 's.SERVERID = i.SERVERID', '')
                     ->where('i.IDHAL = ?', $this->_idHal)
                     ->where('s.TYPE IN ("A", "AS")')
@@ -283,41 +291,42 @@ class Hal_Cv
                 $this->_idExt = $db->fetchPairs($sql);
                 //Récupération des url sociales exterieurs
                 $sql = $db->select()
-                    ->from(['i'=>self::TABLE_IDHAL_IDEXT], array('i.SERVERID', 'i.ID'))
+                    ->from(['i'=>self::TABLE_IDEXT], array('i.SERVERID', 'i.ID'))
                     ->joinLeft(['s' => self::TABLE_SERVEREXT], 's.SERVERID = i.SERVERID', '')
                     ->where('i.IDHAL = ?', $this->_idHal)
                     ->where('s.TYPE = "U"')
                     ->order('s.ORDER ASC');
                 $this->_socialUrlExt = $db->fetchPairs($sql);
 
+
+
+
                 //Récupération des données (publis, ...) de l'auteur
                 if ($loadDocuments) {
-                    $request = $this->createSolrRequest();
-                    $this->_solrResult = $this->solrRequest($request);
-                    /** Attention: @see widget-export.phtml utilise _createSolr */
-                    $this->_createSolr = $request;
+                    $this->_createSolr = $this->createSolrRequest();
+                    $this->_solrResult = $this->solrRequest();
                 }
             } else {
                 $this->_idHal = 0;
             }
         }
+
         return $this;
     }
 
     /**
      * Récupération des données solR
-     * @param string $request
      * @return mixed
      * @throws Exception
      */
-    private function solrRequest($request)
+    private function solrRequest()
     {
         $existFilters = count($this->getFilters())>0;
 
         if (!$existFilters && Hal_Cache::exist($this->getCacheFilename(), 3600*6, $this->_cachePath)) {
             $res = unserialize(Hal_Cache::get($this->getCacheFilename(), $this->_cachePath));
         } else {
-            $res = Hal_Tools::solrCurl($request, 'hal', 'select', true);
+            $res = Hal_Tools::solrCurl($this->_createSolr, 'hal', 'select', true);
             if ($res) {
                 if (!$existFilters) {
                     Hal_Cache::save($this->getCacheFilename(), $res, $this->_cachePath);
@@ -555,7 +564,7 @@ class Hal_Cv
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         $sql = $db->select()
             ->from(array('idhal' => self::TABLE_IDHAL), 'count(*)')
-            ->joinLeft(array('idext' => self::TABLE_IDHAL_IDEXT), 'idhal.IDHAL=idext.IDHAL', '')
+            ->joinLeft(array('idext' => self::TABLE_IDEXT), 'idhal.IDHAL=idext.IDHAL', '')
             ->joinLeft(array('servext' => self::TABLE_SERVEREXT), 'idext.SERVERID=servext.SERVERID', '')
             ->where('servext.URL = ?', $url)
             ->where('idext.ID = ?', $identifier);
@@ -596,7 +605,7 @@ class Hal_Cv
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         $sql = $db->select()
             ->from(array('idhal' => self::TABLE_IDHAL), '')
-            ->joinLeft(array('idext' => self::TABLE_IDHAL_IDEXT), 'idhal.IDHAL=idext.IDHAL', '')
+            ->joinLeft(array('idext' => self::TABLE_IDEXT), 'idhal.IDHAL=idext.IDHAL', '')
             ->joinLeft(array('servext' => self::TABLE_SERVEREXT), 'idext.SERVERID=servext.SERVERID', '')
             ->joinLeft(array('author' => self::TABLE_AUTHOR), 'idhal.IDHAL=author.IDHAL', 'author.AUTHORID')
             ->where('author.VALID = ?', 'VALID')
@@ -879,7 +888,7 @@ class Hal_Cv
     /**
      * Retourne une facette
      * @param $facet
-     * @return array
+     * @return mixed
      */
     private function getFacet($facet)
     {
@@ -899,7 +908,7 @@ class Hal_Cv
             }
             return $out;
         } else {
-            return Ccsd_Tools::ifsetor($this->_solrResult['facet_counts']['facet_fields'][$facet], []);
+            return Ccsd_Tools::ifsetor($this->_solrResult['facet_counts']['facet_fields'][$facet]);
         }
     }
 
@@ -1153,7 +1162,7 @@ class Hal_Cv
         }
 
         //Enregistrement des identifiants externes
-        $db->delete(self::TABLE_IDHAL_IDEXT, 'IDHAL = ' . $this->getIdHal());
+        $db->delete(self::TABLE_IDEXT, 'IDHAL = ' . $this->getIdHal());
         $servers = $this->getServerExt();
         foreach($data as $key => $val) {
             if (substr($key, 0, 6) == 'idExt_' && $val != '') {
@@ -1164,7 +1173,7 @@ class Hal_Cv
                         'SAMEAS'   =>  $servers[$id],
                         'ID'   =>  $val
                     );
-                    $db->insert(self::TABLE_IDHAL_IDEXT, $bind);
+                    $db->insert(self::TABLE_IDEXT, $bind);
                 }
             }
         }
@@ -1233,17 +1242,13 @@ class Hal_Cv
         }
 
         if (isset($data['orcid'])){
-            $sql = $db->select()->from(self::TABLE_SERVEREXT, 'SERVERID')->where('NAME = "ORCID"');
-            $res = $db->fetchOne($sql);
-            if  (intval($res) > 0) {
-                $data['idext'][$res] = $data['orcid'];
-            }
+            $data['idext']['4'] = $data['orcid'];
             unset($data['orcid']);
         }
 
         //Enregistrement des identités exterieures et url sociales exterieures
         if ( ( isset($data['idext']) && is_array($data['idext']) && count($data['idext']) ) || ( isset($data['socialurl']) && is_array($data['socialurl']) && count($data['socialurl']) ) ) {
-            $db->delete(self::TABLE_IDHAL_IDEXT, 'IDHAL = ' . $this->_idHal);
+            $db->delete(self::TABLE_IDEXT, 'IDHAL = ' . $this->_idHal);
             $ext =@ $data['idext'] + $data['socialurl'];
             foreach($ext as $serverid => $id) {
                 if ($id == '') continue;
@@ -1254,7 +1259,7 @@ class Hal_Cv
                     $id = strtr($id, $clean);
                 }
                 $bind = ['IDHAL' => $this->_idHal, 'SERVERID' => $serverid, 'ID' => $id];
-                $db->insert(self::TABLE_IDHAL_IDEXT, $bind);
+                $db->insert(self::TABLE_IDEXT, $bind);
             }
         }
 

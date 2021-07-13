@@ -95,7 +95,6 @@ println('', '----------------------------------------', 'yellow');
 
 foreach ($collections as $sid => $name) {
 
-    $site = Hal_Site::loadSiteFromId($sid);
     if ($debug) {
         println('','** Collection: '. $name . ' (SID=' . $sid . ')', 'blue');
     }
@@ -114,7 +113,7 @@ foreach ($collections as $sid => $name) {
         }
         foreach($docToDeTamponnate as $docid) {
             if (! $test) {
-                $res = Hal_Document_Collection::del($docid, $site);
+                $res = Hal_Document_Collection::del($docid, $sid);
                 if ($verbose) {
                     println('> Détamponnage du document ' . $docid . ': ', ($res ? 'OK' : 'KO'), ($res ? 'green' : 'red'));
                 }
@@ -142,7 +141,7 @@ foreach ($collections as $sid => $name) {
         }
         foreach($docToDeTamponnate as $docid) {
             if (! $test) {
-                $res = Hal_Document_Collection::del($docid, $site);
+                $res = Hal_Document_Collection::del($docid, $sid);
                 if ($verbose) {
                     println('> Détamponnage du document ' . $docid . ': ', ($res ? 'OK' : 'KO'), ($res ? 'green' : 'red'));
                 }
@@ -194,7 +193,7 @@ foreach ($collections as $sid => $name) {
                     $critere = '(' . $critere . ' OR sid_i:' . $res . ')';
                 }
                 //Tamponnage
-                $docToTamponnate = array_merge($docToTamponnate, addStamp($site, $critere, $from, $test, $debug, $verbose));
+                $docToTamponnate = array_merge($docToTamponnate, addStamp($sid, $critere, $from, $test, $debug, $verbose));
 
                 //Détamponnage - Récupération des documents des collections filles
                 $solrRequest  = "q=*&";
@@ -223,7 +222,7 @@ foreach ($collections as $sid => $name) {
                 $docToTamponnate = $db->fetchCol($sql2);
                 if (!$test) {
                     foreach ($docToTamponnate as $docid) {
-                        $res = Hal_Document_Collection::add($docid, $site);
+                        $res = Hal_Document_Collection::add($docid, $sid);
                         if ($verbose) {
                             println('> Tamponnage du document ' . $docid . ': ', ($res ? 'OK' : 'KO'), ($res ? 'green' : 'red'));
                         }
@@ -260,7 +259,7 @@ foreach ($collections as $sid => $name) {
 
             if (!$test) {
                 foreach ($docToDeTamponnate as $docid) {
-                    $res = Hal_Document_Collection::del($docid, $site);
+                    $res = Hal_Document_Collection::del($docid, $sid);
                     if ($verbose) {
                         println('> Detamponnage du document ' . $docid . ': ', ($res ? 'OK' : 'KO'), ($res ? 'green' : 'red'));
                     }
@@ -290,10 +289,10 @@ foreach ($collections as $sid => $name) {
         }
 
         //Tamponnage
-        $docToTamponnate = addStamp($site, $critere, $from, $test, $debug, $verbose);
+        $docToTamponnate = addStamp($sid, $critere, $from, $test, $debug, $verbose);
 
         //Détamponnage
-        $docToDeTamponnate = delStamp($site, $critere, $from, $test, $debug, $verbose, $db);
+        $docToDeTamponnate = delStamp($sid, $critere, $from, $test, $debug, $verbose, $db);
 
     }
 
@@ -317,7 +316,7 @@ println();
  *
  * Récupère de SolR les documents en ligne répondants au critère de la collection et non tamponnés pour la collection
  *
- * @param Hal_Site $site identifiant de la collection
+ * @param int $sid identifiant de la collection
  * @param string $critere critère de tamponnage
  * @param string $from date de modification des dépôts
  * @param boolean $test mode test
@@ -326,9 +325,8 @@ println();
  * @return array liste des document tamponnés
  * @throws Exception
  */
-function addStamp($site, $critere, $from, $test, $debug, $verbose)
+function addStamp($sid, $critere, $from, $test, $debug, $verbose)
 {
-    $sid = $site->getSid();
     $docToTamponnate = array();
 
     $solrRequest  = "q=*&";
@@ -349,7 +347,7 @@ function addStamp($site, $critere, $from, $test, $debug, $verbose)
                 }
             } else {
                 if (!$test) {
-                    $res = Hal_Document_Collection::add($d['docid'], $site);
+                    $res = Hal_Document_Collection::add($d['docid'], $sid);
                     if ($verbose) {
                         println('> Tamponnage du document ' . $d['docid'] . ': ', ($res ? 'OK' : 'KO'), ($res ? 'green' : 'red'));
                     }
@@ -372,7 +370,7 @@ function addStamp($site, $critere, $from, $test, $debug, $verbose)
  *
  * Récupère de SolR les documents ne répondant plus au critère de la collection et tamponnés pour la collection
  *
- * @param Hal_site $site :  collection
+ * @param int $sid identifiant de la collection
  * @param string $critere critère de tamponnage
  * @param string $from date de modification des dépôts
  * @param boolean $test mode test
@@ -382,9 +380,8 @@ function addStamp($site, $critere, $from, $test, $debug, $verbose)
  * @return array liste des document tamponnés
  * @throws Exception
  */
-function delStamp($site, $critere, $from, $test, $debug, $verbose, $db)
+function delStamp($sid, $critere, $from, $test, $debug, $verbose, $db)
 {
-    $sid = $site->getSid();
     global $rootId;
     $docToDeTamponnate = array();
 
@@ -421,7 +418,7 @@ function delStamp($site, $critere, $from, $test, $debug, $verbose, $db)
 
         foreach($docToDeTamponnate as $docid) {
             if (! $test) {
-                $res = Hal_Document_Collection::del($docid, $site);
+                $res = Hal_Document_Collection::del($docid, $sid);
                 if ($verbose) {
                     println('> Détamponnage du document ' . $docid . ': ', ($res ? 'OK' : 'KO'), ($res ? 'green' : 'red'));
                 }

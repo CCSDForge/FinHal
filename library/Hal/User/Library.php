@@ -105,35 +105,27 @@ class Hal_User_Library {
             ->where('UID = ?', $uid);
         return $db->fetchCol($sql);
     }
-
-    /**
-     * @param array $options
-     * @param bool $findDuplicate
-     * @return bool|int
-     */
+    
     public function addShelf($options = array(), $findDuplicate = true) {
         try {
             $stmt = $this->_db->query('INSERT INTO '.self::TABLE_SHELF.' (`LIB`, `UID`) VALUES (?, ?)', array(trim($options['shelfName']), (int)$this->uid));
             if ( $stmt->rowCount() == 1 ) {
-                return (int) $this->_db->lastInsertId();
+                return $this->_db->lastInsertId();
             }
         } catch (Zend_Db_Statement_Exception $e ) {
             if ( $findDuplicate && $e->getCode() == 23000 ) { // doublon
                 $sql = $this->_db->select()->from(self::TABLE_SHELF, 'LIBSHELFID')->where('LIB = ?', trim($options['shelfName']));
                 $id = $this->_db->fetchOne($sql);
-                if ($id) {
-                    return (int)$id;
+                if ( $id ) {
+                    return $id;
                 }
+            } else {
+                return false;
             }
         }
         return false;
     }
-
-    /**
-     * @param array $options
-     * @return int
-     * @throws Zend_Db_Statement_Exception
-     */
+    
     public function addDocument($options = array()) {
         if (isset($options['docIdentifiant']) && $options['docIdentifiant']!='') {
             $shelfId = 0;
@@ -146,19 +138,13 @@ class Hal_User_Library {
                 $stmt = $this->_db->query('INSERT IGNORE INTO '.self::TABLE.' (`UID`, `LIBSHELFID`, `IDENTIFIANT`) VALUES (?, ?, ?)', array((int)$this->uid, (int)$shelfId, trim($options['docIdentifiant'])));
                 return $stmt->rowCount();
             } else {
-                return 0;
+                return false;
             }
         } else {
-            return 0;
+            return false;
         }
     }
-
-    /**
-     * @param int $shelfId
-     * @param string $shelfName
-     * @return bool
-     * @throws Zend_Db_Statement_Exception
-     */
+    
     public static function editShelfName ($shelfId, $shelfName) {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         $stmt = $db->query('UPDATE IGNORE '.self::TABLE_SHELF.' SET `LIB` = ? WHERE LIBSHELFID = ?', array(trim($shelfName), (int)$shelfId));
@@ -168,30 +154,18 @@ class Hal_User_Library {
             return false;
         }
     }
-
-    /**
-     * @param int $libdocid
-     * @return int
-     */
+    
     public static function delDocument($libdocid) {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         return $db->delete(self::TABLE, "LIBDOCID = ".(int)$libdocid);
     }
-
-    /**
-     * @param int $libdocid
-     * @return int
-     */
+    
     public static function delShelf($libshelfid) {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         $db->delete(self::TABLE, "LIBSHELFID = ".(int)$libshelfid);
         return $db->delete(self::TABLE_SHELF, "LIBSHELFID = ".(int)$libshelfid);
     }
 
-    /**
-     * @param int $libdocid
-     * @return int
-     */
     public static function count($libshelfid) {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         $sql = $db->select()->from(self::TABLE, new Zend_Db_Expr('count(*)'))->where("LIBSHELFID = ".(int)$libshelfid);

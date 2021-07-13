@@ -252,7 +252,6 @@ class Hal_User extends Ccsd_User_Models_User {
     /**
      * Chargement des informations spécifiques d'un utilisateurs (données
      * spécifiques application + roles)
-     * @deprecated
      */
     public function load() {
         $this->loadRoles();
@@ -263,8 +262,14 @@ class Hal_User extends Ccsd_User_Models_User {
      * @return boolean
      */
     public function HasCV() {
+        if ($this->getIdhal() == null) {
+            $res = false;
+        }
+
         $res = Hal_Cv::existCVForUid($this->getUid());
+
         $this->setCv($res);
+
         return (bool) $res;
     }
 
@@ -284,7 +289,6 @@ class Hal_User extends Ccsd_User_Models_User {
      * Pour un portail nous retournons tous les rôles de l'utilisateur
      * POur une collection nous ne retournons que le rôle tamponneur
      *
-     * @param string $roleId
      * @return array
      */
     public function getRoles($roleId = null) {
@@ -314,21 +318,12 @@ class Hal_User extends Ccsd_User_Models_User {
 
             $website = Hal_Site::loadSiteFromId($sid);
 
-            if ($right == Hal_Acl::ROLE_ADMIN) {
+            if ($right == Hal_Acl::ROLE_ADMIN || $right == Hal_Acl::ROLE_TAMPONNEUR) {
                 if ($website === null) {
                     continue;
                 }
                 // Vérification de l'existance du portail
-                $site = $website->getShortname();
-                $this->_roles [$right] [$sid] = $site;
-            } elseif ($right == Hal_Acl::ROLE_TAMPONNEUR) {
-                $this->_roles [Hal_Acl::ROLE_A_TAMPONNEUR] = true;
-                if ($website === null) {
-
-                    continue;
-                }
-                // Vérification de l'existance du portail
-                $site = $website->getShortname();
+                $site = $website->getSiteName();
                 $this->_roles [$right] [$sid] = $site;
             } else if ($right == Hal_Acl::ROLE_ADMINSTRUCT) {
 
@@ -371,7 +366,7 @@ class Hal_User extends Ccsd_User_Models_User {
                 if ($sid == 0) {
                     $site = 'all';
                 } else {
-                    $site = $website->getShortname();
+                    $site = $website->getSiteName();
                     if ($site === false) {
                         continue;
                     }
@@ -396,11 +391,9 @@ class Hal_User extends Ccsd_User_Models_User {
 
     /**
      * @param array $roles
-     * @return string
      */
     public function getSqlDeleteRoles($roles = [Hal_Acl::ROLE_ADMINSTRUCT, Hal_Acl::ROLE_MODERATEUR, Hal_Acl::ROLE_VALIDATEUR, Hal_Acl::ROLE_TAMPONNEUR, Hal_Acl::ROLE_ADMIN])
     {
-        // ROLE_A_TAMPONNEUR is not save into DB so, no need to delete it
         $where = 'UID = ' . $this->_uid . ' AND (';
         $or = '';
         foreach ($roles as $role) {
@@ -438,9 +431,6 @@ class Hal_User extends Ccsd_User_Models_User {
                 foreach ($data as $value) {
                     $this->addRole($roleid, $value);
                 }
-            } else if ($roleid == Hal_Acl::ROLE_A_TAMPONNEUR) {
-                // This is a internal role from ROLE_TAMPONEUR: we don't save it to DB
-                continue;
             } else if ($roleid == Hal_Acl::ROLE_MODERATEUR || $roleid == Hal_Acl::ROLE_VALIDATEUR) {
                 // _db->delete(self::TABLE_ROLE, 'UID = ' . $this->_uid . ' AND RIGHTID = "' . $roleid . '"')
                 $this->deleteRoles([$roleid]);
@@ -542,7 +532,6 @@ class Hal_User extends Ccsd_User_Models_User {
      * @param $prefids
      * @param $pref
      * @param $value
-     * @throws Zend_Db_Adapter_Exception
      */
     protected function insertLine(&$prefids, $pref, $value) {
 
@@ -557,9 +546,6 @@ class Hal_User extends Ccsd_User_Models_User {
 
     /**
      * Enregistre les préférences de dépot de l'utilisateur
-     * @param int $uid
-     * @return true
-     * @throws Zend_Db_Adapter_Exception
      */
     public function savePrefDepot($uid)
     {
@@ -614,7 +600,6 @@ class Hal_User extends Ccsd_User_Models_User {
      * @param int $uidTo
      * @param int $uidFrom
      * @return int
-     * @throws Zend_Db_Adapter_Exception
      * static a cause de Hal_User_Merge qui n'a que des Uid...
      */
     public static function movePrefDepot($uidTo, $uidFrom) {
@@ -635,8 +620,6 @@ class Hal_User extends Ccsd_User_Models_User {
 
     /**
      * Enregistre les préférences de mail de l'utilisateur
-     * @param int $uid
-     * @throws Zend_Db_Adapter_Exception
      */
     public function savePrefMail($uid)
     {
@@ -653,7 +636,7 @@ class Hal_User extends Ccsd_User_Models_User {
         {
             $bind = ['UID' => $uid, 'RIGHTID' => $rightid, 'SEND' => (int) $value];
             if ($rightid == 'adminstruct') {
-                foreach ($refstru as $structid => $foovalue)
+                foreach ($refstru as $structid => $value)
                 {
                     $bind['STRUCTID'] = $structid;
                     if (in_array($structid, $prefmail['adminstruct'])){
@@ -681,8 +664,6 @@ class Hal_User extends Ccsd_User_Models_User {
      *
      * @see Ccsd_User_Models_User::save()
      * @return int false UID de l'utilisateur modifié ou ajouté ; sinon false
-     * @throws Zend_Db_Adapter_Exception
-     * @throws Zend_Db_Statement_Exception
      */
     public function save($isNewAccount = false, $forceInsert = false) {
         $uid = parent::save($forceInsert);
@@ -747,7 +728,6 @@ class Hal_User extends Ccsd_User_Models_User {
      * @deprecated
      * @param int $uid
      * @return boolean
-     * @throws Zend_Db_Statement_Exception
      */
     public function populateUserFromUid($uid) {
         $select = $this->_db->select()->from(['U' => self::TABLE_USER], ['UID', 'SCREEN_NAME', 'LANGUEID', 'NBDOCVIS', 'NBDOCSCI', 'NBDOCREF'])->where('U.UID = ?', $uid);
@@ -826,10 +806,6 @@ class Hal_User extends Ccsd_User_Models_User {
      *
      * @param array $data
      * @return true
-     * @uses setDomain
-     * @uses setMode
-     * @uses setInstitution
-     * @uses setAutodepot
      */
     public function populatePrefDepotFromData ($data) {
 
@@ -906,70 +882,13 @@ class Hal_User extends Ccsd_User_Models_User {
         $stmt = $select->query();
         return $stmt->fetchAll();
     }
-
-
-    /**
-     * Creation d'un utilisateur HAL à partir d'un utilisateur CCsd
-     *
-     * @param Ccsd_User_Models_User
-     * @param boolean $full
-     * @return  Hal_User | NULL
-     */
-
-    static public function createUserFromCcsdUser($ccsdUser,$full = true)
-    {
-
-        $newUser = new Hal_User($ccsdUser->toArray());
-
-        // Données de l'utilisateur
-        $ok = true;
-        $rows = Hal_User::fetchRows($newUser->getDb(), self::TABLE_USER, $newUser->getUid());
-        if ((false === $rows || empty($rows)) && $full === true) {
-            return null; // Première connexion, pas de données locales à HAL
-        }
-
-        // Préférences de dépôt
-        if (false === ($rowsPref = Hal_User::fetchRows($newUser->getDb(), self::TABLE_PREF_DEPOT, $newUser->getUid(), 'PREFID'))) {
-            //Todo: Est-ce un bon test??? Le premier ne suffit pas?
-            return null; // Première connexion, pas de données locales à HAL
-        }
-        // Préférences des mails
-        if (false === ($rowsPrefMail = Hal_User::fetchRows($newUser->getDb(), self::TABLE_PREF_MAIL, $newUser->getUid()))) {
-            //Todo: Est-ce un bon test??? Le premier ne suffit pas?
-            return null; // Première connexion, pas de données locales à HAL
-        }
-
-        if (empty($rowsPrefMail)){ //Si les préférences de mail sont vides on les set par défault
-            $rowsPrefMail[] = ['RIGHTID' => 'member', 'STRUCTID' => null, 'SEND' => 1];
-            $rowsPrefMail[] = ['RIGHTID' => 'author', 'STRUCTID' => null, 'SEND' => 1];
-            $rowsPrefMail[] = ['RIGHTID' => 'administrator', 'STRUCTID' => null, 'SEND' => 1];
-
-            foreach ($newUser->getStructAuth() as $structid => $value){
-                $rowsPrefMail[] = ['RIGHTID' => 'adminstruct', 'STRUCTID' => $structid, 'SEND' => 1];
-            }
-        }
-
-        // Il n'y a qu'une ligne de donnée utilisateur
-        $userdata= $rows[0];
-        $ok &= $newUser->populateUserFromData($userdata);
-        $ok &= $newUser->populatePrefDepotFromData($rowsPref);
-        $ok &= $newUser->populatePrefMailFromData($rowsPrefMail);
-        if ($ok || $full === false) {
-            return $newUser;
-        } else {
-            return null;
-        }
-    }
-
-
     /**
      * Création d'un utilisateur HAL par son UID
      *
      * @param int $uid
-     * @param boolean $full return full user or not
      * @return Hal_User | null
      */
-    static public function createUser($uid, $full = true)
+    static public function createUser($uid)
     {
         $newUser = new Hal_User();
 
@@ -1015,35 +934,11 @@ class Hal_User extends Ccsd_User_Models_User {
         $ok &= $newUser->populateUserFromData($userdata);
         $ok &= $newUser->populatePrefDepotFromData($rowsPref);
         $ok &= $newUser->populatePrefMailFromData($rowsPrefMail);
-        if ($ok || $full === false) {
+        if ($ok) {
             return $newUser;
         } else {
             return null;
         }
-    }
-
-    /**
-     * insertion en base d'un utilisateur au niveau Cas (user CCSD)  et Hal
-     *
-     * @param $attributes array valeur d'initialisation de l'objet
-     * @param $valid boolean valeur d'initialisation de la validité de l'utilisateur
-     * @param $isNewAccount boolean
-     * @param $forceInsert boolean
-     * @return int un user si la sauvegarde s'est bien effectués sinon false
-     */
-    public static function insertUserFromIdp($attributes,$valid,$isNewAccount,$forceInsert)
-    {
-
-        $user = new self($attributes);
-        $user->setValid($valid);
-        $user->setTime_registered();
-        $user->setScreen_name();
-        $user->setLangueid(Zend_Registry::get('Zend_Locale')->getLanguage());
-        $user->setPassword(Ccsd_Tools::generatePw());
-        $user->setHasAccountData(true);
-        $result = $user->save($isNewAccount,$forceInsert);
-        if ($result === false ) return false;
-        else return $user;
     }
 
     /**
@@ -1871,7 +1766,6 @@ class Hal_User extends Ccsd_User_Models_User {
             // TODO traiter l'exception: log? ...
         }
     }
-
 
     /**
      * Trouve un uid d'utilisateur à partir d'un identifiant externe

@@ -7,9 +7,6 @@ require_once(__DIR__.'/../Document/Collection.php');
 require_once(__DIR__.'/Settings/Collection.php');
 require_once(__DIR__.'/../Website/Header.php');
 
-/**
- * Class Hal_Site_Collection
- */
 class Hal_Site_Collection extends Hal_Site
 {
     const TABLE_PARENT = 'SITE_PARENT';
@@ -56,12 +53,6 @@ class Hal_Site_Collection extends Hal_Site
     protected $_tamponneursLoaded = false;
 
     /**
-     * @var Hal_Site_portail
-     */
-    protected $_associatedPortail = null;
-    protected $_associatedPortailLoaded = false;
-
-    /**
      * Hal_Site_Collection constructor.
      * @param $infos
      * @param bool $full
@@ -76,10 +67,7 @@ class Hal_Site_Collection extends Hal_Site
     }
 
     /**
-     * @param array $params
-     * @param bool $full
-     * @uses set
-
+     * @param $params
      */
     public function setParams($params, $full = false)
     {
@@ -99,8 +87,9 @@ class Hal_Site_Collection extends Hal_Site
     /**
      * @deprecated
      * Initialisation de l'object avec un tableau associatif
+     * @param array $data
      */
-    public function set()
+    public function set($data)
     {
         Ccsd_Tools::panicMsg(__FILE__, __LINE__, "ATTENTION CETTE FONCTION EST OBSOLETE ET NE DEVRAIT PAR CONSEQUENT PAS ETRE APPELE !!");
     }
@@ -115,7 +104,8 @@ class Hal_Site_Collection extends Hal_Site
 
     /**
      * Chargement des parents depuis la BDD
-     * Le tableau resultant a des clefs numerique correspondant aux SID
+     * TODO: Stop to "select id" and foreach id { do a select } !!!
+     *       Do a join with SITE and directly get objects
      */
     public function loadParents()
     {
@@ -132,8 +122,7 @@ class Hal_Site_Collection extends Hal_Site
                 if ($siteinfo["TYPE"] != self::TYPE_COLLECTION) {
                     Ccsd_Tools::panicMsg(__FILE__, __LINE__, "Try to load a non-collection-typed site as collection parent");
                 } else {
-                    $coll = new Hal_Site_Collection($siteinfo);
-                    $this->_parents[$coll -> getSid()] = $coll;
+                    $this->_parents[] = new Hal_Site_Collection($siteinfo);
                 }
             }
 
@@ -165,7 +154,6 @@ class Hal_Site_Collection extends Hal_Site
 
     /**
      * Tamponnage des documents répondants au critère de tamponnage
-     * @throws Exception
      */
     public function tamponnate()
     {
@@ -173,22 +161,20 @@ class Hal_Site_Collection extends Hal_Site
             return;
         }
 
-        $query = "q=*&fq=status_i:11&fq=" . urlencode(self::getFullCritere($this->getSid()));
-        $query .= "&fq=NOT(collId_i:" . $this->getSid() . ")";
-        $query .= "&rows=1000000&wt=phps&fl=docid&omitHeader=true";
+        $query = "q=*&fq=status_i:11&fq=" . urlencode(self::getFullCritere($this->getSid())) . "&fq=NOT(collId_i:" . $this->getSid() . ")&rows=1000000&wt=phps&fl=docid&omitHeader=true";
         $res = unserialize(Ccsd_Tools::solrCurl($query));
         if (isset($res['response']['numFound']) && isset($res['response']['docs'])) {
-            // BM un echo ici??? On est dans une vue? dans un script oblogatoirement???
             echo count($res['response']['docs']);
             foreach ($res['response']['docs'] as $d) {
-                Hal_Document_Collection::add($d['docid'], $this);
+                Hal_Document_Collection::add($d['docid'], $this->getSid());
             }
         }
     }
 
     /**
+     *
+     * @param bool $tamponate
      * @return bool|mixed
-     * @throws Zend_Db_Adapter_Exception
      */
     public function save() {
 
@@ -259,7 +245,7 @@ class Hal_Site_Collection extends Hal_Site
     /** 
      * Transforme un objet en tableau de bind pour Mysql 
      **/
-    function objAsDbArray() {
+    function obj2site_row() {
         return [self::SID => $this -> getSid(),
                 self::TYPE => $this -> getType(),
                 self::SHORTNAME => $this -> getShortname(),
@@ -484,7 +470,6 @@ class Hal_Site_Collection extends Hal_Site
     /**
      * @param bool $populate
      * @return Ccsd_Form|null
-     * @throws Zend_Config_Exception
      */
     public function getForm($populate = false)
     {
@@ -515,7 +500,6 @@ class Hal_Site_Collection extends Hal_Site
 
     /**
      * @return Ccsd_Form
-     * @throws Zend_Config_Exception
      */
     static public function getDefaultForm()
     {
@@ -563,7 +547,7 @@ class Hal_Site_Collection extends Hal_Site
      */
     public function getThumb($size='small')
     {
-    	return Ccsd_Thumb::THUMB_URL.$this->_imagette."/".$size;
+    	return "http://thumb.ccsd.cnrs.fr/".$this->_imagette."/".$size;
     }
 
     /**
@@ -584,13 +568,11 @@ class Hal_Site_Collection extends Hal_Site
 
     /**
      * @return array
-     * @throws Exception
      */
     public function getNbDocTamponned()
     {
         $data=[];
-        $query = "q=collId_i:" . $this->getSid() . "&start=0&rows=0&wt=phps&facet=true&facet.field=submitType_s&omitHeader=true";
-        $res = Ccsd_Tools::solrCurl($query);
+        $res = Ccsd_Tools::solrCurl("q=collId_i:" . $this->getSid() . "&start=0&rows=0&wt=phps&facet=true&facet.field=submitType_s&omitHeader=true");
         $res = unserialize($res);
         if (isset($res['facet_counts']['facet_fields']['submitType_s'])) {
             $data = $res['facet_counts']['facet_fields']['submitType_s'];
@@ -601,14 +583,13 @@ class Hal_Site_Collection extends Hal_Site
     /**
      * @param int $uid
      * @return array
-     * @throws Exception
      */
     public function getDocumentsToTamponnate($uid = 0)
     {
         $solrFilter = self::getFullCritere($this->getSid()). " AND -collId_i:" . $this->getSid();
         if ($uid != 0) {
-            //On retire des résultats solr les documents masqués par les gestionnaires
-            $docids = $this->getDocumentToHide();
+            //On retire des résultats solr les documents masqués par l'utilisateur
+            $docids = $this->getDocumentToHide($uid);
             if (count($docids)) {
                 if (count($docids) < 1000) {
                     //todo limit solr
@@ -616,8 +597,8 @@ class Hal_Site_Collection extends Hal_Site
                 }
             }
         }
-        $query = "q=*:*&fq=" . urlencode($solrFilter) . "&fq=status_i:11&rows=100&fl=citationFull_s,submitType_s,docid&wt=phps&omitHeader=true";
-        $res = Ccsd_Tools::solrCurl($query);
+
+        $res = Ccsd_Tools::solrCurl("q=*:*&fq=" . urlencode($solrFilter) . "&fq=status_i:11&rows=100&fl=citationFull_s,submitType_s,docid&wt=phps&omitHeader=true");
         $res = unserialize($res);
         if (isset($res['response']['docs'])) {
             return $res['response']['docs'];
@@ -686,16 +667,15 @@ class Hal_Site_Collection extends Hal_Site
 
     /**
      * Retourne les documents à masquer pour le tamponneur d'une collection
-     *     l'ensemble de tous les documents deja gere manuellement par LES gestionnaires de la collection
+     * @param $uid
      * @return array
      */
-    public function getDocumentToHide()
+    public function getDocumentToHide($uid)
     {
         $db =  Zend_Db_Table_Abstract::getDefaultAdapter();
         $sql = $db->select()->from(self::TABLE_HIDDEN_DOC, 'DOCID')
             ->distinct()
-            // BM: suppress limit to a user, if two coll manager, they must see the same things
-            //->where('UID = ?', (int) $uid)
+            ->where('UID = ?', (int) $uid)
             ->where(self::SID.' = ?', (int) $this->getSid());
         return $db->fetchCol($sql);
     }
@@ -789,7 +769,6 @@ class Hal_Site_Collection extends Hal_Site
      * @param string $table
      * @param array $bind
      * @return string
-     * @throws Zend_Db_Adapter_Exception
      */
     function do_insert($table, $bind ) {
         /** @var Zend_Db_Adapter_Pdo_Mysql $db */
@@ -819,7 +798,6 @@ class Hal_Site_Collection extends Hal_Site
 
     /**
      * @param Hal_Site_Collection
-     * @throws Zend_Db_Adapter_Exception
      */
     public function duplicateParent(Hal_Site_Collection $receiver) {
         $oldId = $this -> getSid();
@@ -836,8 +814,6 @@ class Hal_Site_Collection extends Hal_Site
      * @param $name
      * @param $url
      * @return bool|string
-     * @throws Zend_Db_Adapter_Exception
-     * @throws Zend_Db_Exception
      */
     public function createNewFromDuplicate($newcode, $name, $url)
     {
@@ -853,9 +829,10 @@ class Hal_Site_Collection extends Hal_Site
 
         $this->duplicateSite($newCollection);
         $this->duplicateSettings($newCollection);
+        $this->duplicateParent($newCollection);
         $this->duplicateUserRight($newCollection);
         $this->duplicateWebSite($newCollection);
-        $this->duplicateParent($newCollection);
+
         return true;
     }
 
@@ -926,8 +903,6 @@ class Hal_Site_Collection extends Hal_Site
      * @param int  $sid
      * @param bool $onlyAuto
      * @return array
-     * @deprecated
-     *     use @see getAncestors() instead
      */
     static public function getCollectionsSup($sid, $onlyAuto = true)
     {
@@ -946,49 +921,19 @@ class Hal_Site_Collection extends Hal_Site
         }
         return array_unique($collections);
     }
-   /**
-     * @param bool $onlyAuto
-     * @return Hal_Site_Collection[]
+
+    /**
+     * @deprecated : ne pas passer par la base donc passer par getMode() et pas en static !!
+     * @param int $sid
+     * @return string
      */
-    public function getAncestors($onlyAuto = true)
+    static public function getCollectionMode($sid)
     {
-        $ancestors = $this->getParentCollections($onlyAuto);
-        /** @var Hal_Site_Collection $parent */
-        foreach ($ancestors as $parent) {
-            // recursion
-            $pancestors = $parent->getAncestors($onlyAuto);
-            foreach ($pancestors as $coll) {
-                $sid = $coll->getSid();
-                if (!array_key_exists($sid, $ancestors)) {
-                    // Assure unicity
-                    $ancestors[$sid] = $coll;
-                }
-            }
-        }
-        return $ancestors;
+        return Hal_Site_Settings_Collection::getCollectionMode($sid);
     }
 
     /**
-     * @param bool $onlyAuto
-     * @return Hal_Site_Collection[]
-     */
-    public function getParentCollections($onlyAuto = true)
-    {
-        $this->loadParents();
-        if ($onlyAuto) {
-            $parents = $this->getParents();
-            $autoParents = array_filter($parents, function ($coll) {
-                /** @var Hal_Site_Collection $coll */
-                return $coll -> isAuto();
-                });
-            return $autoParents;
-        } else {
-            return $this->getParents();
-        }
-    }
-
-    /**
-     * Récupération des catégories d'une collection
+     * Récupération des catégorie d'une collection
      */
     static public function getCategories() {
         $roles = array();
@@ -1008,7 +953,7 @@ class Hal_Site_Collection extends Hal_Site
     static public function getSubCollections($sid)
     {
         //todo : est-ce qu'il faudrait pas qu'elle ne soit pas static ? Et utiliser le $this->_sid ??
-        // Hum et utiliser un lazy load...
+
         $res = array();
         $db =  Zend_Db_Table_Abstract::getDefaultAdapter();
         $sql = $db->select()->from(array('p' => self::TABLE_PARENT), null)
@@ -1024,10 +969,9 @@ class Hal_Site_Collection extends Hal_Site
     }
 
     /**
-     * @deprecated Use getPortal instead
-     * Return the Id the portal (or false) if a portal is associated to this collection
+     * Vérification si la collection est associée à un portail
      * @param $sid
-     * @return int
+     * @return string
      */
     static public function getAssociatedPortail($sid)
     {
@@ -1036,55 +980,15 @@ class Hal_Site_Collection extends Hal_Site
         $sql = $db->select()->from(Hal_Site_Settings_Portail::TABLE, self::SID)
             ->where('SETTING = "COLLECTION"')
             ->where('VALUE = ?', $sid);
-        return (int) $db->fetchOne($sql);
+        return $db->fetchOne($sql);
     }
 
     /**
-     * A web site can propose access to deposit system: a portal can, a collection cannot
      * Pas de soumission dans une collection
      * @return bool
      */
     public function submitAllowed()
     {
         return false;
-    }
-
-    /**
-     * A collection can automaticaly  or manualy tamponate its documents
-     * So return true if automatic, false if manual
-     * @return bool
-     */
-    public function isAuto() {
-        return ($this->getSetting('mode') == 'auto');
-    }
-
-    /**
-     * Return Portal object (or null) for which this collection is associated
-     *     null si pas associee
-     * @return Hal_Site_Portail
-     */
-    public function getPortail()
-    {
-        if (!$this->_associatedPortailLoaded) {
-            $site = Hal_Site_Portail::findByAssociatedCollection($this);
-            if ($site) {
-                $this->_associatedPortail = $site;
-            }
-        }
-        return $this->_associatedPortail;
-    }
-    /**
-     * If the collection is Patrolled, return the associated portal
-     * !!!!  ONLY Associated Collection can be patrolled because of this
-     * We need to find a portal for the collection
-     * At the moment, collection cannot be associated to a portal
-     * When that become possible, we will be able to patrol thos type of collection.
-     * @return Hal_site
-     */
-    public function isPatrolled() {
-        if ($this->getSetting('patrolled')) {
-            return $this->getPortail();
-        }
-        return null;
     }
 }

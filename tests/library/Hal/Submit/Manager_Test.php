@@ -74,8 +74,7 @@ class Hal_Submit_Manager_Test extends PHPUnit_Framework_TestCase {
         self::assertEquals(false, empty($doc->getMetasFromSource('grobid')));
 
         // Des Métadonnées ont été récupérées par crossref
-        // Plus d'actualite, grobid fait la jointure avec Crossref, Hal ne fait plus l'appel lui meme
-        // self::assertEquals(false, empty($doc->getMetasFromSource('doi')));
+        self::assertEquals(false, empty($doc->getMetasFromSource('doi')));
     }
 
     public function testAddImage()
@@ -212,41 +211,7 @@ class Hal_Submit_Manager_Test extends PHPUnit_Framework_TestCase {
         $submitManager = new Hal_Submit_Manager($this->_session);
         // DOI
         $metas = $submitManager->createMetadatas("10.4000/cybergeo.23737", "doi");
-        self::assertEquals("The thermal rehabilitation of the old buildings of Paris: how to conciliate protection of urban heritage and energetic performance?", $metas[Ccsd_Externdoc::META][Ccsd_Externdoc::META_TITLE]["en"]);
         self::assertEquals("La réhabilitation thermique des bâtiments anciens à Paris : comment concilier protection du patrimoine et performance énergétique ?", $metas[Ccsd_Externdoc::META][Ccsd_Externdoc::META_TITLE]["fr"]);
-    }
-
-    /**
-     * @param $text
-     * @param $lang
-     * @throws Exception
-     * @dataProvider provideTestLanguage
-     */
-    public function testDetectLanguage($text, $lang) {
-        $detector = new Ccsd_Detectlanguage();
-        $bestLangInfo = $detector->detect($text);
-        if ($bestLangInfo) {
-            $langTrouve = $bestLangInfo['langid'];
-            $this->assertEquals($lang, $langTrouve);
-        } else {
-            $this->assertEquals($lang, "en");
-        }
-    }
-
-    /**
-     * Provide example to the language detection system
-     * @return array
-     */
-    public function provideTestLanguage() {
-        return
-            [ '1' => [ 'The thermal rehabilitation of the old buildings of Paris: how to conciliate protection of urban heritage and energetic performance?' , 'en'] ,
-              '2' => [ "Antecedents of well-being for artisan entrepreneurship: A first exploratory study" , "en" ] ,
-              '3' => [ "In vitro cytotoxic effects of secondary metabolites of DEHP and its alternative plasticizers DINCH and DINP on a L929 cell line " , "en"] ,
-              '4' => [ "Est-il moral de s’endetter ? Familles endettes dans le roman LITTLE DORRIT (1855-1857) DE CHARLES DICKENS" , "fr"],
-              '5' => [ "Le Diable dans les occasionnels (deuxième article)" , 'fr'],
-              '6' => [ "Affectivity in mathematical learning: experimental case in University of Veracruz, Mexico", "en"],
-              '7' => [ "Divulgation volontaire sur le Business model : le cas des entreprises du CAC40" , "fr"],
-              '8' => ["Importance et rôles du contrôle de gestion dans une Université publique : une étude de cas", 'fr'],
-        ];
+        self::assertEquals("The thermal rehabilitation of the old buildings of Paris: how to conciliate protection of urban heritage and energetic performance?", $metas[Ccsd_Externdoc::META][Ccsd_Externdoc::META_TITLE]["en"]);
     }
 }

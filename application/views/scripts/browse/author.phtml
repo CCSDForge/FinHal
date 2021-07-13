@@ -1,34 +1,32 @@
 <div class="row">
 
 <?php
+/** @var Hal_View $this */
 $searchParams ['controller'] = 'search';
 $searchParams ['action'] = 'index';
 
-if (count($this->facets) == 0) {
+$facetsList = $this->facets;
+if (count($facetsList) == 0) {
 	echo '<div class="col-md-7">';
 	echo '<p class="lead">';
 	echo $this->translate ( "Pas de données pour l'instant." );
 	echo '</p>';
 	echo '</div>';
-
 	return;
 }
 
 // how many authors will fit in a column
-$authorsPerColumn = round(count($this->facets) / 3);
+$authorsPerColumn = round(count($facetsList) / 3);
 $authorsCount = 0;
 $needToCloseDiv = false;
-
 
 $st = Zend_Controller_Front::getInstance ()->getRequest ()->getParam ( 'submitType_s' );
 if ($st != null) {
 	$searchParams ['submitType_s'] = $st;
 }
-
 if ($this->structures != null){
     $searchParams ['structId_i'] = $this->structures;
 }
-
 if ($this->infostructures != null) {
     echo '<div class="col-md-12">';
     echo '<ul class="list-unstyled">';
@@ -45,15 +43,12 @@ if ($this->infostructures != null) {
 include_once __DIR__ . '/../partials/browse_alphabet.phtml';
 include_once __DIR__ . '/../partials/browse_type.phtml';
 
-foreach ( $this->facets as $itemId => $facet ) {
-
+foreach ($facetsList as $itemId => $facet ) {
     if (($authorsCount == 0) || ($authorsCount > $authorsPerColumn)) {
         echo PHP_EOL . '<div class="col-xs-12 col-sm-6 col-md-4">';
         echo '<ul class="list-group">';
         $needToCloseDiv = true;
     }
-
-
 	echo '<li class="list-group-item">';
 
 	if (isset ( $facet ['idHal'] ) and ($facet ['idHal'] != '')) {
@@ -68,7 +63,6 @@ foreach ( $this->facets as $itemId => $facet ) {
     echo '<a rel="nofollow" href="' . $this->escape($url) . '">';
 	echo $this->escape ( $facet ['name'] );
 	echo '</a>';
-
 	echo '</li>';
 
     if ($authorsCount >= $authorsPerColumn) {
@@ -79,14 +73,15 @@ foreach ( $this->facets as $itemId => $facet ) {
         $authorsCount++;
     }
 }
-
+echo '</ul>';
 ?>
-</ul>
 
-<?php if (count($this->facets) >= Ccsd_Search_Solr::SOLR_MAX_RETURNED_FACETS_RESULTS): ?>
+<?php if (count($facetsList) >= Ccsd_Search_Solr::SOLR_MAX_RETURNED_FACETS_RESULTS): ?>
 <div class="alert alert-info" role="alert">
 <?php echo $this->translate('Affichage limité aux ') . Ccsd_Search_Solr::SOLR_MAX_RETURNED_FACETS_RESULTS . $this->translate(' premières réponses.'); ?>
 </div>
+
 <?php endif; ?>
-	</div>
+<?php  echo '</div>'; // fin de la derniere colonne ?>
 </div>
+

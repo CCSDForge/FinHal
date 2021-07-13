@@ -1,9 +1,7 @@
 <?php
 /**
- * This file seems to be unused!!!
- * @deprecated
- * Correspondances des langues au format iso986
- */
+* Correspondances des langues au format iso986
+*/
 return array(
 	'aa' => 'aar',
 	'ab' => 'abk',

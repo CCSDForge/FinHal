@@ -31,4 +31,3 @@ install/composer.phar
 *.log
 public/php_info.php
 .vscode/*
-/vendor/ccsd/library/vendor/composer/

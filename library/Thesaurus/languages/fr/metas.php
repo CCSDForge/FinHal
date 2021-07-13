@@ -79,6 +79,4 @@ return array(
     "pubmed" => "Pubmed Id",
     "bibcode" => "ADS Id",
     "ird" => "Base Horizon",
-    "biorxiv" => "BioRxiv",
-    "chemrxiv" => "ChemRxiv",
 );

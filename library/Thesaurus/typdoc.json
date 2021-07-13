@@ -44,6 +44,8 @@
             "label": "typdoc_OTHER"
         }
     }
+}, "changeColumn": {
+    "type": "changeColumn"
 }, "typdoc_2": {
     "id": "typdoc_2",
     "type": "category",

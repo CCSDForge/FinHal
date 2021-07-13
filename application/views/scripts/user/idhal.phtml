@@ -20,11 +20,10 @@ $this->layout()->pageDescription = $this->translate('Regroupez vos formes auteur
         $form->getElement('uri')->setAttrib('disabled', 'disabled')->setDescription('');
     }
 
-    $hostname = parse_url(Hal_Site::getCurrentPortail()->getUrl(), PHP_URL_HOST);
     if (isset($_SERVER['HTTPS'])) {
-        $urlredirect = 'https://' . $hostname;
+        $urlredirect = 'https://' . $_SERVER['SERVER_NAME'];
     } else {
-        $urlredirect = 'http://' . $hostname;
+        $urlredirect = 'http://' . $_SERVER['SERVER_NAME'];
     }
 
     if (!isset($orcid)) {

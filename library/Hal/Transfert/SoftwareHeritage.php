@@ -65,7 +65,6 @@ class Hal_Transfert_SoftwareHeritage extends Hal_Transfert {
     /**
      * Usage: On a lu plusieurs ligne, pour eviter de relire la base pour chaque ligne, on evite init_transfert/transfert
      * @param array $row
-     * @return Hal_Transfert_SoftwareHeritage
      */
     static public function dbRow2obj($row) {
         $o = new static();
@@ -149,7 +148,7 @@ class Hal_Transfert_SoftwareHeritage extends Hal_Transfert {
      * @todo: l'url de status est donnee dans la reponse, il vaut mieux la prendre la plutot que de la construire
      */
     public function id2pendingUrl($submissionId) {
-        list($url) = $this -> getServiceUrl();   // on a pas besoin de l'element method du retour de getServiceUrl
+        list($url, $method) = $this -> getServiceUrl();
         return $url . $submissionId . '/status/';
     }
     /**
@@ -164,14 +163,14 @@ class Hal_Transfert_SoftwareHeritage extends Hal_Transfert {
             if (preg_match('/(\.tgz|tar\.gz)$/', $file->getPath())) {
                 // A faire un Objet SwordAssociatedMedia / etendu avec Zip ou Tgz...
                 // Cela permettrait de faire passer le type de fichier dans l'object, avec juste le filename, c'est pas simple...
-                // $type = 'tgz';
+                $type = 'tgz';
                 $zipfilename = PATHTEMPDOCS . $this->filenamePrefix . $document->_docid . '.tgz';
                 copy($file->getPath(), $zipfilename);
                 return ['application/x-tar', $zipfilename ];
             }
         }
         // On a soit un zip (et on accepte pour plus tard d'avoir d'autre fichiers...
-        // $type = 'zip';
+        $type = 'zip';
         $zipfilename = PATHTEMPDOCS . $this->filenamePrefix . $document->_docid . '.zip';
         self::create_zip($zipfilename, $fileList); # Exception de create_zip non traitee
 
@@ -240,31 +239,6 @@ class Hal_Transfert_SoftwareHeritage extends Hal_Transfert {
             foreach ($document -> getDomains() as $domain) {
                 $entry->appendChild($xml->createElement('codemeta:applicationCategory', $domain));
             }
-            $comment = $document -> getMetaObj('comment');
-            if ($comment) {
-                $this->addChildIfNonEmpty ($xml, $entry,  'codemeta:releaseNotes',$comment->getValue());
-            }
-            $seeAlso = $document -> getMetaObj('seeAlso');
-            if ($seeAlso) {
-                $values = $seeAlso -> getValue();
-                if (!is_array($values)) {
-                    $values = [ $values ];
-                }
-                foreach ($values as $value) {
-                    $this->addChildIfNonEmpty($xml, $entry, 'codemeta:relatedLink', $value);
-                }
-            }
-
-            $referencePublication = $document->getMetaObj('localReference');
-            if ($referencePublication) {
-                $values = $referencePublication-> getValue();
-                if (!is_array($values)) {
-                    $values = [ $values ];
-                }
-                foreach ($values as $value) {
-                    $this->addChildIfNonEmpty($xml, $entry, 'codemeta:referencePublication', $value);
-                }
-            }
 
             $keywords = $document -> getHalMeta()->getHalMeta('keyword');
             if ($keywords) {
@@ -278,14 +252,7 @@ class Hal_Transfert_SoftwareHeritage extends Hal_Transfert {
                 $this->addChildIfNonEmpty ($xml, $entry,  'codemeta:keywords',$listOfKwdString);
             }
 
-            $writingDate = $document-> getMetaObj('writingDate');
-            if ($writingDate && $writingDate->getValue()) {
-                $writingDate = $writingDate->getValue();
-            } else {
-                $writingDate = $document->getSubmittedDate('c');
-            }
-            $entry->appendChild($xml->createElement('codemeta:dateCreated', $writingDate));
-            $entry->appendChild($xml->createElement('codemeta:datePublished', $document->getSubmittedDate('c')));
+            $entry->appendChild($xml->createElement('codemeta:dateCreated', $document->getSubmittedDate('c')));
 
             $summary = str_replace("&lt;", "<", strip_tags(str_replace("<", "&lt;", Ccsd_Tools::decodeLatex($document->getAbstract('en')))));
             $this->addChildIfNonEmpty ($xml, $entry,'codemeta:description', $summary);
@@ -329,9 +296,6 @@ class Hal_Transfert_SoftwareHeritage extends Hal_Transfert {
                 }
             }
 
-            // Funders
-
-
             $author = $xml->createElement('author');
             $author->appendChild($xml->createElement('name', 'HAL'));
             $author->appendChild($xml->createElement('email', 'hal@ccsd.cnrs.fr'));
@@ -357,7 +321,7 @@ class Hal_Transfert_SoftwareHeritage extends Hal_Transfert {
                 }
             }
 
-            $entry->appendChild($xml->createElement('codemeta:contributor', $document->getContributor('fullname')));
+            $entry->appendChild($xml->createElement('committer', $document->getContributor('fullname')));
 
             //$comment = $document->getHalMeta()->getMeta('comment');
             //$localRef = trim(implode(' ', $document->getHalMeta()->getMeta('localReference')));
@@ -509,13 +473,7 @@ class Hal_Transfert_SoftwareHeritage extends Hal_Transfert {
         $zipInfo = $this->getSwordMedia($document, $fileList);
         $contentzip = $zipInfo [1];
         $compressMimeType = $zipInfo [0];
-        try {
-            $swordResponse = $sword->addExtraFileToMediaResource($edit_media, $sUser, $password, '', $contentzip, $compressMimeType, false);
-        } catch (Exception $e) {
-            $response -> reason = "Return of SWH not parsable";
-            $response -> result = Hal_Transfert_Response::INTERNAL;
-            return $response;
-        }
+        $swordResponse = $sword->addExtraFileToMediaResource($edit_media, $sUser, $password, '', $contentzip, $compressMimeType, false);
         if (($swordResponse->sac_status < 200) || ($swordResponse->sac_status >= 300)) {
             // Probleme au depot:
             $response -> reason = $swordResponse -> sac_statusmessage;
@@ -552,6 +510,7 @@ class Hal_Transfert_SoftwareHeritage extends Hal_Transfert {
     }
 
     /**
+     * @param Hal_Document $document
      * @param string $editurl
      * @param string $url
      * @param int $attente
@@ -626,7 +585,7 @@ class Hal_Transfert_SoftwareHeritage extends Hal_Transfert {
                 $response->result     = Hal_Transfert_Response::INTERNAL;
                 $response->alternate  = $url;
                 $response->edit       = $editurl;
-                $response->reason     = $trackingInfo->get_status() . $trackingInfo -> get_extraInfo('comment');
+                $response->reason     = $trackingInfo->get_status() . $trackingInfo -> get_extraInfo('deposit_status_detail');
         }
         return $response;
     }
@@ -657,7 +616,7 @@ class Hal_Transfert_SoftwareHeritage extends Hal_Transfert {
         $aTransferts = $db->fetchAll($sql);
 
         if ($dolog) {
-            Ccsd_Log::message("Nombre de documents à vérifier sur SWH : " . count($aTransferts), true, 'INFO');
+            Ccsd_Log::message("Nombre de documents à vérifier sur arXiv : " . count($aTransferts), true, 'INFO');
         }
         foreach ($aTransferts as $row) {
             $transfert = self::dbRow2obj($row);

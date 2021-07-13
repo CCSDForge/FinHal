@@ -68,9 +68,6 @@ class Hal_Plugin extends Zend_Controller_Plugin_Abstract
         //Si la collection est associée à un portail, on redirige sur le portail
         if (MODULE == SPACE_COLLECTION && (($sidPortail = Hal_Site_Collection::getAssociatedPortail(SITEID)) != false)) {
 		    $portail = Hal_Site::loadSiteFromId($sidPortail);
-            if ($portail === null) {
-                Ccsd_Tools::panicMsg(__FILE__, __LINE__, "Pas de portail charge pour la Collection :" .  SITEID . " Portail Id associe: $sidPortail");
-            }
             header('Location: ' . $portail->getUrl());
             exit;
         }
@@ -108,7 +105,11 @@ class Hal_Plugin extends Zend_Controller_Plugin_Abstract
 
 		//Chargement des Acl
 		$acl = new Hal_Acl();
-		$navigationFiles = array($navigationfile, APPLICATION_PATH . '/configs/navigation.' . MODULE . '.json');
+		$navigationAppli = APPLICATION_PATH . '/configs/'.INSTANCEPREFIX.'navigation.' . MODULE . '.json';
+		if (!file_exists($navigationAppli)) {
+            $navigationAppli = APPLICATION_PATH . '/configs/navigation.' . MODULE . '.json';
+        }
+		$navigationFiles = array($navigationfile, $navigationAppli);
 		$acl->loadFromNavigation($navigationFiles);
 		//Zend_Debug::dump($acl->write());exit;
 		/*if (is_file(SPACE . CONFIG . 'acl.ini')) {
@@ -129,7 +130,7 @@ class Hal_Plugin extends Zend_Controller_Plugin_Abstract
 
 		//Chargement de la navigation
 		if (Hal_Auth::isLogged()) {
-			$connectedConfig = new Zend_Config_Json(APPLICATION_PATH . '/configs/navigation.' . MODULE . '.json', null, [ 'ignore_constants' => true ]);
+			$connectedConfig = new Zend_Config_Json($navigationAppli, null, [ 'ignore_constants' => true ]);
 			if ($config != null) {
 				$config = new Zend_Config(array_merge($config->toArray(), $connectedConfig->toArray()));
 			} else {

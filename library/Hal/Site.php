@@ -17,10 +17,7 @@ require_once(__DIR__.'/Website/Footer.php');
 require_once(__DIR__.'/Website/Search.php');
 require_once(__DIR__.'/Website/Style.php');
 
-/**'
- * Class Hal_Site
- */
-abstract class Hal_Site
+class Hal_Site
 {
 
     const TABLE = 'SITE';
@@ -113,20 +110,6 @@ abstract class Hal_Site
     const CAT_SET = 'SET';
     const CAT_COMUE = 'COMUE';
 
-    public $ListCategories = [
-        self::CAT_INSTITUTION,
-        self::CAT_THEME,
-        self::CAT_PRES,
-        self::CAT_UNIV,
-        self::CAT_ECOLE,
-        self::CAT_LABO,
-        self::CAT_COLLOQUE,
-        self::CAT_REVUE,
-        self::CAT_AUTRE,
-        self::CAT_SET,
-        self::CAT_COMUE
-    ];
-
     /**
      * Catégorie de la structure créatrice du site
      * @var string
@@ -206,19 +189,16 @@ abstract class Hal_Site
 
         $this->setCreationDate(Ccsd_Tools::ifsetor($infos[self::DATE_CREATION], ''));
         //  Les path suivant se terminent par /
-        $this -> _spaceName = $this -> _site;
+        $this -> _spaceName = $this -> _name;
         $this -> _sitename  = $this -> _name;
         $this -> _space     = SPACE_DATA . '/'. static::MODULE . '/' . $this->_spaceName . '/' ;
         $this -> _pathPages = $this -> _space . '/' . PAGES;
-        $this -> _cachePath = static::CACHE_MODULE_PATH . '/' .$this->_site;
+        $this -> _cachePath = static::CACHE_MODULE_PATH . '/' .$this->_spaceName;
     }
 
     /**
      * @param $params
      * @param bool $full
-     * @uses setSid(), settype() , setUrl(), setShortname(), setFullname(), setImagette()
-     *
-     *
      */
     public function setParams($params, $full = false)
     {
@@ -228,11 +208,10 @@ abstract class Hal_Site
 
             if (method_exists ( get_class($this) ,  $methodName)) {
                 $this->{$methodName}($value);
+            } else {
+                // todo : faut-il renvoyer une exception ?
+                // BM: non, et meme logger semble difficile car cela arrive souvent.
             }
-            // else {
-            // todo : faut-il renvoyer une exception ?
-            // BM: non, et meme logger semble difficile car cela arrive souvent.
-            // }
         }
 
         if ($full) {
@@ -257,37 +236,7 @@ abstract class Hal_Site
             ->where(self::SID.' = ?', $sid);
 
         $infos = $db->fetchRow($sql);
-        if ($infos) {
-            return self::rowdb2Site($infos);
-        }
-        return null;
-    }
-    /**
-     * @param string $name
-     * @return Hal_Site_Collection|Hal_Site_Portail|null
-     */
-    static public function loadSiteFromName($name)
-    {
-        if ( ! $name) {
-            return null;
-        }
 
-        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-        $sql = $db->select()
-            ->from(self::TABLE)
-            ->where(self::SHORTNAME.' = ?', $name);
-        $infos = $db->fetchRow($sql);
-        if ($infos) {
-            return self::rowdb2Site($infos);
-        }
-        return null;
-    }
-    /**
-     * Transform Raw from DB select to Object
-     * @param $infos
-     * @return Hal_Site_Collection|Hal_Site_Portail|null
-     */
-    public static function rowdb2Site($infos) {
         switch ($infos[self::TYPE]) {
             case self::TYPE_PORTAIL :
                 return new Hal_Site_Portail($infos);
@@ -313,7 +262,6 @@ abstract class Hal_Site
      * Attention tamponnate est spécifique aux collections... il faudrait penser à le sortir du save
      * @param bool
      * @return bool
-     * @throws Zend_Db_Adapter_Exception
      */
     public function save()
     {
@@ -340,7 +288,7 @@ abstract class Hal_Site
             $bind[self::DATE_CREATION] = date('Y-m-d');
             $res = $db->insert(self::TABLE, $bind);
 
-            $this->_sid = $db->lastInsertId(self::TABLE);
+            $this->setSid($db->lastInsertId(self::TABLE));
         } else {
             // Modification
             $db->update(self::TABLE, $bind, self::SID.' = ' . $this->getSid());
@@ -366,6 +314,7 @@ abstract class Hal_Site
     {
         // Sous-classer !!
     }
+
     /**
      * @return int
      */
@@ -374,12 +323,13 @@ abstract class Hal_Site
         return $this->_sid;
     }
 
-   /**
-     * @param  int $sid
+    /**
+     * @deprecated
+     * @param int
      */
-    protected function setSid($sid)
+    public function setSid($sid)
     {
-        $this->_sid = (int) $sid;
+        $this->_sid = (int)$sid;
     }
 
     /**
@@ -724,7 +674,6 @@ abstract class Hal_Site
 
     /**
      * @param Hal_Site $receiver
-     * @throws Zend_Db_Adapter_Exception
      */
     public function duplicateSite(Hal_Site $receiver)
     {
@@ -743,7 +692,6 @@ abstract class Hal_Site
 
     /**
      * @param Hal_Site
-     * @throws Zend_Db_Adapter_Exception
      */
     public function duplicateSettings(Hal_Site $receiver) {
 
@@ -762,7 +710,6 @@ abstract class Hal_Site
      *
      * Duplique les droits des utilisateurs particulier d'un site vers un autre sans supprimer les droits déjà existants
      * @param Hal_Site
-     * @throws Zend_Db_Exception
      */
     public function duplicateUserRight(Hal_Site $receiver) {
 
@@ -829,8 +776,6 @@ abstract class Hal_Site
     /**
      * @param Hal_Site $receiver
      * @param $options
-     * @throws Zend_Db_Adapter_Exception
-     * @throws Zend_Db_Exception
      */
     public function duplicate(Hal_Site $receiver, $options = [])
     {
@@ -925,7 +870,7 @@ abstract class Hal_Site
                 return new Hal_Site_Portail($res);
             default :
                 // todo : est-ce qu'il faut renvoyer null ?
-                return new Hal_Site_Portail($res);
+                return new Hal_Site($res);
         }
     }
 
@@ -957,57 +902,27 @@ abstract class Hal_Site
      * @param string $q
      * @param string
      * @param int  $limit
-     * @param int[] $sitesIds
+     * @param null $sid
      * @return array
-     * @deprecated use searchObj
      */
-    static public function search($q = '%', $type = self::TYPE_COLLECTION, $limit = 100, $sitesIds = [])
+    static public function search($q, $type = self::TYPE_COLLECTION, $limit = 100, $sid = null)
     {
         $db =  Zend_Db_Table_Abstract::getDefaultAdapter();
         $sql = $db->select()->from(array('t' => self::TABLE))
-            ->where('t.TYPE = "'.$type.'"');
-         if ($limit) {
-            $sql->limit($limit);
-        };
-        if ($q != '%') {
-            if (is_numeric($q)) {
-                $sql->where('t.SID = ?', $q );
-            } else {
-                $sql->where('t.SITE LIKE ? OR t.NAME LIKE ?', $q . '%');
-            }
+            ->where('t.TYPE = "'.$type.'"')
+            ->limit($limit);
+        if (is_numeric($q)) {
+            $sql->where('t.SID = ?', $q );
+        } else {
+            $sql->where('t.SITE LIKE ? OR t.NAME LIKE ?', $q . '%');
         }
-        if (is_array($sitesIds) && count($sitesIds)) {
-            $sql->where('t.SID IN (?)', $sitesIds );
+        if ($sid != null && is_array($sid) && count($sid)) {
+            $sql->where('t.SID IN (?)', $sid );
         }
 
         return $db->fetchAll($sql);
     }
 
-    /**
-     * @param string $q
-     * @param string
-     * @param int  $limit
-     * @param null $sid
-     * @return Hal_Site[]
-     */
-    static public function searchObj($q, $type = self::TYPE_COLLECTION, $limit = 100, $sid = null)
-    {
-        if ($sid === null) {
-            $sids = []; // compat fonction search....
-        }
-        $rows = self::search($q, $type, $limit, $sid);
-
-        $list =[];
-        foreach ($rows as $row) {
-            if ($type == self::TYPE_COLLECTION) {
-                $site = new Hal_Site_Collection($row);
-            } else {
-                $site = new Hal_Site_Portail($row);
-            }
-            $list[$site->getSid()] = $site;
-        }
-        return $list;
-    }
     /**
      * @param string $mode
      */
@@ -1073,13 +988,6 @@ abstract class Hal_Site
     {
         return $this->_space;
     }
-    /**
-     * @return string
-     */
-    public function getConfigDir()
-    {
-        return $this->getSpace() . '/' . CONFIG;
-    }
 
     /**
      * @return string
@@ -1093,26 +1001,26 @@ abstract class Hal_Site
      * @return Hal_Site
      */
     static public function getCurrent() {
-        return self::$_current;
+        return static::$_current;
     }
     /**
      * @param Hal_Site $portail  : Portail ou Collection  (en fait website)
      */
     static public function setCurrent($portail) {
-        self::$_current = $portail;
+        static::$_current = $portail;
     }
 
     /**
      * @return Hal_Site_Portail
      */
     static public function getCurrentPortail() {
-        return self::$_currentPortail;
+        return static::$_currentPortail;
     }
     /**
      * @param Hal_Site $portail
      */
     static public function setCurrentPortail($portail) {
-        self::$_currentPortail = $portail;
+        static::$_currentPortail = $portail;
     }
 
     /**
@@ -1136,37 +1044,5 @@ abstract class Hal_Site
     public function submitAllowed()
     {
         return false;
-    }
-    /** R end la collection de patrouillage
-     *   Si portail patrouille, site de la collection associee
-     *   Si collection patrouille: la collection elle meme
-     *
-     *   Si non patrouille: null
-     * @param Hal_site
-     */
-    abstract public function isPatrolled ();
-    /**
-     * @param string|Hal_Document $doc
-     *
-     * La mise a jour du patrouillage ne depends pas du Portail
-     * Seulement de la collection du document
-     *
-     * @throws Zend_Db_Adapter_Exception
-     */
-    public function patrolMaybe($doc) {
-        if ($site = $this->isPatrolled()) {
-            if (is_int($doc)) {          // un docid
-                $identifiant = Hal_Document::getIdFromDocid($doc);
-            } elseif (is_string($doc)) { // un vrai identifiant
-                $identifiant = $doc;
-            } elseif (is_object($doc) && (get_class($doc) == "Hal_Document")) {
-                $identifiant = $doc->getId();
-            } else {
-                Ccsd_Tools::panicMsg(__FILE__, __LINE__, "Param must be an document  identifier or a Document object");
-                return;
-            }
-            $patrol = Hal\Patrol::construct($identifiant, $site);
-            $patrol->save();
-        }
     }
 }

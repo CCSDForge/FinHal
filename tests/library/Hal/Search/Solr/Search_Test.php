@@ -22,7 +22,7 @@ class Search_Test extends PHPUnit_Framework_TestCase
             //'keyword_t' => "test"
         ];
 
-        Hal_Search_Solr_Search_Affiliation::rechAffiliations($data);
+        Hal_Search_Solr_Search::rechAffiliations($data);
     }
 
     public function testgetDomains()

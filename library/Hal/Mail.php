@@ -2,6 +2,7 @@
 class Hal_Mail extends Ccsd_Mail {
 	// Templates liés aux comptes
 	const TPL_ACCOUNT_CREATE = 'account_create';
+    const TPL_ACCOUNT_INIT = 'account_init';
 	const TPL_ACCOUNT_LOST_LOGIN = 'account_lost_login';
 	const TPL_ACCOUNT_LOST_PWD = 'account_lost_pwd';
 

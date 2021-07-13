@@ -9,6 +9,14 @@
 set_include_path(__DIR__ . '/../library');
 define('SOLRINIT', 1);
 
+$instance = getenv('INSTANCE');
+if (!$instance) {
+    $instance='';
+}
+require_once("Hal/Instance.php");
+
+Hal\Instance::getInstance($instance);
+
 putenv('PORTAIL=hal');
 // putenv('CACHE_ROOT=/cache/hal');
 // putenv('DATA_ROOT=/data/hal');

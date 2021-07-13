@@ -118,29 +118,4 @@ class Hal_Document_Meta_Complex extends Hal_Document_Meta_Abstract
 
         return "";
     }
-
-    /**
-     * Return existetnce of group $group in the complex meta
-     * @param $group
-     * @return bool
-     */
-    public function existsGroup($group) {
-        return array_key_exists($group, $this->_value);
-    }
-
-    /**
-     * Remove all group in complex meta
-     * @param $group
-     */
-    public function removeGroup($group) {
-        if ($this->existsGroup($group)) {
-            unset($this->_value[$group]);
-        }
-    }
-      /**
-     * @return bool
-     */
-    public function isMultiValued() {
-        return true;
-    }
 }

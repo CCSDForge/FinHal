@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Class EpisciencesController
- * Update HAL document meta when an article is published in an Episicences journal
- * TODO: use a feed like arxiv https://arxiv.org/help/bib_feed because it can be used by other OA repository, not only HAL
- *
- */
 class EpisciencesController extends Zend_Controller_Action
 {
 
@@ -28,22 +22,26 @@ class EpisciencesController extends Zend_Controller_Action
     }
 
     /**
-     * Update a document after its publication on Episciences (doctype, meta, log, params)
+     * update a document after its publication on Episciences (doctype, meta, log, params)
      * parameters are fetched from a post array
-     * @return bool and display a json encoded array (status, message, success)
-     * @throws Zend_Db_Adapter_Exception
+     * @param string $identifier
+     * @param int $version
+     * @param string $rvcode episciences review short code
+     * @param string $date publication date (optional)
+     * @param string $volume episciences volume name (optional)
+     * @param string $token security token (used for checking that the request was really sent from Episciences)
+     * @return bool
+     * return a boolean, and display a json encoded array (status, message, success)
      */
     public function publicationAction()
     {
         $this->_helper->layout()->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
 
-        /** @var Zend_Controller_Request_Http $request */
-        $request = $this->getRequest();
-        $result = ['status' => 0, 'message' => '', 'success' => 0, 'params' => $request->getPost()];
+        $result = ['status' => 0, 'message' => '', 'success' => 0, 'params' => $this->getRequest()->getPost()];
 	
         // check identifier
-        $identifier = $request->getPost('identifier');
+        $identifier = $this->getRequest()->getPost('identifier');
         if (!$identifier) {
             $result['status'] = self::STATUS_ID_MISSING;
             $result['message'] = 'identifier could not be found';
@@ -52,7 +50,7 @@ class EpisciencesController extends Zend_Controller_Action
         }
 
         // check version
-        $version = $request->getPost('version');
+        $version = $this->getRequest()->getPost('version');
         if (!$version || !is_numeric($version)) {
             $result['status'] = self::STATUS_VERSION_MISSING;
             $result['message'] = 'version could not be found';
@@ -61,7 +59,7 @@ class EpisciencesController extends Zend_Controller_Action
         }
 
         // fetch journal id
-        $rvcode = $request->getPost('rvcode');
+        $rvcode = $this->getRequest()->getPost('rvcode');
         if (!$rvcode) {
             $result['status'] = self::STATUS_JOURNALID_MISSING;
             $result['message'] = 'journal id could not be found';
@@ -78,10 +76,10 @@ class EpisciencesController extends Zend_Controller_Action
         $rvid = constant($rvid . '_ID');
 
         // check volume name
-        $volume = $request->getPost('volume');
+        $volume = $this->getRequest()->getPost('volume');
 
         // check token
-        $token = $request->getPost('token');
+        $token = $this->getRequest()->getPost('token');
         if (!$token) {
             $result['status'] = self::STATUS_TOKEN_MISSING;
             $result['message'] = 'security token is missing';
@@ -90,13 +88,10 @@ class EpisciencesController extends Zend_Controller_Action
         }
 
         // check publication date
-        $date = $request->getPost('date');
-
-        // check for a DOI
-        $doi = $request->getPost('doi');
+        $date = $this->getRequest()->getPost('date');
 
         // check document type
-        $typdoc = $request->getPost('typdoc');
+        $typdoc = $this->getRequest()->getPost('typdoc');
 
         if ($token != hash('sha256', EPISCIENCES_KEY . $rvcode . $volume . $identifier . $version)) {
             $result['status'] = self::STATUS_TOKEN_INVALID;
@@ -123,23 +118,15 @@ class EpisciencesController extends Zend_Controller_Action
             'popularLevel' => 0,
             'audience' => 2
         ];
-
-        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-
-        // set DOI
-        if ($doi != '') {
-           $document->addIdExt($document->getDocid(), Hal_Submit_Manager::DOI, $doi);
-        }
-
         if ($typdoc) {
             $metadata['typdoc'] = $typdoc;
         }
 
         // set metadata
-
+        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         foreach ($metadata as $name => $value) {
             if (is_null($value)) continue;
-            if (array_key_exists($name, $document->getHalMeta()->getMeta())) {
+            if (array_key_exists($name, $document->getMeta())) {
                 $db->update(Hal_Document_Metadatas::TABLE_META, ['METAVALUE' => $value], ['DOCID = ?' => $document->getDocid(), 'METANAME = ?' => $name]);
             } else {
                 $db->insert(Hal_Document_Metadatas::TABLE_META, ['DOCID' => $document->getDocid(), 'METANAME' => $name, 'METAVALUE' => $value]);
@@ -156,8 +143,7 @@ class EpisciencesController extends Zend_Controller_Action
         Hal_Document_Logger::log($document->getDocid(), EPISCIENCES_UID, Hal_Document_Logger::ACTION_UPDATE);
 
         // stamp
-        $episcienceSite = Hal_Site::loadSiteFromId(EPISCIENCES_SID);
-        Hal_Document_Collection::add($document->getDocid(), $episcienceSite, EPISCIENCES_UID, true);
+        Hal_Document_Collection::add($document->getDocid(), EPISCIENCES_SID, EPISCIENCES_UID, true);
 
         $result['status'] = self::STATUS_SUCCESS;
         $result['success'] = true;

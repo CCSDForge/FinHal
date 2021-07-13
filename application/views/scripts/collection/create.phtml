@@ -200,11 +200,11 @@ echo $this->form;
             data: {parentids: parentids},
             success: function (data) {
                 critere = $('#critere').val();
-                if (critere !== '') {
+                if (critere != '') {
                     critere = '(' + critere + ')';
                 }
-                if (! data.match(/^\s*$/)) {
-                    if (critere !== '') {
+                if (! data.match(/^\s*/)) {
+                    if (critere != '') {
                         critere += ' AND ';
                     }
                     critere += data;

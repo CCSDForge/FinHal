@@ -336,11 +336,7 @@ class Hal_Rdf_Document extends Hal_Rdf_Abstract
         $this->appendChild($node, Hal_Rdf_Schema::DCTERMS_ISPARTOF, null,[Hal_Rdf_Schema::RDF_RESOURCE => $url]);
         /**@var $collection Hal_Site_Collection */
         foreach ($this->_document->getCollections() as $collection) {
-            $this->appendChild(
-                $node,
-                Hal_Rdf_Schema::DCTERMS_ISPARTOF,
-                null,
-                [Hal_Rdf_Schema::RDF_RESOURCE => $url . '/' . $collection->getShortname()]);
+            $this->appendChild($node, Hal_Rdf_Schema::DCTERMS_ISPARTOF, null,[Hal_Rdf_Schema::RDF_RESOURCE => $url . '/' . $collection->getCode()]);
         }
 
         foreach ($this->_document->getRelated() as  $related) {

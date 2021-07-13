@@ -1,6 +1,6 @@
 <?php
 /**
- * Gestion des TAMPONS d'un article
+ * Gestion des collections d'un article
  * User: yannick
  * Date: 09/01/2014
  * Time: 11:20
@@ -17,49 +17,41 @@ class Hal_Document_Collection
      */
     static public function getCollections($docid)
     {
+        $res = array();
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-        $sql = $db->select()->from(self::TABLE)
+        $sql = $db->select()->from(self::TABLE, 'SID')
             ->where('DOCID = ?', (int) $docid)
-            ->join(Hal_Site::TABLE, self::TABLE . ".SID = " . Hal_Site::TABLE . ".SID")
             ->order('DATESTAMP ASC');
-
-        $collections = [];
-        foreach($db->fetchAll($sql) as $row) {
-            $site = Hal_Site::rowdb2Site($row);
-            $collections[$site->getSid()]  = $site;
+        foreach($db->fetchCol($sql) as $sid) {
+            $collection = Hal_Site::loadSiteFromId($sid);
+            if ($collection->getSid() != 0) {
+                $res[] = $collection;
+            }
         }
-        return $collections;
+        return $res;
     }
 
     /**
      * Ajoute une collection à un article
      * @param int $docid identifiant de l'article
-     * @param Hal_Site_Collection $site identifiant de la collection
+     * @param int $sid identifiant de la collection
      * @param int $uid identifiant de l'utilisateur
      * @return bool
-     * @throws Zend_Db_Adapter_Exception
-     * @throws Zend_Db_Statement_Exception
      */
-    static public function add($docid, $site, $uid = 100000, $update=true)
+    static public function add($docid, $sid, $uid = 100000, $update=true)
     {
-        $sid = $site->getSid();
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         //Test de la présence de la collection pour le document
-        try {
+        $sql = $db->select()->from(self::TABLE, 'COUNT(*) AS NB')
+            ->where('DOCID = ?', (int) $docid)
+            ->where('SID = ?', (int) $sid);
+        if ($db->fetchOne($sql) == 0) {
             $bind = array(
                 'DOCID' =>  $docid,
                 'SID'   =>  $sid,
                 'UID'   =>  $uid,
             );
-            try {
-                $db->insert(self::TABLE, $bind);
-            } catch (Zend_Db_Statement_Exception $e) {
-                if ($e->getCode() == 23000) { // Duplicate Key: stamp already put but maybe not indexed
-                    Ccsd_Search_Solr_Indexer::addToIndexQueue(array($docid));
-                    return False;
-                }
-                throw $e;
-            }
+            $db->insert(self::TABLE, $bind);
 
             //Détamponnage des autres versions du documents
             $sqlId = $db->select()->from(Hal_Document::TABLE, 'IDENTIFIANT')
@@ -68,18 +60,16 @@ class Hal_Document_Collection
                 ->where('DOCID != ?', (int) $docid)
                 ->where('IDENTIFIANT = ?', $db->fetchOne($sqlId));
             foreach($db->fetchCol($sql) as $doc) {
-                self::del($doc, $site, $uid);
+                self::del($doc, $sid, $uid);
             }
 
             if ($uid != 100000) {
                 //Cas du tamponnage manuel, on tamponne les collections supérieures automatiques
-                foreach($site->getAncestors() as $collParent) {
-                    self::add($docid,$collParent, $uid);
+                foreach(Hal_Site_Collection::getCollectionsSup($sid) as $parentsid) {
+                    self::add($docid,$parentsid, $uid);
                 }
             }
-            // Mise a jour du patrouillage si necessaire.
-            // TODO : devrait avoir l'identifiant, pas le docID
-            $site->patrolMaybe($docid);
+
             //Log
             Hal_Document_Logger::log($docid, $uid, Hal_Document_Logger::ACTION_ADDTAMPON, $sid);
             if ( $update ) {
@@ -91,26 +81,20 @@ class Hal_Document_Collection
                 Ccsd_Search_Solr_Indexer::addToIndexQueue(array($docid));
             }
             return true;
-
-        } catch (Zend_Db_Adapter_Exception $e) {
-             if ($e->getCode() == 23000) { // Duplicate Key: collection allready in db
-                return False;
-            }
+        } else {
             //Le document est déjà tamponné
-            throw $e;
+            return false;
         }
     }
 
     /**
      * Retire une collection à un article
      * @param int $docid  // identifiant de l'article
-     * @param Hal_Site $site    // identifiant de la collection
+     * @param int $sid    // identifiant de la collection
      * @param int $uid    // identifiant de l'utilisateur
-     * @return bool  (toujours true???)
      */
-    static public function del($docid, $site, $uid = 100000)
+    static public function del($docid, $sid, $uid = 100000)
     {
-        $sid = $site->getSid();
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         //Test de la présence de la collection pour le document
         $sql = $db->select()->from(self::TABLE, 'COUNT(*) AS NB')

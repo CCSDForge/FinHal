@@ -20,9 +20,9 @@ if (count($this->document->getCollections())) {
             foreach($this->document->getCollections() as $collection) {
 
                 /** @var Hal_Site_Collection $collection */
-                if (!empty($hidden) && in_array($collection->getShortname(), $hidden)) continue;
+                if (!empty($hidden) && in_array($collection->getCode(), $hidden)) continue;
                 ?>
-                <?php $collections[] = '<a href="/' . $collection->getShortname() . '" target="_blank" data-toggle="tooltip" title="' . $collection->getFullname(). '">' . $collection->getShortname() . '</a>'; ?>
+                <?php $collections[] = '<a href="/' . $collection->getCode() . '" target="_blank" data-toggle="tooltip" title="' . $collection->getName(). '">' . $collection->getCode() . '</a>'; ?>
             <?php } ?>
             <p><?php echo implode(' | ', $collections);?></p>
         </div>

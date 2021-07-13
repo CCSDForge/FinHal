@@ -9,19 +9,11 @@ class Hal_Auth_Plugin extends Ccsd_Auth_Plugin
 
     const UNAUTHAJAX_ACTION = 'unauthajax';
 
-    /**
-     * @return Hal_Acl
-     * @throws Zend_Exception
-     */
 	public function getAcl()
 	{
 		return Zend_Registry::get('acl');
 	}
 
-    /**
-     * @param Zend_Acl_Resource $resource
-     * @return bool
-     */
 	public function isAllowed($resource)
     {
         $allow = false;

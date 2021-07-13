@@ -351,12 +351,12 @@ $b->appendChild($ps);
 $ss = $xml->createElement('seriesStmt');
 foreach ($this->_collections as $collection) {
     if ($collection instanceof Hal_Site_Collection) {
-        $idno = $xml->createElement('idno', $collection->getFullName());
+        $idno = $xml->createElement('idno', $collection->getName());
         $idno->setAttribute('type', 'stamp');
-        $idno->setAttribute('n', $collection->getShortname());
+        $idno->setAttribute('n', $collection->getCode());
         foreach ($collection->getParents() as $parent) {
             if ($parent instanceof Hal_Site_Collection) {
-                $idno->setAttribute('p', $parent->getShortname());
+                $idno->setAttribute('p', $parent->getCode());
             }
         }
         $ss->appendChild($idno);
@@ -670,7 +670,7 @@ if ( $this->getMeta('page') != '' ) {
 }
 if ( $this->getMeta('date') != '' ) {
     $d = $xml->createElement('date', $this->getMeta('date'));
-    if ( in_array($this->_typdoc, array('THESE', 'HDR', 'MEM', 'ETABTHESE')) ) {
+    if ( in_array($this->_typdoc, array('THESE', 'HDR', 'MEM')) ) {
         $d->setAttribute('type', 'dateDefended');
     } else {
         $d->setAttribute('type', 'datePub');

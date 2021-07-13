@@ -11,11 +11,12 @@ class Hal_Document_Author
      * tables
      */
     const TABLE = 'DOC_AUTHOR';
+    const TABLE_REF = 'REF_AUTHOR';
+    const TABLE_REF_STRUCTURE = 'REF_STRUCTURE';
     const TABLE_REF_IDHAL = 'REF_IDHAL';
     const TABLE_DOC_ID = 'DOC_AUTHOR_IDEXT';
     const TABLE_SERVER_EXT = 'REF_SERVEREXT';
-    const TABLE_IDHAL_IDEXT = 'REF_IDHAL_IDEXT';
-    const TABLE_DOCAUTHSTRUCT = 'DOC_AUTSTRUCT';
+    const TABLE_IDHAL_ID = 'REF_IDHAL_IDEXT';
     /**
      * Identifiant de la forme auteur
      *
@@ -132,16 +133,17 @@ class Hal_Document_Author
     );
 
     /**
-     * indice des structures de l'auteurs dans le tableaux des structures du documents.
+     * Identifiants internes des structures de rattachement de l'auteur pour le
+     * dépôt
      *
-     * @var int[]
+     * @var Array
      */
     protected $_structidx = array();
 
     /**
      * Identifiants des structures de rattachement de l'auteur pour le dépôt
      *
-     * @var int[]
+     * @var Array
      */
     protected $_structid = array();
 
@@ -151,11 +153,6 @@ class Hal_Document_Author
      */
     protected $_valid = '';
 
-    /**
-     * Hal_Document_Author constructor.
-     * @param int $authorid
-     * @param int $docid
-     */
     public function __construct($authorid = null, $docid = 0)
     {
         if (null != $authorid) {
@@ -166,7 +163,6 @@ class Hal_Document_Author
 
     /**
      * Chargement des données d'un auteur en fonction du référentiel
-     * @param int $docid
      */
     public function load($docid = 0)
     {
@@ -174,7 +170,7 @@ class Hal_Document_Author
 
         $sql = $db->select()
             ->from(array(
-                'ra' => Ccsd_Referentiels_Author::$_table
+                'ra' => self::TABLE_REF
             ),
                 array(
                     'authorid' => 'ra.AUTHORID',
@@ -188,7 +184,7 @@ class Hal_Document_Author
                     'valid' => 'ra.VALID'
                 ))
             ->joinLeft(array(
-                'rs' => Ccsd_Referentiels_Structure::$_table
+                'rs' => self::TABLE_REF_STRUCTURE
             ), 'ra.STRUCTID = rs.STRUCTID', array(
                 'organism' => 'rs.STRUCTNAME'
             ))
@@ -207,7 +203,7 @@ class Hal_Document_Author
                 // récupère en plus les formes auteurs valides si l'auteur a un idhal et une forme valide
                 $sql2 = $db->select()
                     ->from(array(
-                        'autvalid' => Ccsd_Referentiels_Author::$_table
+                        'autvalid' => self::TABLE_REF
                     ), array(
                             'FIRSTNAME_VALID' => 'autvalid.FIRSTNAME',
                             'LASTNAME_VALID' => 'autvalid.LASTNAME'
@@ -283,7 +279,7 @@ class Hal_Document_Author
     /**
      * initialisation de l'identfiant de l'auteur
      *
-     * @param int $docauthid
+     * @param int $authorid
      */
     public function setDocauthid($docauthid)
     {
@@ -318,7 +314,6 @@ class Hal_Document_Author
 
     /**
      * récupération de l'id de l'établissement d'appartenance
-     * @return int
      */
     public function getOrganismId()
     {
@@ -328,7 +323,6 @@ class Hal_Document_Author
     /**
      *
      * @param number $_organismid
-     * @return Hal_Document_Author
      */
     public function setOrganismid($_organismid)
     {
@@ -357,8 +351,8 @@ class Hal_Document_Author
         }
         if ($this->getIdHal()) {
             $sql = $db->select()
-                ->from(self::TABLE_IDHAL_IDEXT, 'ID')
-                ->join(array(self::TABLE_SERVER_EXT), self::TABLE_SERVER_EXT . '.SERVERID = ' . self::TABLE_IDHAL_IDEXT . '.SERVERID', array('URL', 'NAME'))
+                ->from(self::TABLE_IDHAL_ID, 'ID')
+                ->join(array(self::TABLE_SERVER_EXT), self::TABLE_SERVER_EXT . '.SERVERID = ' . self::TABLE_IDHAL_ID . '.SERVERID', array('URL', 'NAME'))
                 ->where('IDHAL = ?', $this->getIdHal());
 
             foreach ($db->fetchAll($sql) as $row) {
@@ -390,8 +384,6 @@ class Hal_Document_Author
 
     /**
      * Récupération d'une fonction auteur
-     * @param string $role
-     * @return string
      */
     static public function getRole($role)
     {
@@ -403,8 +395,6 @@ class Hal_Document_Author
 
     /**
      * Récupération des fonctions auteur d'un document
-     * @param string $typdoc
-     * @return string[]
      */
     static public function getRoles($typdoc = 'DEFAULT')
     {
@@ -422,7 +412,6 @@ class Hal_Document_Author
      * Remplace une forme auteur par une nouvelle dans les documents
      * @param int $from
      * @param array $docids
-     * @return bool|int
      */
     static public function replaceWithNew($from = 0, $docids = array())
     {
@@ -473,23 +462,6 @@ class Hal_Document_Author
     }
 
     /**
-     * @return Ccsd_Referentiels_Author
-     */
-    public function docauthor2refauthor() {
-        $authorid = $this->getAuthorid();
-        $data = array(
-            'AUTHORID' => $authorid,
-            'IDHAL' => $this->getIdHal(),
-            'FIRSTNAME' => $this->getFirstname(),
-            'LASTNAME' => $this->getLastname(),
-            'MIDDLENAME' => $this->getOthername(),
-            'EMAIL' => $this->getEmail(),
-            'URL' => $this->getUrl(),
-            'STRUCTID' => $this->getOrganismId()
-        );
-        return new Ccsd_Referentiels_Author(0, $data);
-    }
-    /**
      * Enregistrement d'un auteur
      *
      * @return int
@@ -503,19 +475,20 @@ class Hal_Document_Author
             return $authorid;
         }
 
-        $refAuthor = $this->docauthor2refauthor();
+        $data = array(
+            'AUTHORID' => $authorid,
+            'IDHAL' => $this->getIdHal(),
+            'FIRSTNAME' => $this->getFirstname(),
+            'LASTNAME' => $this->getLastname(),
+            'MIDDLENAME' => $this->getOthername(),
+            'EMAIL' => $this->getEmail(),
+            'URL' => $this->getUrl(),
+            'STRUCTID' => $this->getOrganismId()
+        );
+        $refAuthor = new Ccsd_Referentiels_Author(0, $data);
         return $refAuthor->save();
     }
 
-    /**
-     * @param $xml
-     * @return DOMElement
-     */
-    public function getXMLNode($xml) {
-
-        $refAuthor = $this->docauthor2refauthor();
-        return $refAuthor->getXMLNode($xml, $this->getStructid(), $this->getQuality());
-    }
     /**
      * récupération du complément de nom de l'auteur
      */
@@ -575,6 +548,7 @@ class Hal_Document_Author
     }
 
     /**
+     * @param $aut1
      * @param $aut2
      * @return bool
      */
@@ -583,9 +557,6 @@ class Hal_Document_Author
         return Ccsd_Externdoc::isConsideredSameAuthor($this->toArray(), $aut2->toArray());
     }
 
-    /**
-     * @param Hal_Document_Author $aut2
-     */
     public function mergeAuthor(Hal_Document_Author $aut2)
     {
 
@@ -604,12 +575,6 @@ class Hal_Document_Author
         $this->set($result);
     }
 
-    /**
-     * @param int $from
-     * @param int $to
-     * @param array $docids
-     * @return bool|int
-     */
     static public function replace($from = 0, $to = 0, $docids = array())
     {
         try {
@@ -631,11 +596,11 @@ class Hal_Document_Author
      * Recherche dans le référentiel auteur
      * TODO utiliser la même méthode que pour les référentiels
      *
-     * @param string $q terme recherché
-     * @param string $format format de retour
-     * @param int $nbResultats
+     * @param $q terme
+     *            recherché
+     * @param string $format
+     *            format de retour
      * @return mixed
-     * @throws Exception
      */
     public static function search($q, $format = 'json', $nbResultats = 100)
     {
@@ -650,7 +615,6 @@ class Hal_Document_Author
      * @param int $structid identifiant de la structure
      *
      * @return array auteurs triés par nom de famille
-     * @throws Exception
      */
     static public function getFromStructure($structid)
     {
@@ -679,9 +643,9 @@ class Hal_Document_Author
     /**
      * Retourne les auteurs d'un contributeur
      *
-     * @param int  $uid
+     * @param
+     *            $structid
      * @return array
-     * @throws Exception
      */
     static public function getFromUid($uid)
     {
@@ -700,11 +664,6 @@ class Hal_Document_Author
         return $authors;
     }
 
-    /**
-     * @param array $author
-     * @return bool|int
-     * @throws Exception
-     */
     static public function findByAuthor($author)
     {
         $lastname = Ccsd_Tools::ifsetor($author['lastname'], '');
@@ -723,7 +682,6 @@ class Hal_Document_Author
      * @param string $firstname
      * @param string $email
      * @return int docid|bool
-     * @throws Exception
      */
     static public function find($lastname, $firstname, $email = '')
     {
@@ -784,10 +742,6 @@ class Hal_Document_Author
 
     }
 
-    /**
-     * @param int $docauthid
-     * @return array
-     */
     static public function getInfoAuthor($docauthid)
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
@@ -796,22 +750,12 @@ class Hal_Document_Author
         return $db->fetchRow($sql);
     }
 
-    /**
-     * @param int $docauthid
-     */
     static public function deleteAuthor($docauthid)
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         $db->delete(self::TABLE, 'DOCAUTHID = ' . $docauthid);
     }
 
-    /**
-     * @param int $docauthid
-     * @param int $docid
-     * @param int $authorid
-     * @param string $quality
-     * @throws Zend_Db_Adapter_Exception
-     */
     static public function insertAuthor($docauthid, $docid, $authorid, $quality)
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
@@ -825,33 +769,20 @@ class Hal_Document_Author
         Hal_Document::deleteCaches($docid);
     }
 
-    /**
-     * @param int $docauthid
-     * @return array
-     */
     static public function getInfoAuthorStruct($docauthid)
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-        $sql = $db->select()->from(self::TABLE_DOCAUTHSTRUCT, '*')
+        $sql = $db->select()->from('DOC_AUTSTRUCT', '*')
             ->where('DOCAUTHID = ?', $docauthid);
         return $db->fetchRow($sql);
     }
 
-    /**
-     * @param int $docauthid
-     */
     static public function deleteAuthorStruct($docauthid)
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-        $db->delete(self::TABLE_DOCAUTHSTRUCT, 'DOCAUTHID = ' . $docauthid);
+        $db->delete('DOC_AUTSTRUCT', 'DOCAUTHID = ' . $docauthid);
     }
 
-    /**
-     * @param int $autstrucid
-     * @param int $docauthid
-     * @param int $structid
-     * @throws Zend_Db_Adapter_Exception
-     */
     static public function insertAuthorStruct($autstrucid, $docauthid, $structid)
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
@@ -860,7 +791,7 @@ class Hal_Document_Author
             'DOCAUTHID' => $docauthid,
             'STRUCTID' => $structid
         );
-        $db->insert(self::TABLE_DOCAUTHSTRUCT, $bind);
+        $db->insert('DOC_AUTSTRUCT', $bind);
     }
 
     /**
@@ -882,7 +813,6 @@ class Hal_Document_Author
      *
      * @param $docid
      * @param $uid
-     * @return int
      */
     static public function findAuthidFromDocid($docid, $uid)
     {
@@ -921,7 +851,6 @@ class Hal_Document_Author
      *
      * @param int
      * @return bool
-     * @throws Exception
      */
     public function loadFromSolr($authorid)
     {
@@ -940,8 +869,6 @@ class Hal_Document_Author
 
     /**
      * Récupération de l'auteur suivant %n et %p
-     * @param string $pattern
-     * @return string
      */
     public function getEncodedName($pattern = '%n, %p')
     {
@@ -1070,6 +997,7 @@ class Hal_Document_Author
             'firstname_valid' => $this->getFirstname_valid(),
             'othername' => $this->getOthername(),
             'fullname' => $this->getFullname(),
+            'fullname_valid' => $this->getFullname_valid(),
             'email' => $this->getEmail(),
             'url' => $this->getUrl(),
             'organism' => $this->getOrganism(),
@@ -1124,31 +1052,6 @@ class Hal_Document_Author
         return $out;
     }
 
-
-    /**
-     * Return One Author external ID
-     * @param string $extIdName ORCID ; arXiv ; IdRef ; ...
-     * @return string
-     */
-    public function getAuthorExtId(string $extIdName = '') :string
-    {
-        $authorExternalId = '';
-
-        if ($extIdName == '') {
-            $authorExternalId = '';
-        }
-
-        $authorIdExts = $this->getIdsAuthor();
-
-        if ( (isset($authorIdExts[$extIdName])) && ($authorIdExts[$extIdName] != '') )  {
-            $authorExternalId = $authorIdExts[$extIdName];
-        }
-
-        return $authorExternalId;
-
-    }
-
-
     /**
      * @return string
      */
@@ -1159,7 +1062,6 @@ class Hal_Document_Author
 
     /**
      * @param string $lastname_valid
-     * @return Hal_Document_Author
      */
     public function setLastname_valid($lastname_valid)
     {
@@ -1169,7 +1071,6 @@ class Hal_Document_Author
 
     /**
      * @return string
-     * @return Hal_Document_Author
      */
     public function getFirstname_valid()
     {
@@ -1178,7 +1079,6 @@ class Hal_Document_Author
 
     /**
      * @param string $firstname_valid
-     * @return Hal_Document_Author
      */
     public function setFirstname_valid($firstname_valid)
     {
@@ -1188,8 +1088,6 @@ class Hal_Document_Author
 
     /**
      * Récupération du nom complet de l'auteur
-     * @param bool $middlename
-     * @return string
      */
     public function getFullname($middlename = false)
     {
@@ -1198,6 +1096,19 @@ class Hal_Document_Author
             $firstname .= ' ' . $this->getOthername();
         }
         return Ccsd_Tools::formatAuthor($firstname, $this->getLastname());
+    }
+
+    /**
+     * Récupération de la forme valide du nom complet de l'auteur si elle existe
+     *
+     * @return string
+     */
+    public function getFullname_valid()
+    {
+        if ((!empty($this->getFirstname_valid())) && (!empty($this->getLastname_valid()))) {
+            return Ccsd_Tools::formatAuthor($this->getLastname_valid(), $this->getFirstname_valid());
+        }
+        return $this->getFullname(false);
     }
 
     /**
@@ -1271,7 +1182,7 @@ class Hal_Document_Author
      */
     public function setIdCV($_idCV = 0)
     {
-        $this -> _idCV = (int)$_idCV;
+        $_idCV = (int)$_idCV;
         return $this;
     }
 
@@ -1297,7 +1208,7 @@ class Hal_Document_Author
 
     /**
      *
-     * @return  string $_valid
+     * @return the $_valid
      */
     public function getValid()
     {
@@ -1329,7 +1240,6 @@ class Hal_Document_Author
      * Retourne le formulaire d'édition d'un auteur
      *
      * @return Ccsd_Form
-     * @throws Zend_Form_Exception
      */
     public function getForm($typdoc)
     {
@@ -1376,9 +1286,7 @@ class Hal_Document_Author
     /**
      * Retourne le formulaire d'édition d'un auteur
      *
-     * @param string $typdoc
      * @return Ccsd_Form
-     * @throws Zend_Form_Exception
      */
     public function getFunctionForm($typdoc)
     {
@@ -1458,10 +1366,10 @@ class Hal_Document_Author
         $sql = $db->select()
             ->distinct()
             ->from(array(
-                'as' => self::TABLE_DOCAUTHSTRUCT
+                'as' => 'DOC_AUTSTRUCT'
             ), null)
             ->from(array(
-                's' => Ccsd_Referentiels_Structure::$_table
+                's' => 'REF_STRUCTURE'
             ), array(
                 'STRUCTID',
                 'VALID'
@@ -1496,11 +1404,8 @@ class Hal_Document_Author
 
     }
 
-    /**
+    /*
      * Supprime un auteur de la table DOC_AUTHOR
-     * @param int $docid
-     * @return int
-     * @throws Zend_Db_Adapter_Exception
      */
 
     public function saveDocAuthor($docid)
@@ -1528,11 +1433,8 @@ class Hal_Document_Author
         return $db->lastInsertId(self::TABLE);
     }
 
-    /**
+    /*
      * Ajoute un auteur dans la table DOC_AUTHOR
-     * @param string $server
-     * @param int $id
-     * @return Hal_Document_Author
      */
 
     public function addIdAuthor($server, $id)
@@ -1541,10 +1443,8 @@ class Hal_Document_Author
         return $this;
     }
 
-    /**
+    /*
      * Récupération des informations d'un auteur lié aux structures
-     * @param string $_othername
-     * @return Hal_Document_Author
      */
 
     public function setMiddlename($_othername)
@@ -1552,9 +1452,10 @@ class Hal_Document_Author
         return $this->setOthername($_othername);
     }
 
-    /**
+    /*
      * Supprime un auteur de la table DOC_AUTSTRUCT
      */
+
     public function __toString()
     {
         return $this->getFullname();
@@ -1576,18 +1477,11 @@ class Hal_Document_Author
         return true;
     }
 
-    /**
-     * @return string
-     */
     public function getURI()
     {
         return self::createURI($this->getAuthorid());
     }
 
-    /**
-     * @param int $authorid
-     * @return string
-     */
     static public function createURI($authorid)
     {
         return AUREHAL_URL . "/author/{$authorid}";
@@ -1595,7 +1489,6 @@ class Hal_Document_Author
 
     /**
      * @param int $idhal
-     * @return int
      */
     public function getUidFromIdHal($idhal)
     {

@@ -577,20 +577,20 @@ input.error:focus, textarea.error:focus {
     background: url(/img/footer-bg.jpg) no-repeat 10px 10px #9a9b9c;
     margin-top: 30px;
 }
-.footer .footer-col {
+.footer .footer-contact {
     margin-left: 300px;
     padding-top: 25px;
 }
-.footer .footer-col h4, .footer .footer-col a {
+.footer .footer-contact h4, .footer .footer-contact a {
     color: #dadadb;
 }
-.footer .footer-col h4 {
+.footer .footer-contact h4 {
     text-transform: uppercase;
     font-weight: normal;
 }
 .footer .footer-ccsd {
-    /* float: right; */
-    margin-top: 25px;
+    float: right;
+    margin-top: -70px;
     margin-right: 50px;
 }
 
@@ -874,12 +874,7 @@ input.facet-input {
 }
 
 .references-section #istex {
-    background-color: #4884f2;
-}
-
-/* other search engines */
-.references-section #se {
-    background-color:#4A84F4;
+    background-color:#458ca6;
 }
 
 .references-section .reference-row .reference-text .references-identifier-value{
@@ -1028,8 +1023,3 @@ form input[type="radio"]{
     max-height: 15px;
 }
 
-div.doctypeIntro {
-    padding:10px;
-    margin: 10px;
-    background-color: #ffe1c6;
-}

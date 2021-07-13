@@ -9,18 +9,12 @@
 class ModerateController extends Hal_Controller_Action {
 
     public function init() {
-
-        if (Hal_Settings_Features::hasDocModerate() === false) {
-            $this->redirect('/error/feature-disabled');
-        }
-        // TODO: Hum, a priori, ne sert a rien! Devrait rediriger
         if ( ( !Hal_Auth::isModerateur(SITEID) ) && ( !Hal_Auth::isAdministrator()) ) {
             $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Vous ne disposez pas des privilèges pour accéder à cette action");
             $this->view->message = "Accès non autorisé";
             $this->view->description = "";
             $this->renderScript('error/error.phtml');
         }
-
     }
 
     public function indexAction() {
@@ -74,11 +68,9 @@ class ModerateController extends Hal_Controller_Action {
     public function documentsAction() {
         $render = 'documents';
         $moderation = new Hal_Moderation();
-        $request = $this->getRequest();
-        $params = $request->getParams();
+        $params = $this->getRequest()->getParams();
 
         $this->view->forwardAction = $this->getRequest()->getActionName();
-        $this->view->mode = $this; // Mode moderation pour les scripts de la vue
 
         if (isset($params ['docid'])) {
             // Affichage des documents selectionnes ou bien action sur les documents selectionnes
@@ -225,96 +217,87 @@ class ModerateController extends Hal_Controller_Action {
             }
         }
         if ($render == 'documents') {
-            /**
-             *  Les Sites semblent etre recuperes par $moderation->getDocuments()
             $this->view->sites = $moderation->getSites();
-             */
-            /** Recuperation des documents pour cet utilisateur */
-            $req = $moderation->getDocuments();
-            /** ajout des filtre d';interfaces */
-            $filterList = $this->addFilterToRequest($req, $request);
-            /** Ajout ordre interface */
-            $orderTerm = isset($params['order']) ? $params['order'] : null;
-            $sqlOrder = self::getSqlOrderField($orderTerm);
-            $req->order($sqlOrder);
-
-            /** Pagination */
-            $this->getDocumentsPagination($req);
-            $this->view->inProgress = Hal_Moderation::documentsInProgress(Hal_Auth::getUid());
-            $this->view->filterList = $filterList;
-            $this->view->pageDescription = "Merci de bien vouloir vérifier, valider, modérer les articles suivants";
-            $this->view->addFilterMenu = true;
-        }
-        $this->render($render);
-    }
-
-    /**
-     * @param $req Zend_Db_Select
-     * @param Zend_Controller_Request_Http $request
-     * @return array
-     */
-    private function addFilterToRequest($req, $request) {
-        $filter     = $request->getParam('filtre',     null);
-        $queryid    = $request->getParam('queryid',    null);
-        $queryuid   = $request->getParam('queryuid',   null);
-        $querytype  = $request->getParam('querytype',  null);
-        $querydate  = $request->getParam('querydate',  null);
-        $querynbdoc = $request->getParam('querynbdoc', null);
-        $querypor   = $request->getParam('querypor',   null);
-
-        $filterList = [
-            'filter'     => $filter,
-            'queryid'    => $queryid ,
-            'queryuid'   => $queryuid,
-            'queryuid'   => $queryuid,
-            'querytype'  => $querytype,
-            'querydate'  => $querydate,
-            'querynbdoc' => $querynbdoc,
-            'querypor'   => $querypor,
-            ];
-
-        if ($filter){
-                if ($filter == 'arxiv'){
+            if (isset($params['filtre'])){
+                if ($params['filtre'] == 'arxiv'){
                     $query = 'd.DOCSTATUS LIKE ?';
                     $value = Hal_Document::STATUS_TRANSARXIV;
-                    $req->where($query,$value);
                 } else {
                     $query = 'l.LOGACTION LIKE ?';
-                    $value = $filter;
-                    $req->where($query,$value);
+                    $value = $params['filtre'];
                 }
             }
-        if ($queryid) {
+            if (isset($params['order'])) {
+                switch($params['order']) {
+                    case 'docdesc':
+                        $order = 'IDENTIFIANT DESC';
+                        break;
+                    case 'docasc':
+                        $order = 'IDENTIFIANT ASC';
+                        break;
+                    case 'contdesc':
+                        $order = 'SCREEN_NAME DESC';
+                        break;
+                    case 'contasc':
+                        $order = 'SCREEN_NAME ASC';
+                        break;
+                    case 'typedesc':
+                        $order = 'TYPDOC DESC';
+                        break;
+                    case 'typeasc':
+                        $order = 'TYPDOC ASC';
+                        break;
+                    case 'nbdesc':
+                        $order = 'NBDOCVIS DESC';
+                        break;
+                    case 'nbasc':
+                        $order = 'NBDOCVIS ASC';
+                        break;
+                    case 'datedesc':
+                        $order = 'DATESUBMIT DESC';
+                        break;
+                    case 'dateasc':
+                        $order = 'DATESUBMIT ASC';
+                        break;
+                    case 'pordesc':
+                        $order = 'SITE DESC';
+                        break;
+                    case 'porasc':
+                        $order = 'SITE ASC';
+                        break;
+                }
+            } else {
+                $order = 'DATESUBMIT DESC';
+            }
+
+            if (isset($params['queryid'])) {
                 $query = 'd.IDENTIFIANT LIKE ?';
-                $value = "%$queryid%";
-                $req->where($query,$value);
-            }
-        if ($queryuid) {
+                $value = '%'.$params['queryid'].'%';
+            } elseif (isset($params['queryuid'])) {
                 $query = 'u.SCREEN_NAME LIKE ?';
-                $value = "%$queryuid%";
-                $req->where($query,$value);
-            }
-        if ($querytype) {
+                $value = '%'.$params['queryuid'].'%';
+            } elseif (isset($params['querytype'])) {
                 $query = 'd.TYPDOC LIKE ?';
-                $value = "%$querytype%";
-                $req->where($query,$value);
-            }
-        if ($querydate) {
+                $value = '%'.$params['querytype'].'%';
+            } elseif (isset($params['querydate'])) {
                 $query = 'd.DATESUBMIT LIKE ?';
-                $value = "%$querydate%";
-                $req->where($query,$value);
-            }
-        if ($querynbdoc) {
+                $value = '%'.$params['querydate'].'%';
+            } elseif (isset($params['querynbdoc'])) {
                 $query = 'u.NBDOCVIS LIKE ?';
-                $value = $querynbdoc;
-                $req->where($query,$value);
-            }
-        if ($querypor) {
+                $value = $params['querynbdoc'];
+            } elseif (isset($params['querypor'])) {
                 $query = 's.SITE LIKE ?';
-                $value = $querypor;
-                $req->where($query,$value);
+                $value = $params['querypor'];
             }
-        return $filterList;
+            if (isset($query) && isset($value)){
+                $this->getDocumentsPagination($moderation->getDocuments()->order($order)->where($query,$value));
+            } else {
+                $this->getDocumentsPagination($moderation->getDocuments()->order($order));
+            }
+
+            $this->view->inProgress = Hal_Moderation::documentsInProgress(Hal_Auth::getUid());
+        }
+        $this->render($render);
     }
 
     /**
@@ -338,7 +321,7 @@ class ModerateController extends Hal_Controller_Action {
      */
     public function messageAction() {
         $request = $this->getRequest();
-        # L'ensemble des messages de l'utilisateur et Uid0 (tableau index est messageId)
+        # L'ensemble des messages de l'utilisateur et Uid0 (tableau index est messageId) 
         $newObj = new Hal_Evaluation_Moderation_Message ();   // Pour le formulaire vide
         $messages = $newObj->getList(Hal_Auth::getUid());
         $error = '';
@@ -376,7 +359,7 @@ class ModerateController extends Hal_Controller_Action {
                         continue;
                         break;
                     case "edited":
-                        if (trim($title) == '' || trim($message) == '') {
+                        if (trim($title) == '' || trim($message) == '') { 
                             continue;
                         }
                         # Creation ou bien Edition
@@ -428,39 +411,6 @@ class ModerateController extends Hal_Controller_Action {
     }
 
     /**
-     * @param $order   string
-     * @param $default string
-     * @return string
-     */
-    static public function getSqlOrderField($order,$default = 'datedesc')
-    {
-
-        $corresp = [
-            'docdesc' => 'IDENTIFIANT DESC',
-
-            'docasc'   => 'IDENTIFIANT ASC',
-            'contdesc' => 'SCREEN_NAME DESC',
-            'contasc'  => 'SCREEN_NAME ASC',
-            'typedesc' => 'TYPDOC DESC',
-            'typeasc'  => 'TYPDOC ASC',
-            'nbdesc'   => 'NBDOCVIS DESC',
-            'nbasc'    => 'NBDOCVIS ASC',
-            'datedesc' => 'DATESUBMIT DESC',
-            'dateasc'  => 'DATESUBMIT ASC',
-            'pordesc'  => 'SITE DESC',
-            'porasc'   => 'SITE ASC',
-        ];
-        if (!array_key_exists($default, $corresp)) {
-            $default  = 'datedesc';
-        }
-        if (array_key_exists($order, $corresp)) {
-            return $corresp[$order];
-        } else {
-                return $corresp[$default];
-        }
-    }
-
-    /**
      * Liste des documents sous embargo
      */
     public function embargoAction() {
@@ -480,38 +430,69 @@ class ModerateController extends Hal_Controller_Action {
                 }
             }
         }
-        /** $this->view->sites = $moderation->getSites(); */
-
-        $orderTerm = isset($_GET['order']) ? $_GET['order'] : null;
-        $sqlOrder = self::getSqlOrderField($orderTerm);
-        $req = $moderation->getEmbargoDocuments()->order($sqlOrder);
+        $this->view->sites = $moderation->getSites();
+        if (isset($_GET['order'])){
+            switch($_GET['order']) {
+                case 'docdesc':
+                    $order = 'IDENTIFIANT DESC';
+                    break;
+                case 'docasc':
+                    $order = 'IDENTIFIANT ASC';
+                    break;
+                case 'contdesc':
+                    $order = 'SCREEN_NAME DESC';
+                    break;
+                case 'contasc':
+                    $order = 'SCREEN_NAME ASC';
+                    break;
+                case 'typedesc':
+                    $order = 'TYPDOC DESC';
+                    break;
+                case 'typeasc':
+                    $order = 'TYPDOC ASC';
+                    break;
+                case 'datedesc':
+                    $order = 'DATESUBMIT DESC';
+                    break;
+                case 'dateasc':
+                    $order = 'DATESUBMIT ASC';
+                    break;
+                case 'pordesc':
+                    $order = 'SITE DESC';
+                    break;
+                case 'porasc':
+                    $order = 'SITE ASC';
+                    break;
+            }
+        } else {
+            $order = 'DATESUBMIT DESC';
+        }
 
         if (isset($_GET['queryid'])) {
             $query = 'd.IDENTIFIANT LIKE ?';
             $value = '%'.$_GET['queryid'].'%';
+            $this->getDocumentsPagination($moderation->getEmbargoDocuments()->order($order)->where($query,$value));
         } elseif (isset($_GET['queryuid'])) {
             $query = 'u.SCREEN_NAME LIKE ?';
             $value = '%' . $_GET['queryuid'] . '%';
+            $this->getDocumentsPagination($moderation->getEmbargoDocuments()->order($order)->where($query, $value));
         } elseif (isset($_GET['querytype'])) {
             $query = 'd.TYPDOC LIKE ?';
             $value = '%'.$_GET['querytype'].'%';
+            $this->getDocumentsPagination($moderation->getEmbargoDocuments()->order($order)->where($query,$value));
         } elseif (isset($_GET['querydate'])) {
             $query = 'd.DATESUBMIT LIKE ?';
             $value = '%'.$_GET['querydate'].'%';
+            $this->getDocumentsPagination($moderation->getEmbargoDocuments()->order($order)->where($query,$value));
         } elseif (isset($_GET['querypor'])) {
             $query = 's.SITE LIKE ?';
             $value = $_GET['querypor'];
+            $this->getDocumentsPagination($moderation->getEmbargoDocuments()->order($order)->where($query,$value));
+        } else {
+            $this->getDocumentsPagination($moderation->getEmbargoDocuments()->order($order));
         }
-        if (isset($query) && isset($value)){
-            $req->where($query,$value);
-        }
-        $this->getDocumentsPagination($req);
     }
 
-    /**
-     * @param Zend_Db_Select $request
-     * @throws Zend_Paginator_Exception
-     */
     public function getDocumentsPagination($request)
     {
         $currentPage = $this->_getParam ( 'page', 1 );
@@ -533,7 +514,7 @@ class ModerateController extends Hal_Controller_Action {
     public function ajaxgetfilecalendarAction()
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
-            return;
+            return false;
         }
 
         $this->_helper->layout()->disableLayout();
@@ -557,7 +538,7 @@ class ModerateController extends Hal_Controller_Action {
     public function ajaxdelfileembargoAction()
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
-            return;
+            return false;
         }
 
         $this->_helper->layout()->disableLayout();
@@ -596,7 +577,7 @@ class ModerateController extends Hal_Controller_Action {
     public function ajaxputfileembargoAction()
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
-            return;
+            return false;
         }
         $this->_helper->layout()->disableLayout();
         $this->_helper->viewRenderer->setNoRender(true);
@@ -665,20 +646,5 @@ class ModerateController extends Hal_Controller_Action {
                 }
             }
         }
-    }
-    /**
-     * Retourne l'Url de moderation d'un document
-     * @param $docid
-     * @return string
-     */
-    public function getUrlForViewingDocument ($docid) {
-        return PREFIX_URL . 'moderate/documents/docid/' . $docid;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFormAction() {
-        return '/moderate/documents';
     }
 }

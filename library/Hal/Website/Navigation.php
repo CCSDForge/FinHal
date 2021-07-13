@@ -45,19 +45,6 @@ class Hal_Website_Navigation extends Ccsd_Website_Navigation
      * @var int
      */
     protected $_sid = 0;
-    /** @var Hal_Site */
-    protected $_site = null;
-
-    /**
-     * Hal_Website_Navigation constructor.
-     * @param Hal_Site $site
-     * @param array $options
-     */
-    public function __construct($site, $options = array())
-    {
-        parent::__construct($options);
-        $this->_site = $site;
-    }
 
     /**
      * Initialisation des options de la navigation
@@ -130,7 +117,7 @@ class Hal_Website_Navigation extends Ccsd_Website_Navigation
         if (count($this->_pages) == 0) {
             $this->_pages[0] = new Hal_Website_Navigation_Page_Index($this, array (
                 'languages' => Zend_Registry::get ( 'languages' ),
-                'sid' => $this->_site->getSid()
+                'sid' => SITEID
             ));
             $this->_order[0] = array();
         }
@@ -140,7 +127,6 @@ class Hal_Website_Navigation extends Ccsd_Website_Navigation
     /**
      * Enregistrement de la nouvelle navigation
      * @see Ccsd_Website_Navigation::save()
-     * @todo : rendre recursif!
      */
     public function save()
     {
@@ -155,35 +141,32 @@ class Hal_Website_Navigation extends Ccsd_Website_Navigation
         //Enregistrement des nouvelles données
         $i = 0;
         foreach ($this->_order as $pageid => $spageids) {
-            $page = $this->_pages[$pageid];
-            if (isset($page)) {
+            if (isset($this->_pages[$pageid])) {
                 //Initialisation de la pageid
-                                                                                                                                        $page->setPageId($i);
-                $this->savePage($page);
-                $key = $page->getLabelKey();
-                $lang[$key] = $page->getLabels();
+                                                                                                                                        $this->_pages[$pageid]->setPageId($i);
+                $this->savePage($this->_pages[$pageid]);
+                $key = $this->_pages[$pageid]->getLabelKey();
+                $lang[$key] = $this->_pages[$pageid]->getLabels();
                 $i++;
 
                 if (is_array($spageids) && count($spageids) > 0) {
                     foreach ($spageids as $spageid =>$sspageids) {
-                        $subpage = $this->_pages[$spageid];
-                        if (isset($subpage)) {
-                            $subpage->setPageId($i);
-                            $subpage->setPageParentId($page->getPageId());
-                            $this->savePage($subpage);
-                            $key = $subpage->getLabelKey();
-                            $lang[$key] = $subpage->getLabels();
+                        if (isset($this->_pages[$spageid])) {
+                            $this->_pages[$spageid]->setPageId($i);
+                            $this->_pages[$spageid]->setPageParentId($this->_pages[$pageid]->getPageId());
+                            $this->savePage($this->_pages[$spageid]);
+                            $key = $this->_pages[$spageid]->getLabelKey();
+                            $lang[$key] = $this->_pages[$spageid]->getLabels();
                             $i++;
 
                             if (is_array($sspageids) && count($sspageids) > 0) {
                                 foreach (array_keys($sspageids) as $sspageid) {
-                                    $ssubpage = $this->_pages[$sspageid];
-                                    if (isset($ssubpage)) {
-                                        $ssubpage->setPageId($i);
-                                        $ssubpage->setPageParentId($subpage->getPageId());
-                                        $this->savePage($ssubpage);
-                                        $key = $ssubpage->getLabelKey();
-                                        $lang[$key] = $ssubpage->getLabels();
+                                    if (isset($this->_pages[$sspageid])) {
+                                        $this->_pages[$sspageid]->setPageId($i);
+                                        $this->_pages[$sspageid]->setPageParentId($this->_pages[$spageid]->getPageId());
+                                        $this->savePage($this->_pages[$sspageid]);
+                                        $key = $this->_pages[$sspageid]->getLabelKey();
+                                        $lang[$key] = $this->_pages[$sspageid]->getLabels();
                                         $i++;
                                     }
                                 }

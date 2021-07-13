@@ -78,12 +78,7 @@ if (count($this->users) > 20) {
                 <td style="vertical-align:middle;">
                     <?php if (null !== $user['ROLES']) { ?>
                         <ul class="list-unstyled">
-                            <?php foreach ($user['ROLES'] as $rightid => $values) {
-                                if ($rightid == Hal_Acl::ROLE_A_TAMPONNEUR) {
-                                    //Internal role: nothing to display...
-                                    continue;
-                                }?>
-
+                            <?php foreach ($user['ROLES'] as $rightid => $values) { ?>
                                 <li style="margin-bottom:5px;margin-top:5px;">
                                     <span class="label label-primary" style="font-size:12px;"><i class="glyphicon <?php echo $icons[$rightid] ?>"></i>&nbsp;<?php echo $this->translate($rightid); ?></span>
                                     <?php

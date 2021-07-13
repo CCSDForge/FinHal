@@ -36,7 +36,7 @@ abstract class Hal_Script extends Ccsd_Script
         $APPLICATION_PATH =  realpath(__DIR__ . '/../../application');
         $libraries = [];
         $libraries [] =  realpath($APPLICATION_PATH . '/../library') ;
-        $libraries [] =  realpath($APPLICATION_PATH . '/../vendor/ccsd/library');
+        $libraries [] =  realpath($APPLICATION_PATH . '/../vendor/library');
         set_include_path(implode(":", $libraries ). ":" . get_include_path());
     }
 

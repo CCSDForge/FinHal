@@ -21,10 +21,6 @@ abstract class Hal_Document_Meta_Abstract
     // Statut de la métadonnée (enBase=1, enCours=0)
     protected $_status = 0;
 
-    protected $isMultilingue = false;
-
-    protected $_defautlView = 'displayMeta.phtml';
-
     /************* Fonctions à implémenter ****************/
     abstract public function save($docid, $sid, &$metaids = null);
     /** A fonction to merge values when it comes from more than one sources */
@@ -229,22 +225,4 @@ abstract class Hal_Document_Meta_Abstract
         }
     }
 
-    /**
-     * @return bool
-     */
-    public function isMultilingue() {
-        // Must use $isMultilingue but we need before implement title/abstract/subTitle as meta object...
-        return Hal_Settings::isMultiLanguageMetas($this->getKey());
-    }
-
-    /**
-     * @return string
-     */
-    public function getDisplayView() {
-        return $this->_defautlView;
-    }
-
-    public function isMultiValued() {
-        return false;
-    }
 }

@@ -42,7 +42,7 @@ class Hal_Rdf_Typdoc extends Hal_Rdf_Abstract
     static protected $_coarResourceType = [
         Ccsd_Referentiels_Typdoc::TYPE_UNDEFINED  =>  'c_816b',
         Ccsd_Referentiels_Typdoc::TYPE_ART        =>  'c_6501',
-        Ccsd_Referentiels_Typdoc::TYPE_THESE =>  'c_db06',
+        Ccsd_Referentiels_Typdoc::TYPE_THESE =>  'c_7a1f',
         Ccsd_Referentiels_Typdoc::TYPE_BOOK =>  'c_2f33',
         Ccsd_Referentiels_Typdoc::TYPE_COMM =>  'c_c94f',
         Ccsd_Referentiels_Typdoc::TYPE_IMG =>  'c_c513',
@@ -59,9 +59,6 @@ class Hal_Rdf_Typdoc extends Hal_Rdf_Abstract
         //'DOUV' =>  '',
         Ccsd_Referentiels_Typdoc::TYPE_OTHER =>  'c_1843',
         //'HDR' =>  '',
-        // Pour l'ecole des chartes, thèse d'établissement préparée en deux ans (de niveau intermédiaire entre un mémoire de master 2 et une thèse de doctorat).
-        // voir https://fr.wikipedia.org/wiki/Archiviste_pal%C3%A9ographe
-        //'ETABTHESE' => '',
         Ccsd_Referentiels_Typdoc::TYPE_MEM =>  'c_bdcc',
         //'MINUTES' =>  '',
         //'SYNTHESE' =>  '',

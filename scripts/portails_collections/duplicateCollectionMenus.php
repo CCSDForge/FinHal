@@ -102,7 +102,7 @@ class Hal_Site_Duplicator
      *
      */
     private function overwriteNavigationJson() {
-        $nav = new Hal_Website_Navigation($this->getReceiver());
+        $nav = new Hal_Website_Navigation();
         $nav -> setOptions(['sid' => $this->getReceiver()->getSid(), 'languages' => 'en' ]);
         $nav->load();
         $nav->save();  // Sinon, les pageId ne sont pas positionnes...
@@ -115,7 +115,7 @@ class Hal_Site_Duplicator
      * @return mixed
      */
     public function change_menu_label($content) {
-        // On recupere la chaine exacte de l'onglet correspondant a la collection
+        // On recupere la chaine exacte de l'ongle correspondant a la collection
         // Pour garder le capitalisation, les espaces,...
         // ATTETION: ne marche que pour les collections IFIP dont la seule difference entre menu est le menu-label-2!
         $lang = 'en';
@@ -134,7 +134,7 @@ class Hal_Site_Duplicator
             case  'LNCS':
             case  'Search':
                 // Not an expected Label, we use a label from the name of conf
-                $oldlabel = $this->getReceiver()->getFullName();
+                $oldlabel = $this->getReceiver()->getName();
                 $oldlabel = preg_replace('/^IFIP-/', ' '  , $oldlabel);
                 $oldlabel = preg_replace('/-(\d)/' , ' \1', $oldlabel);
                 break;
@@ -229,13 +229,11 @@ $collId   = $toCollection['SID'];
 $tocol = Hal_Site::loadSiteFromId($collId);
 $tocol->registerSiteConstants();
 
-$codeFrom = $fromcol->getShortname();
-$codeTo   = $tocol->getShortname();
-print "Duplicate de $codeFrom vers $codeTo\n";
+print "Duplicate de $fromcol->getCode() vers $toCol->getCode()\n";
 
 $duplicator = new Hal_Site_Duplicator($fromcol, $tocol);
 
-if (!preg_match('/^IFIP/', $codeTo) || !preg_match('/^IFIP/', $codeFrom)) {
+if (!preg_match('/^IFIP/', $tocol->getCode()) || !preg_match('/^IFIP/', $fromcol->getCode())) {
     print "ERROR: Ce programme ne fonctionne que pour les collections IFIP\n";
     exit (1);
 }

@@ -150,7 +150,7 @@ class CollectionController extends Hal_Controller_Action {
 
         if ($collection) {
             $sid = $collection->getSid();
-            $code = $collection->getShortname();
+            $code = $collection->getCode();
             $form = $collection->getForm($populate);
             $newCollection = false;
         } else {
@@ -161,7 +161,7 @@ class CollectionController extends Hal_Controller_Action {
         if (!$newCollection) {
             $form->getElement('code')->setRequired(false);
             $collectionsSupBefore = Hal_Site_Collection::getCollectionsSup($sid,false);
-            $collectionNameBefore = $collection->getShortName();
+            $collectionNameBefore = $collection->getName();
             $collectionCategoryBefore = $collection->getCategory();
         }
 
@@ -185,8 +185,8 @@ class CollectionController extends Hal_Controller_Action {
                     }
                     $collection->createFilePaths();
 
-                    if ($collection->getShortname() != '') {
-                        $code = $collection->getShortname();
+                    if ($collection->getCode() != '') {
+                        $code = $collection->getCode();
                     }
                     unset($this->_session->collection); //On reset la session
 
@@ -194,7 +194,7 @@ class CollectionController extends Hal_Controller_Action {
                         $this->_helper->FlashMessenger->setNamespace('success')->addMessage('Création de la collection ' . '<strong>' . $code . '</strong>');
                     } else {
                         $collectionsSupAfter = Hal_Site_Collection::getCollectionsSup($sid,false);
-                        $collectionNameAfter = $collection->getShortName();
+                        $collectionNameAfter = $collection->getName();
                         $collectionCategoryAfter = $collection->getCategory();
                         if ($collectionsSupBefore != $collectionsSupAfter || $collectionNameBefore != $collectionNameAfter || $collectionCategoryBefore != $collectionCategoryAfter) {
                             //Modification sur les collections supérieures, on réindexe tous les docs de la collection
@@ -252,10 +252,8 @@ class CollectionController extends Hal_Controller_Action {
             if ($collection == null) {
                 $collection = Hal_Site::exist($code, Hal_Site::TYPE_COLLECTION, true);
             }
-            $sid = 0;
-            if ($collection != null) {
-                $sid = $collection->getSid();
-            }
+
+            $sid = $collection->getSid();
             if ($sid == 0) {
                 $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("La collection n'existe pas");
             } else {
@@ -272,15 +270,10 @@ class CollectionController extends Hal_Controller_Action {
         $this->_helper->viewRenderer->setNoRender();
         $params = $this->getRequest()->getPost();
         if (isset($params['sid']) && (Hal_Auth::isTamponneur($params['sid']) || Hal_Auth::isHALAdministrator())) {
-            $sid = $params['sid'];
-            $site = Hal_Site::loadSiteFromId($sid);
-            $docids = [];
             if (isset($params['docid'])) {
                 //Tamponnage d'un ou plusieurs document
-                if (is_array($params['docid'])) {
-                    $docids = $params['docid'];
-                } else {
-                    $docids = array($params['docid']);
+                if (!is_array($params['docid'])) {
+                    $params['docid'] = array($params['docid']);
                 }
             } else if (isset($params['query'])) {
                 try {
@@ -288,15 +281,16 @@ class CollectionController extends Hal_Controller_Action {
                 } catch (Exception $exc) {
                     error_log($exc->getMessage(), 0);
                 }
+                $params['docid'] = array();
                 if (isset($result['response']['docs']) && is_array($result['response']['docs']) && count($result['response']['docs'])) {
                     foreach ($result['response']['docs'] as $docid) {
-                        $docids[] = $docid['docid'];
+                        $params['docid'][] = $docid['docid'];
                     }
                 }
             }
-            $res = count($docids) > 0;
-            foreach ($docids as $docid) {
-                $tmp = Hal_Document_Collection::add($docid, $site, Hal_Auth::getUid());
+            $res = count($params['docid']) > 0;
+            foreach ($params['docid'] as $docid) {
+                $tmp = Hal_Document_Collection::add($docid, $params['sid'], Hal_Auth::getUid());
                 $res = $res || $tmp;
             }
             echo $res;
@@ -311,15 +305,10 @@ class CollectionController extends Hal_Controller_Action {
         $this->_helper->viewRenderer->setNoRender();
         $params = $this->getRequest()->getPost();
         if (isset($params['sid']) && (Hal_Auth::isTamponneur($params['sid']) || Hal_Auth::isHALAdministrator())) {
-            $sid = $params['sid'];
-            $site = Hal_Site::loadSiteFromId($sid);
-            $docids = [];
             if (isset($params['docid'])) {
                 //Tamponnage d'un ou plusieurs document
-                if (is_array($params['docid'])) {
-                    $docids = $params['docid'];
-                } else {
-                    $docids = array($params['docid']);
+                if (!is_array($params['docid'])) {
+                    $params['docid'] = array($params['docid']);
                 }
             } else if (isset($params['query'])) {
                 try {
@@ -327,15 +316,16 @@ class CollectionController extends Hal_Controller_Action {
                 } catch (Exception $exc) {
                     error_log($exc->getMessage(), 0);
                 }
+                $params['docid'] = array();
                 if (isset($result['response']['docs']) && is_array($result['response']['docs']) && count($result['response']['docs'])) {
                     foreach ($result['response']['docs'] as $docid) {
-                        $docids[] = $docid['docid'];
+                        $params['docid'][] = $docid['docid'];
                     }
                 }
             }
-            $res = count($docids) > 0;
-            foreach ($docids as $docid) {
-                $tmp = Hal_Document_Collection::del($docid, $site, Hal_Auth::getUid());
+            $res = count($params['docid']) > 0;
+            foreach ($params['docid'] as $docid) {
+                $tmp = Hal_Document_Collection::del($docid, $params['sid'], Hal_Auth::getUid());
                 $res = $res || $tmp;
             }
             echo $res;

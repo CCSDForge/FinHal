@@ -29,7 +29,7 @@ class Hal_Website_Navigation_Page_Meta extends Hal_Website_Navigation_Page {
      */
     public function load() {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-        $sql = $db->select()->from('WEBSITE_NAVIGATION', 'PARAMS')->where('SID = ?', $this->getSid())->where('TYPE_PAGE = ?', __CLASS__)->where ( 'ACTION = ?', 'meta-' . $this->getMeta() );
+        $sql = $db->select()->from('WEBSITE_NAVIGATION', 'PARAMS')->where('SID = ?', SITEID)->where('TYPE_PAGE = ?', __CLASS__)->where ( 'ACTION = ?', 'meta-' . $this->getMeta() );
         $options = $db->fetchOne($sql);
 
         if ($options) {
@@ -186,6 +186,8 @@ class Hal_Website_Navigation_Page_Meta extends Hal_Website_Navigation_Page {
             'scale_s',
             'sciencespoId_s',
             'seeAlso_s',
+            'speaker_s',
+            'state_s',
             'structAcronym_s',
             'structAddress_s',
             'structCode_s',
@@ -214,7 +216,10 @@ class Hal_Website_Navigation_Page_Meta extends Hal_Website_Navigation_Page {
             "structIsniIdExt_s",
         ];
 
+
         $translator = Ccsd_Form::getDefaultTranslator();
+
+
         foreach ($sc->getFields() as $field) {
             if (!in_array($field, $fieldBlacklist)) {
                 $fieldIndex = substr_replace($field, '', - 2, 2);

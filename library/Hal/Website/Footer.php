@@ -21,17 +21,12 @@ class Hal_Website_Footer
 
     protected $_languages = array();
 
-    /**
-     * Hal_Website_Footer constructor.
-     * @param Hal_Site $site
-     * @param bool $load
-     * @throws Zend_Exception
-     */
-    public function __construct($site,$load = true)
+
+    public function __construct($load = true)
 	{
-        $this->_sid = $site->getSid();
+        $this->_sid = SITEID;
         $this->_languages = Zend_Registry::get('languages');
-        $this->_layoutDir = $site->getSpace() . LAYOUT.'/';
+        $this->_layoutDir = SPACE . LAYOUT.'/';
         if ($load) {
             $this->load();
         }

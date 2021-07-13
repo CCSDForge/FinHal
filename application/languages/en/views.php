@@ -33,9 +33,6 @@ return [
     'Le serveur est indisponible, merci de réssayer dans quelques instants.'=>'The server is unavailable, please try again',
     'Nouvelle recherche'=>'New search',
     'Recommencer la Recherche'=>'Try this search again',
-    'Chercher ailleurs' => 'Search elsewhere',
-    'Liste complète des métadonnées' => 'Complete list of metadatas',
-    'Document(s) archivé(s) le' => 'Long-term archiving on',
 
 
     'résultat' => [
@@ -389,10 +386,6 @@ until',
     'sort_asc' => 'Ascending',
     'sort_desc' => 'Descending',
 
-    'RGPD'=>'GPDR',
-    'Données personnelles'=>'Personal data and privacy',
-    'Mentions légales'=> 'Legal notice',
-
     // CV
     'cv_widget_domain' => 'Domains',
     'cv_widget_domain_desc' => 'Displays submissions distribution by scientific domains',
@@ -473,16 +466,6 @@ until',
     'collection_REVUE' => "Journal",
     'collection_THEME' => "Thematic",
     'collection_SET' => "Set",
-    'collection_AUTRE' => "Other",
+    'collection_AUTRE' => "Other"
 
-        // Status Document
-    'status_11' => "Document online",
-    'status_111' => "Previous version of the document",
-    'status_0' => "Awaiting moderation",
-    'status_10' => "Waiting to be transferred on arXiv",
-    'status_9' => "Awaiting scientific validation",
-    'status_1' => "Awaiting modification",
-    'status_99' => "Document not accepted",
-    'status_88' => "Document merged",
-    'status_2' => "Awaiting to be deposit"
 ];

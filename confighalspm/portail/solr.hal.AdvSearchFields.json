@@ -3,10 +3,8 @@
 	"text_fulltext" : "hal_text_fulltext",
 	"title_t":"hal_title_t",
 	"domain_t":"spm_domain_t",
-
 	"abstract_t":"hal_abstract_t",
 	"fulltext_t":"hal_fulltext_t",
-
 	"keyword_t":"hal_keyword_t",
 	"language_t":"hal_language_t",
 
@@ -16,11 +14,22 @@
 	"structure_t":"spm_structure_t",
 	"auth_t":"hal_auth_t",
 
-	"--sep6" : "",
+	"--sep1" : "",
 
 	"producedDateY_i":"hal_producedDateY_i",
+	"producedDateM_i":"hal_producedDateM_i",
+	"producedDateD_i":"hal_producedDateD_i",
 
-	"--sep7" : "",
+	"submittedDateY_i":"hal_submittedDateY_i",
+	"submittedDateM_i":"hal_submittedDateM_i",
+	"submittedDateD_i":"hal_submittedDateD_i",
 
-	"collection_t":"hal_collection_t"
+	"--sep2" : "",
+
+	"collection_t":"hal_collection_t",
+
+	"--sep3" : "",
+
+	"halId_id" : "spm_halId_id",
+	"identifiers_id":"spm_identifiers_id"
 }

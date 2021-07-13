@@ -1,8 +1,6 @@
-<?php
-/** @var Hal_View $this */
-$this->layout()->pageDescription = $this->translate("Liste de mes collections");
+<?php $this->layout()->pageDescription = $this->translate("Liste de mes collections")?>
 
-if ($this->collections == 'all') { ?>
+<?php if ($this->collections == 'all') { ?>
 	<div class="alert fade in">
             <button type="button" class="close" data-dismiss="alert">×</button>
 			<strong><?php echo $this->translate('Gestionnaire de toutes les collections')?></strong>
@@ -53,7 +51,7 @@ if ($this->collections == 'all') { ?>
                     <tr>
                         <td style="text-align: center; vertical-align: middle;"><i class="glyphicon glyphicon-tag" style="font-size: 30px;line-height:70px;"></i></td>
                         <td>
-                            <h4><?php echo $collection->getShortname();?><small> - <?php echo $collection->getFullname();?></small></h4>
+                            <h4><?php echo $collection->getCode();?><small> - <?php echo $collection->getName();?></small></h4>
                             <blockquote><?php echo $this->translate('Mode')?> : <?php echo ($collection->getMode() == Hal_Site_Settings_Collection::MODE_AUTO ? '<span class="label label-success">' . $this->translate($collection->getMode()) . '</span>' : $this->translate($collection->getMode())) ?><br />
                                 <?php $critere = Hal_Site_Collection::getFullCritere($collection->getSid());
                                 if ($critere != '') { ?>
@@ -62,7 +60,7 @@ if ($this->collections == 'all') { ?>
                             </blockquote>
                         </td>
                         <td align="right" class="middle">
-                            <a href="/user/collections/tampid/<?php echo $collection->getShortname(); ?>" data-toggle="tooltip" title="<?php echo $this->translate('Gérer')?>"><i class="glyphicon glyphicon-wrench"></i></a>
+                            <a href="/user/collections/tampid/<?php echo $collection->getCode(); ?>" data-toggle="tooltip" title="<?php echo $this->translate('Gérer')?>"><i class="glyphicon glyphicon-wrench"></i></a>
                         </td>
                     </tr>
                 <?php } ?>

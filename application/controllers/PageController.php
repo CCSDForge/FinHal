@@ -31,7 +31,7 @@ class PageController extends Hal_Controller_Action
 
     	// Sur le portail et l'instance HAL, on renvoit vers la doc externe quand la page n'est pas trouvée
         $webSiteId = Zend_Registry::get('website')->getSid();
-        $oInstance = Hal_Instance::getInstance('');
+        $oInstance = \Hal\Instance::getInstance('');
         if ($webSiteId == 1 && $oInstance->getName() =='hal' && !file_exists($page->getPagePath(Zend_Registry::get('Zend_Locale')->getLanguage()))) {
             Zend_Controller_Action_HelperBroker::getStaticHelper('Redirector')->gotoUrl('https://doc.archives-ouvertes.fr');
             return;

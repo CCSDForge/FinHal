@@ -24,12 +24,7 @@ class Hal_Site_Collection_Test extends PHPUnit_Framework_TestCase
             $coll->delete();
         }
     }
-    /** callback pour test
-     * @param Hal_Site $c
-     */
-    public function  toId($c) {
-        return $c->getSid();
-    }
+
     /**
      * Test de constructions de sites
      */
@@ -41,7 +36,7 @@ class Hal_Site_Collection_Test extends PHPUnit_Framework_TestCase
         ]);
 
         $this->assertEquals(Hal_Site::TYPE_COLLECTION, $site->getType());
-        $this->assertEquals('TEST', $site->getShortname());
+        $this->assertEquals('TEST', $site->getSite());
         $this->assertEquals('Test en cours', $site->getFullname());
     }
 
@@ -71,7 +66,7 @@ class Hal_Site_Collection_Test extends PHPUnit_Framework_TestCase
         $newcoll = Hal_Site::exist('COPYOFTEST', Hal_Site::TYPE_COLLECTION, true);
         self::$colls[] = $newcoll;
         $newsite = Hal_Site::loadSiteFromId($newcoll->getSid());
-        $this -> assertEquals([ "fr", "en" ], $newsite -> getLanguages());
+        $this -> assertEquals([ "es" ], $newsite -> getLanguages());
         $this -> assertEquals('LABO', $newcoll -> getCategory());
     }
     /**  @afterClass */
@@ -79,59 +74,5 @@ class Hal_Site_Collection_Test extends PHPUnit_Framework_TestCase
         foreach (self::$colls as $coll) {
             $coll -> delete();
         }
-    }
-
-    public function test_getParentCollections() {
-        $coll1 = Hal_Site_Collection::loadSiteFromId(2709);
-        $parents = $coll1 -> getParents();
-        $parentsName = array_map(function ($s) { /** @var Hal_Site $s */ return $s->getShortname(); }, $parents);
-        $this->assertContains('UNIV-PARIS1', $parentsName);
-        $this->assertContains('UPEC', $parentsName);
-        $this->assertContains('CV_LGP', $parentsName);
-
-        $parentsAuto = $coll1->getParentCollections();
-        $parentsName = array_map(function ($s) { /** @var Hal_Site $s */ return $s->getShortname(); }, $parentsAuto);
-        $this->assertContains('UNIV-PARIS1', $parentsName);
-        $this->assertNotContains('UPEC', $parentsName);
-
-    }
-
-    public function test_isAuto() {
-        $coll1 = Hal_Site_Collection::loadSiteFromId(3025);
-        $this -> assertEquals(false, $coll1 -> isAuto());
-        $coll2 = Hal_Site_Collection::loadSiteFromId(114);
-        $this -> assertEquals(true, $coll2 -> isAuto());
-    }
-
-    public function test_getAncestors() {
-        $coll1 = Hal_Site_Collection::loadSiteFromId(3504);
-        $ids = array_map(function($c) { /** @var Hal_Site $c */return $c->getSid(); }, $coll1->getAncestors());
-        $this -> assertContains(3481, $ids);
-        $this -> assertContains(3478, $ids);
-    }
-    public function test_getCollections() {
-        $collections = Hal_Document_Collection::getCollections(144);
-        $ids = array_map([$this, 'toId'] , $collections);
-        $this->assertContains(221, $ids);
-        $this->assertContains(1052, $ids);
-        $this->assertNotContains(1478458, $ids);
-    }
-
-    public function test_addTampon() {
-        $site = Hal_Site::loadSiteFromId(221);
-        $collections = Hal_Document_Collection::getCollections(144);
-        $ids = array_map([$this, 'toId'] , $collections);
-        $this->assertContains(221, $ids);
-
-        Hal_Document_Collection::del(144, $site);
-        $collections = Hal_Document_Collection::getCollections(144);
-        $ids = array_map([$this, 'toId'] , $collections);
-        $this->assertNotContains(221, $ids);
-
-        Hal_Document_Collection::add(144, $site);
-        $collections = Hal_Document_Collection::getCollections(144);
-        $ids = array_map([$this, 'toId'] , $collections);
-        $this->assertContains(221, $ids);
-
     }
 }

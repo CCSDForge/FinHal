@@ -24,7 +24,7 @@ class Hal_LinkExt implements Hal_Model
     const DOITYPE_OTHER = 'openaccess';
     const DOITYPE_UNKNOWN = 'unknown'; // ne devrait pas servir!
 
-    const OADOI_URL = 'https://api.unpaywall.org/v2';
+    const OADOI_URL = 'https://api.oadoi.org';
     const ISTEX_URL = 'https://api.istex.fr/document/openurl?rft_id=info:doi/';
     const ARXIV_URL = "http://arxiv.org/pdf/";
     const PMC_URL   = "https://www.ncbi.nlm.nih.gov/pmc/articles/";
@@ -222,7 +222,6 @@ class Hal_LinkExt implements Hal_Model
                     $url = self::getUrlPMCFromId($idvalue);
                     break;
                 case self::TYPE_DOI:
-
                     $url = self::getUrlFromOADoi($idvalue);
                     if ($url === null) {
                         $url = self::getUrlIstexFromDoi($idvalue);
@@ -266,37 +265,31 @@ class Hal_LinkExt implements Hal_Model
         $url = self::ISTEX_URL . $doi . '&noredirect&sid=hal';
         try {
             $result = self::curl($url);
-            if (is_array($result) && (array_key_exists('resourceUrl', $result))) {
-                return $result['resourceUrl'];
-            }
+
+            return $result['resourceUrl'];
         } catch (Exception $e) {
             // Ok : pas trouve... suite a erreur curl
+            return null;
         }
-        return null;
     }
 
     /**
-     * Get URL (Open Access) from Doi, by cURL on oaDoi
-     * @param string $doi
+     * Get URL (Open Acces) from Doi, by cURL on oaDoi
+     * @param $doi
      * @return null|string
      */
     static private function getUrlFromOADoi($doi)
     {
-
         if (!isset($doi)) {
             return null;
         }
-
-        $doi = trim($doi);
-
         try {
-            $oadoi = self::curl(self::OADOI_URL . "/" . urlencode($doi) . '?email=ccsd-tech@ccsd.cnrs.fr');
+            $oadoi = self::curl(self::OADOI_URL . "/v1/publication/doi/" . $doi);
 
-            if (!isset($oadoi['best_oa_location']['url'])) {
+            if (!isset($oadoi['results'][0]['free_fulltext_url'])) {
                 return null;
             }
-
-            return $oadoi['best_oa_location']['url'];
+            return $oadoi['results'][0]['free_fulltext_url'];
         } catch (Exception $e ) {
             // Ok : pas trouve... suite a erreur curl
             return null;
@@ -339,19 +332,17 @@ class Hal_LinkExt implements Hal_Model
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, "HAL CCSD OA finder ccsd-tech@ccsd.cnrs.fr");
+        curl_setopt($ch, CURLOPT_USERAGENT, "HAL Recup Link");
 
         $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-        if (curl_errno($ch) == CURLE_OK) {
-            curl_close($ch);
-            return json_decode($result,true);
-        } else {
-            $errno = curl_errno($ch);
-            $error_message = curl_strerror($errno) . '. Query: ' . $url;
-            curl_close($ch);
-            throw new Exception("cURL error ({$errno}): {$error_message}", $errno);
+        if ( $httpCode != 200 ) {
+            throw new Exception('Bad HTTP Code');
         }
+
+        return json_decode($result,true);
     }
 
     /**

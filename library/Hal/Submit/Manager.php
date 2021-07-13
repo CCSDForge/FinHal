@@ -209,7 +209,7 @@ class Hal_Submit_Manager
             }
 
         } else if ($from == self::SRC_FTP) {
-            $file = Ccsd_User_Models_User::CCSD_FTP_PATH . Hal_Auth::getUid() . '/' . $src;
+            $file = FTP_DIR . Hal_Auth::getUid() . '/' . $src;
 
             if (!file_exists($file) || !copy($file, $tmpDir . $src)) {
                 throw new Hal_Submit_Manager_Exception("Problème de copie du fichier");
@@ -327,15 +327,13 @@ class Hal_Submit_Manager
         }
 
         // Complétion par DOI s'il a été trouvé
-        // Grobid est appele avec consolidate=1, pas besoin de requeter CrossRef de notre cote.
-        //if (isset($metasArray[self::GROBID][Ccsd_Externdoc::META][Ccsd_Externdoc::META_IDENTIFIER][self::DOI])) {
-        //    try {
-        //        $metasArray[self::DOI] = Hal_Submit_Manager::createMetadatas($metasArray[self::GROBID][Ccsd_Externdoc::META][Ccsd_Externdoc::META_IDENTIFIER][self::DOI], self::DOI);
-        //    } catch (Exception $e) {
-        //        //TODO Faire quelque chose de cette erreur
-        //        Ccsd_Tools::panicMsg(__FILE__, __LINE__, "getMetaArrayFromFile: " . $e->getMessage());
-        //    }
-        //}
+        if (isset($metasArray[self::GROBID][Ccsd_Externdoc::META][Ccsd_Externdoc::META_IDENTIFIER][self::DOI])) {
+            try {
+                $metasArray[self::DOI] = Hal_Submit_Manager::createMetadatas($metasArray[self::GROBID][Ccsd_Externdoc::META][Ccsd_Externdoc::META_IDENTIFIER][self::DOI], self::DOI);
+            } catch (Exception $e) {
+                //TODO Faire quelque chose de cette erreur
+            }
+        }
 
         return $metasArray;
     }
@@ -601,7 +599,7 @@ class Hal_Submit_Manager
 
                 // todo : optimiser le copier/coller
                 $data = $this->prepareAffiliationParams($authorsAndStructs, $authorData, []);
-                $res = Hal_Search_Solr_Search_Affiliation::rechAffiliations($data);
+                $res = Hal_Search_Solr_Search::rechAffiliations($data);
                 $authorLoaded = $this->loadAuthorFromApiAffiliationResult($docAuthor, $res);
                 $foundStruct = $this->createStructFromApiAffiliationResult($res);
 
@@ -626,7 +624,7 @@ class Hal_Submit_Manager
                         $structidsx = isset($authorData[Ccsd_Externdoc_Grobid::STRUCTURES]) ? $authorData[Ccsd_Externdoc_Grobid::STRUCTURES] : [];
 
                         $data = $this->prepareAffiliationParams($authorsAndStructs, $authorData, $structidsx);
-                        $res = Hal_Search_Solr_Search_Affiliation::rechAffiliations($data);
+                        $res = Hal_Search_Solr_Search::rechAffiliations($data);
                         $authorLoaded = $this->loadAuthorFromApiAffiliationResult($docAuthor, $res);
                         $foundStruct = $this->createStructFromApiAffiliationResult($res);
 
@@ -700,7 +698,8 @@ class Hal_Submit_Manager
         if (!empty($metasArray)) {
             foreach ($metasArray as $source => $metas) {
                 $newMeta = new Hal_Document_Metadatas();
-                $newMeta->addMetasFromArray($metas[Ccsd_Externdoc::META], $source, 0); //Ajoute les métas (Titre, résumé, volume, identifiant, langue, etc...)
+                $newMeta->addMetasFromArray($metas[Ccsd_Externdoc::META], $source, 0); //Ajoute les métas (Titre, résumé, volume, etc...)
+                $newMeta->addMetasFromArray($metas, $source, 0); //Ajoute les métas (Identifiants, languages, etc...)
                 $halMeta->merge($newMeta);
             }
         }
@@ -784,8 +783,7 @@ class Hal_Submit_Manager
         if (!empty($metasArray)) {
 
             // Complétion par DOI s'il a été trouvé
-            // On enlève le cas de CrossRef (idtype = doi) sinon on passe 2 fois dans createMetadatas
-            if (isset($metasArray[$idType][Ccsd_Externdoc::META][Ccsd_Externdoc::META_IDENTIFIER][self::DOI]) && $idType != 'doi') {
+            if (isset($metasArray[$idType][Ccsd_Externdoc::META][Ccsd_Externdoc::META_IDENTIFIER][self::DOI])) {
                 try {
                     $metasArray[self::DOI] = $this->createMetadatas($metasArray[$idType][Ccsd_Externdoc::META][Ccsd_Externdoc::META_IDENTIFIER]['doi'], "doi");
                     $this->changeCurrentTypdoc($metasArray[self::DOI][Ccsd_Externdoc_Crossref::DOC_TYPE]);
@@ -813,10 +811,9 @@ class Hal_Submit_Manager
     {
         // On récupère le dataprovider correspondant au type d'identifiant envoyé
         $class = Hal_Settings::$_idtypeToDataProvider[$idType];
-        $config = \Hal\Config::getInstance();
+
         if (class_exists ($class)) {
-            /** @var Ccsd_Dataprovider $dp */
-            $dp = new $class(Zend_Db_Table_Abstract::getDefaultAdapter(), $config);
+            $dp = new $class(Zend_Db_Table_Abstract::getDefaultAdapter());
             $o = $dp->getDocument($idext);
 
             /* @var Ccsd_Externdoc $o*/
@@ -1232,8 +1229,7 @@ class Hal_Submit_Manager
         $idurl = '';
 
         $class = Hal_Settings::$_idtypeToDataProvider[$idType];
-        $config=Hal\Config::getInstance();
-        $o = new $class ($idExt, Zend_Db_Table_Abstract::getDefaultAdapter(),$config);
+        $o = new $class ($idExt, Zend_Db_Table_Abstract::getDefaultAdapter());
 
         if (property_exists ( $class, '_URL' )) {
             $idurl = $o->_URL.'/'.$idExt;

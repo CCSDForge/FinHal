@@ -33,10 +33,6 @@ class SubmitController extends Hal_Controller_Action
      */
     public function init()
     {
-        if (Hal_Settings_Features::hasDocSubmit() === false) {
-            $this->redirect('/error/feature-disabled');
-        }
-
         //Définition de la session et de l'espace temporaire de dépôt des fichiers
         $this->_session = new Hal_Session_Namespace(SESSION_NAMESPACE);
         $this->_tmpDir = PATHTEMPDOCS . Zend_Session::getId() . '/';
@@ -170,8 +166,6 @@ class SubmitController extends Hal_Controller_Action
                 $document->setCitation('full', null);
                 $document->initFiles();
 
-                $document->resetSomeMetaForTypedocWhenReplace();
-
                 $this->_session->document = $document;
                 // Initialisation de la validité du dépot
                 $this->_session->submitStatus->update($document, $this->_session->type, [Hal_Settings::SUBMIT_STEP_FILE, Hal_Settings::SUBMIT_STEP_META, Hal_Settings::SUBMIT_STEP_AUTHOR, Hal_Settings::SUBMIT_STEP_RECAP]);
@@ -222,21 +216,16 @@ class SubmitController extends Hal_Controller_Action
             if (Hal_Document_Acl::canReplace($document, $this->getParam('pwd', ''))) {
                 $this->_session->type = Hal_Settings::SUBMIT_REPLACE;
                 $this->_session->submitStatus->setSubmitType(Hal_Settings::SUBMIT_REPLACE);
-                $newDocument = clone($document);
+
                 //On rajoute le déposant de la version précédente comme propriétaire
                 $docOwner = array_unique(array_merge($document->getOwner(), array($document->getContributor('uid'))));
-                $newDocument->setOwner($docOwner);
-                $newDocument->setContributor(Hal_Auth::getUser());
-                // remise a zero des fichiers pour la nouvelle version
-                $newDocument->initFiles();
-                // effacement des meta donnees qui ne doivent pas survivre a une nouvelle version
-                // eg: identifiant software heritage
-                // TODO...
-                $newDocument->resetSomeMetaForTypedocWhenReplace();
-                $newDocument->_oldVersion = $document;
-                $this->_session->document = $newDocument;
+                $document->setOwner($docOwner);
+                $document->setContributor(Hal_Auth::getUser());
+                $document->initFiles();
+
+                $this->_session->document = $document;
                 // Initialisation de la validité du dépot
-                $this->_session->submitStatus->update($newDocument, $this->_session->type, Hal_Settings::getSubmissionsSteps());
+                $this->_session->submitStatus->update($document, $this->_session->type, Hal_Settings::getSubmissionsSteps());
 
                 $this->redirect('/submit/index');
             } else {
@@ -313,9 +302,6 @@ class SubmitController extends Hal_Controller_Action
             $this->_session->submitStatus->update($this->_session->document, $this->_session->type, [Hal_Settings::SUBMIT_STEP_FILE, Hal_Settings::SUBMIT_STEP_META, Hal_Settings::SUBMIT_STEP_AUTHOR, Hal_Settings::SUBMIT_STEP_RECAP]);
 
             $this->redirect('/submit/index');
-        } else {
-            // Url forgee?
-            $this->redirect('/index/index');
         }
     }
 
@@ -585,6 +571,7 @@ class SubmitController extends Hal_Controller_Action
 
     /**
      * Ajout d'un fichier récupéré dans l'espace FTP de l'utilisateur
+     * @throws Zend_Controller_Response_Exception
      */
     public function selectftpfileAction()
     {
@@ -615,28 +602,37 @@ class SubmitController extends Hal_Controller_Action
      *
      * $return["filerow"] : html (la vue du fichier en cas de dépot détaillée)
      * $return Hal_Submit_Status
+     * @throws Zend_Controller_Response_Exception
      */
     public function ajaxdownloadfileAction()
     {
         $this->noRender();
-        if ($this->isAjaxPost() && $this->getParam('url')) {
-            try {
+        if (defined('USE_UPLOAD_BY_URL') && (USE_UPLOAD_BY_URL == 0)) {
+            // Upload par Url non autorise sur cette plateforme
+            return;
+        }
+        $url = trim($this->getParam('url', ''));
 
-                $toreturn = $this->_submitManager->processNewFile(Hal_Submit_Manager::SRC_URL, $this->getParam('url'), $this->_session->type, $this->_tmpDir, $this->view);
+        if (!preg_match('+^(https?|ftp)://+', $url)) {
+            $this->getResponse()->setHttpResponseCode(500);
+            echo $this->view->translate("Seules les urls http, https et ftp sont acceptees");
+            return;
+        }
 
-                // Rechargement des vues seulement dans le cas de recherche de métadonnées
-                if ($toreturn["existMain"]) {
-                    $toreturn = $toreturn + $this->getajaxreturnsteps(Hal_Settings::getSubmissionsSteps());
-                }
-
-                echo $this->encodeJsonOrGetError($toreturn);
-            } catch (Exception $e) {
-                $this->getResponse()->setHttpResponseCode(500);
-                echo $this->view->translate($e->getMessage());
-            }
-        } else {
+        if (!$this->isAjaxPost()) {
             $this->getResponse()->setHttpResponseCode(500);
             echo $this->view->translate("Aucun fichier transmis");
+        }
+        try {
+            $toreturn = $this->_submitManager->processNewFile(Hal_Submit_Manager::SRC_URL, $url, $this->_session->type, $this->_tmpDir, $this->view);
+            // Rechargement des vues seulement dans le cas de recherche de métadonnées
+            if ($toreturn["existMain"]) {
+                $toreturn = $toreturn + $this->getajaxreturnsteps(Hal_Settings::getSubmissionsSteps());
+            }
+            echo $this->encodeJsonOrGetError($toreturn);
+        } catch (Exception $e) {
+            $this->getResponse()->setHttpResponseCode(500);
+            echo $this->view->translate($e->getMessage());
         }
     }
 
@@ -816,7 +812,6 @@ class SubmitController extends Hal_Controller_Action
      */
     public function ajaxaddidextAction()
     {
-        ini_set('max_execution_time', 0); //Supprime le timeout pour les dépôts ayant énormément d'auteurs
         $this->noRender();
         $params = $this->getRequest()->getParams();
 
@@ -882,12 +877,14 @@ class SubmitController extends Hal_Controller_Action
         $files = $this->_session->document->getFiles();
 
         if (isset($files[$group])) {
+
             $file = $files[$group];
+
             if ("date" == $key || "visible" == $key) {
                 if ($value != 'date') {
                     $file->setDateVisible($value);
-                    if (!$file->isEmbargoValid()){
-                        $file->setDateVisible($file->maxEmbargo());
+
+                    if ($value > $file->maxEmbargo()){
                         $this->getResponse()->setHttpResponseCode(500);
                         echo Zend_Json::encode(["errorMsg" => $this->view->translate('Vous ne pouvez pas avoir un embargo supérieur à : '). $file->maxEmbargo(), "maxDate" => $file->maxEmbargo()]);
                         return;
@@ -1061,7 +1058,7 @@ class SubmitController extends Hal_Controller_Action
             $this->_submitManager->changeCurrentTypdoc($params["type"]);
             $return = $this->_submitManager->getDetailledFiles($this->view, $this->_session->type, array_keys($this->_session->document->getFiles()));
 
-            if (($params["type"] == "THESE" || $params["type"] == "HDR" || $params["type"] == "ETABTHESE") && count($this->_session->document->getAuthors()) > 1) {
+            if (($params["type"] == "THESE" || $params["type"] == "HDR") && count($this->_session->document->getAuthors()) > 1) {
                 $return["errorajax"]["meta"] = $this->view->translate('Attention, vous avez plusieurs auteurs ce qui est rare pour ce type de document. Veuillez vérifier les informations sur les auteurs dans la section \'Compléter les données auteur\'.');
             }
 
@@ -1229,7 +1226,7 @@ class SubmitController extends Hal_Controller_Action
 
                 // todo : optimiser le copier/coller
                 $data = $this->_submitManager->prepareAffiliationParams($this->_session->document->getMeta(), ['authorid' => $authid], []);
-                $res = Hal_Search_Solr_Search_Affiliation::rechAffiliations($data);
+                $res = Hal_Search_Solr_Search::rechAffiliations($data);
 
                 $foundStruct = $this->_submitManager->createStructFromApiAffiliationResult($res);
 
@@ -1362,7 +1359,7 @@ class SubmitController extends Hal_Controller_Action
                         if ($searchAffi) {
                             // todo : optimiser le copier/coller
                             $data = $this->_submitManager->prepareAffiliationParams($this->_session->document->getMeta(), ['lastname'=>$lastname, 'firstname'=>$firstname], []);
-                            $res = Hal_Search_Solr_Search_Affiliation::rechAffiliations($data);
+                            $res = Hal_Search_Solr_Search::rechAffiliations($data);
                             $authorLoaded = $this->_submitManager->loadAuthorFromApiAffiliationResult($author, $res);
                             $foundStruct = $this->_submitManager->createStructFromApiAffiliationResult($res);
 
@@ -1516,18 +1513,10 @@ class SubmitController extends Hal_Controller_Action
         $this->noRender();
         $params = $this->getParams();
         if ($this->isAjaxPost() && isset($params['authorid']) && isset($params['structid'])) {
-            $authorId = $params['authorid'];
-            $structId = $params['structid'];
-            /** @var Hal_Document $document */
-            $document = $this->_session->document;
-            $author = $document->getAuthor($authorId);
-            if ($author) {
-                $author->delStructidx($structId);
-                //On supprime les laboratoires non associés à des auteurs
-                $document->cleanStructures();
-            } else {
-                Ccsd_Tools::panicMsg(__FILE__,__LINE__, "ajaxremoveaffiliationAction de aut=$authorId sur structIdx=$structId pour le document: " . $document->getTitle());
-            }
+            $this->_session->document->getAuthor($params['authorid'])->delStructidx($params['structid']);
+            //On supprime les laboratoires non associés à des auteurs
+            $this->_session->document->cleanStructures();
+
             echo $this->encodeJsonOrGetError($this->getajaxreturnsteps([Hal_Settings::SUBMIT_STEP_AUTHOR, Hal_Settings::SUBMIT_STEP_RECAP]));
         }
     }
@@ -1701,14 +1690,13 @@ class SubmitController extends Hal_Controller_Action
     }
 
     /**
-     * @return void
+     * @return boolean|void
      */
     public function submitsteprecapAction()
     {
 
         if (!$this->getRequest()->isPost() || $this->_session->document->getTypDoc() == '') {
-            $this->redirect('/submit/index');
-            return;
+            return false;
         }
 
         $this->view->filesInTmpDir = in_array($this->_session->type, array(Hal_Settings::SUBMIT_INIT, Hal_Settings::SUBMIT_MODIFY, Hal_Settings::SUBMIT_MODERATE, Hal_Settings::SUBMIT_REPLACE, Hal_Settings::SUBMIT_ADDFILE, Hal_Settings::SUBMIT_ADDANNEX));
@@ -1728,8 +1716,7 @@ class SubmitController extends Hal_Controller_Action
         Ccsd_Tools::deletedir($this->_tmpDir);
 
         if ($type == Hal_Settings::SUBMIT_MODERATE) {
-            $this->redirect('/moderate/documents/docid/' . $docid);
-            return;
+            return $this->redirect('/moderate/documents/docid/' . $docid);
         } else if ($type == Hal_Settings::SUBMIT_MODIFY && Hal_Auth::isAdministrator()) {
             $contributor = new Hal_User ();
             $contributor->find ( $document->getContributor('uid') );
@@ -1739,15 +1726,12 @@ class SubmitController extends Hal_Controller_Action
                 $document
             ));
             $mail->writeMail();
-            $this->redirect('/administrate/pending-modification');
-            return;
+            return $this->redirect('/administrate/pending-modification');
         } else if ($type == Hal_Settings::SUBMIT_UPDATE) {
             $this->_helper->FlashMessenger->setNamespace('success')->addMessage('Vos modifications ont bien été prises en compte.');
-            $this->redirect('/'.$docIdentifiant);
-            return;
+            return $this->redirect('/'.$docIdentifiant);
         } else {
-            $this->redirect('/user/submissions');
-            return;
+            return $this->redirect('/user/submissions');
         }
     }
 

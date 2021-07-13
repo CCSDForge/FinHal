@@ -315,19 +315,4 @@ class ViewController extends Hal_Controller_Action
     {
         $this->renderScript('view/accessibilityHelp.phtml');
     }
-
-    /**
-     * Privacy page / GPDR
-     */
-    public function privacyAction()
-    {
-        $this->renderScript('view/privacy.phtml');
-    }
-    /**
-     * Legal notice
-     */
-    public function legalnoticeAction()
-    {
-        $this->renderScript('view/legalnotice.phtml');
-    }
 }

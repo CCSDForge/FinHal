@@ -29,7 +29,7 @@ class Hal_Site_Portail extends Hal_Site
      */
     protected $_settings = null;
 
-    /**
+        /**
      * Hal_Site_Portail constructor.
      * @param $infos
      * @param bool $full
@@ -42,23 +42,6 @@ class Hal_Site_Portail extends Hal_Site
         $this -> _spaceUrl = $this -> _prefixUrl . "/public/";
         parent::__construct($infos);
     }
-
-    /**
-     * Hal_Site_Portail constructor.
-     * @param Hal_Site_Collection $coll
-     * @return Hal_Site_Portail
-     */
-    public static function findByAssociatedCollection($coll)
-    {
-        $colSid = $coll->getSid();
-        $portailId = Hal_Site_Collection::getAssociatedPortail($colSid);
-        if ($portailId) {
-            return Hal_Site::loadSiteFromId($portailId);
-        } else {
-            return null;
-        }
-    }
-
 
     /**
      * @return string
@@ -124,7 +107,6 @@ class Hal_Site_Portail extends Hal_Site
      * @param $fileId
      * @param $content
      * @return mixed
-     * @throws Zend_Exception
      */
     public function saveConfigFile($fileId, $content)
     {
@@ -134,7 +116,6 @@ class Hal_Site_Portail extends Hal_Site
     /**
      * On récupère les métas données locales pour ce portail
      * @return array
-     * @throws Zend_Config_Exception
      */
     public function getConfigMeta()
     {
@@ -155,7 +136,6 @@ class Hal_Site_Portail extends Hal_Site
 
     /**
      * @param array
-     * @throws Zend_Db_Adapter_Exception
      */
     public function setDomainsInDb($domains)
     {
@@ -169,7 +149,6 @@ class Hal_Site_Portail extends Hal_Site
     /**
      * Copie des settings des fichiers de configurations concernant le dépôt
      * @param Hal_Site $receiver
-     * @throws Zend_Db_Adapter_Exception
      */
     public function copySubmitSettings(Hal_Site $receiver)
     {
@@ -251,6 +230,16 @@ class Hal_Site_Portail extends Hal_Site
     }
 
     /**
+     * @deprecated : devrait pas passer par du static mais par une collection et getAssociatedsite()
+     * @param $sid
+     * @return string
+     */
+    static public function getAssociatedCollection($sid)
+    {
+        return Hal_Site_Settings_Portail::getAssociatedCollection($sid);
+    }
+
+    /**
      * Retourne la liste des SITEID des collections rattachées à un portail
      * @param bool $auto
      * @return array
@@ -284,107 +273,12 @@ class Hal_Site_Portail extends Hal_Site
         return $result != null;
     }
 
-    /**
-     * @return bool
-     */
+
     public function submitAllowed()
     {
         //pas de droit pour les portails sans dépôt
         $oSettings = $this->getSettingsObj();
         return $oSettings->getSubmitAllowed();
     }
-    /**
-     * @return Hal_Site
-     */
-    public function isPatrolled() {
-        if ($this->getSetting('patrol')) {
-            /** @var Hal_Site_Settings_Portail $settings */
-            $settings = $this->getSettingsObj();
-            $collection = $settings->getAssociatedColl();
-            return $collection;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * @return Hal_Site_Collection
-     */
-    public function getAssociatedColl() {
-        $settings = $this->getSettingsObj();
-        $collection = $settings->getAssociatedColl();
-        return $collection;
-    }
-    /**
-     * @param string|Hal_Document $doc
-     *
-     * La mise a jour du patrouillage ne depends pas du Portail
-     * Seulement de la collection du document
-     *
-     * @throws Zend_Db_Adapter_Exception
-     */
-    public function patrolMaybe($doc) {
-        if ($this->getSetting('patrol')) {
-            /** @var Hal_Site_Settings_Portail $settings */
-            $collection = $this->getAssociatedColl();
-            if ($collection) {
-                // Il y a une collection associee... c'est bon
-                // La collection associee au portail implemente le patrouillage
-                if (is_int($doc)) {          // un docid
-                    $identifiant = Hal_Document::getIdFromDocid($doc);
-                } elseif (is_string($doc)) { // un vrai identifiant
-                    $identifiant = $doc;
-                } elseif (is_object($doc) && (get_class($doc) == "Hal_Document")) {
-                    $identifiant = $doc->getId();
-                } else {
-                    Ccsd_Tools::panicMsg(__FILE__, __LINE__, "Param must be an document  identifier or a Document object");
-                    return;
-                }
-                $patrol = Hal\Patrol::construct($identifiant, $collection);
-                $patrol->save();
-            }
-        }
-    }
-    /** @var array
-     * TODO : to put elsewhere ( in config ? maybe not...)
-     */
-    static $embargo2dateargs = [
-        '15-d'=> '+15 days',
-        '1-M' => '+1 months',
-        '3-M' => '3 months',
-        '6-M' => '+3 months',
-        '1-Y' => '+1 years',
-        '2-Y' => '+2 years',
-        '4-Y' => '+4 years',
-        '5-Y' => '+5 years',
-        '6-Y' => '+6 years',
-        '10-Y'=>'+10 years',
-    ];
-    /**
-     * Return the max date allowed for this Portal
-     * Return format = %Y-%m-%d
-     * @param string $typdoc
-     * @return string
-     */
-
-    public function getMaxEmbargo($typdoc = 'DEFAULT') {
-        $embargoSpec = Hal_Settings::getMaxEmbargo($typdoc);
-        $now = strtotime('today UTC');
-        if (array_key_exists($embargoSpec, self::$embargo2dateargs)) {
-            return date('Y-m-d', strtotime(self::$embargo2dateargs[$embargoSpec], $now));
-        }
-        switch ($embargoSpec) {
-            case 'none':  // no embargo allowed on this portal
-                return date('Y-m-d', $now);
-                break;
-            case 'never': // infinite embargo allowed on this portal
-            case '100-Y': // synonyme
-                return '9999-12-31';
-                break;
-            default:
-                return date('Y-m-d', strtotime('+2 years', $now));
-        }
-    }
 
 }
-

@@ -1,11 +1,9 @@
 <?php
 
-class Hal_Tools
-{
+class Hal_Tools {
 
     static $preflang = ['fr', 'en'];
-
-    /**
+     /**
      * Curl sur le serveur de requêtes de solr
      * Exemple : Hal_Tools::solrCurl('q=*:*&wt=json','ref_journal');
      *
@@ -18,8 +16,7 @@ class Hal_Tools
      * @throws Exception
      * @return mixed string boolean du GET ou curl_error()
      */
-    public static function solrCurl($queryString, $core = 'hal', $handler = 'select', $addDefaultFilters = false, $replace = false)
-    {
+    public static function solrCurl($queryString, $core = 'hal', $handler = 'select', $addDefaultFilters = false, $replace = false) {
         if ($addDefaultFilters) {
             //Ajout des filtres par defaut de l'environnement
             $queryString .= Hal_Search_Solr_Search::getDefaultFiltersAsURL(Hal_Settings::getConfigFile('solr.hal.defaultFilters.json'), $replace);
@@ -28,11 +25,10 @@ class Hal_Tools
         return Ccsd_Tools::solrCurl($queryString, $core, $handler);
     }
 
-    public static function encryptMail($mail, $text = '', $class = '', $style = '')
-    {
-        $class = ($class != "") ? 'class="' . $class . '" ' : '';
+    public static function encryptMail($mail, $text = '', $class = '', $style = '') {
+        $class = ( $class != "" ) ? 'class="' . $class . '" ' : '';
         $id = uniqid('link');
-        $style = ($style != "") ? 'style="' . $style . '" ' : '';
+        $style = ( $style != "" ) ? 'style="' . $style . '" ' : '';
 
         $return = '<a href="" id="' . $id . '" ' . $class . $style . '></a>';
         $return .= '<script type="text/javascript" language="javascript"> decryptMail("' . str_rot13($mail) . '", "' . $id . '", "' . $text . '")</script>';
@@ -44,8 +40,7 @@ class Hal_Tools
      * @return mixed
      * TODO Devrait etre dans l'objet/class  Website
      */
-    public static function getLanguages()
-    {
+    public static function getLanguages() {
         return Zend_Registry::get('website')->getLanguages();
     }
 
@@ -56,13 +51,11 @@ class Hal_Tools
      *
      * TODO Devrait passe par l'objet/class  Website pour ne pas faire appel a Zend_Registry::get('website')
      */
-    public static function getLangWebsite()
-    {
+    public static function getLangWebsite() {
         return array_intersect_key(Ccsd_Locale::getLanguage(), array_flip(Zend_Registry::get('website')->getLanguages()));
     }
-
     /**
-     * @param $content : mixte
+     * @param $content: mixte
      * @param null $lang string
      * @param null $preflang string[]
      * @return string
@@ -79,8 +72,7 @@ class Hal_Tools
      *
      */
 
-    public static function getbylang($content, $lang = null, $preflang = null)
-    {
+    public static function getbylang($content, $lang = null, $preflang = null) {
 
         if (is_string($content)) {
             return $content;
@@ -104,7 +96,7 @@ class Hal_Tools
                 }
             }
         }
-        if (method_exists($content, 'getlang')) {
+        if (method_exists ( $content, 'getlang') ){
             foreach ($preflang as $lang) {
                 $res = $content->getlang($lang);
                 if ($res != '') {
@@ -121,17 +113,15 @@ class Hal_Tools
         return '';
     }
 
-
     /**
      * Filtres les chaînes de caractères
      * @param $string string
      */
-    public static function stringFilter($string)
-    {
+    public static function stringFilter ($string) {
         $string = htmlspecialchars($string); //Convertit les caractères spéciaux en entités HTML
         $string = trim($string); //Enlève les espaces avant et devant le chaîne
 
         return $string;
     }
-}
 
+}

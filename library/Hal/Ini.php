@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class Hal_Ini
+ */
 class Hal_Ini extends Zend_Config_Ini {  
 
     /**
@@ -11,6 +14,16 @@ class Hal_Ini extends Zend_Config_Ini {
     
     /**
      * @see Zend_Config_Ini __contruct()
+     * Ecrasement du parent
+     *
+     * Differences principales,
+     *     la section demande peut ne pas exister.  Cela ne remonte pas d'exeption
+     *     $allowModifications = true; systematiquement
+     *     accepte l'option 'section_default', si pas de config en resultat, alors c'est la section en question qui est retournee
+     * @param string $filename
+     * @param string[] $section
+     * @param string[] $options
+     * @throws Zend_Config_Exception
      */
     public function __construct($filename, $section = null, $options = false)
     {
@@ -23,7 +36,6 @@ class Hal_Ini extends Zend_Config_Ini {
         }
     
         $allowModifications = true;
-        
         if (is_array($options)) {
             if (isset($options['nestSeparator'])) {
                 $this->_nestSeparator = (string) $options['nestSeparator'];
@@ -55,19 +67,17 @@ class Hal_Ini extends Zend_Config_Ini {
                 $section = array($section);
             }
             $dataArray = array();
-
-            /*if (!in_array ('metas', (array_intersect($section, array_keys($iniArray))))) {
-            	array_unshift($section, 'metas');
-            }*/
-
             foreach ($section as $sectionName) {
                 if (!isset($iniArray[$sectionName])) {
+                    // Principale diff avec parent: pas d'exception!
                     continue;
                 }
                 $dataArray = $this->_arrayMergeRecursive($dataArray, $this->_processSection($iniArray, $sectionName));
             }
 
-        	if (empty ($dataArray) && isset ($options['section_default']) && isset ($iniArray[$options['section_default']])) {
+        	if (empty ($dataArray)
+                && isset ($options['section_default'])
+                && isset ($iniArray[$options['section_default']])) {
                 $dataArray = $this->_arrayMergeRecursive($this->_processSection($iniArray, $options['section_default']), $dataArray);
                 $section = array($iniArray[$options['section_default']]);
             } 
@@ -125,15 +135,12 @@ class Hal_Ini extends Zend_Config_Ini {
             throw new Zend_Config_Exception("This parameter '$src' must be an array, " . get_class($src) . ' given');
 
         $oConf = self::_firstProcess(key ($src), current($src), $options);
-             
         array_shift($src);
 
-        foreach ($src as $path => $sections)
-            if (file_exists ($path))
-                $oConf->merge( self::_process($path, $sections, $options) );
-
-
-
+        foreach ($src as $path => $sections) {
+            if (file_exists($path))
+                $oConf->merge(self::_process($path, $sections, $options));
+        }
         return $oConf->toArray();
     }
 
@@ -144,6 +151,7 @@ class Hal_Ini extends Zend_Config_Ini {
      * @param  mixed         $section
      * @param  boolean|array $options
      * @return Hal_Ini
+     * @throws Zend_Config_Exception
      */
     protected static function _firstProcess ($filename, $section = null, $options = true)
     {
@@ -160,6 +168,7 @@ class Hal_Ini extends Zend_Config_Ini {
      * @param  mixed         $section
      * @param  boolean|array $options
      * @return Hal_Ini
+     * @throws Zend_Config_Exception
      */
     protected static function _process ($filename, $section = null, $options = true)
     {

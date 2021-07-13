@@ -35,12 +35,11 @@ if ($this->document->existFile()) {
                 ?>
                 <a href="<?php echo $imgSrc; ?>" data-toggle="lightbox" data-type="image" class="img-thumbnail"
                    data-width="900" data-title="<?php echo $this->document->getMainTitle() ?>"><img
-                        src="<?php echo $imgSrc; ?>" width="320"/></a>
-                <h4 class="text-left">
-                    <a href="<?php echo $href . $this->document->getUrlMainFile(); ?>" target="_blank"
+                        alt='' src="<?php echo $imgSrc; ?>" width="320"/></a>
+                <h4 class="text-center">
+                    <a class="btn btn-default" href="<?php echo $href . $this->document->getUrlMainFile(); ?>" target="_blank"
                        data-toggle="tooltip"
-                       title="<?php echo $this->translate('Plein écran avec métadonnées MédiHAL') ?>"><i
-                            class="glyphicon glyphicon-info-sign"></i></a>&nbsp;
+                       title="<?php echo $this->translate('Afficher le fichier original') ?>"><i class="fa fa-print"></i><?php echo $this->translate('Afficher') ?></a>&nbsp;
                 </h4>
                 <script>
                     $(document).delegate('*[data-toggle="lightbox"]', 'click', function (event) {
@@ -54,6 +53,7 @@ if ($this->document->existFile()) {
     <?php
     } else if ($this->document->getTypDoc() == 'VIDEO') {
         $file = $this->document->getDefaultFile();
+        $options=[];
         if ($file->isVideo()) {
             $options = [
                 //'width' => 400,
@@ -66,24 +66,19 @@ if ($this->document->existFile()) {
             }
 
         }
-
-
-
-        /*$options = [
-            //'width' => 400,
-            'title' => $this->document->getMainTitle(),
-            /*'rtmp' => 'rtmp://ccsdvid1.in2p3.fr/hal/mp4:01/09/26/52/RPS_LEST_2014.mp4',
-            'hls' => 'http://ccsdvid1.in2p3.fr/hal/_definst_/mp4:01/09/26/52/RPS_LEST_2014.mp4',*/
-            /*'rtmp' => 'rtmp://ccsdvid1.in2p3.fr/hal/mp4:01/12/14/51/VID_cmm2.m4v',
-            'hls' => 'http://ccsdvid1.in2p3.fr/hal/_definst_/mp4:01/12/14/51/VID_cmm2.m4v',*
-            'rtmp' => 'rtmp://ccsdvid1.in2p3.fr/hal/mp4:01/15/05/79/conf_connes_juin2014_2.mp4',
-            'hls' => 'http://ccsdvid1.in2p3.fr/hal/_definst_/mp4:01/15/05/79/conf_connes_juin2014_2.mp4',
-
-
-        ];*/
         ?>
         <div style="margin:20px auto 0;">
-            <?php echo $this->jwplayer($options); ?>
+            <?php
+            $video = $this->videojsplayer($options);
+            echo $video;
+            ?>
+
+
+            <h4 class="text-center">
+            <a class="btn btn-default" href="<?php echo $this->document->getUri(true).'/document'?>" target="_blank"
+               data-toggle="tooltip"
+               title="<?php echo $this->translate('Afficher le fichier original') ?>"><i class="fa fa-print"></i><?php echo $this->translate('Afficher') ?></a>&nbsp;
+            </h4>
         </div>
         <?php
     }

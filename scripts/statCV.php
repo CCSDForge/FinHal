@@ -18,13 +18,12 @@ if ($opts->date == false) {
     }
 }
 
-$dbMaster = Hal_Db_Adapter_Stats::getAdapter(APPLICATION_ENV);
 // Prépration de la db
 // On écrit les stats de consultation dans la base de HAL. Seule la lecture se fait sur le réplicat pour des questions de performances
 
-$Visit = $dbMaster->prepare("INSERT INTO STAT_VISITOR (`IP`,`ROBOT`,`AGENT`,`DOMAIN`,`CONTINENT`,`COUNTRY`,`CITY`,`LAT`,`LON`) VALUES (:IP,:ROBOT,:AGENT,:DOMAIN,:CONTINENT,:COUNTRY,:CITY,:LAT,:LON) ON DUPLICATE KEY UPDATE VID=LAST_INSERT_ID(VID)");
+$Visit = $db->prepare("INSERT INTO STAT_VISITOR (`IP`,`ROBOT`,`AGENT`,`DOMAIN`,`CONTINENT`,`COUNTRY`,`CITY`,`LAT`,`LON`) VALUES (:IP,:ROBOT,:AGENT,:DOMAIN,:CONTINENT,:COUNTRY,:CITY,:LAT,:LON) ON DUPLICATE KEY UPDATE VID=LAST_INSERT_ID(VID)");
 
-$Count = $dbMaster->prepare("INSERT INTO CV_STAT_COUNTER (`IDHAL`,`UID`,`VID`,`DHIT`,`COUNTER`) VALUES (:IDHAL,:UID,:VID,:DHIT,:COUNTER) ON DUPLICATE KEY UPDATE COUNTER=COUNTER+1");
+$Count = $db->prepare("INSERT INTO CV_STAT_COUNTER (`IDHAL`,`UID`,`VID`,`DHIT`,`COUNTER`) VALUES (:IDHAL,:UID,:VID,:DHIT,:COUNTER) ON DUPLICATE KEY UPDATE COUNTER=COUNTER+1");
 
 if ( $debug ) {
     println("\tla date : ".$date);
@@ -64,7 +63,7 @@ foreach (new DirectoryIterator(PATHTEMPDOCS.'visite/') as $file) {
                     $bind[':LAT']       = $vData['lat'];
                     $bind[':LON']       = $vData['lon'];
                     $Visit->execute($bind);
-                    $vid = $dbMaster ->lastInsertId();
+                    $vid = $db->lastInsertId();
                     if ($vid) {
                         $bind = array();
                         $bind[':IDHAL']   = $data[0];

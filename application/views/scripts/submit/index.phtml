@@ -1,6 +1,11 @@
 <?php
-/** @var Hal_View $this */
-$this->layout()->docLink = 'https://doc.archives-ouvertes.fr/deposer/';
+$oInstance = \Hal\Instance::getInstance('');
+if ($oInstance->getName() == 'halspm') {
+    $this->layout()->docLink = "../public/PlateformeDA-002-Déposer-un-document-guide-sketchnote.pdf";
+} else {
+    $this->layout()->docLink = 'https://doc.archives-ouvertes.fr/deposer/';
+
+}
 
 $renderNav = array(
     Hal_Settings::SUBMIT_STEP_FILE => array('icon' => "glyphicon glyphicon-folder-open", 'title' => "Déposer le(s) fichier(s)"),
@@ -65,11 +70,7 @@ if (Hal_Settings::SUBMIT_INIT != $this->submitType) {
                         <div class="panel-body">
                             <?php if ($step == Hal_Settings::SUBMIT_STEP_FILE || $step == Hal_Settings::SUBMIT_STEP_META || $step == Hal_Settings::SUBMIT_STEP_AUTHOR) {?>
                             <div class="switch-container">
-                                <?php if ($step == Hal_Settings::SUBMIT_STEP_AUTHOR
-                                    ||    $step == Hal_Settings::SUBMIT_STEP_META
-                                    || $this->type != Hal_Settings::SUBMIT_UPDATE
-                                    || $this->type != Hal_Settings::SUBMIT_ADDFILE
-                                    || $this->type != Hal_Settings::SUBMIT_ADDANNEX) {?>
+                                <?php if ($step == Hal_Settings::SUBMIT_STEP_AUTHOR || $step == Hal_Settings::SUBMIT_STEP_META || ($this->type != Hal_Settings::SUBMIT_UPDATE || $this->type != Hal_Settings::SUBMIT_ADDFILE || $this->type != Hal_Settings::SUBMIT_ADDANNEX)) {?>
                                 <div id="change-view-button-<?php echo $step; ?>" class="switch-view-button"
 
                                 <?php if ($step == Hal_Settings::SUBMIT_STEP_FILE && $this->submitType != Hal_Settings::SUBMIT_UPDATE) {
@@ -105,6 +106,7 @@ if (Hal_Settings::SUBMIT_INIT != $this->submitType) {
             } ?>
         </div>
     </div>
+    </div>
 </section>
 
 <div id="modal-success" class="modal fade bs-example-modal-sm " tabindex="-1"
@@ -121,7 +123,6 @@ if (Hal_Settings::SUBMIT_INIT != $this->submitType) {
             </div>
             <div class="modal-body">
                 <br/>
-                <p><?php echo $this->translate("Si votre document comporte beaucoup d'auteurs, le processus de récupération peut prendre un peu de temps. Merci pour votre patience.")?></p>
                 <div class="progress">
                     <div class="progress-bar progress-bar-striped active" role="progressbar"
                          aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%;">

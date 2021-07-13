@@ -30,8 +30,4 @@ class Hal_Document_Meta_Journal extends Hal_Document_Meta_Object
             $this->_value = (new Ccsd_Referentiels_Journal())->load($value);
         }
     }
-
-    public function __get($key) {
-        return $this->getValueObj()->__get($key);
-    }
 }

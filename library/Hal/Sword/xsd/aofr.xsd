@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!-- Changes:
-      * 2019-04: l'attribut "p" est obsolete et remplace par l'attribut "corresp". L'attribut "P" est conserve pour l'instant
--->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.tei-c.org/ns/1.0"
     xmlns:ns1="http://www.tei-c.org/ns/1.0">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace"
@@ -16,11 +12,6 @@
                 <xs:element minOccurs="0" ref="ns1:teiHeader"/>
                 <xs:element ref="ns1:text"/>
             </xs:sequence>
-            <xs:attribute name="version" use="optional">
-                <xs:simpleType>
-                    <xs:restriction base="xs:string" />
-                </xs:simpleType>
-            </xs:attribute>
         </xs:complexType>
     </xs:element>
     <xs:element name="teiHeader">
@@ -269,7 +260,7 @@
     </xs:element>
     <xs:element name="p">
         <xs:complexType mixed="true">
-            <xs:attribute name="part" type="xs:string"/>
+            <xs:attribute name="part" use="required" type="xs:string"/>
         </xs:complexType>
     </xs:element>
     <xs:element name="biblStruct">
@@ -525,9 +516,6 @@
     <xs:element name="abstract">
         <!-- %abstract -->
         <xs:complexType mixed="true">
-            <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="ns1:p" minOccurs="0"/>
-            </xs:sequence>
             <xs:attribute ref="xml:lang" use="required"/>
         </xs:complexType>
     </xs:element>
@@ -720,8 +708,6 @@
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:i"/>
             </xs:sequence>
             <xs:attribute name="n" type="xs:string"/>
-            <xs:attribute name="corresp" type="xs:string"/>
-            <!-- l'attribut "p" est obsolete et remplace par l'attribut "corresp" -->
             <xs:attribute name="p" type="xs:string"/>
             <xs:attribute name="status" type="xs:string"/>
             <xs:attribute name="type" use="required" type="xs:string"/>

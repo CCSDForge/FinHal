@@ -72,13 +72,11 @@ class SearchController extends Hal_Controller_Action
         );
 
         $htmlOfMultisortable_available = '';
-        $this->view->defaultExportedFields = explode(',', static::$_defaultExportedFields);
 
         foreach ($this->getExportMetadataFields() as $htmlId => $field) {
-            if (!in_array($htmlId, $this->view->defaultExportedFields)) {
-                $htmlOfMultisortable_available .= PHP_EOL . '<li id="' . $htmlId . '"><span class="glyphicon glyphicon-move" >&nbsp;</span>' . $field . '</li>';
-            }
+            $htmlOfMultisortable_available .= PHP_EOL . '<li id="' . $htmlId . '"><span class="glyphicon glyphicon-move"></span>&nbsp;' . $field . '</li>';
         }
+
         $f->addElement(new Zend_Form_Element_Text('multisortableFields_available', [
             'value' => $htmlOfMultisortable_available,
             'helper' => 'formNote',
@@ -89,6 +87,10 @@ class SearchController extends Hal_Controller_Action
             'label' => "Préparer l'export",
             'class' => "btn btn-primary"
         ]);
+
+
+        $this->view->defaultExportedFields = explode(',', static::$_defaultExportedFields);
+
         $this->view->form = $f;
     }
     /**
@@ -141,17 +143,13 @@ class SearchController extends Hal_Controller_Action
                     case '*_title_s' :
                     case '*_abstract_s' :
                     case '*_keyword_s' :
-                        // Champs avec langue!
                         foreach ($dfield ['fieldList'] as $fieldList) {
                             // Can't use get_translated_field
-                            $langCode = $this->get_lang_code($fieldList);
-                            if ($langCode !== false) {
-                                $rhey [$fieldList] = $this->get_translated_field(
-                                    'hal_' . $this->getFieldNameWithoutStar($dfield ['name']),
-                                    $fieldList,
-                                    'lang_' . $langCode // pour recuperer la langue
-                                );
-                            }
+                            $rhey [$fieldList] = $this->get_translated_field(
+                                'hal_' . $this->getFieldNameWithoutStar($dfield ['name']),
+                                $fieldList,
+                                'lang_' . $this->get_lang_code($fieldList) // pour recuperer la langue
+                            );
                             //if ($this->view->translate()->getTranslator()->isTranslated('hal_' . substr($dfield ['name'], 2))) {
                             //    $rhey [$fieldList] = $this->view->translate('hal_' . substr($dfield ['name'], 2)) .
                             //        ' ' . $this->view->translate('en') .
@@ -164,11 +162,7 @@ class SearchController extends Hal_Controller_Action
                         break;
                     default :
                         foreach ($dfield ['fieldList'] as $fieldList) {
-                            if (preg_match('/^[0-9]+_s$/',$fieldList )) {
-                                // champs 0_s,... 7_s !!! on supprime de la sortie...
-                            } else {
-                                $rhey [$fieldList] = $this->get_translated_field('hal_' . $fieldList, $fieldList);
-                            }
+                            $rhey [$fieldList] = $this->get_translated_field('hal_' . $fieldList, $fieldList);
                         }
                         break;
                 }
@@ -180,12 +174,7 @@ class SearchController extends Hal_Controller_Action
         return $rhey;
     }
 
-    /**
-     * @param string $field
-     * @param string $default
-     * @param string $byLang
-     * @return string|Zend_View_Helper_Translate
-     */
+
     public function get_translated_field($field, $default, $byLang = '')
     {
         if ($this->view->translate()->getTranslator()->isTranslated($field)) {
@@ -211,19 +200,13 @@ class SearchController extends Hal_Controller_Action
         return substr($fieldname, 2);
     }
 
-    /**
-     * Les champs dynamique de Solr sont prefixes par la langue xx_
-     * Si pas xx_ alors ce n'est pas un champs de langue, on rends false.
-     * @param $lang
-     * @return bool|string
-     */
     public function get_lang_code($lang)
     {
         /* Le field contenant la langue est XXxxx_fieldname */
-        if (preg_match('/^[a-z][a-z]_/i', $lang)) {
+        if (preg_match('/^[a-z][a-z]/i', $lang)) {
             return strtolower(substr($lang, 0, 2));
         } else {
-            return false;
+            return 'en';
         }
     }
 
@@ -819,6 +802,17 @@ class SearchController extends Hal_Controller_Action
                     if ($facet['fieldName'] == "authIdHalFullName_fs") {
                         // On tri par nom de famille pour le cas des auteurs
                         $values = $resultset->getFacetSet()->getFacet($facet ['fieldName'])->getValues();
+
+                        // pour SPM, on enlève de la facette les auteurs dont le prénom est (collectif)
+                        $oInstance = \Hal\Instance::getInstance('');
+                        if (($oInstance->getName() == 'halspm') && ( $facet['fieldName'] == 'authIdHalFullName_fs')) {
+                            foreach ($values as $key=>$value ) {
+                                if (preg_match('/(collectif)/', $key)) {
+                                    unset($values[$key]);
+                                }
+                            }
+                        }
+
                         uksort($values, "SearchController::sortAuthorValues");
                         $allFacetsArray [$indexOfArray] ['values'] = $values;
                     } else {
@@ -839,7 +833,7 @@ class SearchController extends Hal_Controller_Action
             $this->view->numFound = $resultset->getNumFound();
 
             //instance de l'appli
-            $oInstance = Hal_Instance::getInstance('');
+            $oInstance = \Hal\Instance::getInstance('');
             $this->view->instance = $oInstance->getName();
 
             // résultats

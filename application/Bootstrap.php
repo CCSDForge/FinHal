@@ -36,7 +36,37 @@ class Bootstrap extends Hal_Application_Bootstrap_Bootstrap {
             @mkdir(CCSD_USER_PHOTO_PATH);
             // On tourne en nobody, on ne peut pas faire des chgrp et chown
         }
+
     }
+    /**
+     * Doit être apres les constantes et l'application
+     * @return Zend_Session_Namespace
+     */
+    protected function _initSession()
+    {
+        // Initialisation de la *Class*.  L'instance ne sert a rien...
+        if (!Zend_Session::isStarted()) {
+            if (!defined('SESSION_NAMESPACE')) define('SESSION_NAMESPACE', 'hal');
+            $option = \Hal\Config::getInstance();
+            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) {
+                $secure = $option->getOption('resources.session.cookie_secure');
+            } else {
+                $secure = false;
+            }
+            $sessionOptions = [
+                'name' => SESSION_NAMESPACE,
+                'cookie_httponly' => $option->getOption('resources.session.cookie_httponly'),
+                'cookie_secure' => $secure,
+            ];
+
+            Zend_Session::setOptions($sessionOptions);
+        }
+
+        $session = parent::_initSession();
+        Zend_Registry::set('session', $session);
+        return $session;
+    }
+
     /**
      * Ajout des Helpers de vue
      *

@@ -29,7 +29,6 @@ class Hal_Document_Validity
      * @uses isValidMeta
      * @uses isValidAuthor
      * @uses isValidRecap
-     * @throws Hal_Document_Exception
      */
     static public function isValid(Hal_Document &$document, $step = null)
     {
@@ -62,7 +61,6 @@ class Hal_Document_Validity
      * On vérifie que le typdoc appartient bien aux types du portail
      * @param Hal_Document $document
      * @return bool
-     * @throws Hal_Document_Exception
      */
     static public function isValidTypdoc (Hal_Document &$document)
     {
@@ -76,7 +74,6 @@ class Hal_Document_Validity
      * Indique si l'étape file est valide
      * @param Hal_Document $document
      * @return bool
-     * @throws Hal_Document_Exception
      */
     static public function isValidFile (Hal_Document &$document)
     {
@@ -113,7 +110,6 @@ class Hal_Document_Validity
      * Indique si l'étape meta est valide
      * @param Hal_Document $document
      * @return bool
-     * @throws Hal_Document_Exception
      */
     static public function isValidMeta (Hal_Document &$document)
     {
@@ -146,12 +142,8 @@ class Hal_Document_Validity
         $metas = Hal_Document_Meta_Domain::explodeInterDomains($document->getMeta(), $form);
 
         // Fonction à effet de bord qui remplit les messages du formulaire ! Ne pas la virer :D
-        try {
-            if ($form->isValid(array_merge($metas, ['type' => $document->getTypDoc()]))) {
-                return true;
-            }
-        } catch (Zend_Form_Exception $e) {
-            // can't arise: we have an array
+        if ($form->isValid(array_merge($metas, ['type' => $document->getTypDoc()]))) {
+            return true;
         }
 
         $errors = [];
@@ -169,7 +161,6 @@ class Hal_Document_Validity
      * Indique si l'étape author est valide
      * @param Hal_Document $document
      * @return bool
-     * @throws Hal_Document_Exception
      */
     static public function isValidAuthor (Hal_Document &$document)
     {
@@ -237,22 +228,16 @@ class Hal_Document_Validity
         if ($document->getMeta('inPress')) {
             $form->getElement('date')->setRequired(false);
         }
-        try {
-            if ($form->isValid(array_merge($document->getMeta(), ['type' => $document->getTypDoc()]))) {
-                $document->clearMetas();
-                $document->addMetas($form->getValues(), Hal_Auth::getUid());
-            }
-        } catch (Zend_Form_Exception $e) {
-            // Can't arise, param is an array...
+
+        if ($form->isValid(array_merge($document->getMeta(), ['type' => $document->getTypDoc()]))) {
+            $document->clearMetas();
+            $document->addMetas($form->getValues(), Hal_Auth::getUid());
         }
+
         return $document;
     }
 
     //todo à modifier : pas glop
-    /**
-     * @param Hal_Document
-     * @return bool
-     */
     static public function isValidRecap (Hal_Document &$document)
     {
         return true;

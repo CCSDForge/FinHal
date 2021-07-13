@@ -14,7 +14,6 @@ return array(
     "writingDate" => "Date de production/écriture",
     "licence" => "Licence",
     "nnt" => "Numéro National (NNT)",
-    "thesisNumber" => "Numéro",
     "reportType" => "Type",
     "imageType" => "Type",
     "journal" => "Nom de la revue",

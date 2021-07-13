@@ -17,6 +17,8 @@ class TrackerJS
         $config = \Hal\Config::getInstance();
         $domain = $config->getOption('tarteaucitron.domain');
         $url = $config->getOption('tarteaucitron.scriptUrl', CCSDLIB . "/js/tarteaucitron/tarteaucitron.js");
+        $highPrivacy = $config->getOption('tarteaucitron.highPrivacy', 'false');
+        $privacyUrl= $config->getOption('tarteaucitron.privacyUrl', '');
 
         if ($domain) {
             // Tarteaucitron Enable
@@ -24,19 +26,19 @@ class TrackerJS
 
             $script = <<< EOV
         tarteaucitron.init({
-    	  "privacyUrl": "", /* Privacy policy url */
+    	  "privacyUrl": "$privacyUrl", /* Privacy policy url */
 
     	  "hashtag": "#tarteaucitron", /* Open the panel with this hashtag */
     	  "cookieName": "tarteaucitron", /* Cookie name */
 
-    	  "orientation": "top", /* Banner position (top - bottom) */
+    	  "orientation": "bottom", /* Banner position (top - bottom) */
     	  "showAlertSmall": true, /* Show the small banner on bottom right */
     	  "cookieslist": true, /* Show the cookie list */
 
     	  "adblocker": false, /* Show a Warning if an adblocker is detected */
     	  "AcceptAllCta" : true, /* Show the accept all button when highPrivacy on */
-    	  "highPrivacy": false, /* Disable auto consent */
-    	  "handleBrowserDNTRequest": false, /* If Do Not Track == 1, disallow all */
+    	  "highPrivacy": $highPrivacy, /* Disable auto consent */
+    	  "handleBrowserDNTRequest": true, /* If Do Not Track == 1, disallow all */
 
     	  "removeCredit": false, /* Remove credit link */
     	  "moreInfoLink": true, /* Show more info link */
@@ -52,6 +54,7 @@ EOV;
             // No RGPD Anti Tracker
         }
     }
+
     /**
      * @param string $url
      * @param int $piwikId
@@ -61,30 +64,25 @@ EOV;
         $config = \Hal\Config::getInstance();
         $domain    = $config->getOption('tarteaucitron.domain');
         $matomo = $config->getOption('matomo.enable');
-        $globalPiwikiId = $config->getOption('matomo.globalPiwikiId');
         if (!$matomo) {
             return "";
         }
 
         if ($domain) {
             // Tarteaucitron enable
-            $script = "<script>";
-            $script .= "tarteaucitron.user.matomoId = $piwikId;\n";
-            $script .= "tarteaucitron.user.matomoHost = \"$url\";\n";
-            $script .= "(tarteaucitron.job = tarteaucitron.job || []).push('matomo');";
-
-            if ($globalPiwikiId) {
-                $script .= "tarteaucitron.user.matomoHalId = $globalPiwikiId;\n";
-                $script .= "tarteaucitron.user.matomoHalHost = \"$url\";\n";
-                $script .= "(tarteaucitron.job = tarteaucitron.job || []).push('matomoHal');\n";
-            }
-            $script .= "</script>\n";
+            $script = <<< EOV
+        <script>
+        tarteaucitron.user.matomoId = $piwikId;
+        tarteaucitron.user.matomoHost = "$url";
+        (tarteaucitron.job = tarteaucitron.job || []).push('matomo');
+        </script>
+EOV;
         } else {
         // No RGPD Anti tracker: just piwik code
 
             $script = <<< EOV
         <script type="text/javascript">
-        var pkBaseURL = (("https:" === document.location.protocol) ? "https://piwik-hal.ccsd.cnrs.fr/" : "http://piwik-hal.ccsd.cnrs.fr/");
+        var pkBaseURL = (("https:" == document.location.protocol) ? "https://piwik-hal.ccsd.cnrs.fr/" : "http://piwik-hal.ccsd.cnrs.fr/");
         document.write(decodeURI("%3Cscript src=\'" + pkBaseURL + "piwik.js\' type=\'text/javascript\'%3E%3C/script%3E"));
 
         try {
@@ -103,6 +101,7 @@ EOV;
         }
         return($script);
     }
+
     /**
      * @param \Hal_View $view
      */

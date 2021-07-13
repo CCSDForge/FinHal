@@ -64,18 +64,18 @@ echo
 case $action in
     list)
         verbose "List of all actual request to DB"
-        echo "$usedb;SELECT $selectfields FROM PROCESSLIST WHERE COMMAND != 'Sleep'" | MYSQL_PWD="$password" mysql -u root -h dbname1
+        echo "$usedb;SELECT $selectfields FROM PROCESSLIST WHERE COMMAND != 'Sleep'" | MYSQL_PWD="$password" mysql -u root -h ccsddb04
         ;;
     badrequest)
         verbose "List of id of presumably bad request" 
-        echo "$usedb;SELECT $selectfields FROM PROCESSLIST WHERE COMMAND != 'Sleep' and length(INFO) > $size;" | MYSQL_PWD="$password" mysql -u root -h dbname1
+        echo "$usedb;SELECT $selectfields FROM PROCESSLIST WHERE COMMAND != 'Sleep' and length(INFO) > $size;" | MYSQL_PWD="$password" mysql -u root -h ccsddb04
         ;;
     count)
         verbose "Number of request"
-        echo "$usedb;SELECT count(*) as Count FROM PROCESSLIST WHERE COMMAND != 'Sleep'" | MYSQL_PWD="$password" mysql -u root -h dbname1
+        echo "$usedb;SELECT count(*) as Count FROM PROCESSLIST WHERE COMMAND != 'Sleep'" | MYSQL_PWD="$password" mysql -u root -h ccsddb04
         ;;
     kill)
-	ids=`echo "$usedb;SELECT $selectfields FROM PROCESSLIST WHERE COMMAND != 'Sleep' and length(INFO) > $size;" | MYSQL_PWD="$password" mysql --skip-column-names -u root -h dbname1 | grep -e '^[0-9]*'`
+	ids=`echo "$usedb;SELECT $selectfields FROM PROCESSLIST WHERE COMMAND != 'Sleep' and length(INFO) > $size;" | MYSQL_PWD="$password" mysql --skip-column-names -u root -h ccsddb04 | grep -e '^[0-9]*'`
 	case "$ids" in
 	    ?*)
 	    echo
@@ -84,7 +84,7 @@ case $action in
 		case "X$reponse" in
 		    X[yYoO])
 			for p in $ids; do
-			    echo "$usedb;KILL $p" | MYSQL_PWD="$password" mysql --skip-column-names -u root -h dbname1
+			    echo "$usedb;KILL $p" | MYSQL_PWD="$password" mysql --skip-column-names -u root -h ccsddb04
 			done
 			;;
 		    *)

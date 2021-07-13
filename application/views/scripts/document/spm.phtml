@@ -439,7 +439,7 @@ if (! (isset($this->document) && $this->document instanceof Hal_Document) ) {
             <small>
                 <?php echo $this->translate('Contributeur') ?> : <a rel="nofollow"
                                                                     href="<?php echo PREFIX_URL ?>search/index/q/*/contributorId_i/<?php echo $this->document->getContributor('uid'); ?>/"
-                                                                    target="_blank"><?php echo $this->document->getContributor('fullname') ?></a><br/>
+                                                                    target="_blank"><?php $alias = $this->document->getContributor('alias'); echo ($alias != '') ? $alias : $this->document->getContributor('fullname')?></a><br/>
                 <?php echo $this->translate('Déposé le') . ' : ' . $this->document->getSubmittedDate(Zend_Date::DATE_FULL) ?><br />
                 <?php echo $this->translate('Dernière modification le') . ' : ' . $this->document->getLastModifiedDate(Zend_Date::DATE_FULL) ?><br />
             </small>

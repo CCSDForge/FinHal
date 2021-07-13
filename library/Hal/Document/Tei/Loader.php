@@ -11,10 +11,6 @@ class Hal_Document_Tei_Loader
     /** @var DOMXPath|null  */
     private $_xpath = null;
 
-    /**
-     * Hal_Document_Tei_Loader constructor.
-     * @param DOMDocument $xml
-     */
     public function __construct(DOMDocument $xml)
     {
         $this->_xpath = new DOMXPath($xml);
@@ -24,10 +20,6 @@ class Hal_Document_Tei_Loader
         $this->_xpath->registerNamespace('xml', "http://www.w3.org/XML/1998/namespace");
     }
 
-    /**
-     * @param string $instance
-     * @return array
-     */
     public function loadMetas($instance = 'hal') {
 
         /**
@@ -138,14 +130,6 @@ class Hal_Document_Tei_Loader
                 $finalMetas["typdoc"] = $n;
                 continue;
             }
-            //JB :ajout de la gestion de l'indexation controlée
-            else if ($scheme == "VOCINRA"){
-                $meta = 'inra_indexation_local';
-                $n = $entry->getAttribute('n');
-                if ($n !== ''){
-                    $value = $n;
-                }
-            }
             if ($meta != '') {
                 if ($multiple) {
                     if ( !isset($finalMetas[$meta]) || !is_array($finalMetas[$meta]) ) {
@@ -194,9 +178,8 @@ class Hal_Document_Tei_Loader
          * source
          */
 //$entries = $this->_xpath->query('/tei:TEI/tei:text/tei:body/tei:listBibl/tei:biblFull/tei:sourceDesc/tei:biblStruct/tei:monogr[node() = "tei:idno" or "tei:title"]');
-        $entries = $this->_xpath->query(
-            '/tei:TEI/tei:text/tei:body/tei:listBibl/tei:biblFull/tei:sourceDesc/tei:biblStruct/tei:monogr/tei:title |
-             /tei:TEI/tei:text/tei:body/tei:listBibl/tei:biblFull/tei:sourceDesc/tei:biblStruct/tei:monogr/tei:idno');
+        $entries = $this->_xpath->query('/tei:TEI/tei:text/tei:body/tei:listBibl/tei:biblFull/tei:sourceDesc/tei:biblStruct/tei:monogr/tei:title |
+                          /tei:TEI/tei:text/tei:body/tei:listBibl/tei:biblFull/tei:sourceDesc/tei:biblStruct/tei:monogr/tei:idno');
         $journal = array('VALID'=>'INCOMING', 'JID' => '', 'ISSN'  =>  '', 'EISSN' =>  '', 'JNAME' => '', 'PUBLISHER' => '', 'URL' => '');
         $dataJournal = false;
         foreach($entries as $entry) {
@@ -246,11 +229,8 @@ class Hal_Document_Tei_Loader
                 }
             }
         }
-        # TODO: Au lieu d'aller dans Solr, aller directement dans la BD, on cherche un identifiant!!!
-        #       Il faudrait mettre les VALID en premier pour systematiquement prendre un journal deja valide.
 
         if (! isset($finalMetas['journal']) && is_array($journal) && count($journal)) {
-            $solrResult=[];
             if (isset($journal['ISSN']) && $journal['ISSN'] != '') {
                 $solrResult = Ccsd_Referentiels_Journal::search('issn_s:' . $journal['ISSN'], 1);
             } else if (isset($journal['EISSN']) && $journal['EISSN'] != '') {
@@ -380,7 +360,7 @@ class Hal_Document_Tei_Loader
                                 }
                             }
                         } else if ($type == 'dateDefended') {
-                            if (in_array($finalMetas["typdoc"], array('THESE', 'HDR', 'MEM', 'ETABTHESE'))) {
+                            if (in_array($finalMetas["typdoc"], array('THESE', 'HDR', 'MEM'))) {
                                 $meta = 'date';
                             }
                         } else if ($type == 'dateEpub') {
@@ -434,7 +414,7 @@ class Hal_Document_Tei_Loader
         foreach($entries as $entry) {
             $type = strtolower($entry->getAttribute('type'));
             if ( in_array($type, Hal_Document::$_serverCopy) ) {
-                $finalMetas['identifier'][$type] = trim($entry->nodeValue);
+                $finalMetas['identifier'][$type] = $entry->nodeValue;
             }
         }
 
@@ -445,15 +425,14 @@ class Hal_Document_Tei_Loader
         $entries = $this->_xpath->query('/tei:TEI/tei:text/tei:body/tei:listBibl/tei:biblFull/tei:sourceDesc/tei:biblStruct/tei:ref');
         foreach($entries as $entry) {
             $type = $entry->getAttribute('type');
-            $value = trim($entry->nodeValue);
             if ($type == 'seeAlso') {
                 if ($finalMetas["typdoc"] == 'SOFTWARE') {
-                    $finalMetas['codeRepository'] = $value;
+                    $finalMetas['codeRepository'] = $entry->nodeValue;
                 } else {
-                    $finalMetas['seeAlso'][] = $value;
+                    $finalMetas['seeAlso'][] = $entry->nodeValue;
                 }
             } else if ($type == 'publisher') {
-                $finalMetas['publisherLink'] = $value;
+                $finalMetas['publisherLink'] = $entry->nodeValue;
             }
         }
         /**
@@ -474,8 +453,8 @@ class Hal_Document_Tei_Loader
                     $orgs = $this->_xpath->query('/tei:TEI/tei:text/tei:back/tei:listOrg[@type="projects"]/tei:org[@xml:id="' . $ref . '"]');
                     if ($orgs->length == 1) {
                         $org = $orgs->item(0);
-                        $data = array();
                         if ($org->hasChildNodes()) {
+                            $data = array();
                             foreach($org->childNodes as $node) {
                                 if ($node->nodeName == 'orgName') {
                                     $type = $node->getAttribute('type');
@@ -494,17 +473,14 @@ class Hal_Document_Tei_Loader
                         $finalMetas['anrProject'][] = new Ccsd_Referentiels_Anrproject(0, $data);
                     }
                 } else if (strpos($ref, 'projeurop') !== false) {
-                    // Si Id HAL indique, on prends par l'Id.
                     $finalMetas['europeanProject'][] = new Ccsd_Referentiels_Europeanproject(str_replace('projeurop-', '', $ref));
                 } else if (strpos($ref, 'localProjeurop') !== false) {
-                    // Sinon, on cherche
                     $orgs = $this->_xpath->query('/tei:TEI/tei:text/tei:back/tei:listOrg[@type="projects"]/tei:org[@xml:id="' . $ref . '"]');
                     if ($orgs->length == 1) {
                         $org = $orgs->item(0);
-                        $data = array();
                         if ($org->hasChildNodes()) {
+                            $data = array();
                             foreach($org->childNodes as $node) {
-                                // TODO: remplacer par un switch
                                 if ($node->nodeName == 'orgName') {
                                     $data['ACRONYME'] = $node->nodeValue;
                                 } else if ($node->nodeName == 'idno') {
@@ -668,12 +644,8 @@ class Hal_Document_Tei_Loader
          */
         $entries = $this->_xpath->query('/tei:TEI/tei:text/tei:body/tei:listBibl/tei:biblFull/tei:sourceDesc/tei:recordingStmt/tei:recording');
         foreach ($entries as $entry) {
-            try {
-                $interval = new DateInterval($entry->getAttribute('dur'));
-                $finalMetas['duration'] = $interval->format('%h:%i:%s');
-            } catch (Exception $e) {
-                continue;
-            }
+            $interval = new DateInterval($entry->getAttribute('dur'));
+            $finalMetas['duration'] = $interval->format('%h:%i:%s');
         }
 
         /** Begin ZMO - To get the local meta for portal
@@ -831,10 +803,6 @@ class Hal_Document_Tei_Loader
                 $ref = str_replace('#', '', $affiliation->getAttribute('ref'));
                 if (strpos($ref, 'struct-') !== false) {
                     $structure = new Hal_Document_Structure((int)str_replace('struct-', '', $ref));
-                    if ($structure->getStructid() ==0) {
-                        // La structure indiquee ne corresponds a rien!
-                        throw new Exception(Ccsd_Tools::translate("$ref ne corresponds pas a une structure HAL valide"));
-                    }
                     $structArray[] = $structure;
                     $structidx = count($structArray)-1;
                 } else if (strpos($ref, 'localStruct-') !== false) {
@@ -842,14 +810,8 @@ class Hal_Document_Tei_Loader
                     if ($structure->length == 1) {
                         $structure = $this->createStructure($structure->item(0), $this->_xpath);
                         $structArray[] = $structure;
-                        $structidx = count($structArray) - 1;
-                    } else {
-                        // Ne devrait pas etre des Panic, juste warning
-                        Ccsd_Tools::panicMsg(__FILE__, __LINE__, "To much org element with id: $ref");
+                        $structidx = count($structArray)-1;
                     }
-                } else {
-                    // Ne devrait pas etre des Panic, juste warning
-                    Ccsd_Tools::panicMsg(__FILE__, __LINE__, "ref attribute for affiliation element is badly formatted: $ref");
                 }
                 if ($structidx !== false) {
                     $author->addStructidx($structidx);
@@ -886,7 +848,7 @@ class Hal_Document_Tei_Loader
     /**
      * @param $contributor
      * @return Hal_Site_Collection []
-     * @throws Hal_Site_Exception
+     * @throws Exception
      */
     public function loadCollections($contributor)
     {
@@ -906,7 +868,7 @@ class Hal_Document_Tei_Loader
                 $collection = Hal_Site::exist($tampid, Hal_Site::TYPE_COLLECTION, true);
                 /** @var Hal_Site_Collection $collection */
                 if ($collection === false) {
-                    throw new Hal_Site_Exception("Test collection $tampid not found");
+                    throw new Exception("Test collection $tampid not found");
                 }
                 if ($collection->getSid() != 0 && $collection->isTamponneur($contributor)) {
                     $collections[] = $collection;
@@ -966,9 +928,7 @@ class Hal_Document_Tei_Loader
 
             $dates = $this->_xpath->query('tei:date', $entry);
             if ($dates->length == 1) {
-                /** @var DOMElement $dateItem */
-                $dateItem = $dates->item(0);
-                $date = $dateItem->getAttribute('notBefore');
+                $date = $dates->item(0)->getAttribute('notBefore');
             } else {
                 $date = date("Y-m-d");
             }
@@ -1016,9 +976,7 @@ class Hal_Document_Tei_Loader
                     }
                     $addrCountry = $xpath->query('tei:address/tei:country', $item);
                     if ($addrCountry->length == 1) {
-                        /** @var DOMElement $countryItem */
-                        $countryItem = $addrCountry->item(0);
-                        $structure->setPaysid(strtolower($countryItem->getAttribute('key')));
+                        $structure->setPaysid(strtolower($addrCountry->item(0)->getAttribute('key')));
                     }
                     if (isset($item->ref)) {
                         $structure->setUrl($item->ref->nodeValue);
@@ -1035,9 +993,7 @@ class Hal_Document_Tei_Loader
                         } else if (strpos($active, 'localStruct-') !== false) {
                             $structures = $xpath->query('/tei:TEI/tei:text/tei:back/tei:listOrg/tei:org[@xml:id="' . $active . '"]');
                             if ($structures->length == 1) {
-                                /** @var DOMElement $strucItem */
-                                $strucItem = $structures->item(0);
-                                $structure->addParent($this->createStructure($strucItem, $xpath), $name);
+                                $structure->addParent($this->createStructure($structures->item(0), $xpath), $name);
                             }
                         }
                     }

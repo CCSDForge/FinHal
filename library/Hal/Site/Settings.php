@@ -9,9 +9,6 @@
 
 require_once(__DIR__.'/Settings.php');
 
-/**
- * Class Hal_Site_Settings
- */
 class Hal_Site_Settings
 {
 
@@ -32,11 +29,7 @@ class Hal_Site_Settings
     protected $_visibility = true;
 
     /** @var int */
-    protected $_associatedsiteId = 0;
-    /** @var Hal_Site_Collection */
-    protected $_associatedsite = null;
-    /** @var bool */
-    protected $_associatedsiteLoaded = false;
+    protected $_associatedsite = 0;
 
     /**
      * @var string[]  ; Langues par défaut pour un site
@@ -57,7 +50,7 @@ class Hal_Site_Settings
 
         $this->setVisibility(Ccsd_Tools::ifsetor($data['visibility'], true));
         $this->setLanguages(Ccsd_Tools::ifsetor($data['languages'], $this->_defaultLangs));
-        $this->setAssociatedsiteId(Ccsd_Tools::ifsetor($data['associatedsite'], 0));
+        $this->setAssociatedsite(Ccsd_Tools::ifsetor($data['associatedsite'], 0));
     }
 
     /**
@@ -67,7 +60,6 @@ class Hal_Site_Settings
     static public function loadFromSite(Hal_Site $site)
     {
         // Sous-classer !
-        Ccsd_Tools::panicMsg(__FILE__, __LINE__, "loadFromSite must be subclassed!!! caslled with " . $site->getShortname());
         return null;
 
     }
@@ -109,12 +101,10 @@ class Hal_Site_Settings
                     break;
             }
         }
-        return $this;
     }
 
     /**
      * @return int
-     * @throws Zend_Db_Adapter_Exception
      */
     public function save()
     {
@@ -249,49 +239,20 @@ class Hal_Site_Settings
     }
 
     /**
-     * @param int $siteid
-     * @return $this
-     */
-    public function setAssociatedsiteId($siteid)
-    {
-        if ($this->_associatedsiteId != $siteid) {
-            $this->_associatedsiteId = $siteid;
-            $this->_associatedsiteLoaded = false;
-        }
-        return $this;
-    }
-
-    /**
-     * @param Hal_Site $site
+     * @param $site
      * @return $this
      */
     public function setAssociatedsite($site)
     {
-        $this-> setAssociatedsiteId($site->getSid());
         $this->_associatedsite = $site;
-        $this->_associatedsiteLoaded = true;
         return $this;
     }
-
 
     /**
      * @return int
      */
-    public function getAssociatedsiteId()
-    {
-        return $this->_associatedsiteId;
-    }
-   /**
-     * @return Hal_Site_Collection
-     */
     public function getAssociatedsite()
     {
-        $id = $this->getAssociatedsiteId();
-        if ($id && ! $this->_associatedsiteLoaded) {
-            /** @var Hal_Site_Collection $site */
-            $site = Hal_Site::loadSiteFromId($this->getAssociatedsiteId() );
-            $this->setAssociatedsite($site);
-        }
         return $this->_associatedsite;
     }
 
@@ -333,7 +294,6 @@ class Hal_Site_Settings
 
     /**
      * @param Hal_Site_Settings $settings
-     * @throws Zend_Db_Adapter_Exception
      */
     public function duplicate(Hal_Site_Settings $settings)
     {

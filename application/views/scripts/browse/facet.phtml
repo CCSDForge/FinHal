@@ -37,8 +37,9 @@
 
                 echo '<li class="list-group-item">';
 
-                $searchParams ['q'] = $this->urlFilterName . ':"' . $facet ['name'] . '"';
-
+                // $searchParams ['q'] = $this->urlFilterName . ':"' . $facet ['name'] . '"';
+                $searchParams ['q'] = '*';
+                $searchParams [$this->urlFilterName] = $facet ['name'];
                 $url = $this->url($searchParams, null, TRUE);
 
                 echo '<a rel="nofollow" href="' . $this->escape($url) . '">';

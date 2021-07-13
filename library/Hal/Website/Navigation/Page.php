@@ -81,13 +81,9 @@ class Hal_Website_Navigation_Page extends Ccsd_Website_Navigation_Page
      */
     public function getSid() {
         $sid = $this -> _sid;
-        if (!$sid) {
+        if ($sid == 0) {
             // sid not set, we get it from navigation menu.
             $sid = $this -> nav-> getSid();
-        }
-        if (!$sid) {
-            // sid not set, we get it from navigation menu.
-            $sid = Hal_Site::getCurrent()-> getSid();
         }
         return $sid;
     }

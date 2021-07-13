@@ -5,8 +5,7 @@
  * Created by PhpStorm In CNRS-CCSD
  * User: Zahen MALLA OSMAN
  * Date: 29/11/2016
- * Refactor: B Marmol: stop to transform in string and parsing string each time
- *                     add comment for type control
+ * Time: 16:58
  * =============================================================================================================
  */
 
@@ -15,16 +14,20 @@
  * This class allows to create an XML/TEI string for a HAL document
  * His constructor receive a HAL_Document object and base on it to build the TEI elements
  * Using the method create(), it is possible to construct all the TEI elements of the HAL document :
->>> $var = new Hal_Document_Tei(Hal_Document)
->>> $var->create();
+   >>> $var = new Hal_Document_Tei(Hal_Document)
+   >>> $var->create();
  * It is also possible to use one of the 33 methods implemented in this class to create a specific TEI element
-like <title>, <author>, <abstract>, ... :
->>> $var->createTitle()
+   like <title>, <author>, <abstract>, ... :
+   >>> $var->createTitle()
  * =============================================================================================================
  */
 
 class Hal_Document_Tei_Creator extends Hal_Document
 {
+    //<editor-fold desc="Constants">
+    /**
+     * Constants */
+
     const UTF8            = "utf-8";
     const TITLE           = "title";
     const STATUS          = "status";
@@ -70,24 +73,26 @@ class Hal_Document_Tei_Creator extends Hal_Document
     const CLASSCODE       = "classCode";
     const COLLABORATION   = "collaboration";
     const TEI_LOGDIR      = "/tmp/tei_logFolder/";
+    //</editor-fold>
+
+    //<editor-fold desc="Properties">
     /**
      * Properties */
 
-    /** @var bool :  Say if Creator must return string with XML header */
+    // Browser header
     protected $_header      = null;
-    /** @var Ccsd_DOMDocument */
+    // Element <xml>
     protected $_xml         = null;
     // Element <tei>
     protected $_root        = null;
     // Object Hal_Document
     protected $_HalDocument = null;
+    //</editor-fold>
 
+    //<editor-fold desc="Constructor">
     /**
      * receive a HAL_Document object
-     * create two elements <XML> and <TEI> by default
-     * @param Hal_Document $HalDocument
-     * @param bool $_header
-     */
+     * create two elements <XML> and <TEI> by default */
 
     public function __construct($HalDocument, $_header = false) {
         if (!$HalDocument instanceof Hal_Document) {
@@ -99,21 +104,20 @@ class Hal_Document_Tei_Creator extends Hal_Document
         $this->_xml->substituteEntities = true;
         $this->_xml->preserveWhiteSpace = false;
         $this->_root = $this->_xml->createElement('TEI');
-        $this->_root->setAttribute('xmlns',     'http://www.tei-c.org/ns/1.0');
-        $this->_root->setAttribute('xmlns:xsi', "http://www.w3.org/2001/XMLSchema-instance");
-        $this->_root->setAttribute('xmlns:hal', 'http://hal.archives-ouvertes.fr/');
-        $this->_root->setAttribute('version', '1.1');
-        $attr = new DOMAttr('xsi:schemaLocation', "http://www.tei-c.org/ns/1.0 http://api.archives-ouvertes.fr/documents/aofr-sword.xsd");
-        $this->_root->setAttributeNode($attr);
+        $this->_root->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.tei-c.org/ns/1.0');
+        $this->_root->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:hal', 'http://hal.archives-ouvertes.fr/');
         $this->_xml->appendChild($this->_root);
         $this->_header = $_header;
     }
+    //</editor-fold>
+
+    //<editor-fold desc="appendStringToDomNode">
     /**
      * Append a string child to a dom parent
      * @param DOMElement $domParent
      * @param DOMElement|string $domChild
-     * @deprecated
      */
+
     private function appendStringToDomNode($domParent, $domChild) {
         if(isset($domChild) && $domChild != "") {
             if(is_string($domChild)) {
@@ -130,12 +134,14 @@ class Hal_Document_Tei_Creator extends Hal_Document
             }
         }
     }
+
     /**
      * In case that the doc is not valid according to the TEI schema :
      * this method create a log file that contain the produced errors in tei_logFolder
      * @param string $XML_TEI
      */
-    public function validateTEI($XML_TEI) {
+
+    private function validateTEI($XML_TEI) {
         $teiSchema = __DIR__.'/../Sword/xsd/aofr.xsd';
         $xml = new Ccsd_DOMDocument('1.0',self::UTF8);
         $xml->loadXML($XML_TEI);
@@ -177,8 +183,8 @@ class Hal_Document_Tei_Creator extends Hal_Document
             }
         }
     }
+
     /**
-     * @deprecated  will be suppress very soon
      * @param string $var
      * @return string
      */
@@ -196,25 +202,15 @@ class Hal_Document_Tei_Creator extends Hal_Document
     }
 
     /**
-     * return an XML string that represent all TEI elements of a HAL Document
-     * Keep for compatibility
-     * @deprecated: prefer createDOM
-     * @return string
-     */
-    public function create() {
-        $teiDom = $this->createDOM();
-        return ($this->_header) ? $teiDom->saveXML() : $teiDom->saveXML($teiDom->documentElement);
-    }
+     * return an XML string that represent all TEI elements of a HAL Document */
 
-    /**
-     * @return Ccsd_DOMDocument|null
-     */
-    public function createDOM() {
+    public function create() {
+
         // =====================================================================
         // ============================= teiHeader =============================
         // =====================================================================
         // Create and append <teiHeader>
-        $this->_root ->appendChild($this->createTeiHeader());
+        $this->appendStringToDomNode($this->_root, $this->createTeiHeader(false));
 
         // =====================================================================
         // ==================== text>body>listBibl>biblFull ====================
@@ -229,25 +225,42 @@ class Hal_Document_Tei_Creator extends Hal_Document
         $b = $this->_xml->createElement('biblFull');
 
         // ============================ titleStmt =============================
+        // Create <titleStmt>
+        $ts = $this->_xml->createElement('titleStmt');
+        // Create <title> and append it to <titleStmt>
+        $this->appendStringToDomNode($ts, $this->createTitle(false));
+        // Create <title> (subtitle) and append it to <titleStmt>
+        $this->appendStringToDomNode($ts, $this->createSubTitle(false));
+        // Create <author> and append it to <titleStmt>
+        $this->appendStringToDomNode($ts, $this->createAuthors(false));
+        // Create <editor> and append it to <titleStmt>
+        $this->appendStringToDomNode($ts, $this->createContributors(false));
+        // Create <funder> and append it to <titleStmt>
+        $this->appendStringToDomNode($ts, $this->createFinancements(false));
         // Append <titleStmt> to <biblFull>
-        $b->appendChild($this->createTitleStmt());
+        $b->appendChild($ts);
 
         // ============================ editionStmt ===========================
         // Create <editionStmt>
-        $es = $this->createEditionStmt();
+        $es = $this->_xml->createElement('editionStmt');
+        // Create <edition> and append it to <editionStmt>
+        $this->appendStringToDomNode($es, $this->createEdition(false));
+        // Create <respStmt> and append it to <editionStmt>
+        $this->appendStringToDomNode($es, $this->createRespStmt(false));
+        // Append <editionStmt> to <biblFull>
         $b->appendChild($es);
 
         // ========================== publicationStmt =========================
         // Create <publicationStmt> and append it to <biblFull>
-        $b->appendChild($this->createPublicationStmt());
+        $this->appendStringToDomNode($b, $this->createPublicationStmt(false));
 
         // ============================= seriesStmt ===========================
         // Create <seriesStmt> and append it to <biblFull>
-        $b->appendChild($this->createSeriesStmt());
+        $this->appendStringToDomNode($b, $this->createSeriesStmt(false));
 
         // ============================== notesStmt ===========================
         // Create <notesStmt> and append it to <biblFull>
-        $b->appendChild($this->createNotesStmt());
+        $this->appendStringToDomNode($b, $this->createNotesStmt(false));
 
         // ============================= sourceDesc ===========================
         // Create <sourceDesc>
@@ -256,39 +269,26 @@ class Hal_Document_Tei_Creator extends Hal_Document
         // Create <biblStruct>
         $biblStruct = $this->_xml->createElement('biblStruct');
         // Create <analytic> and append it to <biblStruct>
-        $analiytic = $this->createAnalytic();
-        if ($analiytic) $biblStruct -> appendChild($analiytic);
+        $this->appendStringToDomNode($biblStruct, $this->createAnalytic(false));
         // Create <monogr> and append it to <biblStruct>
-        $biblStruct -> appendChild($this->createMonogr());
-
+        $this->appendStringToDomNode($biblStruct, $this->createMonogr(false));
         // Create <series> and append it to <biblStruct>
-        $series = $this->createSeries();
-        if ($series) $biblStruct -> appendChild($series);
-
+        $this->appendStringToDomNode($biblStruct, $this->createSeries(false));
         // Create <idno> and append it to <biblStruct>
-        foreach ($this->createIdentifier() as $idno) {
-            $biblStruct->appendChild($idno);
-        }
+        $this->appendStringToDomNode($biblStruct, $this->createIdentifier(false));
         // Create <ref> type seeAlso and append it to <biblStruct>
-        foreach ($this->createSeeAlso() as $seeAlso) {
-            $biblStruct -> appendChild($seeAlso);
-        }
+        $this->appendStringToDomNode($biblStruct, $this->createSeeAlso(false));
         // Create <ref> type publisher and append it to <biblStruct>
-        $publisherLink = $this->createPublisherLink();
-        if ($publisherLink) $biblStruct -> appendChild($publisherLink);
+        $this->appendStringToDomNode($biblStruct, $this->createPublisherLink(false));
         // Create <relatedItem> and append it to <biblStruct>
-        foreach ($this->createRelatedItem() as $relatedItem){
-            $biblStruct->appendChild($relatedItem);
-        }
+        $this->appendStringToDomNode($biblStruct, $this->createRelatedItem(false));
         // Append <biblStruct> to <sourceDesc>
         $sd->appendChild($biblStruct);
 
         // Create <listPlace> and append it to <sourceDesc>
-        $listPlace = $this->createListPlace();
-        if ($listPlace) $sd -> appendChild($listPlace);
+        $this->appendStringToDomNode($sd, $this->createListPlace(false));
         // Create <recordingStmt> and append it to <sourceDesc>
-        $recortStmt = $this->createRecordingStmt();
-        if ($recortStmt) $sd->appendChild($recortStmt);
+        $this->appendStringToDomNode($sd, $this->createRecordingStmt(false));
 
         // Append <sourceDesc> to <biblFull>
         $b->appendChild($sd);
@@ -298,27 +298,16 @@ class Hal_Document_Tei_Creator extends Hal_Document
         $pd = $this->_xml->createElement('profileDesc');
 
         // Create <languages> and append it to <profileDesc>
-        $pd->appendChild($this->createLanguages());
+        $this->appendStringToDomNode($pd, $this->createLanguages(false));
 
         // Create <textClass> and append it to <profileDesc>
-        $pd ->appendChild($this->createTextClass());
+        $this->appendStringToDomNode($pd, $this->createTextClass(false));
 
         // Create <abstract> and append it to <profileDesc>
-        foreach ($this->createAbstract() as $abstract) {
-            $pd -> appendChild($abstract);
-        }
+        $this->appendStringToDomNode($pd, $this->createAbstract(false));
 
-        /** add bibliographics information
-         * TODO: le XML des references contient un xml:id qui n'est plus unique si on mets un resultat avec plusieurs document!!!
-         *       Il faut ABSOLUEMENT modifier les Id avant de remettre le code.
-         * Fait: BM
-         * @see changeXmlIdValue
-         * $listBibl = $this->createReferences();
-         * if ($listBibl) $pd->appendChild($listBibl);
-         */
         // Create <org> and append it to <profileDesc>
-        $org = $this->createOrg();
-        if ($org) $pd->appendChild($org);
+        $this->appendStringToDomNode($pd, $this->createOrg(false));
 
         // Append <profileDesc> to <biblFull>
         $b->appendChild($pd);
@@ -334,7 +323,7 @@ class Hal_Document_Tei_Creator extends Hal_Document
         // ============================= text>back =============================
         // =====================================================================
         // Create <back> and append it to <text>
-        $text ->appendChild($this->createBack());
+        $this->appendStringToDomNode($text, $this->createBack(false));
 
         // APPEND THE ROOT AND RETURN THE XML STRING
         // Append <text> to <tei>
@@ -345,18 +334,19 @@ class Hal_Document_Tei_Creator extends Hal_Document
         //$this->validateTEI($this->_xml->saveXML($this->_xml->documentElement));
 
         // Return the XML
-        return $this->_xml;
-
+        return ($this->_header) ? $this->_xml->saveXML() : $this->_xml->saveXML($this->_xml->documentElement);
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createTeiHeader">
     /**
-     * @return DOMElement
      * return <teiHeader> */
 
-    private function createTeiHeader() {
+    public function createTeiHeader($showXML = true) {
         $head = $this->_xml->createElement('teiHeader');
-        $fd   = $this->_xml->createElement('fileDesc');
-        $ts    = $this->_xml->createElement('titleStmt');
-        $title = $this->_xml->createElement(self::TITLE, 'HAL TEI export of '. $this->_HalDocument->getId(true));
+        $fd = $this->_xml->createElement('fileDesc');
+        $ts = $this->_xml->createElement('titleStmt');
+        $title = $this->_xml->createElement(self::TITLE, 'HAL TEI export of '.$this->_HalDocument->_identifiant);
         $ts->appendChild($title);
         $fd->appendChild($ts);
         $ps = $this->_xml->createElement('publicationStmt');
@@ -364,7 +354,7 @@ class Hal_Document_Tei_Creator extends Hal_Document
         $headeravailability = $this->_xml->createElement('availability');
         $headeravailability->setAttribute(self::STATUS, 'restricted');
         if ( $this->_HalDocument->getLicence() != '' ) {
-            $headerlicence = $this->_xml->createElement(self::LICENCE, Ccsd_Tools::translate(Hal_Referentiels_Metadata::getLabel(self::LICENCE, $this->_HalDocument->getLicence()), 'en'));
+            $headerlicence = $this->_xml->createElement(self::LICENCE, Zend_Registry::get(self::ZENDTRANSLATE)->translate(Hal_Referentiels_Metadata::getLabel(self::LICENCE, $this->_HalDocument->getLicence()), 'en'));
             $headerlicence->setAttribute(self::TARGET, $this->_HalDocument->getLicence());
         } else {
             $headerlicence = $this->_xml->createElement(self::LICENCE, 'Distributed under a Creative Commons Attribution 4.0 International License');
@@ -382,455 +372,390 @@ class Hal_Document_Tei_Creator extends Hal_Document
         $sd->appendChild($p);
         $fd->appendChild($sd);
         $head->appendChild($fd);
-        return $head;
+        if($showXML) {
+            return $this->convertToXMLString($this->_xml->saveXML($head));
+        } else {
+            return $this->_xml->saveXML($head);
+        }
     }
+    //</editor-fold>
 
+    //<editor-fold desc="createTitle">
     /**
-     * @return DOMElement
-     */
-    private function createTitleStmt() {
-        $ts = $this->_xml->createElement('titleStmt');
+     * return the title of the document <title> */
+
+    public function createTitle($showXML = true) {
+        $titlesList = [];
         foreach ($this->_HalDocument->getTitle() as $l => $t) {
-            $ts ->appendChild($this->createTitle($t, $l));
+            $tit = $this->_xml->createElement(self::TITLE, $t);
+            $tit->setAttribute(self::XMLLANG, $l);
+            array_push($titlesList, $this->_xml->saveXML($tit));
         }
-        $subtitle = $this->_HalDocument->getMetaObj('subTitle');
-        if ($subtitle) {
-            foreach ($subtitle->getValue() as $l => $t) {
-                $ts->appendChild($this->createSubTitle($t, $l));
-            }
+        if ($showXML) {
+            return $this->convertToXMLString(implode("", $titlesList));
+        } else {
+            return implode("", $titlesList);
         }
-        foreach ($this ->createAuthors() as $autnode) {
-            $ts ->appendChild($autnode);
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="createSubTitle">
+    /**
+     * return the sub title of the document <title type="sub"> */
+
+    public function createSubTitle($showXML = true) {
+        $subTitlesList = array();
+        foreach ($this->_HalDocument->getMeta('subTitle') as $l => $t) {
+            $stit = $this->_xml->createElement(self::TITLE, $t);
+            $stit->setAttribute(self::XMLLANG, $l);
+            $stit->setAttribute('type', 'sub');
+            array_push($subTitlesList, $this->_xml->saveXML($stit));
         }
-        $contributor = $this->createContributors();
-        if ($contributor) $ts ->appendChild($contributor);
-
-        $this->addFinancements($ts);
-        return $ts;
-    }
-    /**
-     * return the title of the document <title>
-     * @param string $title
-     * @param string $lang
-     * @return  DOMElement
-     */
-    private function createTitle($title, $lang) {
-        $tit = $this->_xml->createElement(self::TITLE, $title);
-        $tit->setAttribute(self::XMLLANG, $lang);
-        return $tit;
-    }
-    /**
-     * return the sub title of the document <title type="sub">
-     * @param string $subtitle
-     * @param string $lang
-     * @return DOMElement
-     */
-
-    private function createSubTitle($subtitle, $lang) {
-        $stit = $this->createTitle($subtitle, $lang);
-        $stit->setAttribute('type', 'sub');
-        return $stit;
-    }
-    /**
-     * return the authors of the document <author>
-     * @return DOMElement[]
-     */
-
-    private function createAuthors() {
-        $autnodes = [];
-        foreach ($this->_HalDocument->_authors as $aut) {
-            $autnodes[] = $aut->getXMLNode($this->_xml);
+        if ($showXML) {
+            return $this->convertToXMLString(implode("", $subTitlesList));
+        } else {
+            return implode("", $subTitlesList);
         }
-        return $autnodes;
     }
+    //</editor-fold>
 
+    //<editor-fold desc="createAuthors">
     /**
-     * return the contributors of the document <editors>
-     * @return DOMElement | null
-     */
-    private function createContributors() {
-        $c = null;
-        $lastname  = $this->_HalDocument->getContributor(self::LASTNAME);
-        $firstname = $this->_HalDocument->getContributor(self::FIRSTNAME);
-        $email     = $this->_HalDocument->getContributor(self::EMAIL);
+     * return the authors of the document <author> */
 
-        if ($lastname  != '' && $firstname != '' && $email != '') {
+    public function createAuthors($showXML = true) {
+        $authorsList = array();
+        foreach ($this->_HalDocument->_authors as $a) {
+            $autFromReferentiels = new Ccsd_Referentiels_Author($a->getAuthorid());
+            array_push($authorsList, $autFromReferentiels->getXML(false, $a->getStructid(), $a->getQuality()));
+        }
+        if ($showXML) {
+            return $this->convertToXMLString(implode("", $authorsList));
+        } else {
+            return implode("", $authorsList);
+        }
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="createContributors">
+    /**
+     * return the contributors of the document <editors> */
+
+    public function createContributors($showXML = true) {
+        if ($this->_HalDocument->getContributor(self::LASTNAME) != '' && $this->_HalDocument->getContributor(self::FIRSTNAME) != '' && $this->_HalDocument->getContributor(self::EMAIL) != '') {
             $c = $this->_xml->createElement(self::EDITOR);
             $c->setAttribute('role', 'depositor');
-            $persName =  $this ->createPersName($firstname,$lastname);
+            $persName = $this->_xml->createElement(self::PERSNAME);
+            $persName->appendChild($this->_xml->createElement(self::FORENAME, $this->_HalDocument->getContributor(self::FIRSTNAME)));
+            $persName->appendChild($this->_xml->createElement(self::SURNAME, $this->_HalDocument->getContributor(self::LASTNAME)));
             $c->appendChild($persName);
-            $email = $this->_HalDocument->getContributor(self::EMAIL);
-            $emailNode = $this ->createEmail($email);
-            $c->appendChild($emailNode);
-            $emailDomain = $this ->createEmailDomain($email);
+            $email = $this->_xml->createElement(self::EMAIL, Hal_Document_Author::getEmailHashed((string)$this->_HalDocument->getContributor(self::EMAIL), Hal_Settings::EMAIL_HASH_TYPE));
+            $email->setAttribute('type',Hal_Settings::EMAIL_HASH_TYPE);
+            $c->appendChild($email);
+            $emailDomain = $this->_xml->createElement(self::EMAIL, Ccsd_Tools::getEmailDomain((string)$this->_HalDocument->getContributor(self::EMAIL)));
+            $emailDomain->setAttribute('type','domain');
             $c->appendChild($emailDomain);
+
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($c));
+            } else {
+                return $this->_xml->saveXML($c);
+            }
         }
-        return $c;
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="createFinancements">
+    /**
+     * return the organization financing the document <funder> */
+
+    public function createFinancements($showXML = true) {
+        $ANRProjects = $this->createANRProject(false);
+        $europeanProjects = $this->createEuropeanProject(false);
+        $fundings = $this->createFunding(false);
+        if (strlen($ANRProjects) > 0 || strlen($europeanProjects) > 0 || strlen($fundings) > 0) {
+                $funders = [];
+            array_push($funders, $ANRProjects);
+            array_push($funders, $europeanProjects);
+            array_push($funders, $fundings);
+            if ($showXML) {
+                return $this->convertToXMLString(implode("", $funders));
+            } else {
+                return implode("", $funders);
+            }
+        }
     }
 
     /**
-     * @param string $firstname
-     * @param string $lastmame
-     * @return DOMElement
-     */
-    private function createPersName($firstname='', $lastmame='') {
-        $persName = $this->_xml->createElement(self::PERSNAME);
-        $persName->appendChild($this->_xml->createElement(self::FORENAME, $firstname));
-        $persName->appendChild($this->_xml->createElement(self::SURNAME, $lastmame));
-        return $persName;
-    }
-    /**
-     * @param string $email
-     * @return DOMElement
-     */
-    private function createEmail($email='') {
-        $email = $this->_xml->createElement(self::EMAIL, Hal_Document_Author::getEmailHashed($email, Hal_Settings::EMAIL_HASH_TYPE));
-        $email->setAttribute('type', Hal_Settings::EMAIL_HASH_TYPE);
-        return $email;
-    }
-    /**
-     * @param string $email
-     * @return DOMElement
-     */
-    private function createEmailDomain($email='') {
-        $emailDomain = $this->_xml->createElement(self::EMAIL, Ccsd_Tools::getEmailDomain($email));
-        $emailDomain->setAttribute('type', 'domain');
-        return $emailDomain;
-    }
-    /**
-     * return the organization financing the document <funder>
-     * @param DOMElement $parentNode
-     * @return void
-     */
-    private function addFinancements($parentNode) {
-        foreach ($this->createANRProject() as $project) {
-            $parentNode->appendChild($project);
-        }
-        foreach ($this->createEuropeanProject() as $project) {
-            $parentNode->appendChild($project);
-        }
-        foreach ($this->createFunding() as $project) {
-            $parentNode->appendChild($project);
-        }
-    }
-    /**
-     * return <funder> type ANR Project
-     * @return DOMElement[]
-     */
-    private function createANRProject()
-    {
-        $projects = [];
-        $listProjectsObj = $this->_HalDocument->getMetaObj(self::ANRPROJECT);
-        if ($listProjectsObj != null) {
-            $listProjects = $listProjectsObj -> getValue();
-            if ($listProjects) {
-                foreach ($listProjects as $anr) {
-                    if ($anr instanceof Ccsd_Referentiels_Anrproject) {
-                        $projNode = $this->_xml->createElement(self::FUNDER);
-                        $projNode->setAttribute('ref', '#projanr-' . $anr->ANRID);
-                        array_push($projects, $projNode);
-                    }
+     * return <funder> type ANR Project */
+
+    public function createANRProject($showXML = true) {
+        if ( is_array($this->_HalDocument->getMeta(self::ANRPROJECT)) ) {
+            $projanrs = [];
+            foreach ( $this->_HalDocument->getMeta(self::ANRPROJECT) as $anr ) {
+                if ( $anr instanceof Ccsd_Referentiels_Anrproject ) {
+                    $p = $this->_xml->createElement(self::FUNDER);
+                    $p->setAttribute('ref', '#projanr-'.$anr->ANRID);
+                    array_push($projanrs, $this->_xml->saveXML($p));
                 }
             }
+            if ($showXML) {
+                return $this->convertToXMLString(implode("", $projanrs));
+            } else {
+                return implode("", $projanrs);
+            }
         }
-        return $projects;
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createEuropeanProject">
     /**
-     * return <funder> type EUROPEAN project
-     * @return DOMElement[]
-     */
-    private function createEuropeanProject() {
-        $projects = [];
-        $listProjectsObj = $this->_HalDocument->getMetaObj(self::EURPROJECT);
-        if ($listProjectsObj != null) {
-            $listProjects = $listProjectsObj->getValue();
-            if ($listProjects) {
-                foreach ($listProjects as $europe) {
-                    if ($europe instanceof Ccsd_Referentiels_Europeanproject) {
-                        $projNode = $this->_xml->createElement(self::FUNDER);
-                        $projNode->setAttribute('ref', '#projeurop-' . $europe->PROJEUROPID);
-                        array_push($projects, $projNode);
-                    }
+     * return <funder> type EUROPEAN project */
+
+    public function createEuropeanProject($showXML = true) {
+        if ( is_array($this->_HalDocument->getMeta(self::EURPROJECT)) ) {
+            $projeuropes = [];
+            foreach ( $this->_HalDocument->getMeta(self::EURPROJECT) as $europe ) {
+                if ( $europe instanceof Ccsd_Referentiels_Europeanproject ) {
+                    $p = $this->_xml->createElement(self::FUNDER);
+                    $p->setAttribute('ref', '#projeurop-'.$europe->PROJEUROPID);
+                    array_push($projeuropes, $this->_xml->saveXML($p));
                 }
             }
-        }
-        return $projects;
-    }
-    /**
-     * return <funder> type funding
-     * @return DOMElement[]
-     */
-    private function createFunding() {
-        $projects = [];
-        $funders = $this->_HalDocument->getMetaObj('funding');
-        if ($funders) {
-            $funderArray = $funders -> getValue();
-            foreach ( $funderArray as $funder ) {
-                $funding = $this->_xml->createElement(self::FUNDER, $funder);
-                array_push($projects, $funding);
+            if ($showXML) {
+                return $this->convertToXMLString(implode("", $projeuropes));
+            } else {
+                return implode("", $projeuropes);
             }
         }
-        return $projects;
     }
+    //</editor-fold>
 
+    //<editor-fold desc="createFunding">
     /**
-     * @return DOMElement
-     */
-    private function createEditionStmt() {
-        $es = $this->_xml->createElement('editionStmt');
-        foreach  ($this->createEdition() as $edition) {
-            $es->appendChild($edition);
+     * return <funder> type funding */
+
+    public function createFunding($showXML = true) {
+        if ( is_array($this->_HalDocument->getMeta('funding')) ) {
+            $fundings = [];
+            foreach ( $this->_HalDocument->getMeta('funding') as $funder ) {
+                $f = $this->_xml->createElement(self::FUNDER, $funder);
+                array_push($fundings, $this->_xml->saveXML($f));
+            }
+            if ($showXML) {
+                return $this->convertToXMLString(implode("", $fundings));
+            } else {
+                return implode("", $fundings);
+            }
         }
-        // Create <respStmt> and append it to <editionStmt>
-        $respStmt = $this->createRespStmt();
-        if ($respStmt != null) {
-            $es->appendChild($respStmt);
-        }
-        return $es;
     }
-    /**
-     * return the edition(s) of the document <edition>
-     * @return DOMElement[]
-     */
+    //</editor-fold>
 
-    private function createEdition() {
+    //<editor-fold desc="createEdition">
+    /**
+     * return the edition(s) of the document <edition>  */
+
+    public function createEdition($showXML = true) {
         // Pour les différentes versions
         $editions = [];
-
-        foreach ( $this->_HalDocument->getDocVersions() as $n=>$docrow ) {
-            $date = Hal_Document::getDateVersionFromDocRow($docrow);
+        foreach ( $this->_HalDocument->_versions as $n=>$date ) {
             $edition = $this->_xml->createElement(self::EDITION);
             $edition->setAttribute('n', 'v'.$n);
-
             $d = $this->_xml->createElement('date', $date);
             $d->setAttribute('type', 'whenSubmitted');
             $edition->appendChild($d);
-
-            if ( $this->_HalDocument->getVersion() == $n ) {
+            if ( $this->_HalDocument->_version == $n ) {
                 $edition->setAttribute('type', 'current');
-                $dateObjList = $this->createDates();
-                foreach ($dateObjList as $d) {
+                if ( $this->_HalDocument->getMeta(self::WRITINGDATE) ) {
                     $edition->appendChild($d);
+                    $d = $this->_xml->createElement('date', $this->_HalDocument->getMeta(self::WRITINGDATE));
+                    $edition->appendChild($d);
+                    $d->setAttribute('type', 'whenWritten');
                 }
-
-                foreach ($this->createFiles() as $fileNode) {
-                    $edition->appendChild($fileNode);
+                $d = $this->_xml->createElement('date', $this->_HalDocument->_modifiedDate);
+                $d->setAttribute('type', 'whenModified');
+                $edition->appendChild($d);
+                $d = $this->_xml->createElement('date', $this->_HalDocument->_releasedDate);
+                $d->setAttribute('type', 'whenReleased');
+                $edition->appendChild($d);
+                $d = $this->_xml->createElement('date', $this->_HalDocument->_producedDate);
+                $d->setAttribute('type', 'whenProduced');
+                $edition->appendChild($d);
+                if ( $this->_HalDocument->_format == Hal_Document::FORMAT_FILE ) {
+                    $d = $this->_xml->createElement('date', $this->_HalDocument->getFirstDateVisibleFile());
+                    $d->setAttribute('type', 'whenEndEmbargoed');
+                    $edition->appendChild($d);
+                    $ref = $this->_xml->createElement('ref');
+                    $ref->setAttribute('type', 'file');
+                    $ref->setAttribute(self::TARGET, $this->_HalDocument->getUri(true).$this->_HalDocument->getUrlMainFile());
+                    $v = $this->_HalDocument->getDateVisibleMainFile();
+                    if ( preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $v) ) {
+                        $date = $this->_xml->createElement('date');
+                        $date->setAttribute(self::NOTBEFORE, $v);
+                        $ref->appendChild($date);
+                    }
+                    $edition->appendChild($ref);
                 }
-
-                $fs = $this->createMetas();
-                if ($fs) $edition->appendChild($fs);
-
-                $linkext=$this->createLinkExt();
-                if ($linkext) $edition->appendChild($linkext);
-            }
-            array_push($editions, $edition);
-        }
-        return $editions;
-    }
-
-    /**
-     * Add the Url for external link
-     */
-    private function createLinkExt() {
-        /** @var Hal_Document_Meta_LinkExt $linkext */
-        $linkext = $this->_HalDocument-> getMetaObj(Hal_Document_Meta_LinkExt::linkext);
-        if (!$linkext) {
-            return null;
-        }
-        $url = $linkext->getUrl();
-        $ref = $this->_xml->createElement('ref');
-        $ref->setAttribute('type', 'externalLink');
-        $ref->setAttribute('target', $url);
-        return $ref;
-    }
-    /**
-     * @return DOMElement[]
-     */
-    private function createFiles() {
-        $files = [];
-        foreach ( $this->_HalDocument->_files as $file ) {
-            if ( $file instanceof Hal_Document_File &&
-                in_array($file->getType(), array(Hal_Document::FORMAT_FILE, Hal_Document::FORMAT_ANNEX)) ) {
-
-                $ref = $this->createFile($file);
-                $files[] = $ref;
-            }
-        }
-        return $files;
-    }
-
-    /**
-     * @param Hal_Document_File $file
-     * @return DOMElement
-     */
-    private function createFile($file)
-    {
-        $ref = $this->_xml->createElement('ref');
-        $ref->setAttribute('type', $file->getType());
-        if ($file->getType() == 'file') {
-            if ($file->getOrigin()) {
-                $ref->setAttribute(self::SUBTYPE, $file->getOrigin());
-            }
-        } else if ($file->getType() == 'annex') {
-            $format = $file->getFormat();
-            if ($format == '') {
-                $format = 'undefined';
-            }
-            $ref->setAttribute(self::SUBTYPE, $format);
-        }
-        $ref->setAttribute('n', (int)($file->getDefault() || $file->getDefaultannex()));
-        $ref->setAttribute(self::TARGET, $this->_HalDocument->getUri() . '/file/' . rawurlencode($file->getName()));
-        if (preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $file->getDateVisible())) {
-            $date = $this->_xml->createElement('date');
-            $date->setAttribute(self::NOTBEFORE, $file->getDateVisible());
-            $ref->appendChild($date);
-        }
-        if ($file->getComment() != '') {
-            $ref->appendChild($this->_xml->createElement('desc', $file->getComment()));
-        }
-        return $ref;
-    }
-
-    /**
-     * @return DOMElement|null
-     */
-    private function createMetas()
-    {
-        $fs = null;
-        // Metadonnées Local
-        // Define an array to store the names of the local metas
-        $tableLocalMetas = [];
-
-        // On charge la configuration du portail de dépôt du document pour les métas spécifiques
-        $sid = $this->_HalDocument->getSid();
-        // TODO: faire un cache au niveau de site portail pour les meta pour ne pas lite des millions de fois les .ini
-        $portail = Hal_Site_Portail::loadSiteFromId($sid);
-        $ini = $portail->getConfigMeta();
-
-        // Get the name of the local meta (if existed) et prepare the process for the integration in CreateTei.php
-        foreach ($ini['elements'] as $nomMeta => $element) {
-            // Get the value of elements
-            foreach ($element as $cle => $val) {
-                // Get element by options
-                if ($cle == "options") {
-                    // Test if localTei fgexist and assigned to true (the portal has specific metas)
-                    if (isset($val['localMeta']) && $val['localMeta']) {
-                        // Add the names of metas to tha variable tableLocalMetas
-                        array_push($tableLocalMetas, $nomMeta);
+                foreach ( $this->_HalDocument->_files as $file ) {
+                    if ( $file instanceof Hal_Document_File && in_array($file->getType(), array(Hal_Document::FORMAT_FILE, Hal_Document::FORMAT_ANNEX)) ) {
+                        $ref = $this->_xml->createElement('ref');
+                        $ref->setAttribute('type', $file->getType());
+                        if ( $file->getType() == 'file' ) {
+                            if ( $file->getOrigin() ) {
+                                $ref->setAttribute(self::SUBTYPE, $file->getOrigin());
+                            }
+                        } else if ( $file->getType() == 'annex' ) {
+                            $ref->setAttribute(self::SUBTYPE, $file->getFormat());
+                        }
+                        $ref->setAttribute('n', (int)($file->getDefault()||$file->getDefaultannex()));
+                        $ref->setAttribute(self::TARGET, $this->_HalDocument->getUri().'/file/'.rawurlencode($file->getName()));
+                        if ( preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $file->getDateVisible()) ) {
+                            $date = $this->_xml->createElement('date');
+                            $date->setAttribute(self::NOTBEFORE, $file->getDateVisible());
+                            $ref->appendChild($date);
+                        }
+                        if ( $file->getComment() != '' ) {
+                            $ref->appendChild($this->_xml->createElement('desc', $file->getComment()));
+                        }
+                        $edition->appendChild($ref);
                     }
                 }
             }
-        }
-        $nbOfMetaAdded=0;
-        // Test if the return of the method getLocalMeta is an array and his size to not null
-        if (count($tableLocalMetas)) {
-            // Create a fs element
-            $fs = $this->_xml->createElement('fs');
-            // Meta type list with id ans text (e.g. inria_presConf)
-            $metasList = Hal_Referentiels_Metadata::metaList();
-            // Loop over the names of the retrieved local metas
+            // Metadonnées Local
+            // Define an array to store the names of the local metas
+            $tableLocalMetas = array();
 
-            foreach ($tableLocalMetas as $LML) {
-                $meta = $this->_HalDocument->getMetaObj($LML);
-                if ($meta === null) {
-                    continue;
+            // On charge la configuration du portail de dépôt du document pour les métas spécifiques
+            $sid = $this->_HalDocument->getSid();
+
+            $portail = Hal_Site_Portail::loadSiteFromId($sid);
+            $ini = $portail->getConfigMeta();
+
+            // Get the name of the local meta (if existed) et prepare the process for the integration in CreateTei.php
+            foreach ($ini['elements'] as $nomMeta => $element) {
+                // Get the value of elements
+                foreach ($element as $cle => $val) {
+                    // Get element by options
+                    if ($cle == "options") {
+                        // Test if localTei exist and assigned to true (the portal has specific metas)
+                        if (isset($val['localMeta']) && $val['localMeta']) {
+                            // Add the names of metas to tha variable tableLocalMetas
+                            array_push($tableLocalMetas, $nomMeta);
+                        }
+                    }
                 }
-                $value = $meta->getValue();
-                // Test if meta value not null
-                if ($value == '' || $value === null) {
-                    continue;
-                }
-                // Create a f element
-                $f = $this->_xml->createElement('f');
-                // Assign the name of the retrieved local meta to the attribute NAME of the f element
-                $f->setAttribute('name', $LML);
-                // Assign the value string to the attribut notation
-                $f->setAttribute(self::NOTATION, self::STRING);
-                // TODO: ne pas faire deux noeuds <f> mais un noeud <f><vAlt><numeric><string></vAlt><f>
-                if (in_array($LML, $metasList)) {
-                    ///////////// Creation of string element ////////////////
-                    // Create a string element and assign the value of the retrieved local meta to it
-                    $string = $this->_xml->createElement(self::STRING, Ccsd_Tools::translate(Hal_Referentiels_Metadata::getLabel($LML, $value), 'en'));
-                    // Add the string element to the f element
-                    $f->appendChild($string);
-                    // Add the f element to the fs element
-                    $fs->appendChild($f);
-                    ///////////// Creation of numeric element ///////////////
-                    $f = $this->_xml->createElement('f');
-                    $f->setAttribute('name', $LML);
-                    $f->setAttribute(self::NOTATION, self::NUMERIC);
-                    $numeric = $this->_xml->createElement(self::NUMERIC, $value);
-                    $f->appendChild($numeric);
-                    $fs->appendChild($f);
-                    // Meta based free text
-                } else {
-                    $string = $this->_xml->createElement(self::STRING, $value);
-                    $f->appendChild($string);
-                    $fs->appendChild($f);
-                }
-                $nbOfMetaAdded++;
             }
+            // Test if the return of the method getLocalMeta is an array and his size to not null
+            if(is_array($tableLocalMetas) && count($tableLocalMetas)) {
+                // Create a fs element
+                $fs = $this->_xml->createElement('fs');
+                // Loop over the names of the retrieved local metas
+                foreach ($tableLocalMetas as $LML) {
+                    // Test if meta value not null
+                    if ($this->_HalDocument->getMeta($LML) != '') {
+                        $metasList = Hal_Referentiels_Metadata::metaList();
+                        // Meta type list with id ans text (e.g. inria_presConf)
+                        if (in_array($LML, $metasList)) {
+                            ///////////// Creation of string element ////////////////
+                            // Create a f element
+                            $f = $this->_xml->createElement('f');
+                            // Assign the name of the retrieved local meta to the attribute NAME of the f element
+                            $f->setAttribute('name', $LML);
+                            // Assign the value string to the attribut notation
+                            $f->setAttribute(self::NOTATION, self::STRING);
+                            // Create a string element and assign the value of the retrieved local meta to it
+                            $string = $this->_xml->createElement(self::STRING, Zend_Registry::get(self::ZENDTRANSLATE)->translate(Hal_Referentiels_Metadata::getLabel($LML, $this->_HalDocument->getMeta($LML)), 'en'));
+                            // Add the string element to the f element
+                            $f->appendChild($string);
+                            // Add the f element to the fs element
+                            $fs->appendChild($f);
+                            ///////////// Creation of numeric element ///////////////
+                            $f = $this->_xml->createElement('f');
+                            $f->setAttribute('name', $LML);
+                            $f->setAttribute(self::NOTATION, self::NUMERIC);
+                            $numeric = $this->_xml->createElement(self::NUMERIC, $this->_HalDocument->getMeta($LML));
+                            $f->appendChild($numeric);
+                            $fs->appendChild($f);
+                            // Meta based free text
+                        } else {
+                            $f = $this->_xml->createElement('f');
+                            $f->setAttribute('name', $LML);
+                            $f->setAttribute(self::NOTATION, self::STRING);
+                            $string = $this->_xml->createElement(self::STRING, $this->_HalDocument->getMeta($LML));
+                            $f->appendChild($string);
+                            $fs->appendChild($f);
+                        }
+                    }
+                }
+                if ($fs->nodeValue !='') {
+                    // Add the fs element to the edition element
+                    $edition->appendChild($fs);
+                }
+            }
+            array_push($editions, $this->_xml->saveXML($edition));
         }
-        if ($nbOfMetaAdded > 0) {
-            return $fs;
+        if ($showXML) {
+            return $this->convertToXMLString(implode("", $editions));
         } else {
-            return null;
+            return implode("", $editions);
         }
     }
+    //</editor-fold>
 
+    //<editor-fold desc="createDates">
     /**
-     * return the set of dates for a document (with embargo date for files
-     * @return DOMElement[]
-     */
+     * return <date> */
 
-    private function createDates() {
-        $dates=[];
-        $writingDate = $this->_HalDocument->getMetaObj(self::WRITINGDATE);
-        if ($writingDate) {
-            $d = $this->_xml->createElement('date', $writingDate -> getValue());
-            $d->setAttribute('type', 'whenWritten');
-            $dates[]=$d;
-        }
-        $d = $this->_xml->createElement('date', $this->_HalDocument->_modifiedDate);
-        $d->setAttribute('type', 'whenModified');
-        $dates[]=$d;
-
-        $d = $this->_xml->createElement('date', $this->_HalDocument->_releasedDate);
-        $d->setAttribute('type', 'whenReleased');
-        $dates[]=$d;
-
-        $d = $this->_xml->createElement('date', $this->_HalDocument->_producedDate);
-        $d->setAttribute('type', 'whenProduced');
-        $dates[]=$d;
-
-        if ($this->_HalDocument->_format == Hal_Document::FORMAT_FILE) {
-            $d = $this->_xml->createElement('date', $this->_HalDocument->getFirstDateVisibleFile());
-            $d->setAttribute('type', 'whenEndEmbargoed');
-            $dates[] = $d;
-
-            $ref = $this->_xml->createElement('ref');
-            $ref->setAttribute('type', 'file');
-            $ref->setAttribute(self::TARGET, $this->_HalDocument->getUri(true) . $this->_HalDocument->getUrlMainFile());
-            $v = $this->_HalDocument->getDateVisibleMainFile();
-            if (preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $v)) {
-                $date = $this->_xml->createElement('date');
-                $date->setAttribute(self::NOTBEFORE, $v);
-                $ref->appendChild($date);
-            }
-            $dates[] = $ref;
-        }
-        return $dates;
-    }
-
-    /**
-     * @return DOMElement[]
-     * @unused : A garder pour inserer les ref biblio dans Tei lorsque cela marchera!
-     */
-    private function createRefs() {
+    public function createDates($showXML = true) {
         // Pour les différentes versions
         $editions = [];
-        foreach ($this->_HalDocument->getDocVersions() as $n => $docrow) {
-            $date = Hal_Document::getDateVersionFromDocRow($docrow);
+        foreach ( $this->_HalDocument->_versions as $n=>$date ) {
+            $edition = $this->_xml->createElement(self::EDITION);
+            $edition->setAttribute('n', 'v' . $n);
+            $d = $this->_xml->createElement('date', $date);
+            $d->setAttribute('type', 'whenSubmitted');
+            $edition->appendChild($d);
+            if ($this->_HalDocument->_version == $n) {
+                $edition->setAttribute('type', 'current');
+                if ($this->_HalDocument->getMeta(self::WRITINGDATE)) {
+                    $edition->appendChild($d);
+                    $d = $this->_xml->createElement('date', $this->_HalDocument->getMeta(self::WRITINGDATE));
+                    $edition->appendChild($d);
+                    $d->setAttribute('type', 'whenWritten');
+                }
+                $d = $this->_xml->createElement('date', $this->_HalDocument->_modifiedDate);
+                $d->setAttribute('type', 'whenModified');
+                $edition->appendChild($d);
+                $d = $this->_xml->createElement('date', $this->_HalDocument->_releasedDate);
+                $d->setAttribute('type', 'whenReleased');
+                $edition->appendChild($d);
+                $d = $this->_xml->createElement('date', $this->_HalDocument->_producedDate);
+                $d->setAttribute('type', 'whenProduced');
+                $edition->appendChild($d);
+                if ($this->_HalDocument->_format == Hal_Document::FORMAT_FILE) {
+                    $d = $this->_xml->createElement('date', $this->_HalDocument->getFirstDateVisibleFile());
+                    $d->setAttribute('type', 'whenEndEmbargoed');
+                    $edition->appendChild($d);
+                }
+            }
+            array_push($editions, $this->_xml->saveXML($edition));
+        }
+        if ($showXML) {
+            return $this->convertToXMLString(implode("", $editions));
+        } else {
+            return implode("", $editions);
+        }
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="createRefs">
+    /**
+     * return the file of document <ref> */
+
+    public function createRefs($showXML = true) {
+        // Pour les différentes versions
+        $editions = [];
+        foreach ($this->_HalDocument->_versions as $n => $date) {
             $edition = $this->_xml->createElement(self::EDITION);
             $edition->setAttribute('n', 'v' . $n);
             if ($this->_HalDocument->_version == $n) {
@@ -871,47 +796,141 @@ class Hal_Document_Tei_Creator extends Hal_Document
                     }
                 }
             }
-            array_push($editions, $edition);
+            array_push($editions, $this->_xml->saveXML($edition));
         }
-        return ($editions);
+        if ($showXML) {
+            return $this->convertToXMLString(implode("", $editions));
+        } else {
+            return implode("", $editions);
+        }
     }
+    //</editor-fold>
 
+    //<editor-fold desc="createLocalMeta">
     /**
-     * @return DOMElement|null
+     * IL SEMBLE QU'ON NE PASSE JAMAIS PAR CETTE FONCTION !!!
+     * return the local metas of the portail of the document <fs> */
+
+    public function createLocalMeta($showXML = true) {
+        // Metadonnées Local
+        // Define an array to store the names of the local metas
+        $tableLocalMetas = array();
+
+        // On charge la configuration du portail de dépôt du document pour les métas spécifiques
+        $sid = $this->_HalDocument->getSid();
+        $portail = Hal_Site::loadSiteFromId($sid);
+        $ini = $portail->getConfigMeta();
+
+        // Get the name of the local meta (if existed) et prepare the process for the integration in CreateTei.php
+        foreach ($ini['elements'] as $nomMeta => $element) {
+            // Get the value of elements
+            foreach ($element as $cle => $val) {
+                // Get element by options
+                if ($cle == "options") {
+                    // Test if localTei exist and assigned to true (the portal has specific metas)
+                    if (isset($val['localMeta']) && $val['localMeta']) {
+                        // Add the names of metas to tha variable tableLocalMetas
+                        array_push($tableLocalMetas, $nomMeta);
+                    }
+                }
+            }
+        }
+        // Test if the return of the method getLocalMeta is an array and his size to not null
+        if(is_array($tableLocalMetas) && count($tableLocalMetas)) {
+            // Create a fs element
+            $fs = $this->_xml->createElement('fs');
+            // Loop over the names of the retrieved local metas
+            foreach ($tableLocalMetas as $LML) {
+                // Test if meta value not null
+                if ($this->_HalDocument->getMeta($LML) != '') {
+                    $metasList = Hal_Referentiels_Metadata::metaList();
+                    // Meta type list with id ans text (e.g. inria_presConf)
+                    if (in_array($LML, $metasList)) {
+                        ///////////// Creation of string element ////////////////
+                        // Create a f element
+                        $f = $this->_xml->createElement('f');
+                        // Assign the name of the retrieved local meta to the attribute NAME of the f element
+                        $f->setAttribute('name', $LML);
+                        // Assign the value string to the attribut notation
+                        $f->setAttribute(self::NOTATION, self::STRING);
+                        // Create a string element and assign the value of the retrieved local meta to it
+                        $string = $this->_xml->createElement(self::STRING, Zend_Registry::get(self::ZENDTRANSLATE)->translate(Hal_Referentiels_Metadata::getLabel($LML, $this->_HalDocument->getMeta($LML)), 'en'));
+                        // Add the string element to the f element
+                        $f->appendChild($string);
+                        // Add the f element to the fs element
+                        $fs->appendChild($f);
+                        ///////////// Creation of numeric element ///////////////
+                        $f = $this->_xml->createElement('f');
+                        $f->setAttribute('name', $LML);
+                        $f->setAttribute(self::NOTATION, self::NUMERIC);
+                        $numeric = $this->_xml->createElement(self::NUMERIC, $this->_HalDocument->getMeta($LML));
+                        $f->appendChild($numeric);
+                        $fs->appendChild($f);
+                        // Meta based free text
+                    } else {
+                        $f = $this->_xml->createElement('f');
+                        $f->setAttribute('name', $LML);
+                        $f->setAttribute(self::NOTATION, self::STRING);
+                        $string = $this->_xml->createElement(self::STRING, $this->_HalDocument->getMeta($LML));
+                        $f->appendChild($string);
+                        $fs->appendChild($f);
+                    }
+                }
+            }
+            if ($fs->nodeValue !='') {
+                if ($showXML) {
+                    return $this->convertToXMLString($this->_xml->saveXML($fs));
+                } else {
+                    return $this->_xml->saveXML($fs);
+                }
+            }
+        }
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="createRespStmt">
+    /**
+     * @param bool $showXML
+     * @return string|DOMElement
      * return the responsable of the document <respStmt> */
 
-    private function createRespStmt() {
-        $respStmt = null;
-
-        $lastname = $this->_HalDocument->getContributor(self::LASTNAME);
-        $firstname = $this->_HalDocument->getContributor(self::FIRSTNAME);
-        $email = $this->_HalDocument->getContributor(self::EMAIL);
-        if ( $this->_HalDocument->getContributor('uid') != ''
-            && $lastname != '' && $firstname != '' && $email != '' ) {
+    public function createRespStmt($showXML = true) {
+        if ( $this->_HalDocument->getContributor('uid') != '' && $this->_HalDocument->getContributor(self::LASTNAME) != '' && $this->_HalDocument->getContributor(self::FIRSTNAME) != '' && $this->_HalDocument->getContributor(self::EMAIL) != '' ) {
             $respStmt = $this->_xml->createElement('respStmt');
             $respStmt->appendChild($this->_xml->createElement('resp', 'contributor'));
             $name = $this->_xml->createElement('name');
             $name->setAttribute('key', $this->_HalDocument->getContributor('uid'));
-
-            $persName = $this->createPersName($firstname, $lastname);
+            $persName = $this->_xml->createElement(self::PERSNAME);
+            $persName->appendChild($this->_xml->createElement(self::FORENAME, $this->_HalDocument->getContributor(self::FIRSTNAME)));
+            $persName->appendChild($this->_xml->createElement(self::SURNAME, $this->_HalDocument->getContributor(self::LASTNAME)));
             $name->appendChild($persName);
-            $emailObj = $this->createEmail($email);
-            $name->appendChild($emailObj);
-            $emailDomain = $this->createEmailDomain($email);
+            $email = $this->_xml->createElement(self::EMAIL, Hal_Document_Author::getEmailHashed((string)$this->_HalDocument->getContributor(self::EMAIL), Hal_Settings::EMAIL_HASH_TYPE));
+            $email->setAttribute('type',Hal_Settings::EMAIL_HASH_TYPE);
+            $name->appendChild($email);
+            $emailDomain = $this->_xml->createElement(self::EMAIL, Ccsd_Tools::getEmailDomain((string)$this->_HalDocument->getContributor(self::EMAIL)));
+            $emailDomain->setAttribute('type','domain');
             $name->appendChild($emailDomain);
 
             $respStmt->appendChild($name);
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($respStmt));
+            } else {
+                return $this->_xml->saveXML($respStmt);
+            }
         }
-        return $respStmt;
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createPublicationStmt">
     /**
-     * @return DOMElement
+     * @param bool $showXML
+     * @return string|DOMElement
      * return <publicationStmt> including :
      *        <distributor>
      *        <idno> (halId, halUri, halBibtex, halRefHtml, halRef
      *        <licnence> */
 
-    private function createPublicationStmt() {
+    public function createPublicationStmt($showXML = true) {
         $ps = $this->_xml->createElement('publicationStmt');
         $ps->appendChild($this->_xml->createElement('distributor', 'CCSD'));
         $hal = $this->_xml->createElement('idno', $this->_HalDocument->getId());
@@ -932,7 +951,7 @@ class Hal_Document_Tei_Creator extends Hal_Document
 
         $licences = [];
         if ( $this->_HalDocument->getLicence() != '' ) {
-            $licences[Ccsd_Tools::translate(Hal_Referentiels_Metadata::getLabel(self::LICENCE, $this->_HalDocument->getLicence()), 'en')] = $this->_HalDocument->getLicence();
+            $licences[Zend_Registry::get(self::ZENDTRANSLATE)->translate(Hal_Referentiels_Metadata::getLabel(self::LICENCE, $this->_HalDocument->getLicence()), 'en')] = $this->_HalDocument->getLicence();
         } else if ($softwareLicence = $this->_HalDocument->getHalMeta()->getMeta('softwareLicence')){
             //Licence logiciel
             $referencial = new Thesaurus_Spdx();
@@ -953,40 +972,52 @@ class Hal_Document_Tei_Creator extends Hal_Document
             $ps->appendChild($headeravailability);
         }
 
-        return $ps;
+        if ($showXML) {
+            return $this->convertToXMLString($this->_xml->saveXML($ps));
+        } else {
+            return $this->_xml->saveXML($ps);
+        }
     }
+    //</editor-fold>
 
+    //<editor-fold desc="createSeriesStmt">
     /**
-     * @return DOMElement
+     * @param bool $showXML
+     * @return string|DOMElement
      * return the HAL collections <seriesStmt>
      */
 
-    private function createSeriesStmt() {
+    public function createSeriesStmt($showXML = true) {
         $ss = $this->_xml->createElement('seriesStmt');
         foreach ($this->_HalDocument->_collections as $collection) {
             if ($collection instanceof Hal_Site_Collection) {
-                $idno = $this->_xml->createElement('idno', $collection->getFullName());
+                $idno = $this->_xml->createElement('idno', $collection->getName());
                 $idno->setAttribute('type', 'stamp');
-                $idno->setAttribute('n', $collection->getShortname());
+                $idno->setAttribute('n', $collection->getCode());
                 foreach ($collection->getParents() as $parent) {
-                    // Note: esperons qu'il n'y aura toujours qu'un seul parent
                     if ($parent instanceof Hal_Site_Collection) {
-                        $idno->setAttribute('corresp', $parent->getShortname());
+                        $idno->setAttribute('p', $parent->getCode());
                     }
-                    break; // pour etre sur qu'il n'y aura pas deux attributs identiques
                 }
                 $ss->appendChild($idno);
             }
         }
-        return $ss;
+        if ($showXML) {
+            return $this->convertToXMLString($this->_xml->saveXML($ss));
+        } else {
+            return $this->_xml->saveXML($ss);
+        }
     }
+    //</editor-fold>
 
+    //<editor-fold desc="createNotesStmt">
     /**
-     * @return DOMElement
+     * @param bool $showXML
+     * @return string|DOMElement
      * return <notesStmt>
      */
 
-    private function createNotesStmt() {
+    public function createNotesStmt($showXML = true) {
         $ns = $this->_xml->createElement('notesStmt');
         // List of Meta in notesStmt MetaName => elementName, value for attribute Type, flag for translating
         $notesStmt = array(
@@ -1009,16 +1040,14 @@ class Hal_Document_Tei_Creator extends Hal_Document
             "programmingLanguage"  => array(self::VALUEATTRIBUTE => "programmingLanguage" , self::TRANSLATINGFLAG => false ),
         );
         foreach ($notesStmt as $noteName => $noteInformation) {
-            $noteValuesObj = $this->_HalDocument->getMetaObj($noteName);
-            if ($noteValuesObj === null) continue; // pas de meta correspondante
-            $noteValues = $noteValuesObj -> getValue();
+            $noteValues = $this->_HalDocument->getMeta($noteName);
             if (! is_array($noteValues)) {
                 $noteValues = [$noteValues];
             }
             foreach ($noteValues as $noteValue) {
                 if($noteValue != '') {
                     if ($noteInformation[self::TRANSLATINGFLAG]) {
-                        $note = $this->_xml->createElement("note", Ccsd_Tools::translate(Hal_Referentiels_Metadata::getLabel($noteName, $noteValue), 'en'));
+                        $note = $this->_xml->createElement("note", Zend_Registry::get(self::ZENDTRANSLATE)->translate(Hal_Referentiels_Metadata::getLabel($noteName, $noteValue), 'en'));
                         $note->setAttribute("type", $noteInformation[self::VALUEATTRIBUTE]);
                         $note->setAttribute("n", $noteValue);
                     } else {
@@ -1029,492 +1058,370 @@ class Hal_Document_Tei_Creator extends Hal_Document
                 }
             }
         }
-        return $ns;
+        if ($showXML) {
+            return $this->convertToXMLString($this->_xml->saveXML($ns));
+        } else {
+            return $this->_xml->saveXML($ns);
+        }
     }
+    //</editor-fold>
 
+    //<editor-fold desc="createAnalytic">
     /**
-     * @return DOMElement|null
+     * @param bool $showXML
+     * @return string|DOMElement
      * return <analytic> including :
      * <title>
      * <title type="sub">
      * <author> */
-    private function createAnalytic() {
-        // TODO: analytic doit etre non present pour les types:
-        //           Direction ouvrage, Brevet, rapport, these, memoire etudiant , HDR, Cours, Ouvrage , Logiciel, Video
-        // ET doit etre plutot present dans monogr
-        // Mettre un commentaire pour faire le pb de compatibilite et de depreciation
-        // Attention: les auteurs et le titre seront donc a des endroits differents suivant typology
-        $analytic = $this->_xml->createElement('analytic');
-        foreach ($this->_HalDocument->getTitle() as $l => $t) {
-            $analytic ->appendChild($this->createTitle($t, $l));
-        }
-        foreach ($this->_HalDocument->getSubTitle() as $l => $t) {
-            $analytic ->appendChild($this->createSubTitle($t, $l));
-        }
-        foreach ($this ->createAuthors() as $autnode) {
-            $analytic ->appendChild($autnode);
-        }   // Title
-        if ($analytic->hasChildNodes()) {
-            return $analytic;
-        } else {
-            return null;
-        }
-    }
+    public function createAnalytic($showXML = true) {
+        if ($this->createTitle(false) || $this->createSubTitle(false) || $this->createAuthors(false)) {
+            $analytic = $this->_xml->createElement('analytic');
+            // Title
+            $this->appendStringToDomNode($analytic, $this->createTitle(false));
 
+            // Subtitle
+            $this->appendStringToDomNode($analytic, $this->createSubTitle(false));
+
+            // Author
+            $this->appendStringToDomNode($analytic, $this->createAuthors(false));
+            // Analytic
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($analytic));
+            } else {
+                return $this->_xml->saveXML($analytic);
+            }
+        }
+        return "";
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="createMonogr">
     /**
-     * @return DOMElement|null
-     */
-    private function createNnt() {
-        if ( $this->_HalDocument->getMetaObj('nnt') != null ) {
-            $idno = $this->_xml->createElement('idno', $this->_HalDocument->getMetaObj('nnt')->getValue());
+     * return <monogr> including many elements like journal<journal> and confrence<meeting>, .. */
+
+    public function createMonogr($showXML = true) {
+        $monogr = $this->_xml->createElement('monogr');
+        if ( $this->_HalDocument->getMeta('nnt') != '' ) {
+            $idno = $this->_xml->createElement('idno', $this->_HalDocument->getMeta('nnt'));
             $idno->setAttribute('type', 'nnt');
-            return $idno;
+            $monogr->appendChild($idno);
         }
-        return null;
-    }
-    /**
-     * @return DOMElement|null
-     */
-    private function createNumber() {
-        if ( $this->_HalDocument->getMetaObj('number') != null) {
-            $idno = $this->_xml->createElement('idno', $this->_HalDocument->getMetaObj('number')->getValue());
+        if ( $this->_HalDocument->getMeta('number') != '' ) {
+            $idno = $this->_xml->createElement('idno', $this->_HalDocument->getMeta('number'));
             $idno->setAttribute('type', strtolower($this->_HalDocument->getTypDoc()).'Number');
-            return $idno;
+            $monogr->appendChild($idno);
         }
-        return null;
-    }
-    /**
-     * @return DOMElement|null
-     */
-    private function createIsbn()
-    {
-        if ( $this->_HalDocument->getMetaObj('isbn') != null ) {
-            $idno = $this->_xml->createElement('idno', $this->_HalDocument->getMetaObj('isbn')->getValue());
+        if ( $this->_HalDocument->getMeta('isbn') != '' ) {
+            $idno = $this->_xml->createElement('idno', $this->_HalDocument->getMeta('isbn'));
             $idno->setAttribute('type', 'isbn');
-            return $idno;
+            $monogr->appendChild($idno);
         }
-        return null;
-    }
-
-    /**
-     * @return DOMElement[]
-     */
-    private function createLocalReference()
-    {
-        $localRefs=[];
-        $localRefObj = $this->_HalDocument->getMetaObj('localReference') ;
-        if ($localRefObj == null) {
-            return [];
-        }
-        foreach ($localRefObj -> getValue() as $ref) {
+        foreach ($this->_HalDocument->getMeta('localReference') as $ref) {
             $idno = $this->_xml->createElement('idno', $ref);
             $idno->setAttribute('type', 'localRef');
-            $localRefs[] = $idno;
+            $monogr->appendChild($idno);
         }
-        return $localRefs;
-    }
-
-    /**
-     * @return DOMElement[]
-     */
-    private function createJournal() {
-        $journalObjList=[];
-
-        if  ( $oJ = $this->_HalDocument->getMetaObj('journal') )  {
-            /** @var Hal_Document_Meta_Journal $oJ */
-            $journalObj = $oJ -> getValue();
-            $journalIdNode = $this->_xml->createElement('idno', $journalObj->JID);
-            $journalIdNode->setAttribute('type', 'halJournalId');
-            $journalIdNode->setAttribute(self::STATUS, strtoupper($journalObj->VALID));
-            $journalObjList[]=$journalIdNode;
-
-            if ( $journalObj->ISSN ) {
-                $issnNode = $this->_xml->createElement('idno', $journalObj->ISSN);
-                $issnNode->setAttribute('type', 'issn');
-                $journalObjList[]=$issnNode;
+        if ( ( $oJ = $this->_HalDocument->getMeta('journal') ) instanceof Ccsd_Referentiels_Journal ) {
+            /** @var Ccsd_Referentiels_Journal $oJ */
+            $journal = $this->_xml->createElement('idno', $oJ->JID);
+            $journal->setAttribute('type', 'halJournalId');
+            $journal->setAttribute(self::STATUS, strtoupper($oJ->VALID));
+            $monogr->appendChild($journal);
+            if ( $oJ->ISSN ) {
+                $journal = $this->_xml->createElement('idno', $oJ->ISSN);
+                $journal->setAttribute('type', 'issn');
+                $monogr->appendChild($journal);
             }
-            if ( $journalObj->EISSN ) {
-                $eissnNode = $this->_xml->createElement('idno', $journalObj->EISSN);
-                $eissnNode->setAttribute('type', 'eissn');
-                $journalObjList[]=$eissnNode;
+            if ( $oJ->EISSN ) {
+                $journal = $this->_xml->createElement('idno', $oJ->EISSN);
+                $journal->setAttribute('type', 'eissn');
+                $monogr->appendChild($journal);
             }
-            $journal = $this->_xml->createElement(self::TITLE, $journalObj->JNAME);
+            $journal = $this->_xml->createElement(self::TITLE, $oJ->JNAME);
             $journal->setAttribute(self::LEVEL, 'j');
-            $journalObjList[]=$journal;
-
+            $monogr->appendChild($journal);
+            if ( $oJ->PUBLISHER ) {
+                $journalPublisher = $oJ->PUBLISHER;
+            }
         }
-        return $journalObjList;
-    }
-
-    /**
-     * @return DOMElement|null
-     */
-    private function createBookTitle()
-    {
-        $title=null;
-        $bookTitleObj = $this->_HalDocument->getMetaObj('bookTitle');
-        if ($bookTitleObj != null) {
-            $title = $this->_xml->createElement(self::TITLE, $bookTitleObj ->getValue());
+        if ( $this->_HalDocument->getMeta('bookTitle') != '' ) {
+            $title = $this->_xml->createElement(self::TITLE, $this->_HalDocument->getMeta('bookTitle'));
             $title->setAttribute(self::LEVEL, 'm');
+            $monogr->appendChild($title);
         }
-        return $title;
-    }
-
-    /**
-     * @return DOMElement|null
-     */
-    public function createSource() {
-        $source =null;
-        $sourceObj = $this->_HalDocument->getMetaObj('source');
-        if ( $this->_HalDocument->getTypDoc() == 'COMM' && $sourceObj != null ) {
-            $source = $this->_xml->createElement(self::TITLE, $sourceObj -> getValue());
-            $source->setAttribute(self::LEVEL, 'm');
+        if ( $this->_HalDocument->getTypDoc() == 'COMM' && $this->_HalDocument->getMeta('source') != '' ) {
+            $title = $this->_xml->createElement(self::TITLE, $this->_HalDocument->getMeta('source'));
+            $title->setAttribute(self::LEVEL, 'm');
+            $monogr->appendChild($title);
         }
-        return $source;
-    }
-    /**
-     *
-     * @return DOMElement
-     * return <monogr> including many elements like journal<journal> and conference<meeting>, .. */
-
-    private function createMonogr() {
-        $monogr = $this->_xml->createElement('monogr');
-
-        $nntNode = $this->createNnt();
-        if ($nntNode) $monogr ->appendChild($nntNode);
-
-        $numberNode = $this->createNumber();
-        if ($numberNode)  $monogr->appendChild($numberNode);
-
-        $isbn = $this->createIsbn();
-        if($isbn) $monogr->appendChild($isbn);
-
-        $localrefs=$this->createLocalReference();
-        foreach ($localrefs as $ref) {
-            $monogr->appendChild($ref);
-        }
-
-        foreach ($this->createJournal() as $journalInfoNode) {
-            $monogr->appendChild($journalInfoNode);
-        }
-
-        $booktitle=$this->createBookTitle();
-        if ($booktitle!=null) $monogr->appendChild($booktitle);
-
-        $source = $this->createSource();   // Pour COMM et meta source
-        if ($source != null) $monogr->appendChild($source);
-
-        $conftitle     = $this->_HalDocument->getMetaObj(self::CONFTITLE);
-        $confstartdate = $this->_HalDocument->getMetaObj(self::CONFSTARTDATE);
-        $confenddate   = $this->_HalDocument->getMetaObj(self::CONFENDDATE) ;
-        $city          = $this->_HalDocument->getMetaObj('city');
-        $countryObj    = $this->_HalDocument->getMetaObj(self::COUNTRY) ;
-        $organizerObj  = $this->_HalDocument->getMetaObj(self::CONFORGANIZER);
-        if ( !in_array($this->_HalDocument->_typdoc, array('PATENT', 'IMG', 'MAP', 'LECTURE'))
-            && ( $conftitle != null || $confstartdate != null || $confenddate != null || $city != null || $countryObj != null || $organizerObj != null )) {
+        if ( !in_array($this->_HalDocument->_typdoc, array('PATENT', 'IMG', 'MAP', 'LECTURE')) && ( $this->_HalDocument->getMeta(self::CONFTITLE) != '' || $this->_HalDocument->getMeta(self::CONFSTARTDATE) != '' || $this->_HalDocument->getMeta(self::CONFENDDATE) != '' || $this->_HalDocument->getMeta('city') != '' || $this->_HalDocument->getMeta(self::COUNTRY) != '' || count($this->_HalDocument->getMeta(self::CONFORGANIZER)) ) ) {
             $meeting = $this->_xml->createElement('meeting');
-
-            if ( $conftitle != null )
-                $meeting->appendChild($this->_xml->createElement(self::TITLE, $conftitle->getValue()));
-
-            if ( $confstartdate != null ) {
-                $d = $this->_xml->createElement('date', $confstartdate ->getValue());
+            if ( $this->_HalDocument->getMeta(self::CONFTITLE) != '' )
+                $meeting->appendChild($this->_xml->createElement(self::TITLE, $this->_HalDocument->getMeta(self::CONFTITLE)));
+            if ( $this->_HalDocument->getMeta(self::CONFSTARTDATE) != '' ) {
+                $d = $this->_xml->createElement('date', $this->_HalDocument->getMeta(self::CONFSTARTDATE));
                 $d->setAttribute('type', 'start');
                 $meeting->appendChild($d);
             }
-
-            if ( $confenddate != null ) {;
-                $d = $this->_xml->createElement('date', $confenddate->getValue());
+            if ( $this->_HalDocument->getMeta(self::CONFENDDATE) != '' ) {
+                $d = $this->_xml->createElement('date', $this->_HalDocument->getMeta(self::CONFENDDATE));
                 $d->setAttribute('type', 'end');
                 $meeting->appendChild($d);
             }
-
-            if ( $city != null ) {
-                $meeting->appendChild($this->_xml->createElement('settlement', $city->getValue()));
+            if ( $this->_HalDocument->getMeta('city') != '' ) {
+                $meeting->appendChild($this->_xml->createElement('settlement', $this->_HalDocument->getMeta('city')));
             }
-
-            if ( $countryObj != null ) {
-                $country = $this->_xml->createElement(self::COUNTRY, Zend_Locale::getTranslation(strtoupper($countryObj->getValue()), self::COUNTRY, 'en'));
-                $country->setAttribute('key', strtoupper($countryObj->getValue()));
+            if ( $this->_HalDocument->getMeta(self::COUNTRY) != '' ) {
+                $country = $this->_xml->createElement(self::COUNTRY, Zend_Locale::getTranslation(strtoupper($this->_HalDocument->getMeta(self::COUNTRY)), self::COUNTRY, 'en'));
+                $country->setAttribute('key', strtoupper($this->_HalDocument->getMeta(self::COUNTRY)));
                 $meeting->appendChild($country);
             }
             $monogr->appendChild($meeting);
-            if ($organizerObj != null) {
-                $organizers = $organizerObj->getValue();
-                if (count($organizers)) {   // Possible not? An empty metadata?
-                    $resp = $this->_xml->createElement('respStmt');
-                    $resp->appendChild($this->_xml->createElement('resp', self::CONFORGANIZER));
-                    foreach ($organizers as $orga) {
-                        $resp->appendChild($this->_xml->createElement('name', $orga));
-                    }
-                    $monogr->appendChild($resp);
+            if ( count($this->_HalDocument->getMeta(self::CONFORGANIZER)) ) {
+                $resp = $this->_xml->createElement('respStmt');
+                $resp->appendChild($this->_xml->createElement('resp', self::CONFORGANIZER));
+                foreach ( $this->_HalDocument->getMeta(self::CONFORGANIZER) as $orga ) {
+                    $resp->appendChild($this->_xml->createElement('name', $orga));
                 }
+                $monogr->appendChild($resp);
             }
         }
         if ( in_array($this->_HalDocument->_typdoc, array('PATENT', 'IMG', 'MAP', 'LECTURE')) ) {
-            $city = $this->_HalDocument->getMetaObj('city');
-            if ( $city != null ) {
-                $monogr->appendChild($this->_xml->createElement('settlement', $city->getValue()));
+            if ( $this->_HalDocument->getMeta('city') != '' ) {
+                $monogr->appendChild($this->_xml->createElement('settlement', $this->_HalDocument->getMeta('city')));
             }
-            $countryObj = $this->_HalDocument->getMetaObj(self::COUNTRY);
-            if ( $countryObj != null ) {
-                $country = $this->_xml->createElement(self::COUNTRY, Zend_Locale::getTranslation(strtoupper($countryObj->getValue()), 'territory', 'en'));
-                $country->setAttribute('key', strtoupper($countryObj->getValue()));
+            if ( $this->_HalDocument->getMeta(self::COUNTRY) != '' ) {
+                $country = $this->_xml->createElement(self::COUNTRY, Zend_Locale::getTranslation(strtoupper($this->_HalDocument->getMeta(self::COUNTRY)), 'territory', 'en'));
+                $country->setAttribute('key', strtoupper($this->_HalDocument->getMeta(self::COUNTRY)));
                 $monogr->appendChild($country);
             }
         }
-        $scientificEditor = $this->_HalDocument->getMetaObj('scientificEditor') ;
-        if ($scientificEditor) {
-            foreach ($scientificEditor->getValue() as $edsci) {
-                $edsci = trim($edsci, ", \t\n\r\0\x0B");  // On enleve les virgules finales... pour eviter les editeurs vides!
-                $editorArray = explode(',', $edsci);
-                switch (count($editorArray)) {
-                    case 0: // pas possible!!!
-                    case 1: // 1 seul editeur
-                    case 2: // 2 editeurs, ou bien un: prenom, nom: tant pis on laisse, bibtex ne platera pas, c'est deja ca.
-                        $monogr->appendChild($this->_xml->createElement(self::EDITOR, $edsci));
-                        break;
-                    default: // > 2
-                        // Au lieu de mettre une meta par editeur, il y a des editeurs separes par des virgules, on les mets dans un tag chacun
-                        foreach ($editorArray as $edsci2) {
-                            $edsci2 = trim($edsci2);  // On traite la chaine...
-                            $monogr->appendChild($this->_xml->createElement(self::EDITOR, $edsci2));
-                        }
-                        break;
-                }
+        foreach ( $this->_HalDocument->getMeta('scientificEditor') as $edsci ) {
+            $edsci = trim($edsci, ", \t\n\r\0\x0B");  // On enleve les virgules finales... pour eviter les editeurs vides!
+            $editorArray = explode(',' , $edsci);
+            switch (count($editorArray)) {
+                case 0: // pas possible!!!
+                case 1: // 1 seul editeur
+                case 2: // 2 editeurs, ou bien un: prenom, nom: tant pis on laisse, bibtex ne platera pas, c'est deja ca.
+                    $monogr->appendChild($this->_xml->createElement(self::EDITOR, $edsci));
+                    break;
+                default: // > 2
+                    // Au lieu de mettre une meta par editeur, il y a des editeurs separes par des virgules, on les mets dans un tag chacun
+                    foreach ($editorArray as $edsci2) {
+                        $edsci2 = trim($edsci2);  // On traite la chaine...
+                        $monogr->appendChild($this->_xml->createElement(self::EDITOR, $edsci2));
+                    }
+                    break;
             }
         }
 
         // sourceDesc>biblStruct>monogr>imprint
         $imprint  = $this->_xml->createElement('imprint');
-        $publishers = $this->_HalDocument->getMetaObj(self::PUBLISHER);
-        if ($publishers)
-            foreach ( $publishers ->getValue() as $publisher ) {
-                $imprint->appendChild($this->_xml->createElement(self::PUBLISHER, $publisher));
-            }
-        // Le cas ci dessous peut arriver dans le cas du type OTHER (un journal et des publisher
-        $oJ = $this->_HalDocument->getMetaObj('journal');
-        if ( $oJ != null ) {
-            /** @var  Hal_Document_Meta_Journal  $oJ */
-            /** @var Ccsd_Referentiels_Journal $journal */
-            $journal = $oJ ->getValue();
-            $journalPublisher = $journal->PUBLISHER;
-            if ( $journalPublisher ) {
-                $docPulisher = $this->_HalDocument->getMetaObj(self::PUBLISHER);
-                // Si pas deja present dans publisher, on l'ajoute
-                if (! ($docPulisher && in_array(strtolower($journalPublisher), array_map('strtolower', $docPulisher->getValue())) )) {
-                    $imprint->appendChild($this->_xml->createElement(self::PUBLISHER, $journalPublisher));
-                }
-            }
+        foreach ( $this->_HalDocument->getMeta(self::PUBLISHER) as $publisher ) {
+            $imprint->appendChild($this->_xml->createElement(self::PUBLISHER, $publisher));
         }
-
-        $publicationLocation = $this->_HalDocument->getMetaObj('publicationLocation');
-        if ( $publicationLocation != null ) {
-            $imprint->appendChild($this->_xml->createElement('pubPlace', $publicationLocation->getValue()));
+        if ( isset($journalPublisher) && $journalPublisher != '' && !in_array(strtolower($journalPublisher), array_map('strtolower', $this->_HalDocument->getMeta(self::PUBLISHER))) ) {
+            $imprint->appendChild($this->_xml->createElement(self::PUBLISHER, $journalPublisher));
         }
-        $serie = $this->_HalDocument->getMetaObj(self::SERIE);
-        if ( $serie != null ) {
-            $bs = $this->_xml->createElement(self::BIBLSCOPE, $serie -> getValue());
+        if ( $this->_HalDocument->getMeta('publicationLocation') != '' ) {
+            $imprint->appendChild($this->_xml->createElement('pubPlace', $this->_HalDocument->getMeta('publicationLocation')));
+        }
+        if ( $this->_HalDocument->getMeta(self::SERIE) != '' ) {
+            $bs = $this->_xml->createElement(self::BIBLSCOPE, $this->_HalDocument->getMeta(self::SERIE));
             $bs->setAttribute('unit', self::SERIE);
             $imprint->appendChild($bs);
         }
-        $volume = $this->_HalDocument->getMetaObj(self::VOLUME);
-        if ( $volume != null) {
-            $bs = $this->_xml->createElement(self::BIBLSCOPE, $volume->getValue());
+        if ( $this->_HalDocument->getMeta(self::VOLUME) != '' ) {
+            $bs = $this->_xml->createElement(self::BIBLSCOPE, $this->_HalDocument->getMeta(self::VOLUME));
             $bs->setAttribute('unit', self::VOLUME);
             $imprint->appendChild($bs);
         }
-        $issue = $this->_HalDocument->getMetaObj(self::ISSUE);
-        if ( $issue != null ) {
-            $bs = $this->_xml->createElement(self::BIBLSCOPE, $issue->getValue());
+        if ( $this->_HalDocument->getMeta(self::ISSUE) != '' ) {
+            $bs = $this->_xml->createElement(self::BIBLSCOPE, $this->_HalDocument->getMeta(self::ISSUE));
             $bs->setAttribute('unit', self::ISSUE);
             $imprint->appendChild($bs);
         }
-        $page = $this->_HalDocument->getMetaObj('page');
-        if ( $page != null ) {
-            $bs = $this->_xml->createElement(self::BIBLSCOPE, $page->getValue());
+        if ( $this->_HalDocument->getMeta('page') != '' ) {
+            $bs = $this->_xml->createElement(self::BIBLSCOPE, $this->_HalDocument->getMeta('page'));
             $bs->setAttribute('unit', 'pp');
             $imprint->appendChild($bs);
         }
-        $date = $this->_HalDocument->getMetaObj('date');
-        if ( $date != null ) {
-            $d = $this->_xml->createElement('date', $date->getValue());
-            if ( in_array($this->_HalDocument->_typdoc, array('THESE', 'HDR', 'MEM', 'ETABTHESE')) ) {
+        if ( $this->_HalDocument->getMeta('date') != '' ) {
+            $d = $this->_xml->createElement('date', $this->_HalDocument->getMeta('date'));
+            if ( in_array($this->_HalDocument->_typdoc, array('THESE', 'HDR', 'MEM')) ) {
                 $d->setAttribute('type', 'dateDefended');
             } else {
                 $d->setAttribute('type', 'datePub');
             }
-            $circa = $this->_HalDocument->getMetaObj('circa');
-            if ( $circa && $circa->getValue() == 1 ) {
+            if ( $this->_HalDocument->getMeta('circa') == 1 ) {
                 $d->setAttribute('precision', 'unknown');
             }
-            $inpress = $this->_HalDocument->getMetaObj('inPress') ;
-            if ( $inpress != null  && $inpress->getValue()== 1 ) {
+            if ( $this->_HalDocument->getMeta('inPress') == 1 ) {
                 $d->setAttribute('subtype', 'inPress');
             }
             $imprint->appendChild($d);
         }
-        $edate = $this->_HalDocument->getMetaObj('edate');
-        if ( $edate !=null ) {
-            $d = $this->_xml->createElement('date', $edate->getValue());
+        if ( $this->_HalDocument->getMeta('edate') != '' ) {
+            $d = $this->_xml->createElement('date', $this->_HalDocument->getMeta('edate'));
             $d->setAttribute('type', 'dateEpub');
             $imprint->appendChild($d);
         }
         $monogr->appendChild($imprint);
-        $authorityInstitution = $this->_HalDocument->getMetaObj('authorityInstitution');
-        if ($authorityInstitution)
-            foreach ( $authorityInstitution  -> getValue() as $orgthe ) {
-                $auth = $this->_xml->createElement(self::AUTHORITY, $orgthe);
-                $auth->setAttribute('type', 'institution');
-                $monogr->appendChild($auth);
-            }
-        $thesisSchool = $this->_HalDocument->getMetaObj('thesisSchool');
-        if ($thesisSchool)
-            foreach ( $thesisSchool->getValue() as $school ) {
-                $auth = $this->_xml->createElement(self::AUTHORITY, $school);
-                $auth->setAttribute('type', 'school');
-                $monogr->appendChild($auth);
-            }
-        $director = $this->_HalDocument->getMetaObj('director');
-        if ($director)
-            foreach ( $director ->getValue() as $dir ) {
-                $auth = $this->_xml->createElement(self::AUTHORITY, $dir);
-                $auth->setAttribute('type', 'supervisor');
-                $monogr->appendChild($auth);
-            }
-        $inria_directorEmail = $this->_HalDocument->getMetaObj('inria_directorEmail');
-        if ( $inria_directorEmail  != null ) {
-            $auth = $this->_xml->createElement(self::AUTHORITY, $inria_directorEmail -> getValue());
+        foreach ( $this->_HalDocument->getMeta('authorityInstitution') as $orgthe ) {
+            $auth = $this->_xml->createElement(self::AUTHORITY, $orgthe);
+            $auth->setAttribute('type', 'institution');
+            $monogr->appendChild($auth);
+        }
+        foreach ( $this->_HalDocument->getMeta('thesisSchool') as $school ) {
+            $auth = $this->_xml->createElement(self::AUTHORITY, $school);
+            $auth->setAttribute('type', 'school');
+            $monogr->appendChild($auth);
+        }
+        foreach ( $this->_HalDocument->getMeta('director') as $dir ) {
+            $auth = $this->_xml->createElement(self::AUTHORITY, $dir);
+            $auth->setAttribute('type', 'supervisor');
+            $monogr->appendChild($auth);
+        }
+        if ( $this->_HalDocument->getMeta('inria_directorEmail') != '' ) {
+            $auth = $this->_xml->createElement(self::AUTHORITY, $this->_HalDocument->getMeta('inria_directorEmail'));
             $auth->setAttribute('type', 'supervisorEmail');
             $monogr->appendChild($auth);
         }
-        $memsic_directorEmail =  $this->_HalDocument->getMetaObj('memsic_directorEmail');
-        if ( $memsic_directorEmail != null ) {
-            $auth = $this->_xml->createElement(self::AUTHORITY, $memsic_directorEmail ->getValue());
+        if ( $this->_HalDocument->getMeta('memsic_directorEmail') != '' ) {
+            $auth = $this->_xml->createElement(self::AUTHORITY, $this->_HalDocument->getMeta('memsic_directorEmail'));
             $auth->setAttribute('type', 'supervisorEmail');
             $monogr->appendChild($auth);
         }
-        $committee = $this->_HalDocument->getMetaObj('committee') ;
-        if ($committee)
-            foreach ( $committee -> getValue() as $jury ) {
-                $auth = $this->_xml->createElement(self::AUTHORITY, $jury);
-                $auth->setAttribute('type', 'jury');
-                $monogr->appendChild($auth);
-            }
-        return $monogr;
+        foreach ( $this->_HalDocument->getMeta('committee') as $jury ) {
+            $auth = $this->_xml->createElement(self::AUTHORITY, $jury);
+            $auth->setAttribute('type', 'jury');
+            $monogr->appendChild($auth);
+        }
+        if ($showXML) {
+            return $this->convertToXMLString($this->_xml->saveXML($monogr));
+        } else {
+            return $this->_xml->saveXML($monogr);
+        }
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createSeries">
     /**
-     * @return DOMElement|null
+     * @param bool $showXML
      * return <series> */
 
-    private function createSeries() {
-        $series=null;
-        $seriesEditors = [];
-        $seriesEditorObj = $this->_HalDocument->getMetaObj('seriesEditor');
-        if ($seriesEditorObj) {
-            $seriesEditors = $seriesEditorObj->getValue();
-        }
-        $lectureNameObj = $this->_HalDocument->getMetaObj(self::LECTURENAME);
-        if ( count($seriesEditors) || $lectureNameObj != null) {
+    public function createSeries($showXML = true) {
+        if ( count($this->_HalDocument->getMeta('seriesEditor')) || $this->_HalDocument->getMeta(self::LECTURENAME) != '' ) {
             $series = $this->_xml->createElement('series');
-            foreach ( $seriesEditors as $edcoll ) {
+            foreach ( $this->_HalDocument->getMeta('seriesEditor') as $edcoll ) {
                 $series->appendChild($this->_xml->createElement(self::EDITOR, $edcoll));
             }
-            if ( $lectureNameObj) {
-                $series->appendChild($this->_xml->createElement(self::TITLE, $lectureNameObj -> getValue()));
+            if ( $this->_HalDocument->getMeta(self::LECTURENAME) != '' ) {
+                $series->appendChild($this->_xml->createElement(self::TITLE, $this->_HalDocument->getMeta(self::LECTURENAME)));
+            }
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($series));
+            } else {
+                return $this->_xml->saveXML($series);
             }
         }
-        return $series;
     }
+    //</editor-fold>
 
+    //<editor-fold desc="createIdentifier">
     /**
-     * @return DOMElement[]
+     * @param bool $showXML
      * return <idno> in <biblStruct> */
 
-    private function createIdentifier() {
+    public function createIdentifier($showXML = true) {
         $idnos = [];
-        $identifierObj = $this->_HalDocument->getMetaObj('identifier');
-        if ($identifierObj === null)
-            return $idnos;
-        foreach ($identifierObj->getValue() as $code => $id) {
+        foreach ($this->_HalDocument->getMeta('identifier') as $code => $id) {
             $idno = $this->_xml->createElement('idno', $id);
             $idno->setAttribute('type', $code);
-            array_push($idnos, $idno);
+            array_push($idnos, $this->_xml->saveXML($idno));
         }
-        return $idnos;
+        if ($showXML) {
+            return $this->convertToXMLString(implode("", $idnos));
+        } else {
+            return implode("", $idnos);
+        }
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createSeeAlso">
     /**
-     * @return DOMElement[]
+     * @param bool $showXML
      * return <ref> type seeAlso in <biblStruct>*/
 
-    private function createSeeAlso() {
+    public function createSeeAlso($showXML = true) {
         $refs = [];
-        $urls = [];
-        $urlsObj = $this->_HalDocument->getMetaObj('seeAlso');
-        if ($urlsObj) $urls = $urlsObj-> getValue();
-
-        $codeRepositoryObj = $this->_HalDocument->getMetaObj('codeRepository');
-        if ($codeRepositoryObj) {
-            $url = $codeRepositoryObj ->getValue(); // Compatibilite
-            $urls[] = $url;
-            $ref = $this->_xml->createElement('ref');
-            $ref->setAttribute('type', 'codeRepository');
-            $ref->setAttribute('target', $url);
-            $refs[] = $ref;
+        $urls = $this->_HalDocument->getMeta('seeAlso');
+        if ($this->_HalDocument->getHalMeta()->getMeta('codeRepository')) {
+            $urls[] = $this->_HalDocument->getHalMeta()->getMeta('codeRepository');
         }
-        // Todo: Ne pas mettre le codeRepository dans seeAlso mais dans un ref type="codeRepository"
-        // Todo il faudrait mettre les URL dans un attribut target plutôt que dans la valeur de la balise
-        // Todo: supprimer l'url dans le contenu de l'element ref
+        //todo il faudrait mettre les URL dans un attribut target plutôt que dans la valeur de la balise
         foreach ( $urls as $url ) {
             $ref = $this->_xml->createElement('ref', $url);
-            // TODO: peut etre verifier que l'url corresponds a une url
-            // Si oui, alors mettre dans target, sinon, en text node
-            $comment = $this->_xml -> createComment("Url must be retreive in target attribute, text node with Url will be removed in future version");
-            $ref->appendChild($comment);
             $ref->setAttribute('type', 'seeAlso');
-            $ref->setAttribute('target', $url);
-            $refs[] = $ref;
+            array_push($refs, $this->_xml->saveXML($ref));
         }
-        return $refs;
+        if ($showXML) {
+            return $this->convertToXMLString(implode("", $refs));
+        } else {
+            return implode("", $refs);
+        }
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createPublisherLink">
     /**
-     * @return DOMElement
+     * @param bool $showXML
      * return <ref> type publisher in <biblStruct>*/
 
-    private function createPublisherLink() {
-        $ref = null;
-        $publisherLinkObj = $this->_HalDocument->getMetaObj('publisherLink');
-        if ( $publisherLinkObj ) {
-            $ref = $this->_xml->createElement('ref', $publisherLinkObj ->getValue());
+    public function createPublisherLink($showXML = true) {
+        if ( $this->_HalDocument->getMeta('publisherLink') != '' ) {
+            $ref = $this->_xml->createElement('ref', $this->_HalDocument->getMeta('publisherLink'));
             $ref->setAttribute('type', self::PUBLISHER);
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($ref));
+            } else {
+                return $this->_xml->saveXML($ref);
+            }
         }
-        return $ref;
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createRelatedItem">
     /**
-     * @return DOMElement[]
+     * @param bool $showXML
      * return <relatedItem> */
 
-    private function createRelatedItem() {
+    public function createRelatedItem($showXML = true) {
         $relatedItems = [];
         foreach ( $this->_HalDocument->_related as $info) {
             $item = $this->_xml->createElement('relatedItem', $info['INFO']);
             $item->setAttribute(self::TARGET, $info['URI']);
             $item->setAttribute('type', $info['RELATION']);
-            array_push($relatedItems, $item);
+            array_push($relatedItems, $this->_xml->saveXML($item));
         }
-        return $relatedItems;
+        if ($showXML) {
+            return $this->convertToXMLString(implode("", $relatedItems));
+        } else {
+            return implode("", $relatedItems);
+        }
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createListPlace">
     /**
-     * @return DOMElement|null
+     * @param bool $showXML
      * Manage Latitude and Longitude of image docs
      * return <listPlace> */
 
-    private function createListPlace() {
+    public function createListPlace($showXML = true) {
         // Test if the values of the elements latitude and longitude aren't null
-        $listPlace = null;
-        $latitudeObj = $this->_HalDocument->getMetaObj('latitude') ;
-        $longitudeObj = $this->_HalDocument->getMetaObj('longitude');
-        if ($longitudeObj && $latitudeObj) {
+        if ($this->_HalDocument->getMeta('latitude') !='' && $this->_HalDocument->getMeta('longitude')!='') {
             // Create a listPlace element
             $listPlace = $this->_xml->createElement('listPlace');
             // Create a place element
@@ -1522,26 +1429,31 @@ class Hal_Document_Tei_Creator extends Hal_Document
             // Create a location element
             $location = $this->_xml->createElement('location');
             // Create a geo element and assign the values of latitude and longitude to it
-            $geo = $this->_xml->createElement('geo', $latitudeObj->getValue() . ' ' . $longitudeObj->getValue());
+            $geo = $this->_xml->createElement('geo', $this->_HalDocument->getMeta('latitude') . ' ' . $this->_HalDocument->getMeta('longitude'));
             // Add the geo element to the location element
             $location->appendChild($geo);
             // Add the location element to the place element
             $place->appendChild($location);
             // Add the place element to the listPlace element
             $listPlace->appendChild($place);
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($listPlace));
+            } else {
+                return $this->_xml->saveXML($listPlace);
+            }
         }
-        return $listPlace;
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createRecordingStmt">
     /**
-     * @return DOMElement|null
+     * @param bool $showXML
      * Manage Duration of video docs
      * return <recordingStmt> */
 
-    private function createRecordingStmt() {
+    public function createRecordingStmt($showXML = true) {
         // Test if the value of the duration element isn't null
-        $recordingStmt = null;
-        $durationObj = $this->_HalDocument->getMetaObj('duration');
-        if($durationObj != null) {
+        if($this->_HalDocument->getMeta('duration') !='') {
             // Create a recordingStmt element
             $recordingStmt = $this->_xml->createElement('recordingStmt');
             //Create a recording element
@@ -1556,44 +1468,45 @@ class Hal_Document_Tei_Creator extends Hal_Document
                 $recording->setAttribute('type', 'audio');
             }
             // Assign the value of duration to the attribute dur of the recording element
-            if ($durationObj)
-                $recording->setAttribute('dur', $durationObj->getValue());
+            $recording->setAttribute('dur', $this->_HalDocument->getMeta('duration'));
             // Add the recording element to the recordingStmt element
             $recordingStmt->appendChild($recording);
-
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($recordingStmt));
+            } else {
+                return $this->_xml->saveXML($recordingStmt);
+            }
         }
-        return $recordingStmt;
     }
 
+    //</editor-fold>
+
+    //<editor-fold desc="createLanguages">
     /**
-     * @return DOMElement
+     * @param bool $showXML
      * profileDesc>langUsage>language
      * return <languages> */
 
-    private function createLanguages() {
+    public function createLanguages($showXML = true) {
         $lu = $this->_xml->createElement('langUsage');
-        $langObj = $this->_HalDocument->getMetaObj(self::LANGUAGE);
-
-        if ($langObj) {
-            $docLang = $langObj->getValue();
-        } else {
-            // Si pas de langue, on met 'en'
-            $docLang = 'en';
-        }
-        $tradLang = Zend_Locale::getTranslation($docLang, self::LANGUAGE, 'en');
-
-        $lang = $this->_xml->createElement(self::LANGUAGE, $tradLang);
-        $lang->setAttribute('ident', $docLang);
+        $lang = $this->_xml->createElement(self::LANGUAGE, Zend_Locale::getTranslation($this->_HalDocument->getMeta(self::LANGUAGE), self::LANGUAGE, 'en'));
+        $lang->setAttribute('ident', $this->_HalDocument->getMeta(self::LANGUAGE));
         $lu->appendChild($lang);
-
-        return $lu;
+        if ($showXML) {
+            return $this->convertToXMLString($this->_xml->saveXML($lu));
+        } else {
+            return $this->_xml->saveXML($lu);
+        }
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createTextClass">
     /**
-     * @return DOMElement
+     * @param bool $showXML
      * profileDesc>textClass
      * return <textClass> */
 
-    private function createTextClass() {
+    public function createTextClass($showXML = true) {
         $textClass = $this->_xml->createElement('textClass');
         // keyword
         if ( count($kwls = $this->_HalDocument->getKeywords()) ) {
@@ -1615,236 +1528,230 @@ class Hal_Document_Tei_Creator extends Hal_Document
             $textClass->appendChild($kws);
         }
         // classif
-        $classif = $this->_HalDocument->getMetaObj('classification');
-        if ( $classif != null) {
-            $kws = $this->_xml->createElement(self::CLASSCODE, $classif->getValue());
+        if ( ( $classif = $this->_HalDocument->getMeta('classification') ) != '' ) {
+            $kws = $this->_xml->createElement(self::CLASSCODE, $classif);
             $kws->setAttribute(self::SCHEME, 'classification');
             $textClass->appendChild($kws);
         }
         // mesh
-        $meshObj = $this->_HalDocument->getMetaObj('mesh');
-        if ($meshObj)
-            foreach ( $meshObj->getValue() as $mesh ) {
-                $kws = $this->_xml->createElement(self::CLASSCODE, $mesh);
-                $kws->setAttribute(self::SCHEME, 'mesh');
-                $textClass->appendChild($kws);
-            }
+        foreach ( $this->_HalDocument->getMeta('mesh') as $mesh ) {
+            $kws = $this->_xml->createElement(self::CLASSCODE, $mesh);
+            $kws->setAttribute(self::SCHEME, 'mesh');
+            $textClass->appendChild($kws);
+        }
         // jel
-        $jelObj = $this->_HalDocument->getMetaObj('jel');
-        if ($jelObj)
-            foreach ( $jelObj->getValue() as $jel ) {
-                $kws = $this->_xml->createElement(self::CLASSCODE, Ccsd_Tools_String::getHalMetaTranslated($jel, 'en', '/', 'jel'));
-                $kws->setAttribute(self::SCHEME, 'jel');
-                $kws->setAttribute('n', $jel);
-                $textClass->appendChild($kws);
-            }
+        foreach ( $this->_HalDocument->getMeta('jel') as $jel ) {
+            $kws = $this->_xml->createElement(self::CLASSCODE, Ccsd_Tools_String::getHalMetaTranslated($jel, 'en', '/', 'jel'));
+            $kws->setAttribute(self::SCHEME, 'jel');
+            $kws->setAttribute('n', $jel);
+            $textClass->appendChild($kws);
+        }
         // acm
-        $acmObj = $this->_HalDocument->getMetaObj('acm');
-        if ($acmObj)
-            foreach ( $acmObj ->getValue() as $acm ) {
-                $kws = $this->_xml->createElement(self::CLASSCODE, Ccsd_Tools_String::getHalMetaTranslated($acm, 'en', '/', 'acm'));
-                $kws->setAttribute(self::SCHEME, 'acm');
-                $kws->setAttribute('n', $acm);
-                $textClass->appendChild($kws);
-            }
+        foreach ( $this->_HalDocument->getMeta('acm') as $acm ) {
+            $kws = $this->_xml->createElement(self::CLASSCODE, Ccsd_Tools_String::getHalMetaTranslated($acm, 'en', '/', 'acm'));
+            $kws->setAttribute(self::SCHEME, 'acm');
+            $kws->setAttribute('n', $acm);
+            $textClass->appendChild($kws);
+        }
         // domain
-        $domainObj = $this->_HalDocument->getMetaObj('domain');
-        if ($domainObj)
-            foreach ( $domainObj-> getValue() as $domain ) {
-                $d = $this->_xml->createElement(self::CLASSCODE, Ccsd_Tools_String::getHalDomainTranslated($domain, 'en', '/'));
-                $d->setAttribute(self::SCHEME, 'halDomain');
-                $d->setAttribute('n', $domain);
-                $textClass->appendChild($d);
-            }
-        // inra classification spécifique VOCINRA
-        $vocinraObj = $this->_HalDocument->getMetaObj('inra_indexation_local');
-        if ($vocinraObj)
-            foreach($vocinraObj->getValue() as $vocinraTerm){
-                $v = $this->_xml->createElement(self::CLASSCODE,$vocinraTerm);
-                $v->setAttribute(self::SCHEME,'VOCINRA');
-                $v->setAttribute('n',$vocinraTerm);
-                $textClass->appendChild($v);
-            }
+        foreach ( $this->_HalDocument->getMeta('domain') as $domain ) {
+            $d = $this->_xml->createElement(self::CLASSCODE, Ccsd_Tools_String::getHalDomainTranslated($domain, 'en', '/'));
+            $d->setAttribute(self::SCHEME, 'halDomain');
+            $d->setAttribute('n', $domain);
+            $textClass->appendChild($d);
+        }
         // typdoc
-        $typdoc = $this->_xml->createElement(self::CLASSCODE, Ccsd_Tools::translate('typdoc_'.$this->_HalDocument->getTypDoc(), 'en'));
+        $typdoc = $this->_xml->createElement(self::CLASSCODE, Zend_Registry::get(self::ZENDTRANSLATE)->translate('typdoc_'.$this->_HalDocument->getTypDoc(), 'en'));
         $typdoc->setAttribute(self::SCHEME, 'halTypology');
         $typdoc->setAttribute('n', $this->_HalDocument->getTypDoc());
         $textClass->appendChild($typdoc);
-        return $textClass;
+        if ($showXML) {
+            return $this->convertToXMLString($this->_xml->saveXML($textClass));
+        } else {
+            return $this->_xml->saveXML($textClass);
+        }
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createAbstract">
     /**
-     * @return DOMElement[]
+     * @param bool $showXML
      * profileDesc>abstract
      * return <abstract> */
 
-    private function createAbstract()
+    public function createAbstract($showXML = true)
     {
         $abstractList = [];
         foreach ($this->_HalDocument->getAbstract() as $l => $t) {
             if ( is_array($t) ) {
-                // Hum: si plusieurs fois la meme langue ???
-                // On ne prends que le premier!
                 $t = current($t);
             }
-            $textInP = $this->_xml->createElement('p', $t);
-            $abs = $this->_xml->createElement('abstract');
-            $abs->appendChild($textInP);
+
+            $abs = $this->_xml->createElement('abstract', $t);
             $abs->setAttribute(static::XMLLANG, $l);
-            $abstractList[] = $abs;
+            $abstractList[] = $this->_xml->saveXML($abs);
         }
-        return $abstractList;
+        if ($showXML) {
+            return $this->convertToXMLString(implode("", $abstractList));
+        } else {
+            return implode("", $abstractList);
+        }
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createOrg">
     /**
-     * @return DOMElement|null
+     * @param bool $showXML
      * profileDesc>particDesc>org
      * return <org> */
 
-    private function createOrg() {
-        $collaboration=null;
-        $collabObj = $this->_HalDocument->getMetaObj(self::COLLABORATION);
-        if ($collabObj) {
+    public function createOrg($showXML = true) {
+        if ( is_array($this->_HalDocument->getMeta(self::COLLABORATION)) && count($this->_HalDocument->getMeta(self::COLLABORATION)) ) {
             $collaboration = $this->_xml->createElement('particDesc');
-            foreach ( $collabObj ->getValue() as $collab ) {
+            foreach ( $this->_HalDocument->getMeta(self::COLLABORATION) as $collab ) {
                 $org = $this->_xml->createElement('org', $collab);
                 $org->setAttribute('type', 'consortium');
                 $collaboration->appendChild($org);
             }
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($collaboration));
+            } else {
+                return $this->_xml->saveXML($collaboration);
+            }
         }
-        return $collaboration;
+        return "";
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createBack">
     /**
-     * @return DOMElement|null
+     * @param bool $showXML
      * return <back> */
 
-    private function createBack() {
-        $back = null;
-        $structures = $this->createStructures();
-        $projects = $this->createProjects();
-        // Create <back>
-        $back = $this->_xml->createElement('back');
-        if ($structures || $projects) {
-            // Append structures to <back>
-            if ($structures)
-                $back -> appendChild($structures);
-            // Append projects to <back>
-            if ($projects)
-                $back -> appendChild($projects);
-            // Return <back>
+    public function createBack($showXML = true) {
 
+        $structures = $this->createStructures(false);
+        $projects = $this->createProjects(false);
+
+        if ($structures || $projects) {
+            // Create <back>
+            $back = $this->_xml->createElement('back');
+            // Append structures to <back>
+            $this->appendStringToDomNode($back, $structures);
+            // Append projects to <back>
+            $this->appendStringToDomNode($back, $projects);
+            // Return <back>
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($back));
+            } else {
+                return $this->_xml->saveXML($back);
+            }
         }
-        return $back;
+        return "";
     }
+
+    //</editor-fold>
+
+    //<editor-fold desc="createStructures">
     /**
-     * @return DOMElement
+     * @param bool $showXML
      * return <org> of structures */
 
-    private function createStructures() {
-        $listOrg = null;
+    public function createStructures($showXML = true) {
         $structures = $this->_HalDocument->_structures;
         if ( isset($structures) && is_array($structures) && count($structures) ) {
             $listOrg = $this->_xml->createElement('listOrg');
             $listOrg->setAttribute('type', 'structures');
             $parents = array();
-
             foreach ( $structures as $s ) {
-                $struct = new Hal_Document_Structure($s->getStructId());
+                $struct = new Ccsd_Referentiels_Structure($s->getStructId());
                 if ( $struct->getStructid() == 0 ) {
                     continue;
                 }
                 $parents = array_merge($parents, $struct->getParentsStructids());
-                $listOrg -> appendChild($struct->getXMLNode($this->_xml));
+                $this->appendStringToDomNode($listOrg, $struct->getXML(false));
             }
-            $structuresIds = array_map( function($s) {
-                /** @var  Hal_Document_Structure $s */
-                return $s->getStructid(); } , $structures);
+            $structuresIds = array_map( function($s) { return $s->getStructid(); } , $structures);
             foreach ( array_unique(array_diff($parents, $structuresIds)) as $sid ) {
                 $struct = new Ccsd_Referentiels_Structure($sid);
                 if ( $struct->getStructid() == 0 ) {
                     continue;
                 }
-                $listOrg->appendChild($struct->getXMLNode($this->_xml));
+                $this->appendStringToDomNode($listOrg, $struct->getXML(false));
             }
-
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($listOrg));
+            } else {
+                return $this->_xml->saveXML($listOrg);
+            }
         }
-        return $listOrg;
+        return "";
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createProjects">
     /**
-     * @return DOMElement
+     * @param bool $showXML
      * return <org> */
 
-    private function createProjects()
-    {
+    public function createProjects($showXML = true) {
         // projets
-        $listOrg = null;
-        $anrProjects = $this->_HalDocument->getMetaObj(self::ANRPROJECT);
-        $europProjects = $this->_HalDocument->getMetaObj(self::EURPROJECT);
-        if ($anrProjects || $europProjects) {
+        if ( ($this->_HalDocument->getMeta(self::ANRPROJECT) != null && is_array($this->_HalDocument->getMeta(self::ANRPROJECT)) && count($this->_HalDocument->getMeta(self::ANRPROJECT))) || ($this->_HalDocument->getMeta(self::EURPROJECT) != null && is_array($this->_HalDocument->getMeta(self::EURPROJECT)) && count($this->_HalDocument->getMeta(self::EURPROJECT))) ) {
             $listOrg = $this->_xml->createElement('listOrg');
             $listOrg->setAttribute('type', 'projects');
-            if ($anrProjects)
-                foreach ($anrProjects->getValue() as $p) {
-                    if ($p instanceof Ccsd_Referentiels_Anrproject) {
-                        $listOrg->appendChild($p->getXMLNode($this->_xml));
-                    }
+            foreach ($this->_HalDocument->getMeta(self::ANRPROJECT) as $p) {
+                if ($p instanceof Ccsd_Referentiels_Anrproject) {
+                    $this->appendStringToDomNode($listOrg,$p->getXML(false));
                 }
-            if ($europProjects)
-                foreach ($europProjects->getValue() as $p) {
-                    if ($p instanceof Ccsd_Referentiels_Europeanproject) {
-                        $listOrg->appendChild($p->getXMLNode($this->_xml));
-                    }
+            }
+            foreach ($this->_HalDocument->getMeta(self::EURPROJECT) as $p) {
+                if ($p instanceof Ccsd_Referentiels_Europeanproject) {
+                    $this->appendStringToDomNode($listOrg,$p->getXML(false));
                 }
+            }
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($listOrg));
+            } else {
+                return $this->_xml->saveXML($listOrg);
+            }
         }
-        return $listOrg;
+        return "";
     }
+    //</editor-fold>
 
+    //<editor-fold desc="createReferences">
     /**
-     * Calcul la valeur de l'XML id pour la rendre unique sur l'ensemble des documents.
-     * @param $xmlid
+     * Implement hal doc references in TEI
+     * @param bool $showXML
      * @return string
      */
-    public static function changeXmlIdValue($xmlid, $docid) {
-        $xmlid = "ref$docid-$xmlid";
-        return $xmlid;
-    }
-    /**
-     * @todo Ne semble pas utilisee
-     * Implement hal doc references in TEI
-     * @return DOMElement|null
-     */
-    public function createReferences() {
+    public function createReferences($showXML = true) {
         $halDocReferences = new Hal_Document_References($this->_HalDocument->getDocid());
         $halDocReferences->load();
-        /** @var string[][]  $references */
         $references = $halDocReferences->get();
         if(count($references)) {
             $listBibl = $this->_xml->createElement('listBibl');
             $listBibl->setAttribute('type', 'references');
             foreach ($references as $reference) {
-                if ($reference[Hal_Document_References::REFXML] != '') {
-                    $newdom = new Ccsd_DOMDocument();
-                    $newdom->loadXML((string)$reference[Hal_Document_References::REFXML]);
-                    /** @var DOMElement $node */
-                    $node = $newdom ->getElementsByTagName('biblStruct')->item(0);
-                    $xmlid = $node-> getAttribute('xml:id');
-                    $node-> setAttribute('xml:id', self::changeXmlIdValue($xmlid, $this->_HalDocument->getDocid()));
-                    if ($node) {
-                        $importedNode = $this->_xml->importNode($node, true);
-                        $listBibl->appendChild($importedNode);
-                    }
-                }
+                $this->appendStringToDomNode($listBibl, (string) $reference['REFXML']);
             }
-            return $listBibl;
+            if ($showXML) {
+                return $this->convertToXMLString($this->_xml->saveXML($listBibl));
+            } else {
+                return $this->_xml->saveXML($listBibl);
+            }
         }
-        return null;
+        return "";
     }
+    //</editor-fold>
+
+    //<editor-fold desc="createAuthor(Hal_Document_Author)">
     /**
-     * @deprecated ??? Ne semble pas utilisee
-     * @param Hal_Document_Author $hal_document_author
-     * @return string
      * return a specific author */
     public function createAuthor($hal_document_author) {
         $autFromReferentiels = new Ccsd_Referentiels_Author($hal_document_author->getAuthorid());
         return $autFromReferentiels->getXML(false);
     }
+    //</editor-fold>
 }
 

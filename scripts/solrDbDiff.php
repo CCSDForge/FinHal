@@ -89,12 +89,6 @@ if ($opts->progress == true) {
     $progress = false;
 }
 
-$db = Zend_Db_Table_Abstract::getDefaultAdapter();
-Ccsd_Log::message('DB Host: ' . $db->getConfig()['host']  , $verbose, '', '');
-Ccsd_Log::message('DB Name: ' . $db->getConfig()['dbname'], $verbose, '', '');
-
-
-
 if ($opts->method == 'add') {
     /*
      * 1- Vérification que les documents visibles en base sont bien indexés par solr

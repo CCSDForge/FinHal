@@ -381,7 +381,7 @@ function selectMapMarker()
             var div = L.DomUtil.create('div', 'info legend');
 
                 div.innerHTML =
-                    '<span>'+ translate('Double-cliquez pour changer la position du repère') + '</span> ';
+                    '<span>'+ translate('Double-cliquez pour changer la position du repère'); + '</span> ';
 
             return div;
         };
@@ -488,7 +488,7 @@ function selectMapSquare()
             var div = L.DomUtil.create('div', 'info legend');
 
             div.innerHTML =
-                '<span>'+ translate('Cliquez sur le ⬛ pour créer une nouvelle zone') + '</span> ';
+                '<span>'+ translate('Cliquez sur le ⬛ pour créer une nouvelle zone'); + '</span> ';
 
             return div;
         };

@@ -55,8 +55,3 @@ if (Zend_Registry::get('APPLICATION_NAME' ) == 'HAL') {
     Ccsd_Tools::rrmdir(SPACE_DATA);
     Ccsd_Tools::copy_tree(RESSOURCESDIR . '/data/.', SPACE_DATA);
 }
-
-// Set the current site and portail
-$halSite = Hal_Site_Portail::loadSiteFromId(1);
-Hal_Site::setCurrentPortail($halSite);
-Hal_Site::setCurrent($halSite);

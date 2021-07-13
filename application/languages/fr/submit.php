@@ -49,7 +49,7 @@ return array(
     'File not accepted for this document type' => 'Dépôt avec fichier non accepté pour ce type de document',
     'latitude_desc' => "<button class='btn btn-default btn-xs' type='button' onclick='selectMapMarker()'>Afficher la carte</button>",
     'latitudeSW_desc' => "<button class='btn btn-default btn-xs' type='button' onclick='selectMapSquare()'>Afficher la carte</button>",
-    'The uploaded file exceeds the post_max_size directive in php.ini' => 'La taille du fichier téléchargé excède la taille maximale autorisée (' . ini_get('post_max_size') . ')',
+    'The uploaded file exceeds the post_max_size directive in php.ini' => 'La taille du fichier téléchargé excède la taille maximale autorisée',
     'Abstract' => 'Résumé',
     'Keyword' => 'Mots-Clé',
     'Language' => 'Langue',

@@ -107,9 +107,7 @@ while(true) {
 
 }
 $portal[PORTAL_URL] = str_replace('%portail%', $portal[PORTAL_NAME], URL_TPL);
-$portalUrl = getParam("URL du portail", false, [], $portal[PORTAL_URL]);
-$portalUrl = preg_replace('|https?://|', '', $portalUrl);  // nettoyage car on ajout le http apres
-$portal[PORTAL_URL] =$portalUrl;
+$portal[PORTAL_URL] = getParam("URL du portail", false, [], $portal[PORTAL_URL]);
 
 $portal[PORTAL_ALIAS] = getParam("Autre URL du portail (alias)", false);
 
@@ -233,8 +231,9 @@ if (getParam("Créer le portail", true, ['O', 'n'], 'n') == 'O') {
     println("- Ajout du droit administrateur : ", getMsg($res), getColor($res));
 
     // Création des répertoires
-    define('SPACE', '/data/hal/'  . APPLICATION_ENV . '/portail/' . $portal[PORTAL_NAME] . '/');
-    define('CACHE', '/cache/hal/' . APPLICATION_ENV . '/portail/' . $portal[PORTAL_NAME] . '/');
+    //todo ne fonctionne que pour la prod
+    define('SPACE', '/data/hal/production/portail/' . $portal[PORTAL_NAME] . '/');
+    define('CACHE', '/cache/hal/production/portail/' . $portal[PORTAL_NAME] . '/');
 
     $directories = [SPACE, CACHE, SPACE . 'config', SPACE . 'languages', SPACE . 'layout', SPACE . 'pages', SPACE . 'public'];
 
@@ -319,18 +318,10 @@ if (getParam("Créer le portail", true, ['O', 'n'], 'n') == 'O') {
 
 
     println('', 'Création du portail terminée...', 'yellow');
-} else {
-    println("ABANDON");
 }
 println();
 
-/**
- * @param $text
- * @param bool $required
- * @param array $values
- * @param string $default
- * @return string
- */
+
 function getParam($text, $required = true, $values = [], $default = '')
 {
     if (count($values)) {
@@ -362,11 +353,6 @@ function getParam($text, $required = true, $values = [], $default = '')
     return $res;
 }
 
-/**
- * @param string $s
- * @param string $v
- * @param string $color
- */
 function println($s = '', $v = '', $color = '')
 {
     if ($v != '') {

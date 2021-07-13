@@ -6,38 +6,48 @@ $this->navigation = $style->getNavigationOrientation();
 $this->cssFile = $style->getCssFile();
 
 $controller = Zend_Controller_Front::getInstance()->getRequest()->getControllerName();
+$action = Zend_Controller_Front::getInstance()->getRequest()->getActionName();
+
+if ($this->document) {
+    // used by tracker
+    $documentid = '' . $this->document->getId();
+    $docuri = $this->document->getUri();
+    $docurlmainfile = $this->document->getUrlMainFile();
+    $defaultFile =  $this->document->getDefaultFile();
+    if ($defaultFile) {
+        $docdefault = $defaultFile->getName();
+    }
+} else {
+    $documentid = '';
+    $docuri = '';
+    $docuri = '';
+    $docdefault = '';
+}
+
 if ( $controller == 'view' ) {
     echo $this->doctype('XHTML1_RDFA');
 } else {
     echo $this->doctype('HTML5');
     $this->headMeta()->setCharset('UTF-8');
 }
-
-$site = Hal_Site::getCurrent();
-$layout = $this->layout();
-$lang = Zend_Registry::get('lang');
-$language = Zend_Registry::get('Zend_Locale')->getLanguage(); // Hum: pa la meme chose que $lang???
 ?>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="<?php
-echo $language; ?>">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="<?php echo Zend_Registry::get('Zend_Locale')->getLanguage(); ?>">
 <head>
     <?php if(APPLICATION_ENV != ENV_PROD) : ?>
-    <meta name="robots" content="noindex">
+        <meta name="robots" content="noindex">
     <?php endif; ?>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta http-equiv="Content-Language" content="<?php echo $language; ?>" />
-    <?php
-    /** @var  $active Ccsd_Website_Navigation_Page[] */
+<?php
 
-    if ($this->headTitle()->getContainer() == '') {
-        $active = $this->nav()->findActive($this->nav()->getContainer());
-        $this->headTitle($active ? $this->translate($active['page']->getLabel()) : $site->getShortname());
-    } elseif ($layout->pageTitle != '') {
-        $this->headTitle($layout->pageTitle);
-    }
+/** @var  $active Ccsd_Website_Navigation_Page[] */
+$site = Hal_Site::getCurrent();
+
+if ($this->headTitle()->getContainer() == '') {
+    $active = $this->nav()->findActive($this->nav()->getContainer());
+    $this->headTitle($active ? $this->translate($active['page']->getLabel()) : $site->getShortname());
+} elseif ($this->layout()->pageTitle != '') {
+    $this->headTitle($this->layout()->pageTitle);
+}
 
 $this->headTitle()->prepend($site->getFullname());
 $this->headTitle()->setSeparator(' - ');
@@ -48,19 +58,46 @@ $this->headLink(['rel'=>'dns-prefetch', 'href'=>'//cdn.mathjax.org']);
 $this->headLink(['rel'=>'icon', 'type'=>'type/png', 'href'=>(file_exists(SPACE . 'public/favicon.png') ? SPACE_URL . 'favicon.png' : '/img/favicon.png')]);
 $this->headLink(['rel'=>'search', 'type'=>'application/opensearchdescription+xml', 'href'=>'/search/opensearch', 'title'=>'HAL']);
 $this->headLink()->appendStylesheet("/css/print_hal.css", 'print');
-$this->headScript()->appendScript("var lang = '" . $language . "';");
+
+$this->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=UTF-8');
+$this->headMeta()->appendHttpEquiv('Content-Language', Zend_Registry::get('Zend_Locale')->getLanguage());
+
+$this->headScript()->appendScript("var lang = '" . Zend_Registry::get('Zend_Locale')->getLanguage() . "';");
 
 echo $this->headTitle().PHP_EOL;
 echo $this->headLink().PHP_EOL;
 echo $this->headMeta().PHP_EOL;
 
-\Hal\View\TrackerJS::addRgpdAntiTracker($this);
+// Ajouté le 28/07/2020:
+$tag_name = '';
+$page_active = $this->nav()->findActive($this->nav()->getContainer());
+$tag_name = $page_active ? $this->translate($page_active['page']->getLabel()) : '';
+$menu_label_origin = $page_active ? $page_active['page']->getLabel() : '';
+if (!empty($menu_label_origin)) {
+    $menu_label = trim($menu_label_origin);
+}
+//
+$piwikId = Hal_Site::getCurrent()->getSetting('PIWIKID');
+// Modification: intégration de Tarteaucitron et de différentes cookies.
+
+$trackerRgpd = new \Hal\View\Tarteaucitron($this);
+$trackerRgpd->addHeader();
+//
+$trackerMatomo = new \Hal\View\Matomo('//piwik-hal.ccsd.cnrs.fr/', $piwikId);
+$trackerMatomo->addHeader();
+//
+$trackerAtinternet = new \Hal\View\Atinternet($this, $controller, $action, $tag_name, $documentid);
+$trackerAtinternet->addHeader();
+//
+$trackerAddtoany = new \Hal\View\Addtoany($this);
+$trackerAddtoany->addHeader();
+
+// -------------------------------------------------
 
 echo $this->headScript().PHP_EOL;
 
-
-    $this->jQuery()
-    ->addJavascriptFile("/js/translations.php?lang=" . $lang)
+$this->jQuery()
+    ->addJavascriptFile("/js/translations.php?lang=" . Zend_Registry::get('lang'))
     ->addJavascriptFile(CCSDLIB ."/v3/js/bootstrap.min.js")
     ->addJavascriptFile(CCSDLIB ."/js/form.js")
     ->addJavascriptFile("/js/utile.js")
@@ -72,7 +109,7 @@ echo $this->headScript().PHP_EOL;
 
 if ('index' != $controller && 'page' != $controller) {
     $this->jQuery()
-        ->addJavascriptFile(CCSDLIB . "/js/datepicker/datepicker-" . $lang . ".js")
+        ->addJavascriptFile(CCSDLIB . "/js/datepicker/datepicker-" . Zend_Registry::get('lang') . ".js")
         ->addJavascriptFile(CCSDLIB . "/js/datepicker.js");
 }
 
@@ -82,7 +119,6 @@ if ($this->cssFile) {
 }
 
 echo $this->jQuery()->setLocalPath(CCSDLIB . '/js/jquery/jquery-1.12.4.min.js')->enable()->setUiLocalPath(CCSDLIB . '/js/jquery-ui-1.11.4/jquery-ui.min.js')->UiEnable();
-
 
 ?>
 
@@ -94,21 +130,18 @@ html {
 	min-height: 100%;
 }
 </style>
-    <?php
-   echo $this->headStyle().PHP_EOL;
-?>
 </head>
-<body>
-<?php $this->navbar(true, array('languages' =>  Zend_Registry::get('languages'), 'lang' => $lang), true, array('isLogged' => Hal_Auth::isLogged()), PREFIX_URL); ?>
+<body>$this->translate($page_active['page']->getLabel())
+<?php $this->navbar(true, array('languages' =>  Zend_Registry::get('languages'), 'lang' => Zend_Registry::get('lang')), true, array('isLogged' => Hal_Auth::isLogged()), PREFIX_URL); ?>
 <div id="container" class="container<?php echo $this->containerClass;?>">
     <div class="logo">
         <?php
-        if (is_file(SPACE . LAYOUT . 'header.' . $lang . '.html')) {
+        if (is_file(SPACE . LAYOUT . 'header.' . Zend_Registry::get('lang') . '.html')) {
             //Header prédéfini du portail
-            echo file_get_contents(SPACE . LAYOUT . 'header.' . $lang . '.html');
+            echo file_get_contents(SPACE . LAYOUT . 'header.' . Zend_Registry::get('lang') . '.html');
         } else {
             //Header par défaut du module (portail, collection)
-            $title = $site->getFullname() ;
+            $title = Zend_Registry::get('website')->getFullname() ;
             $name = '';
             if (MODULE == SPACE_PORTAIL)
                 $name = PORTAIL;
@@ -131,7 +164,7 @@ html {
         $class = "col-md-12";
     }?>
         <div class="<?php echo $class; ?>">
-            <?php echo $this->sidebar($this, $this->navigation, $this->nav(),PREFIX_URL); ?>
+            <?php echo $this->sidebar($this->navigation, $this->nav(),PREFIX_URL); ?>
             <?php if ($this->navigation == Ccsd_Website_Style::MENU_LIST || $this->navigation == Ccsd_Website_Style::MENU_ACCORDION) {?>
         </div>
         <div class="col-md-10">
@@ -139,18 +172,18 @@ html {
             <div class="corps">
                 <?php if ($style->displayBreadCrumbs()) {
                     echo $breadcrumbs = trim($this->render('common/breadcrumbs.phtml'));
-                    if ($breadcrumbs == '' && $layout->pageTitle != '') {
+                    if ($breadcrumbs == '' && $this->layout()->pageTitle != '') {
                         ?>
                         <ol class="breadcrumb">
-                            <li class="active"> <?php echo $layout->pageTitle; ?> </li>
-                            <?php if(!empty($layout->docLink)) { ?>
-                                <a href="<?php echo $layout->docLink; ?>" target="_blank" rel="noopener"><span class="glyphicon glyphicon-question-sign" style="float:right; font-size:22px;" data-toggle="tooltip" data-original-title="Documentation"></span></a>
+                            <li class="active"> <?php echo $this->layout()->pageTitle; ?> </li>
+                            <?php if(!empty($this->layout()->docLink)) { ?>
+                                <a href="<?php echo $this->layout()->docLink; ?>" target="_blank" rel="noopener"><span class="glyphicon glyphicon-question-sign" style="float:right; font-size:22px;" data-toggle="tooltip" data-original-title="Documentation"></span></a>
                             <?php }?>
                         </ol>
                     <?php }
                 } else {
-                    if ($layout->pageTitle != '') {
-                        $title = $layout->pageTitle;
+                    if ($this->layout()->pageTitle != '') {
+                        $title = $this->layout()->pageTitle;
                     } else {
                         $active = $this->nav()->findActive($this->nav()->getContainer());
                         $title = $active ? $active['page']->getLabel() : '';
@@ -160,8 +193,8 @@ html {
                         <h1><?php echo $this->translate($title);?></h1>
                     <?php } ?>
                 <?php } ?>
-                <?php if ($layout->pageDescription != '') { ?>
-                    <blockquote><?php echo $layout->pageDescription;?></blockquote>
+                <?php if ($this->layout()->pageDescription != '') { ?>
+                    <blockquote><?php echo $this->layout()->pageDescription;?></blockquote>
                     <hr />
                 <?php } ?>
                 <div id="flash-messages">
@@ -169,7 +202,8 @@ html {
                     echo $this->DisplayFlashMessages('danger', false);
                     echo $this->DisplayFlashMessages('warning', true);
                     echo $this->DisplayFlashMessages('success', true);
-                    echo $this->DisplayFlashMessages('info', true);
+                    echo $this->DisplayFlashMessages('info', true);5326
+
                     ?>
                 </div>
                 <?php
@@ -190,26 +224,32 @@ html {
                     }
                 }
 
-                echo $layout->content ;?>
+                echo $this->layout()->content ;?>
 
             </div>
             <?php if ($this->displayErrors) {echo $this->render('common/errors.phtml');}?>
         </div>
     </div>
-    <?php if ( in_array(APPLICATION_ENV, [ENV_DEV, ENV_TEST]) ) { echo $this->render('common/debug.phtml'); } ?>
+    <?php //if ( in_array(APPLICATION_ENV, [ENV_DEV, ENV_TEST]) ) { echo $this->render('common/debug.phtml'); } ?>  <!-- Ligne provisoirement desactivee le 06.08.2020. -->
 </div>
 <?php echo $this->render('common/footer.phtml'); ?>
+
 <script type="text/javascript">
     $(document).ready(function () {
         $(document.body).tooltip({ selector: '[data-toggle="tooltip"]' , html: true, container: 'body'});
     });
 </script>
+
 <?php
-//PIWIK
-$config = \Hal\Config::getInstance();
-$matomoHost = $config->getOption('matomo.host');
-$piwikId = Hal_Site::getCurrent()->getSetting('piwikid');
-echo \Hal\View\TrackerJS::getMatomoTracker($matomoHost, $piwikId);
+
+// --------------------------------------
+
+echo $trackerAtinternet->getHeader();
+
+echo $trackerMatomo->getHeader();
+
+echo $trackerAddtoany->getHeader();
+// --------------------------------------
 ?>
 
 </body>

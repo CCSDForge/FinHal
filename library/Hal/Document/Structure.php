@@ -73,7 +73,7 @@ class Hal_Document_Structure extends Ccsd_Referentiels_Structure implements Iter
             $db = Zend_Db_Table_Abstract::getDefaultAdapter();
             $where['STRUCTID = ?'] = (int)$from;
             // affiliation auteur/structure
-            $db->update(Hal_Document_Author::TABLE_DOCAUTHSTRUCT, array('STRUCTID' => $to), $where);
+            $db->update('DOC_AUTSTRUCT', array('STRUCTID' => $to), $where);
             // organisme d'appartenance dans la forme auteur
             $sql = $db->select()->from('REF_AUTHOR')->where('STRUCTID = ?', $from);
             foreach ($db->fetchAll($sql) as $author) {

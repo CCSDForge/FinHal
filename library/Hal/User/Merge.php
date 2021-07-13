@@ -29,7 +29,7 @@ Class Hal_User_Merge extends Ccsd_User_Merge {
      * Table à ne pas évaluer ni modifier pour les fusions
      * @var array
      */
-    protected $_tablesBlacklist = ['USER', 'USER_PREF_DEPOT', 'USER_PREF_MAIL', 'USER_CONNEXION', 'DOC_STAT_COUNTER'];
+    private static $_tablesBlacklist = ['USER', 'USER_PREF_DEPOT', 'USER_PREF_MAIL', 'USER_CONNEXION', 'DOC_STAT_COUNTER'];
 
     /**
      * Constructeur
@@ -37,6 +37,7 @@ Class Hal_User_Merge extends Ccsd_User_Merge {
     public function __construct() {
         parent::__construct();
         $this->setApplicationUsersTable(self::PROFILE_TABLE);
+        $this->setTablesBlacklist(self::$_tablesBlacklist);
         $this->setUserMergeLogTable(self::USER_MERGE_LOG_TABLE);
 
         return $this;
@@ -106,6 +107,9 @@ Class Hal_User_Merge extends Ccsd_User_Merge {
 
     /**
      * Copy de administrate controller....
+     * @param Hal_User_Merge $um
+     * @param Hal_User $toUidUser
+     * @param Hal_User $fromUidUser
      * @throws Zend_Db_Statement_Exception
      * @return Ccsd_FlashMessenger
      */
@@ -150,7 +154,7 @@ Class Hal_User_Merge extends Ccsd_User_Merge {
         }
 
         Ccsd_Tools::panicMsg(__FILE__,__LINE__, 'Tests not exhautive! ...');
-        return null;
+        return '';
     }
 
     /**

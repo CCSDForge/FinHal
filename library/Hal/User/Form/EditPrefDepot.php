@@ -13,6 +13,12 @@ class Hal_User_Form_EditPrefDepot extends Ccsd_Form
 
         $pref_form = new Ccsd_Form_SubForm();
         $pref_form->setConfig(new Zend_Config_Ini(__DIR__ . '/../config/account.ini', 'pref-depot'));
+        $oInstance = \Hal\Instance::getInstance('');
+        if ($oInstance->getName() == 'halspm') {
+            $pref_form->removeElement('MODE');
+            $pref_form->removeElement('DEFAULT_AUTHOR');
+        }
+
         $pref_form->setLegend("Mes préférences de dépôt");
         $pref_form->setDescription("editpref_intro");
         $pref_form->setDecorators(

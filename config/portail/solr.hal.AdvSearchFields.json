@@ -4,7 +4,6 @@
 	"title_t":"hal_title_t",
 	"subTitle_t":"hal_subTitle_t",
 	"bookTitle_t":"hal_bookTitle_t",
-	"serie_t":"hal_serie_t",
 
 	"abstract_t":"hal_abstract_t",
 	"fulltext_t":"hal_fulltext_t",
@@ -61,7 +60,6 @@
 	"conferenceOrganizer_t":"hal_conferenceOrganizer_t",
 	"conferenceStartDateY_i":"hal_conferenceStartDateY_i",
 	"conferenceEndDateY_i":"hal_conferenceEndDateY_i",
-	"invitedCommunication_t": "hal_invitedCommunication_t",
 
 	"--sep3":"",
 
@@ -147,7 +145,7 @@
 	"docType_s":"hal_docType_s",
 	"isbn_id":"hal_isbn_id",
 	"number_id":"hal_number_id",
-	"doiId_id":"hal_doiId_id",
+	"doiId_s":"hal_doiId_s",
 
 
 	"--sep11" : "",

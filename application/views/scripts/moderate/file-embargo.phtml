@@ -1,6 +1,5 @@
 <?php
 /**
- * @var Hal_View $this
  * Created by PhpStorm.
  * User: baptiste
  * Date: 03/12/2015
@@ -33,18 +32,17 @@ $form->removeDecorator('Form');
 </div>
 <script type="text/javascript">
     function putFileEmbargo(id, uid, docid){
-        var $calendar = $("#calendar-id");
         $.ajax({
             type: "POST",
             url: '/moderate/ajaxputfileembargo',
-            data: {id : id, uid: uid, docid:docid, datelimit:$calendar.attr('attr-maxdate'), date: $calendar.val()},
+            data: {id : id, uid: uid, docid:docid, datelimit:$("#calendar-id").attr('attr-maxdate'), date: $("#calendar-id").val()},
             success: function(data){
                 $('#emb_'+id).popover('destroy');
-                if ($calendar.val() === '') {
+                if ($("#calendar-id").val() === '') {
                     $('#file'+id).prepend(getMessageHtml(translate("Veuillez remplir une date d'embargo"), 'alert-danger'));
-                } else if ($calendar.val() > $calendar.attr('attr-maxdate')) {
+                } else if ($("#calendar-id").val() > $("#calendar-id").attr('attr-maxdate')) {
                     $('#file'+id).prepend(getMessageHtml(translate("La date d'embargo est supérieure à la date de dépôt +2ans"), 'alert-danger'));
-                } else if ($calendar.val() < $calendar.attr('attr-mindate')) {
+                } else if ($("#calendar-id").val() < $("#calendar-id").attr('attr-mindate')) {
                     $('#file'+id).prepend(getMessageHtml(translate("La date d'embargo est inférieure à la date d'aujourd'hui"), 'alert-danger'));
                 } else {
                     $('#file'+id).replaceWith(data);
@@ -53,4 +51,5 @@ $form->removeDecorator('Form');
             }
         });
     }
+
 </script>

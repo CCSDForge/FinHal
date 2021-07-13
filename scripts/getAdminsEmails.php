@@ -3,8 +3,8 @@
 // Pour l'envoi du questionnaire sur les stats à tous les administrateurs de portail
 // 23/02/2018
 
-$dbHAL = new PDO('mysql:host=localhost;port=3306;dbname=HALV3', 'username', 'password', array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'"));
-$dbCAS = new PDO('mysql:host=localhost;dbname=CAS_users', 'username', 'password', array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'"));
+$dbHAL = new PDO('mysql:host=ccsddb04.in2p3.fr;port=3306;dbname=HALV3', 'ccsd_sql', 'pap5e2008', array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'"));
+$dbCAS = new PDO('mysql:host=ccsddb04.in2p3.fr;dbname=CAS_users', 'cas_sql', 'c88y7YSPWCHe248BNurDDbYDMpE4d6VWUHfv7zF8SaUJttHa', array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'"));
 
 $res = $dbHAL->query('SELECT UID FROM USER_RIGHT WHERE RIGHTID="administrator"')->fetchAll(PDO::FETCH_COLUMN);
 $resAsString = '(';

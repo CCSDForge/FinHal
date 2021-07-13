@@ -3,7 +3,7 @@
     "controller": "user",
     "action": "space",
     "resource": "user-space",
-    "privilege": "member,atamponneur,tamponneur,administrator,adminstruct,validateur,moderateur",
+    "privilege": "member,tamponneur,administrator,adminstruct,validateur,moderateur",
     "pages": [{
             "label": "Mes dépôts",
             "controller": "user",
@@ -73,21 +73,45 @@
         "controller": "rights",
         "action": "index",
         "resource": "rights-index",
-        "privilege": "tamponneur,atamponneur,administrator,adminstruct,validateur,moderateur,haladmin",
-        "pages": [
-            {
-                "label": "Mes collections",
-                "controller": "user",
-                "action": "mycollections",
-                "resource": "user-collections",
-                "privilege": "tamponneur,atamponneur,administrator,haladmin"
-            },
-            {
-                "label": "Administrer les collections",
+        "privilege": "tamponneur,administrator,adminstruct,validateur,moderateur,haladmin",
+        "pages": [{
+                "label": "Collections",
                 "controller": "collection",
-                "action": "list",
-                "resource": "collection-list",
-                "privilege": "administrator"
+                "action": "index",
+                "resource": "collection-index",
+                "privilege": "tamponneur,administrator",
+                "pages": [
+                    {
+                        "label": "Mes collections",
+                        "controller": "user",
+                        "action": "collections",
+                        "resource": "user-collections",
+                        "privilege": "tamponneur,administrator,haladmin"
+                    },
+                    {
+                        "label": "Gestion des collections",
+                        "controller": "collection",
+                        "action": "list",
+                        "resource": "collection-list",
+                        "privilege": "administrator",
+                        "pages": [
+                            {
+                                "label": "Créer une collection",
+                                "controller": "collection",
+                                "action": "create",
+                                "resource": "collection-create",
+                                "privilege": "administrator"
+                            },
+                            {
+                                "label": "Supprimer une collection",
+                                "controller": "collection",
+                                "action": "delete",
+                                "resource": "collection-delete",
+                                "privilege": "haladmin"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "label": "Statistiques",
@@ -160,13 +184,6 @@
                         "privilege": "administrator"
                     }
                 ]
-            },
-            {
-                "label": "Patrouillage",
-                "controller": "patrol",
-                "action": "index",
-                "resource": "patrol-index",
-                "privilege": "moderateur"
             },
             {
                 "label": "Modération",

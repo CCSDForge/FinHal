@@ -23,6 +23,7 @@ abstract class Hal_Transfert
 {
     const MAX_RECURSION = 51;
 
+
     static protected $zipExcludeRe = '/The regexp to exclude some files in sent zip/';
 
     /*  DB Fields */
@@ -61,7 +62,7 @@ abstract class Hal_Transfert
     /** @var bool isFromDb */
     protected $isFromDb = false;
     /** @var  Hal_Transfert[] */
-    protected $oldTransferts = [];
+    protected $oldTransferts;
     /** @var string $serviceUrl */
     protected $serviceUrl;
     /** @var string $method */
@@ -117,19 +118,12 @@ abstract class Hal_Transfert
      */
     public function __construct($docid = 0, $extId = '', $pendingUrl = '')
     {
-        $this->setDocid($docid);
-        $this->setRemoteId($extId);
-        $this->setPendingUrl($pendingUrl);
+        $this->_docid = $docid;
+        $this->_remoteId = $extId;
+        $this->_pendingUrl = $pendingUrl;
         $this->modified = true;
     }
 
-    /**
-     * Set docid in object, assure this is an int
-     * @param $docid
-     */
-    protected function setDocid($docid) {
-        $this->_docid = (int) $docid;
-    }
     /** setter
      * @param string $url
      */
@@ -233,7 +227,7 @@ abstract class Hal_Transfert
         if ($row === false) {
             return false;
         }
-        $this->_docid = (int) $row['DOCID'];
+        $this->_docid = $row['DOCID'];
         $this->_remoteId = $row[static::$EXTFIELDNAME];
         $this->_pendingUrl = $row['PENDING'];
         // obj is like in DB...
@@ -381,22 +375,5 @@ abstract class Hal_Transfert
             Ccsd_Search_Solr_Indexer::addToIndexQueue([ $this -> _docid ]);
         }
         return $response;
-    }
-
-    /**
-     * Si changement de DociId pour un document, suivit dans les tables de trasnferts
-     *
-     * @param int $olddoci
-     * @param int $newDocid
-     */
-    static public function changeDocid($olddoci, $newDocid)
-    {
-        $transfertObj = new static($olddoci);
-        if ($transfertObj->load($olddoci)) {
-            $transfertObj->delete();
-            $transfertObj->setDocid($newDocid);
-            $transfertObj->modified = true;
-            $transfertObj->save();
-        }
     }
 }

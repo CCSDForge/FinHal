@@ -5,24 +5,13 @@
 require __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../library/Hal/Script.php';
 
-/**
- * Class loadAnrScript
- *
- * INPUT: CSV de la base projet fourni par l'ANR
- *
- * Objectif: Remplissage de la table REF_PROJANR
- */
 class loadAnrScript extends Hal_Script {
     protected $options = [
         'filename|f=s' => 'path to CSV file of ANR Project',
-        'year|y=s' => 'limit to year',
         'test|t' => 'Do nothing, just print message',
     ];
 
-    /**
-     * @param $data
-     * @return array
-     */
+
     private function cleanCsvEntry ($data) {
         $entry = [];
         $num = count($data);
@@ -43,17 +32,16 @@ class loadAnrScript extends Hal_Script {
     public function main($args) {
 
         $file = $args -> filename;
-        $year = $args -> year;
         $db = Zend_Db_Table::getDefaultAdapter();
         $stmtANRInsert = $db->prepare("INSERT INTO `REF_PROJANR` (TITRE,ACRONYME,REFERENCE,INTITULE,ACROAPPEL,ANNEE,VALID) VALUES (:TITRE,:ACRONYME,:REFERENCE,:INTITULE,:ACROAPPEL,:ANNEE,:VALID)");
-        $stmtANRUpdate = $db->prepare("UPDATE `REF_PROJANR` set TITRE=:TITRE,ACRONYME=:ACRONYME,REFERENCE=:REFERENCE,INTITULE=:INTITULE, ACROAPPEL=:ACROAPPEL,ANNEE=:ANNEE,VALID=:VALID where ANRID=:ANRID");
+        $stmtANRUpdate = $db->prepare("UPDATE `REF_PROJANR` set TITRE=:TITRE,ACRONYME=:ACRONYME,REFERENCE=:REFERENCE,ACROAPPEL=:ACROAPPEL,ANNEE=:ANNEE,VALID=:VALID where ANRID=:ANRID");
 
         // Récupération des ProjANR, csv -> Référence;Titre;Acronyme;Intitulé du programme;Acronyme du programme;Année
         $csv = [];
         $line = 0;
         if (($handle = fopen($file, "r")) !== FALSE) {
-            $header = fgetcsv($handle, 0, "\t"); // suppress header
-            while (($data = fgetcsv($handle, 0, "\t")) !== FALSE) {
+            $header = fgetcsv($handle, 4096, ";"); // suppress header
+            while (($data = fgetcsv($handle, 4096, ",")) !== FALSE) {
                 $csv[] = $this->cleanCsvEntry($data);
                 $line++;
             }
@@ -80,20 +68,14 @@ class loadAnrScript extends Hal_Script {
                 }
                 // Entetes CSV 2017
                 // REFERENCE,ACRONYME_PROJET,TITRE_FR,ACRONYME_PROGRAMME,ANNEE
-                list($reference, $annee, $accronyme, $titleFr, $titleEn, $intProg, $acroappel) = $anr;
-                if (($year != null) && ($annee != $year)) {
-                    continue;
-                }
-                // $exist = $db->query("SELECT ANRID from `REF_PROJANR` where MD5 = UNHEX('" . $md5 ."')")->fetch();
-                $title = ($titleEn == '') ? $titleFr : $titleEn;
+                list($reference, $accronyme, $title, $acroappel, $annee) = $anr;
                 $md5 = md5(mb_strtolower('titre'.$title.'acronyme'.$accronyme.'reference'.$reference));
-
+                // $exist = $db->query("SELECT ANRID from `REF_PROJANR` where MD5 = UNHEX('" . $md5 ."')")->fetch();
                 $exist = array_key_exists($md5, $md5array);
                 $bind=[];
                 $bind[':REFERENCE'] = $reference;
                 $bind[':ACRONYME']  = $accronyme;
                 $bind[':TITRE']     = $title;
-                $bind[':INTITULE']  = $intProg;
                 $bind[':ACROAPPEL'] = $acroappel;
                 $bind[':ANNEE']     = $annee;
                 $bind[':VALID']     = 'VALID';
@@ -114,18 +96,19 @@ class loadAnrScript extends Hal_Script {
                             try {
                                 $res = $stmtANRUpdate->execute($bind);
                             } catch (Exception $e) {
-                                $this -> debug('ERROR: ne devrait pas arrive...: ' . $e->getMessage());
+                                $this -> debug('ERROR: ne devrait pas arrive...');
                                 $nbErr++;
                                 $res  = false;
                             }
                         } else {
+                            $bind[':INTITULE']  = '';
                             $this->verbose("$reference: nouveau projet");
                             $nbNew++;
                             $lastCommand = $stmtANRInsert;
                             try {
                                 $res = $stmtANRInsert->execute($bind);
                             } catch (Exception $e) {
-                                $this -> debug('ERROR: ne devrait pas arrive...:' . $e->getMessage());
+                                $this -> debug('ERROR: ne devrait pas arrive...');
                                 $nbNew--;
                                 $nbErr++;
                                 $res  = false;

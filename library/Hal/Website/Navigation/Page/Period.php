@@ -123,7 +123,7 @@ class Hal_Website_Navigation_Page_Period extends Hal_Website_Navigation_Page
     public function load()
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-        $sql = $db->select()->from('WEBSITE_NAVIGATION', 'PARAMS')->where('SID = ?', $this->getSid())->where('TYPE_PAGE = ?', __CLASS__);
+        $sql = $db->select()->from('WEBSITE_NAVIGATION', 'PARAMS')->where('SID = ?', SITEID)->where('TYPE_PAGE = ?', __CLASS__);
         $dbRes = $db->fetchOne($sql);
 
         if ($dbRes) {

@@ -71,7 +71,6 @@ if (Hal_Auth::isLogged() ) {
         );
     }
 
-    // TODO : Better to use the A_TAMPONNEUR role than the TAMPONNEUR role
     if (Hal_Auth::isTamponneur()) {
         //L'utilisateur peut tamponner/détamponner le document
         $actionsUser[Hal_Settings_Submissions::ACTION_TAMPONNER] = array();

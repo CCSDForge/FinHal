@@ -1,8 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>Internal error</title>
+  <title>Zend Framework Default Application</title>
 </head>
 <body>
   <h1>An error occurred</h1>
@@ -12,7 +12,7 @@
   <?php if (ENV_TEST == APPLICATION_ENV || ENV_DEV == APPLICATION_ENV) {  ?>
           <h3>Exception information:</h3>
           <p>
-              <strong>Message:</strong> <?php echo $this->exception->getMessage() ?>
+              <b>Message:</b> <?php echo $this->exception->getMessage() ?>
           </p>
 
           <h3>Stack trace:</h3>
@@ -23,19 +23,15 @@
           <pre><?php echo $this->escape(var_export($this->request->getParams(), true)) ?>
           </pre>
       <?php } else {
-      try {
           $mail = new Zend_Mail();
-          $text = 'Error: ' . $this->exception->getMessage();
-          $text .= '<br /><br />Dump: ' . Zend_Debug::dump($this->request->getParams(), null, false);
-          $text .= '<br /><br />Stack Trace: ' . Zend_Debug::dump($this->exception->getTrace(), null, false);
+          $text = 'Error: '.$this->exception->getMessage();
+          $text .= '<br /><br />Dump: '.Zend_Debug::dump($this->request->getParams(), null, false);
+          $text .= '<br /><br />Stack Trace: '.Zend_Debug::dump($this->exception->getTrace(), null, false);
           $mail->setBodyHtml($text);
           $mail->setFrom('ccsd-tech@ccsd.cnrs.fr');
           $mail->addTo('ccsd-tech@ccsd.cnrs.fr');
-          $mail->setSubject('[HAL PHP Error] : AUREHAL - ' . $this->exception->getMessage());
+          $mail->setSubject('[HAL PHP Error] : AUREHAL - ' .  $this->exception->getMessage());
           $mail->send();
-      } catch (Exception $e) {
-
-      }
       } ?>
   <?php endif ?>
 

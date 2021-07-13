@@ -3,7 +3,9 @@ $this->layout()->pageTitle = $this->translate('Mon profil');
 ?>
 <fieldset class="well well-small" id="profil_ccsd">
     <legend style="border: none;">
-        <img src="/img/logo-ccsd.png">
+        <?php if (LOGO_INSTANCE != '') { ?>
+            <img id="logo-instance" src=<?php echo LOGO_INSTANCE ?> >
+        <?php } ?>
     </legend>
     <p class="description"><?php echo $this->translate('Informations de mon profil CCSD.'); ?></p>
     <div class="col-md-9">
@@ -70,8 +72,10 @@ $this->layout()->pageTitle = $this->translate('Mon profil');
 
 <form class="form-horizontal">
     <fieldset class="well well-small" id="profil_hal">
-        <legend style="border: none;">
-            <img src="/img/logo-hal.png">
+        <legend id="logo-application" style="border: none;">
+            <?php if (LOGO_APPLICATION != '') { ?>
+                <img id="logo-instance" src=<?php echo LOGO_APPLICATION ?> >
+            <?php } ?>
         </legend>
         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
             <div class="panel panel-default">
@@ -85,7 +89,7 @@ $this->layout()->pageTitle = $this->translate('Mon profil');
                 <div id="collapseProfil" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
                     <div class="panel-body">
                         <?php
-                        if ((array_key_exists('screen_name', $this->halUser)) and ( $this->halUser['screen_name'] != null)) { ?>
+                        if ((array_key_exists('screen_name', $this->halUser)) && ( $this->halUser['screen_name'] != null)) { ?>
                             <div class="form-group">
                                 <label class="col-md-3 control-label"><?php echo $this->translate('Votre nom dans HAL') ?> :</label>
                                 <div class="col-md-8">
@@ -185,8 +189,7 @@ $this->layout()->pageTitle = $this->translate('Mon profil');
                                 Hal_Acl::ROLE_ADMINSTRUCT => 'glyphicon-list-alt',
                                 Hal_Acl::ROLE_VALIDATEUR => 'glyphicon-eye-close',
                                 Hal_Acl::ROLE_MODERATEUR => 'glyphicon-eye-open',
-                                Hal_Acl::ROLE_TAMPONNEUR => 'glyphicon-tag',
-                                Hal_Acl::ROLE_A_TAMPONNEUR  => 'glyphicon-tag',
+                                Hal_Acl::ROLE_TAMPONNEUR => 'glyphicon-tag'
                             )
                             ?>
 
@@ -194,15 +197,9 @@ $this->layout()->pageTitle = $this->translate('Mon profil');
                                 <label class="col-md-3 control-label"><?php echo $this->translate('Privilèges'); ?> :</label>
                                 <div class="col-md-8">
                                     <?php  foreach ($this->roles as $rightid => $values) {
-                                        if (is_array($values)) {
-                                            if (count($values) == 0 || (count($values) == 1 && array_key_exists(0, $values) && $values[0] == '')) {
-                                                continue;
-                                            }
-                                        }
-                                        if ($rightid == Hal_Acl::ROLE_A_TAMPONNEUR) {
-                                            //Internal role: no neeed to do something
+                                        if (count($values) == 0 || (count($values) == 1 && array_key_exists(0, $values) && $values[0] == '')) {
                                             continue;
-                                        }?>
+                                        } ?>
                                         <div style="margin-bottom:10px;">
                                             <span class="struct-label struct-label-title label label-default">
                                             <i class="glyphicon <?php if (isset($icons[$rightid])) { echo $icons[$rightid]; } ?>"></i>&nbsp;<?php echo $this->translate($rightid); ?> :
@@ -258,7 +255,7 @@ $this->layout()->pageTitle = $this->translate('Mon profil');
                     <div class="panel-body">
                         <p class="description"><?php echo $this->translate('editpref_intro'); ?></p>
                         <?php
-                        if ($this->halUser['mode'] != null) {
+                        if ($this->halUser['mode'] != null && Hal_Settings::chooseDefaultView()) {
                             ?>
                             <div class="form-group">
                                 <label class="col-md-3 control-label"><?php echo $this->translate('Formulaire de dépôt'); ?> :</label>
@@ -298,79 +295,85 @@ $this->layout()->pageTitle = $this->translate('Mon profil');
                     </div>
                     <div class="col-md-12">
                         <?php
-                        if ($this->halUser['default_author'] != null) {
-                            ?>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label"><?php echo $this->translate("M'ajouter comme auteur"); ?> :</label>
-                                <div class="col-md-8">
-                                    <p class="form-control-static">
-                                        <?php
-                                        if ($this->halUser['default_author'] == 1) {
-                                            echo $this->translate('Oui');
-                                        } else {
-                                            echo $this->translate('Non');
-                                        }
-                                        ?></p>
-                                </div>
-                            </div>
-                            <?php
-                        }
-                        if ($this->halUser['default_author'] == 1) {
-                            if ($this->halUser['default_role'] != '') {
+                        if (Hal_Settings::useShareProperty()) {
+                            if ($this->halUser['default_author'] != null) {
                                 ?>
-                                <div class="form-group" style="display:none">
-                                    <label class="col-md-3 control-label"><?php echo $this->translate("Rôle par défaut"); ?> :</label>
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label"><?php echo $this->translate("M'ajouter comme auteur"); ?>
+                                        :</label>
                                     <div class="col-md-8">
                                         <p class="form-control-static">
                                             <?php
-                                            echo $this->translate('relator_'.$this->halUser['default_role']);
-                                            ?>
-                                        </p>
+                                            if ($this->halUser['default_author'] == 1) {
+                                                echo $this->translate('Oui');
+                                            } else {
+                                                echo $this->translate('Non');
+                                            }
+                                            ?></p>
                                     </div>
                                 </div>
                                 <?php
                             }
-                            ?>
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label"><?php echo $this->translate('Affiliation(s)') ?> :</label>
-                                <div class="col-md-8">
+                            if ($this->halUser['default_author'] == 1) {
+                                if ($this->halUser['default_role'] != '') {
+                                    ?>
+                                    <div class="form-group" style="display:none">
+                                        <label class="col-md-3 control-label"><?php echo $this->translate("Rôle par défaut"); ?>
+                                            :</label>
+                                        <div class="col-md-8">
+                                            <p class="form-control-static">
+                                                <?php
+                                                echo $this->translate('relator_' . $this->halUser['default_role']);
+                                                ?>
+                                            </p>
+                                        </div>
+                                    </div>
                                     <?php
-                                    $ajoutLabo = false;
-                                    if ((array_key_exists('laboratory', $this->halUser)) and ( $this->halUser['laboratory'] != null)) {
-                                        if (is_array($this->halUser['laboratory'])) {
+                                }
+                                ?>
 
-                                            foreach ($this->halUser['laboratory'] as $structid) {
-                                                $struct = new Hal_Document_Structure ($structid);
-                                                $type = '';
-                                                $name = $struct->getStructname();
-                                                if ($struct->getTypestruct() != '') {
-                                                    $ajoutLabo = true;
-                                                    $type = ' <small>[' . $this->translate($struct->getTypestruct()) . ']</small>';
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label"><?php echo $this->translate('Affiliation(s)') ?>
+                                        :</label>
+                                    <div class="col-md-8">
+                                        <?php
+                                        $ajoutLabo = false;
+                                        if ((array_key_exists('laboratory',
+                                                $this->halUser)) and ($this->halUser['laboratory'] != null)) {
+                                            if (is_array($this->halUser['laboratory'])) {
 
-                                                    ?>
-                                                    <div>
+                                                foreach ($this->halUser['laboratory'] as $structid) {
+                                                    $struct = new Hal_Document_Structure ($structid);
+                                                    $type = '';
+                                                    $name = $struct->getStructname();
+                                                    if ($struct->getTypestruct() != '') {
+                                                        $ajoutLabo = true;
+                                                        $type = ' <small>[' . $this->translate($struct->getTypestruct()) . ']</small>';
+
+                                                        ?>
+                                                        <div>
                                             <span class="label label-default"><?php echo $name;
                                                 echo $type; ?>
                                                 <small>(<?php echo $structid ?>)</small>
-                                                    </div>
-                                                    <?php
+                                                        </div>
+                                                        <?php
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    if (!$ajoutLabo) {
-                                        ?>
-                                        <div>
+                                        if (!$ajoutLabo) {
+                                            ?>
+                                            <div>
                             <span class="label label-default"><small><?php echo $this->translate('structure_no_lab'); ?></small>
-                                        </div>
-                                        <?php
-                                    }
-                                    ?>
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
+                                    </div>
                                 </div>
-                            </div>
-                            <?php
+                                <?php
+                            }
                         }?>
                     </div>
                     <div class="form-group">

@@ -12,7 +12,7 @@ class Hal_Document_Meta_LinkExt extends Hal_Document_Meta_Object
 
     /**
      * Hal_Document_Meta_LinkExt constructor.
-     * @param string $key
+     * @param string $url
      * @param string|Hal_Linkext $doiOrLinkext
      * @param $source
      * @param $uid

@@ -8,7 +8,7 @@
 -- ATTENTION: Commande en ligne a lancer apres le SQL
 --
 -- Utilisation: remplacer les hotes et port par les valeurs correctes
---         mysql -u root -p -h dbname4 HALV3 < CorectionProdInraBMC.sql
+--         mysql -u root -p -h ccsddb04 HALV3 < CorectionProdInraBMC.sql
 --
 -- Auteur: BM
 -- Specification: AM
@@ -28,5 +28,5 @@ UPDATE DOC_FILE JOIN DOCUMENT on DOCUMENT.DOCID=DOC_FILE.DOCID set DOC_FILE.FILE
 
 --
 SELECT "LANCER le script d effacement de cache"
-SELECT "for i in `echo 'SELECT DOCID FROM DOCUMENT WHERE (DOCUMENT.UID=132775 OR DOCUMENT.UID=326461) AND (DOCUMENT.DOCSTATUS =10 OR DOCUMENT.DOCSTATUS =0)' | mysql  --skip-column-names -u root -p -h dbname4 HALV3` ; do dir=`printf '%08d' $i | sed 's+\(..\)+\1/+g'`; [ -d /cache/hal/production/docs/${dir} ] && rm -rf /cache/hal/production/docs/${dir} ;done"
+SELECT "for i in `echo 'SELECT DOCID FROM DOCUMENT WHERE (DOCUMENT.UID=132775 OR DOCUMENT.UID=326461) AND (DOCUMENT.DOCSTATUS =10 OR DOCUMENT.DOCSTATUS =0)' | mysql  --skip-column-names -u root -p -h ccsddb04 HALV3` ; do dir=`printf '%08d' $i | sed 's+\(..\)+\1/+g'`; [ -d /cache/hal/production/docs/${dir} ] && rm -rf /cache/hal/production/docs/${dir} ;done"
 

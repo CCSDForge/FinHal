@@ -156,10 +156,6 @@ return array (
 	'administrate-action-delete' => 'Le document %%DOCUMENT%% a été supprimé',
 	'administrate-action-delete-multiple' => 'Les documents %%DOCUMENTS%% sont été supprimés',
 
-    //patrouillage
-    'patrol-action-patrol' => 'Le document %%DOCUMENT%% est maintenant marqué comme patrouillé',
-	'patrol-action-annotate' => 'Le document %%DOCUMENT%% a été annoté',
-	'patrol-action-patrol-multiple' => 'Les documents ont été marqué comme patrouillé',
 
 	// Actions
 	'action_see' => 'Consulter',
@@ -180,7 +176,7 @@ return array (
 	'action_library' => 'Ajouter à ma bibliothèque',
 	'action_refresh' => 'Rafraichir',
 	'action_history' => 'Historique',
-    'action_claim' => 'Demander la propriété',
+		'action_claim' => 'Demander la propriété',
 
 	'history_create' => 'Création du dépôt',
 	'history_annotate' => 'Annotation',
@@ -268,16 +264,6 @@ return array (
 	'collection_SET'   => "Set",
 	'collection_AUTRE' => "Autre",
 
-    // Status Document
-    'status_11' => "Document en ligne",
-    'status_111' => "Version antérieure du document",
-    'status_0' => "En attente de modération",
-    'status_10' => "En attente de transfert arXiv",
-    'status_9' => "En attente de validation scientifique",
-    'status_1' => "En attente de modification",
-    'status_99' => "Document refusé",
-    'status_88' => "Document fusionné",
-    'status_2' => "Document dans l'espace du déposant",
 
 	"Document sous embargo" => "Accès restreint",
 	"Documents sous embargo" => 'Documents en accès restreint',

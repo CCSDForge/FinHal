@@ -33,7 +33,6 @@ usage() {
 VIRTUOSOSTATUSFILE=/cache/hal/production/rdf/virtuoso-production-host
 LOGFILE=/cache/hal/production/rdf/toggle.log
 ISQL=/usr/local/bin/isql
-WC=/usr/bin/wc
 
 action=''
 verb=0
@@ -49,7 +48,7 @@ doLoad=1
 date=''
 redirect='>'
 
-while getopts ":e:t:p:CLvnrDHVd" option; do
+while getopts ":e:t:p:CvnrDHVd" option; do
     case "${option}" in
         e)
             env=${OPTARG}
@@ -175,13 +174,8 @@ case $doClean in
 	;;
 esac
 
-# temps en ms
-#   67978 europeanProject
-#    1400 anrProject
-# 1205855 author
-# ...
 case $doDropCache in
-    0) ;;
+    9) ;;
     1) 
 	verbose "--- Drop Virtuoso graph"
 	for graph in \
@@ -194,7 +188,7 @@ case $doDropCache in
 		https://data.archives-ouvertes.fr/author/           \
 		https://data.archives-ouvertes.fr/document/         \
 	    ; do
-	    verbose "Drop graph: $graph"
+        verbose "Drop virtuoso $graph"
 	    $action $ISQL -P $pwd  "EXEC=sparql drop  silent graph <$graph>"
 	    $action $ISQL -P $pwd  "EXEC=sparql create       graph <$graph>"
 	done
@@ -204,24 +198,10 @@ case $doDropCache in
 	;;
 esac
 
-# temps de load
-# europeanProject: 6773003 msec
-#
-#
-#
-
 case $doLoad in
     0) ;;
     1)
-    $action $ISQL -P $pwd  exec="delete from DB.DBA.LOAD_LIST";     # temps exec ~ 68318
-
-	verbose "--- Prerecord load items: environ 2h"
-	#  212 027 anrProject
-	#   65 323 europeanProject
-	#  926 981 structure
-	#  879 696 author
-	# 4611 805 document
-	# ~ 2h
+	verbose "--- Prerecord load item"
 	for graphItem in subject doctype  revue anrProject europeanProject structure author document ; do
 	    verbose "    Do $graphItem"
 	    $action $ISQL -P $pwd  exec="ld_dir_all('/cache/hal/production/rdf/$graphItem/', '*.rdf', 'https://data.archives-ouvertes.fr/$graphItem/');"
@@ -243,28 +223,10 @@ case $doLoad in
 	;;
 esac
 
-# Verification du fonctionnement
-countGraphs=`$ISQL  -P $pwd  exec="sparql select distinct ?g count(*)  where  { graph ?g {  ?s ?p ?v  } } ;"`
-
-hasDoc=`echo "$countGraphs" | /bin/grep /document/  | /bin/grep -P '\d{8}' | $WC -l`
-hasAut=`echo "$countGraphs" | /bin/grep /author/    | /bin/grep -P '\d{8}' | $WC -l`
-hasStr=`echo "$countGraphs" | /bin/grep /structure/ | /bin/grep -P '\d{7}' | $WC -l`
-
-case $hasDoc$hasAut$hasStr in
-   111)
-   eval "$action /bin/hostname $redirect $VIRTUOSOSTATUSFILE"
-
-   $action /sbin/iptables -i eth0 -D INPUT -m tcp -p tcp --dport 8890 -j REJECT
-   date=`date`
-   $action echo "$date: Start $hostname"  $redirect  $LOGFILE
-   ;;
-   *)
-   # Il manque qq chose, le remplissage de Virtuoso ne n'est pas passe correctement
-   echo 2>&1 "---------------------------"
-   echo 2>&1 "Update de Virtuoso en echec"
-   echo 2>&1 "---------------------------"
-   ;;
-esac
+eval "$action /bin/hostname $redirect $VIRTUOSOSTATUSFILE"
+$action /sbin/iptables -i eth0 -D INPUT -m tcp -p tcp --dport 8890 -j REJECT
+date=`date`
+$action echo "$date: Start $hostname"  $redirect  $LOGFILE
 
 verbose
 verbose "Debut de script: $begin"

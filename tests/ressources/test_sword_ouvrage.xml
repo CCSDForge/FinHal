@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<TEI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://www.tei-c.org/ns/1.0 http://api-preprod.archives-ouvertes.fr/documents/aofr-sword.xsd"
-     xmlns="http://www.tei-c.org/ns/1.0" >
-   <text>
+<?xml version="1.0" encoding="utf-8"?> <TEI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.tei-c.org/ns/1.0 http://api-preprod.archives-ouvertes.fr/documents/aofr-sword.xsd"
+ xmlns="http://www.tei-c.org/ns/1.0" xmlns:hal="http://hal.archives-ouvertes.fr/">
+      <text>
       <body>
          <listBibl>
             <biblFull>
@@ -14,14 +13,14 @@
                         <forename type="first">Faron</forename>
                         <surname>Moller</surname>
                      </persName>
-                     <affiliation ref="#struct-36731"/>
+                     <affiliation ref="#struct-36731"></affiliation>
                   </author>   
                   <author role="aut">
                      <persName>
                         <forename type="first">Georg</forename>
                         <surname>Struth</surname>
                      </persName>
-                     <affiliation ref="#struct-205974"/>
+                     <affiliation ref="#struct-205974"></affiliation>
                   </author>    
                </titleStmt>
                <notesStmt>                
@@ -38,14 +37,14 @@
                               <forename type="first">Faron</forename>
                               <surname>Moller</surname>
                            </persName>
-                           <affiliation ref="#struct-36731"/>
+                           <affiliation ref="#struct-36731"></affiliation>
                         </author>   
                         <author role="aut">
                            <persName>
                               <forename type="first">Georg</forename>
                               <surname>Struth</surname>
                            </persName>
-                           <affiliation ref="#struct-205974"/>
+                           <affiliation ref="#struct-205974"></affiliation>
                         </author>        
                      </analytic>
                      <monogr>
@@ -66,12 +65,12 @@
                </sourceDesc>
                <profileDesc>
                   <langUsage>
-                     <language ident="en"/>
+                     <language ident="en"></language>
                   </langUsage>
                   <textClass>
-                     <classCode scheme="halDomain" n="info.info-mo"/>
-                     <classCode scheme="halDomain" n="math.math-oc"/>
-                     <classCode scheme="halTypology" n="OUV"/>
+                     <classCode scheme="halDomain" n="info.info-mo"></classCode>
+                     <classCode scheme="halDomain" n="math.math-oc"></classCode>                        
+                     <classCode scheme="halTypology" n="OUV"></classCode>
                   </textClass>
                   <abstract xml:lang="en">This engaging textbook presents the fundamental mathematics.</abstract>
                </profileDesc>

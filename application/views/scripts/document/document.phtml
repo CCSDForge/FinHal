@@ -174,25 +174,22 @@ $metas = Hal_Settings::getMeta($this->document->getTypdoc());
                     <div class="struct">
                         <span class="structid label label-default"><?php echo $i + 1; ?></span>
                         <strong>
-                            <?php if ($struct->getSigle()) {
-                                echo $struct->getSigle() . ' - ';
-                            }
-                            echo  $struct->getStructname() . ' <span class="label label-default">' . $struct->getStructid() . '</span> - '; ?>
+                            <?php if ($struct->getSigle()) {?>
+                                <?php echo $struct->getSigle() . ' - '; ?>
+                            <?php } ?>
+                            <?php echo  $struct->getStructname() . ' <span class="label label-default">' . $struct->getStructid() . '</span> - '; ?>
                         </strong>
-                        <?php if ($struct->getAddress() != '') {
-                            echo $struct->getAddress() . ' - ';
-                        }
-                        $country = Zend_Locale::getTranslation(strtoupper($struct->getPaysid()), 'country');
+                        <?php if ($struct->getAddress() != '') {?>
+                            <?php echo $struct->getAddress(); ?>&nbsp;-&nbsp;
+                        <?php } ?>
+                        <?php $country = Zend_Locale::getTranslation(strtoupper($struct->getPaysid()), 'country');
                         if ($country == '') {$country = strtoupper($struct->getPaysid());}
                         echo $country; ?><br>
                         <?php
                         $parents = array();
-                        /** @var array $parent */
                         foreach ($struct->getAllParents() as $parent) {
-                            /** @var Ccsd_Referentiels_Structure $pstruct */
-                            $pstruct = $parent["struct"];
                             $code = Ccsd_Tools::ifsetor($parent['code']);
-                            $parents[] = $pstruct->getStructname() . ($code != '' ? ' : ' . $code : '') . ' <span class="label label-default">' . $pstruct->getStructId() . '</span>';
+                            $parents[] = $parent['struct']->getStructname() . ($code != '' ? ' : ' . $code : '') . ' <span class="label label-default">' . $parent['struct']->getStructId() . '</span>';
                         }
                         if (count($parents)) {
                             ?> <span class="prec"> <?php echo implode(' ; ', $parents); ?> </span><?php
@@ -359,7 +356,7 @@ $metas = Hal_Settings::getMeta($this->document->getTypdoc());
                                 echo $this->translate('Non');
                             }
                         } else if ($meta == 'researchdata') {
-                            echo "<a href=\"". Hal_ResearchData::getDataUrl($v)."\" target=\"_blank\" type=\"noopener\">".$v."</a>";
+                            echo "<a href=\"". Hal_Document_Meta_Researchdata::getDataUrl($v)."\" target=\"_blank\" type=\"noopener\">".$v."</a>";
                         } else {
                           echo $v;
                         } ?></span>

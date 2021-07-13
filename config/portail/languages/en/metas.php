@@ -14,7 +14,6 @@ return array(
 "writingDate" => "Production date",
 "licence" => "Licence",
 "nnt" => "French National Number(NNT)",
-"thesisNumber" => "Number",
 "imageType" => "Type",
 "journal" => "Journal",
 "source" => "Source",

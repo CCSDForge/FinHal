@@ -44,6 +44,8 @@ return [
     'hal_files_s' => 'URL des fichiers',
     'hal_fileMainAnnex_s' => "URL de l'annexe principale",
     'hal_fileAnnexes_s' => "URL des annexes",
+    'hal_bookCollection_s' => 'Collection de livre',
+    'hal_bookCollection_t' => 'Collection de livre',
     'hal_credit_s' => 'Crédits',
     'hal_credit_t' => 'Crédits',
     'hal_description_s' => 'Description',
@@ -319,8 +321,8 @@ return [
     'hal_sample_identifiers_id' => '',
     'hal_instance_s' => 'Instance HAL',
     'hal_sample_instance_s' => 'hal-shs',
-    'hal_invitedCommunication_s' => 'Conférence invitée (0/1)',
-    'hal_invitedCommunication_t' => 'Conférence invitée (oui/non)',
+    'hal_invitedCommunication_s' => 'Conférence invitée',
+    'hal_invitedCommunication_t' => 'Conférence invitée',
     'hal_sample_invitedCommunication_s' => '',
     'hal_isbn_id' => 'ISBN',
     'hal_sample_isbn_id' => '',
@@ -444,8 +446,8 @@ return [
     'hal_sample_scientificEditor_s' => '',
     'hal_scientificEditor_t' => 'Éditeur scientifique',
     'hal_sample_scientificEditor_t' => '',
-    'hal_serie_s' => 'Titre du volume (Série)',
-    'hal_serie_t' => 'Titre du volume (Série)',
+    'hal_serie_s' => 'Série',
+    'hal_serie_t' => 'Série',
 
     'hal_sample_serie_s' => '',
     'hal_seriesEditor_s' => 'Éditeur de la série',
@@ -613,6 +615,8 @@ return [
     'hal_proceedings_t' => 'Actes de colloque',
     'hal_publicationLocation_s' => 'Lieu de publication',
     'hal_publicationLocation_t' => 'Lieu de publication',
+    'hal_relator_s' => 'Narrateur',
+    'hal_relator_t' => 'Narrateur',
     'hal_degreeType_s' => 'Type de diplôme',
     'hal_degreeType_t' => 'Type de diplôme',
     'hal_imageType_s' => "Type d'image (codes numériques)",
@@ -629,22 +633,6 @@ return [
 // local campus AAR
     "hal_campusaar_genre" => "Campus AAR - Genre audiovisuel",
     "hal_campusaar_context" => "Campus AAR - Contexte d'usage",
-
-
-// software
-
-    'hal_softCodeRepository_s' => '(Logiciel) Entrepôt de code',
-    'hal_softCodeRepository_t' => '(Logiciel) Entrepôt de code',
-    'hal_softDevelopmentStatus_s' => '(Logiciel) État du dévelopement',
-    'hal_softDevelopmentStatus_t' => '(Logiciel) État du dévelopement',
-    'hal_softPlatform_s' => '(Logiciel) Plateforme',
-    'hal_softPlatform_t' => '(Logiciel) Plateforme',
-    'hal_softProgrammingLanguage_s' => '(Logiciel) Langage de programmation',
-    'hal_softProgrammingLanguage_t' => '(Logiciel) Langage de programmation',
-    'hal_softRuntimePlatform_s' => "(Logiciel) Plateforme d'execution",
-    'hal_softRuntimePlatform_t' => "(Logiciel) Plateforme d'execution",
-    'hal_softVersion_s' => '(Logiciel) Version',
-    'hal_softVersion_t' => '(Logiciel) Version',
 
 
     /*
@@ -668,6 +656,24 @@ return [
 
     hal_rteam*
 
+    hal_softCodeRepository_s
+    hal_softCodeRepository_t
+    hal_softDevelopmentStatus_s
+    hal_softDevelopmentStatus_t
+    hal_softPlatform_s
+
+    hal_softPlatform_t
+    hal_softProgrammingLanguage_s
+    hal_softProgrammingLanguage_t
+    hal_softRuntimePlatform_s
+    hal_softRuntimePlatform_t
+    hal_softVersion_s
+    hal_softVersion_t
+
+    hal_speaker_s
+
+    hal_state_s
+    hal_state_t
 */
 
 

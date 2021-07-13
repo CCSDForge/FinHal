@@ -29,10 +29,11 @@ class BrowseController extends Hal_Controller_Action
             case Ccsd_Referentiels_Structure::TYPE_LABORATORY . Hal_Website_Navigation_Page_Structure::STRUCTURE_ACTION_SUFFIX://break omitted
             case Ccsd_Referentiels_Structure::TYPE_REGROUPLABORATORY . Hal_Website_Navigation_Page_Structure::STRUCTURE_ACTION_SUFFIX://break omitted
             case Ccsd_Referentiels_Structure::TYPE_DEPARTMENT . Hal_Website_Navigation_Page_Structure::STRUCTURE_ACTION_SUFFIX://break omitted
-            case Ccsd_Referentiels_Structure::TYPE_RESEARCHTEAM . Hal_Website_Navigation_Page_Structure::STRUCTURE_ACTION_SUFFIX://break omitted
-                // browse all structure type
-            case 'structure' . Hal_Website_Navigation_Page_Structure::STRUCTURE_ACTION_SUFFIX:
-                $this->forward('structure');
+            case Ccsd_Referentiels_Structure::TYPE_RESEARCHTEAM . Hal_Website_Navigation_Page_Structure::STRUCTURE_ACTION_SUFFIX:
+            // browse all structure type
+            case 'structure'. Hal_Website_Navigation_Page_Structure::STRUCTURE_ACTION_SUFFIX:
+
+            $this->forward('structure');
                 break;
             default:
                 break;
@@ -62,21 +63,9 @@ class BrowseController extends Hal_Controller_Action
 
 
         $page->load();
-        $structuresAsFilters = $page->getFilter();
+        $structures = $page->getFilter();
         $structureType = '';
         $facetField = '';
-
-        $letter = $this->getParam('letter', 'all');
-        $typeFilter = $this->getParam('submitType_s');
-        $sort = $this->getParam('sort', $page->getSort());
-
-        if (!self::isValidSortParameter($sort) || !self::isValidLetterParameter($letter) || !self::isValidSubmitTypeParameter($typeFilter)) {
-            $this->view->message = "Erreur de paramètre";
-            $this->view->description = "Un des paramètres utilisé n'est pas valide";
-            $this->renderScript('error/error.phtml');
-            return;
-        }
-
 
         $this->view->action = $currentAction;
 
@@ -142,11 +131,11 @@ class BrowseController extends Hal_Controller_Action
             // ------------------------------------------------------------------
         }
 
-        $this->view->letter = $letter;
-        $this->view->typeFilter = $typeFilter;
-        $this->view->sortType = $sort;
+        $this->view->letter = $this->_getParam('letter', 'all');
+        $this->view->typeFilter = $this->_getParam('submitType_s');
+        $this->view->sortType = $this->_getParam('sort', $page->getSort());
 
-        $cacheName = Ccsd_Cache::makeCacheFileName('', '', $currentAction . $letter . $typeFilter . $sort);
+        $cacheName = Ccsd_Cache::makeCacheFileName('', '', $currentAction . $this->view->letter . $this->view->typeFilter . $this->view->sortType);
 
         if (Hal_Cache::exist($cacheName, self::BROWSE_CACHE_LIFETIME)) {
             $cachedData = Hal_Cache::get($cacheName);
@@ -159,9 +148,9 @@ class BrowseController extends Hal_Controller_Action
         }
 
         if ($structureType != '') {
-            $structure = Hal_Search_Solr_Search_Structure::getLinkedStructures($structuresAsFilters, $letter, $typeFilter, $sort, $structureType);
+            $structure = Hal_Search_Solr_Search::getLinkedStructures($structures, $this->view->letter, $this->view->typeFilter, $this->view->sortType, $structureType);
         } else {
-            $structure = Hal_Search_Solr_Search::getFacet($facetField, $letter,$typeFilter, $sort);
+            $structure = Hal_Search_Solr_Search::getFacet($facetField, $this->view->letter, $this->view->typeFilter, $this->view->sortType);
         }
 
         $this->view->facets = $structure;
@@ -170,48 +159,6 @@ class BrowseController extends Hal_Controller_Action
             Hal_Cache::save($cacheName, serialize($structure));
         }
         $this->render('facet');
-    }
-
-    /**
-     * @param string $sortFromUser
-     * @return bool
-     */
-    private static function isValidSortParameter($sortFromUser = ''): bool
-    {
-
-        $validSort = ['', 'count', 'index'];
-        return in_array($sortFromUser, $validSort);
-
-    }
-
-    /**
-     * @param string $letterFromUser
-     * @return bool
-     */
-    private static function isValidLetterParameter($letterFromUser = ''): bool
-    {
-        $validLetters = array_merge([''], range('A', 'Z'), ['other', 'all']);
-        return in_array($letterFromUser, $validLetters);
-    }
-
-    /**
-     * @param string $submitTypeFromUser eg : 'file OR annex' || 'file'
-     * @return bool
-     */
-    private static function isValidSubmitTypeParameter($submitTypeFromUser = ''): bool
-    {
-        if ($submitTypeFromUser == '') {
-            return true;
-        }
-        $validsubmitTypes = [Hal_Document::FORMAT_FILE, Hal_Document::FORMAT_NOTICE, Hal_Document::FORMAT_ANNEX];
-        $submitTypeFromUserArray = explode(' OR ', $submitTypeFromUser);
-
-        foreach ($submitTypeFromUserArray as $inputValue) {
-            if (!in_array($inputValue, $validsubmitTypes)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -241,22 +188,9 @@ class BrowseController extends Hal_Controller_Action
         $page->load();
         $structures = $page->toArray()['filter'];
 
-
-        $letter = $this->getParam('letter', 'all');
-        $typeFilter = $this->getParam('submitType_s');
-        $sort = $this->getParam('sort', $page->getSort());
-
-        if (!self::isValidSortParameter($sort) || !self::isValidLetterParameter($letter) || !self::isValidSubmitTypeParameter($typeFilter)) {
-            $this->view->message = "Erreur de paramètre";
-            $this->view->description = "Un des paramètres utilisé n'est pas valide";
-            $this->renderScript('error/error.phtml');
-            return;
-        }
-
-
-        $this->view->letter = $letter;
-        $this->view->typeFilter = $typeFilter;
-        $this->view->sortType = $sort;
+        $this->view->letter = $this->_getParam('letter', 'all');
+        $this->view->typeFilter = $this->_getParam('submitType_s');
+        $this->view->sortType = $this->_getParam('sort', $page->getSort());
         $this->view->urlFilterName = 'authLastNameFirstName_s';
 
         if ($structures != '') {
@@ -270,7 +204,7 @@ class BrowseController extends Hal_Controller_Action
             $this->view->structures = implode(' OR ', $structures);
         }
 
-        $cacheName = Ccsd_Cache::makeCacheFileName('', '', $letter . $typeFilter . $sort);
+        $cacheName = Ccsd_Cache::makeCacheFileName('', '', $this->view->letter . $this->view->typeFilter . $this->view->sortType);
 
         if (Hal_Cache::exist($cacheName, self::BROWSE_CACHE_LIFETIME)) {
             $cachedData = Hal_Cache::get($cacheName);
@@ -282,9 +216,9 @@ class BrowseController extends Hal_Controller_Action
             }
         }
         if ($structures != '') {
-            $authors = Hal_Search_Solr_Search_Author::getLinkedAuthors('all', $structures, $letter, $typeFilter, $sort);
+            $authors = Hal_Search_Solr_Search::getLinkedAuthors('all', $structures, $this->view->letter, $this->view->typeFilter, $this->view->sortType);
         } else {
-            $authors = Hal_Search_Solr_Search::getFacet('authAlphaLastNameFirstNameIdHal_fs', $letter, $typeFilter, $sort);
+            $authors = Hal_Search_Solr_Search::getFacet('authAlphaLastNameFirstNameIdHal_fs', $this->view->letter, $this->view->typeFilter, $this->view->sortType);
         }
 
         $this->view->facets = $authors;
@@ -294,6 +228,8 @@ class BrowseController extends Hal_Controller_Action
         }
         $this->render('author');
     }
+
+
 
     /**
      * Liste des domaines
@@ -306,21 +242,13 @@ class BrowseController extends Hal_Controller_Action
         $page->load();
         $displayType = $page->getDisplayType();
 
-        $typeFilter = $this->getParam('submitType_s');
 
-        if (!self::isValidSubmitTypeParameter($typeFilter)) {
-            $this->view->message = "Erreur de paramètre";
-            $this->view->description = "Un des paramètres utilisé n'est pas valide";
-            $this->renderScript('error/error.phtml');
-            return;
-        }
-
-        $this->view->typeFilter = $typeFilter;
+        $this->view->typeFilter = $this->_getParam('submitType_s');
         $this->view->sortType = null;
 
         $cacheName = Ccsd_Cache::makeCacheFileName('', true, $displayType . $this->view->typeFilter);
         if (!Hal_Cache::exist($cacheName, self::BROWSE_CACHE_LIFETIME)) {
-            $domains = Hal_Search_Solr_Search_Domain::getDomainConsultationArray($displayType, $typeFilter);
+            $domains = Hal_Search_Solr_Search::getDomainConsultationArray($displayType, $this->view->typeFilter);
 
 
             if ($domains == null) {
@@ -383,7 +311,7 @@ class BrowseController extends Hal_Controller_Action
             }
         }
 
-        $docTypes = Hal_Search_Solr_Search_Typedoc::getTypeDocsPivotHasFile();
+        $docTypes = Hal_Search_Solr_Search::getTypeDocsPivotHasFile();
 
         $this->view->docType = $docTypes;
         if (!empty($docTypes)) {
@@ -464,31 +392,16 @@ class BrowseController extends Hal_Controller_Action
         $page = new Hal_Website_Navigation_Page_Collections ();
 
         $page->setAction($currentAction);
-        $page->load();
-
-        // quid si pasa de page correspondante dans le site actuel ???
-
-
+        $page->load(); // quid si pasa de page correspondante dans le site actuel ???
 
         $this->view->viewType = $page->getField();
 
-
-        $typeFilter = $this->getParam('submitType_s');
-        $sort = $this->getParam('sort', $page->getSort());
-
-        if (!self::isValidSortParameter($sort) || !self::isValidSubmitTypeParameter($typeFilter)) {
-            $this->view->message = "Erreur de paramètre";
-            $this->view->description = "Un des paramètres utilisé n'est pas valide";
-            $this->renderScript('error/error.phtml');
-            return;
-        }
+        $this->view->typeFilter = $this->_getParam('submitType_s');
+        $this->view->sortType = $this->_getParam('sort', $page->getSort());
+        $this->view->letter = null;
 
 
-        $this->view->typeFilter = $typeFilter;
-        $this->view->sortType = $sort;
-
-
-        $cacheName = Ccsd_Cache::makeCacheFileName('browse' . $currentAction . '_' . $page->getField() . '_' . $typeFilter . '_' . $sort, '', '');
+        $cacheName = Ccsd_Cache::makeCacheFileName('browse' . $currentAction . '_' . $page->getField() . '_' . $this->view->typeFilter . '_' . $this->view->sortType, '', '');
 
         if (Hal_Cache::exist($cacheName, self::BROWSE_CACHE_LIFETIME, CACHE_PATH)) {
             $cachedData = Hal_Cache::get($cacheName, CACHE_PATH);
@@ -498,7 +411,7 @@ class BrowseController extends Hal_Controller_Action
             }
         }
 
-        $collections = Hal_Search_Solr_Search_Collection::getCollections($page->getField(), $page->getFilter(), $typeFilter, $sort);
+        $collections = Hal_Search_Solr_Search::getCollections($page->getField(), $page->getFilter(), $this->view->typeFilter, $this->view->sortType);
 
 
         if (!empty($collections)) {
@@ -527,38 +440,21 @@ class BrowseController extends Hal_Controller_Action
         $page = new Hal_Website_Navigation_Page_Meta();
         $page->setMeta($this->_meta);
         $page->load();
-        $letter = '';
 
         if ($this->_meta == 'hceres_entityName') {
-            $letter = $this->getParam('letter', 'all');
-            $this->view->letter = $letter;
-            if (!self::isValidLetterParameter($letter)) {
-                $this->view->message = "Erreur de paramètre";
-                $this->view->description = "Un des paramètres utilisé n'est pas valide";
-                $this->renderScript('error/error.phtml');
-                return;
-            }
+            $this->view->letter = $this->_getParam('letter', 'all');
         }
 
-
-
-        $typeFilter = $this->getParam('submitType_s');
-        $sort = $this->getParam('sort', $page->getSort());
-
-        if (!self::isValidSortParameter($sort) || !self::isValidSubmitTypeParameter($typeFilter)) {
-            $this->view->message = "Erreur de paramètre";
-            $this->view->description = "Un des paramètres utilisé n'est pas valide";
-            $this->renderScript('error/error.phtml');
-            return;
-        }
-
-
-        $this->view->typeFilter = $typeFilter;
-        $this->view->sortType = $sort;
+        $this->view->typeFilter = $this->_getParam('submitType_s');
+        $this->view->sortType = $this->_getParam('sort', $page->getSort());
 
         $this->view->fieldSolr = $this->_meta . '_s';
-        $cacheName = Ccsd_Cache::makeCacheFileName('browseMeta_' . $this->_meta . $letter . $typeFilter . $sort . '_' . Zend_Registry::get('lang'));
 
+        if ($this->_meta == 'hceres_entityName') {
+            $cacheName = Ccsd_Cache::makeCacheFileName('browseMeta_' . $this->_meta . $this->view->letter . $this->view->typeFilter . $this->view->sortType . '_' . Zend_Registry::get('lang'));
+        } else {
+            $cacheName = Ccsd_Cache::makeCacheFileName('browseMeta_' . $this->_meta . $this->view->typeFilter . $this->view->sortType . '_' . Zend_Registry::get('lang'));
+        }
 
         if (Hal_Cache::exist($cacheName, self::BROWSE_CACHE_LIFETIME)) {
             $cachedData = Hal_Cache::get($cacheName);
@@ -572,10 +468,10 @@ class BrowseController extends Hal_Controller_Action
         // no cache
 
 
-        if ($letter != '') {
-            $facets = Hal_Search_Solr_Search::getFacetField($this->view->fieldSolr, $letter, $sort, $typeFilter);
+        if ($this->_meta == 'hceres_entityName') {
+            $facets = Hal_Search_Solr_Search::getFacetField($this->view->fieldSolr, $this->view->letter, $this->view->sortType, $this->view->typeFilter);
         } else {
-            $facets = Hal_Search_Solr_Search::getFacetField($this->view->fieldSolr, null, $sort, $typeFilter);
+            $facets = Hal_Search_Solr_Search::getFacetField($this->view->fieldSolr, null, $this->view->sortType, $this->view->typeFilter);
         }
 
         $isMetaList = Hal_Referentiels_Metadata::isMetaList($this->_meta, null) || Hal_Referentiels_Metadata::isMetaList($this->_meta, SITEID);
@@ -608,7 +504,7 @@ class BrowseController extends Hal_Controller_Action
             }
         }
         // tri par PHP si demande de tri alphabétique
-        if ($sort != 'count') {
+        if ($this->view->sortType != 'count') {
             if ($this->_meta == 'hceres_campagne_local') {
                 krsort($facetList);
             } else {
@@ -670,7 +566,7 @@ class BrowseController extends Hal_Controller_Action
      */
     public function yearAction()
     {
-        Ccsd_Tools::deprecatedMsg(__FILE__, __LINE__, 'BROWSE YEAR called with SPACE_NAME :' . SPACE_NAME);
+        Ccsd_Tools::panicMsg(__FILE__, __LINE__, 'BROWSE YEAR called with SPACE_NAME :' . SPACE_NAME);
 
         $this->periodAction();
     }
@@ -713,7 +609,7 @@ class BrowseController extends Hal_Controller_Action
             $query [] = 'facet.range.end=' . $page->getFacetRangeEnd();
         } else {
             // facet.range.end applique un < strict donc on ajoute une année
-            $query [] = 'facet.range.end=' . date('Y', strtotime('+1 year'));
+            $query [] = 'facet.range.end=' . date('Y-m-d', strtotime('+1 year'));
         }
 
         if ($page->getFacetRangeGap()) {
@@ -744,8 +640,7 @@ class BrowseController extends Hal_Controller_Action
         // Fichiers
         try {
             $solrResponse = Ccsd_Tools::solrCurl($baseQueryString . '&fq=submitType_s:' . Hal_Document::FORMAT_FILE, 'hal');
-            $solrObj = unserialize($solrResponse);
-            $file = $solrObj['facet_counts']['facet_ranges']['date'];
+            $file = unserialize($solrResponse)['facet_counts']['facet_ranges']['date'];
 
         } catch (Exception $exc) {
             error_log($exc->getMessage(), 0);
@@ -756,8 +651,7 @@ class BrowseController extends Hal_Controller_Action
         //Notices
         try {
             $solrResponse = Ccsd_Tools::solrCurl($baseQueryString . '&fq=submitType_s:' . Hal_Document::FORMAT_NOTICE, 'hal');
-            $solrObj = unserialize($solrResponse);
-            $notice = $solrObj['facet_counts']['facet_ranges']['date'];
+            $notice = unserialize($solrResponse)['facet_counts']['facet_ranges']['date'];
         } catch (Exception $exc) {
             error_log($exc->getMessage(), 0);
             $this->facetYears = null;
@@ -767,8 +661,7 @@ class BrowseController extends Hal_Controller_Action
         //Annexes
         try {
             $solrResponse = Ccsd_Tools::solrCurl($baseQueryString . '&fq=submitType_s:' . Hal_Document::FORMAT_ANNEX, 'hal');
-            $solrObj = unserialize($solrResponse);
-            $annex = $solrObj['facet_counts']['facet_ranges']['date'];
+            $annex = unserialize($solrResponse)['facet_counts']['facet_ranges']['date'];
         } catch (Exception $exc) {
             error_log($exc->getMessage(), 0);
             $this->facetYears = null;

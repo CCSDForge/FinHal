@@ -34,6 +34,8 @@ class Hal_Document
      * Tables
      */
     const TABLE = 'DOCUMENT'; // Table principale d'un article
+    const TABLE_AUTHOR = 'DOC_AUTHOR'; // Table des associations auteur/structures
+    const TABLE_AUTSTRUCT = 'DOC_AUTSTRUCT'; // Table des associations auteur/structures
     const TABLE_RELATED = 'DOC_RELATED'; // Table des ressources liées de l'article
     const TABLE_DELETED = 'DOC_SAMEAS'; // Table des correspondances id deleted et id online
     const TABLE_OWNER = 'DOC_OWNER'; // Table des propriétaires d'un doc
@@ -44,7 +46,7 @@ class Hal_Document
     const URL_DOI = 'https://dx.doi.org/';
     const URL_THESES = 'https://www.theses.fr/';
 
-    public static $_serverCopy = array('doi', 'arxiv', 'pubmed', 'bibcode', 'ird', 'ineris', 'pubmedcentral', 'irstea', 'sciencespo', 'oatao', 'ensam', 'prodinra', 'okina', 'cern', 'inspire', 'swh', 'biorxiv', 'chemrxiv','wos');
+    public static $_serverCopy = array('doi', 'arxiv', 'pubmed', 'bibcode', 'ird', 'ineris', 'pubmedcentral', 'irstea', 'sciencespo', 'oatao', 'ensam', 'prodinra', 'okina', 'cern', 'inspire', 'swh', 'biorxiv', 'chemrxiv');
 
     public static $_serverCopyUrl = array(
         'doi' => 'https://dx.doi.org/',
@@ -63,9 +65,8 @@ class Hal_Document
         'cern' => 'https://cds.cern.ch/record/',
         'inspire' => 'https://inspirehep.net/record/',
         'swh' => 'https://archive.softwareheritage.org/',
-        'biorxiv' => 'https://www.biorxiv.org/cgi/content/short/',
-        'chemrxiv' => 'https://dx.doi.org/10.26434/chemrxiv.',
-        'wos'=>''
+        'biorxiv' => '',
+        'chemrxiv' => ''
     );
 
     /**
@@ -239,13 +240,6 @@ class Hal_Document
     protected $_producedDate = null;
 
     /**
-     * The Publication Date
-     * 'yyyy-MM-dd' eg: 1970-12-31
-     * @var string
-     */
-    protected $_publicationDate = null;
-
-    /**
      * Date d'archivage                'yyyy-MM-dd HH:mm:ss'
      */
     protected $_archivedDate = null;
@@ -404,35 +398,14 @@ class Hal_Document
 
     /**
      * Récupération du docid d'un document à partir de son identifiant
-     * @param string $identifiant
-     * @return int
      */
     public function getDocidFromId($identifiant = null)
     {
-        if ($identifiant) {
-            $matches=[];
-            if (preg_match("/(.*)v(\d+)/", $identifiant, $matches)) {
-                # identifiant avec version
-                $version = $matches[2];
-                $identifiant = $matches[1];
-            } else {
-                $version = 0; // We take the visible one
-            }
-        } else {
-            $version     = $this->_version;
-            $identifiant = $this->_identifiant;
-        }
-
-        # NOTE: Ne pas utiliser $this, si identifiant est donnee!!!
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-        # Ancienne forme utilisees en externe...
-        $identifiant = str_replace('democrite-', 'in2p3-', str_replace('ccsd-', 'hal-', $identifiant));
-
-        // Le cas habituel...
         $sql = $db->select()->from(self::TABLE, 'DOCID')
-            ->where('IDENTIFIANT = ?', $identifiant);
-        if ($version > 0) {
-            $sql->where('VERSION = ?', $version);
+            ->where('IDENTIFIANT = ?', str_replace('democrite-', 'in2p3-', str_replace('ccsd-', 'hal-', ($identifiant == null) ? $this->_identifiant : $identifiant)));
+        if ($this->_version > 0) {
+            $sql->where('VERSION = ?', $this->_version);
             $sql->where('DOCSTATUS != ?', self::STATUS_MERGED);
         } else {
             $sql->where('DOCSTATUS = ?', self::STATUS_VISIBLE);
@@ -441,20 +414,23 @@ class Hal_Document
         $docid = $db->fetchOne($sql);
 
         if (!$docid) {
-            // Peut etre un identifiant supprime ?
-            // TODO: Un petit join... non? au lieu de deux requete?
+            // TODO: Un petit join non? au lieu de deux requete?
             $sql = $db->select()
-                ->from(['del'=> self::TABLE_DELETED], 'doc.DOCID')
-                ->join(['doc'=>self::TABLE], "del.CURRENTID=doc.IDENTIFIANT")
-                ->where('del.DELETEDID = ?', $identifiant)
-                ->where('doc.DOCSTATUS = ?', self::STATUS_VISIBLE);
-
-            $docid = $db->fetchOne($sql);
+                ->from(self::TABLE_DELETED, 'CURRENTID')
+                ->where('DELETEDID = ?', str_replace('democrite-', 'in2p3-', str_replace('ccsd-', 'hal-', ($identifiant == null) ? $this->_identifiant : $identifiant)));
+            $newId = $db->fetchOne($sql);
+            if ($newId) {
+                $sql = $db->select()
+                    ->from(self::TABLE, 'DOCID')
+                    ->where('IDENTIFIANT = ?', $newId)
+                    ->where('DOCSTATUS = ?', self::STATUS_VISIBLE);
+                $docid = $db->fetchOne($sql);
+            }
         }
-        // Toujours pas de resultat: on prends qq soit le status
+
         if (!$docid && $this->_version == 0) {
             $sql = $db->select()->from(self::TABLE, 'DOCID')
-                ->where('IDENTIFIANT = ?', $identifiant);
+                ->where('IDENTIFIANT = ?', str_replace('democrite-', 'in2p3-', str_replace('ccsd-', 'hal-', ($identifiant == null) ? $this->_identifiant : $identifiant)));
             $res = $db->fetchCol($sql);
             if (count($res) == 1) {
                 $docid = $res[0];
@@ -467,10 +443,8 @@ class Hal_Document
 
     /**
      * Récupération de l'identifiant d'un document à partir de son docid
-     * @param int $docid
-     * @return string
      */
-    static public function getIdFromDocid($docid)
+    public function getIdFromDocid($docid)
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         $sql = $db->select()->from(self::TABLE, 'IDENTIFIANT')
@@ -480,7 +454,6 @@ class Hal_Document
 
     /**
      * Récupération du docid
-     * @return int
      */
     public function getDocid()
     {
@@ -489,7 +462,6 @@ class Hal_Document
 
     /**
      * Récupération identifiant
-     * @return string
      */
     public function getId($version = false)
     {
@@ -498,7 +470,6 @@ class Hal_Document
 
     /**
      * Récuparation version
-     * @return int
      */
     public function getVersion()
     {
@@ -507,7 +478,6 @@ class Hal_Document
 
     /**
      * Récupération de toutes les versions d'un document
-     * @return int[]
      */
     public function getVersionsFromId($identifiant)
     {
@@ -527,15 +497,6 @@ class Hal_Document
     }
 
     /**
-     * Initialisation de la liste des versions
-     * @param array $versions
-     */
-    public function setVersions($arrayVersions)
-    {
-        $this->_versions = $arrayVersions;
-    }
-
-    /**
      * Constructeur via docid
      * @param int $docid
      * @param bool $populate
@@ -547,7 +508,6 @@ class Hal_Document
             $this->load();
         }
     }
-
 
     /**
      * Constructeur via l'identifiant
@@ -566,7 +526,7 @@ class Hal_Document
 
     /**
      * Récupération des docid du dépôt à partir de son identifiant
-     * @return int[]
+     * @return array
      */
     public function getDocids()
     {
@@ -702,20 +662,21 @@ class Hal_Document
                 $this->_status = $row['DOCSTATUS'];
                 $this->_typdoc = $row['TYPDOC'];
 
-                $user = new Ccsd_User_Models_DbTable_User();
-                $contribInfo = $user->search($row['UID']);
-                if ((is_array($contribInfo)) && (isset($contribInfo[0]))) {
+                //recherche de l'alias (Screen_name) du contributeur pour la notice
+                $halUser = Hal_User::createUser($row['UID']);
+                if (isset($halUser)) {
                     $this->_contributor = array(
-                        'lastname' => $contribInfo[0]['LASTNAME'],
-                        'firstname' => $contribInfo[0]['FIRSTNAME'],
-                        'fullname' => Ccsd_Tools::formatUser($contribInfo[0]['FIRSTNAME'], $contribInfo[0]['LASTNAME']),
-                        'email' => $contribInfo[0]['EMAIL'],
+                        'lastname' => $halUser->getLastname(),
+                        'firstname' => $halUser->getFirstname(),
+                        'fullname' => $halUser->getFullName(),
+                        'email' => $halUser->getEmail(),
+                        'alias' => $halUser->getScreen_name(),
                         'uid' => $row['UID']
                     );
                 } else {
                     $this->_contributor = array('uid' => $row['UID']);
                 }
-                unset($user, $contribInfo);
+                unset($halUser);
 
                 $this->setSid($row['SID']);
                 $site = Hal_Site::loadSiteFromId($row['SID']);
@@ -768,11 +729,11 @@ class Hal_Document
 
                 // Autres versions
                 $sql = $db->select()
-                    ->from(self::TABLE)
+                    ->from(self::TABLE, array('VERSION', 'DATESUBMIT'))
                     ->where('IDENTIFIANT = ?', $this->_identifiant)
                     ->order('DATESUBMIT ASC');
                 foreach ($db->fetchAll($sql) as $row) {
-                    $this->_versions[$row['VERSION']] = $row;
+                    $this->_versions[$row['VERSION']] = $row['DATESUBMIT'];
                 }
 
                 // Métadonnées
@@ -800,7 +761,7 @@ class Hal_Document
 
                     // Liens Auteurs-Structures
                     $sql2 = $db->select()
-                        ->from(Hal_Document_Author::TABLE_DOCAUTHSTRUCT , 'STRUCTID')
+                        ->from(Hal_Document::TABLE_AUTSTRUCT, 'STRUCTID')
                         ->where('DOCAUTHID = ?', (int)$row['DOCAUTHID'])
                         ->order('AUTSTRUCTID ASC');
                     foreach ($db->fetchAll($sql2) as $row2) {
@@ -833,9 +794,6 @@ class Hal_Document
                 // Date de production de la ressource : date ou conferenceStartDate ou writingDate sinon submittedDate
                 $this->_producedDate = $this->createProducedDate();
 
-                // Publication Date @see Hal_Document_Settings_Dates for configuration
-                $this->_publicationDate = $this->createPublicationDate();
-
                 // Date d'archivage
                 $sql = $db->select()->from(Ccsd_Archive::TABLE_DONNEES, 'DATE_ACTION')
                     ->where('DOCID = ?', (int)$this->_docid)
@@ -849,7 +807,6 @@ class Hal_Document
                 $this->getCoins();
 
                 //auto-archivage -> un des propriétaires est auteur
-                // TODO: C'est faux, cela...  Seulement si le deposant est un auteur.
                 $contributeurs = [];
                 $user = new Ccsd_User_Models_UserMapper();
                 foreach ($this->getOwner() as $uid) {
@@ -878,42 +835,6 @@ class Hal_Document
         }
     }
 
-
-    /**
-     * Temp kludge
-     * True if typdoc == COMM + SubmitDate > '2006-01-01' + 'date' > '2017-01-01'
-     * @param $dateFormatted
-     * @return bool
-     */
-    private function isCracKludgeCondition($dateFormatted)
-    {
-
-        if (('COMM' == $this->getTypDoc())
-            && (strtotime($this->getSubmittedDate()) > strtotime('2016-01-01'))
-            && (strtotime($dateFormatted) > strtotime('2017-01-01'))) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * 2019-10 temp kludge for CNRS CRAC Application
-     * TODO remove at end of CRAC +/- 2020-01-01
-     * @param string $confStartDateFormatted
-     * @param string $dateFormatted
-     * @return string
-     */
-    private function cracKludge($confStartDateFormatted, $dateFormatted) {
-
-            if ($this->isCracKludgeCondition($dateFormatted)) {
-                return $dateFormatted;
-            } else {
-               return $confStartDateFormatted;
-            }
-    }
-
-
     /**
      * @return string
      */
@@ -928,10 +849,9 @@ class Hal_Document
         } else {
             $confStartDateFormatted = Ccsd_Tools::str2date($this->getMeta('conferenceStartDate'));
             if (in_array($this->_typdoc, ['COMM', 'POSTER', 'PRESCONF']) && $confStartDateFormatted != '') {
-                $producedDate = $this->cracKludge($confStartDateFormatted, $dateFormatted);
+                $producedDate = $confStartDateFormatted;
             } else {
                 $writingDateFormatted = Ccsd_Tools::str2date($this->getMeta('writingDate'));
-
                 if ($writingDateFormatted != '') {
                     $producedDate = $writingDateFormatted;
                 }
@@ -1101,60 +1021,6 @@ class Hal_Document
     }
 
     /**
-     * Return the publication date
-     * @param null $format
-     * @param null $locale
-     * @return bool|false|string
-     * @throws Zend_Date_Exception
-     */
-    public function getPublicationDate($format = null, $locale = null)
-    {
-        if (empty($this->_publicationDate)) {
-            $this->_publicationDate = $this->createPublicationDate();
-        }
-
-        if ($format != null) {
-            $date = new Ccsd_Date();
-            $date->set($this->_publicationDate);
-            $this->_publicationDate = $date->get($format, $locale);
-        }
-        return $this->_publicationDate;
-    }
-
-
-    /**
-     * Create a publication Date
-     * Use a config array from Hal_Document_Settings_Dates
-     * @see Hal_Document_Settings_Dates
-     * @return bool|false|string
-     */
-    public function createPublicationDate()
-    {
-        $publicationDate = '';
-
-        foreach (Hal_Document_Settings_Dates::getPublicationDateMethods($this->getTypDoc()) as $dateMethod) {
-
-            if ($dateMethod == Hal_Document_Settings_Dates::TYPE_SUBMITTED_DATE) {
-                $publicationDate = $this->getSubmittedDate("YYYY-MM-dd");
-            } else {
-                $publicationDate = Ccsd_Tools::str2date($this->getHalMeta()->getMeta($dateMethod));
-            }
-
-            // Stop ASA we get a string date
-            if (!empty($publicationDate)) {
-                break;
-            }
-        }
-
-        // Eventually we must have a date : Hal_Document_Settings_Dates::TYPE_SUBMITTED_DATE
-        if (empty($publicationDate)) {
-            Ccsd_Tools::panicMsg(__FILE__, __LINE__, 'Eventually, publication date for '. $this->getId(true) . ' is empty: it is a bug');
-        }
-
-        return $publicationDate;
-    }
-
-    /**
      * Initialisation des fichiers d"un article
      *
      * @param array $files
@@ -1262,9 +1128,6 @@ class Hal_Document
         return false;
     }
 
-    /**
-     * @return string|null
-     */
     public function getDefaultFileThumb()
     {
         foreach ($this->_files as $file) {
@@ -1275,9 +1138,6 @@ class Hal_Document
         return null;
     }
 
-    /**
-     * @return string|null
-     */
     public function getDateVisibleMainFile()
     {
         foreach ($this->_files as $file) {
@@ -1288,9 +1148,8 @@ class Hal_Document
         return null;
     }
 
-    /**
+    /*
      * Calcule la première date de visibilité des fichiers de type file
-     * @return string
      */
     public function getFirstDateVisibleFile()
     {
@@ -1305,9 +1164,6 @@ class Hal_Document
         return $date;
     }
 
-    /**
-     * @return string
-     */
     public function getUrlMainFile()
     {
         if ($this->_typdoc == 'IMG') {
@@ -1450,9 +1306,6 @@ class Hal_Document
         return false;
     }
 
-    /**
-     * @return Hal_Document_File[]
-     */
     public function loadFiles()
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
@@ -1556,9 +1409,6 @@ class Hal_Document
         return false;
     }
 
-    /**
-     * @return bool
-     */
     public function delFiles()
     {
         $res = true;
@@ -1568,17 +1418,11 @@ class Hal_Document
         return $res;
     }
 
-    /**
-     *
-     */
     public function initFiles()
     {
         $this->_files = array();
     }
 
-    /**
-     * @return int
-     */
     public function getStatus()
     {
         return $this->_status;
@@ -1595,27 +1439,17 @@ class Hal_Document
         $this->addMetas($metas, $uid, $source);
     }
 
-    /**
-     * @param array  $metas
-     * @param int    $uid
-     * @param string $source
-     */
     public function addMetas($metas, $uid = 0, $source = "web")
     {
         $this->_metas->addMetasFromArray($metas, $source, $uid);
     }
 
-    /**
-     * @param Hal_User $user
-     */
     public function addUserMetas($user)
     {
         $this->_metas->addMetasFromUser($user);
     }
 
-    /** On ajoute les auteurs depuis les préférences de dépot d'un utilisateur
-     *
-     */
+    // On ajoute les auteurs depuis les préférences de dépot d'un utilisateur
     public function addUserAuthors(Hal_User $user)
     {
         if ($user->getDefault_author()) {
@@ -1713,8 +1547,7 @@ class Hal_Document
      */
     public function getMeta($meta = null)
     {
-        // On veut acceder au identifiant comme si c'etait des noms de meta...
-        //
+        // TODO : chercher pourquoi cette bizarerie
         if (in_array($meta, self::$_serverCopy)) {
             return $this->_metas->getMeta('identifier', $meta);
         } else {
@@ -1755,7 +1588,7 @@ class Hal_Document
     public function getCoins($reload = false)
     {
         if ($reload || $this->_coins == '') {
-            $typeDC = array('UNDEFINED' => 'document', 'ART' => 'journal', 'OUV' => 'book', 'COUV' => 'incollection', 'COMM' => 'proceedings', 'POSTER' => 'poster', 'REPORT' => 'report', 'THESE' => 'phdthesis', 'HDR' => 'thesis', 'ETABTHESE' => 'thesis', 'LECTURE' => 'lecture', 'IMG' => 'image', 'VIDEO' => 'video', 'PATENT' => 'patent', 'DOUV' => 'book', 'SON' => 'sound');
+            $typeDC = array('UNDEFINED' => 'document', 'ART' => 'journal', 'OUV' => 'book', 'COUV' => 'incollection', 'COMM' => 'proceedings', 'POSTER' => 'poster', 'REPORT' => 'report', 'THESE' => 'phdthesis', 'HDR' => 'thesis', 'LECTURE' => 'lecture', 'IMG' => 'image', 'VIDEO' => 'video', 'PATENT' => 'patent', 'DOUV' => 'book', 'SON' => 'sound');
             $param = array();
             $param[] = 'ctx_ver=Z39.88-2004';
             $param[] = 'rft_val_fmt=' . rawurlencode('info:ofi/fmt:kev:mtx:dc');
@@ -1781,7 +1614,6 @@ class Hal_Document
 
             $param[] = 'rft.language=' . $this->getMeta(Ccsd_Externdoc::META_LANG);
             $param[] = 'rft.date=' . $this->getProducedDate();
-            /** @var Ccsd_Referentiels_Journal  $oJ */
             if (($oJ = $this->getMeta('journal')) instanceof Ccsd_Referentiels_Journal && $oJ->JNAME) {
                 $param[] = 'rft.source=' . rawurlencode($oJ->JNAME);
             }
@@ -1814,19 +1646,16 @@ class Hal_Document
 
         /**  TODO: Revoir la transformation... Il faut pouvoir dire si une chaine est ascii, html ou latex et faire les transformation en connaissance de cause.
          *   */
-        $bruteTitle = strip_tags($this->getMainTitle(false, $lang));
-        // Latex treat greek characters so if greek, it's not math, so don't translate greek into math symbol
-        $doGreek = ($lang != 'el');
-        $title    = Ccsd_Tools::htmlToTex($bruteTitle, $doGreek);
-        $authors  = Ccsd_Tools::htmlToTex(strip_tags($this->getListAuthors(10)), $lang=!'el') ;
-        $citation = Ccsd_Tools::htmlToTex(strip_tags($this->getCitation('full')), $doGreek) ;
+        $title    = Ccsd_Tools::htmlToTex(strip_tags($this->getMainTitle(false, $lang)));
+        $authors  = Ccsd_Tools::htmlToTex(strip_tags($this->getListAuthors(10))) ;
+        $citation = Ccsd_Tools::htmlToTex(strip_tags($this->getCitation('full'))) ;
         // Hum apres cela, il reste des caractere Latex indesirable...
         // Exemple: %
         // Il ne devrait pas y avoir de commentaire dans les meta, donc on escape
         // Idem pour &
-        $title    = Ccsd_Tools::protectCoverpage($title);
-        $authors  = Ccsd_Tools::protectCoverpage($authors);  // ok with array
-        $citation = Ccsd_Tools::protectCoverpage($citation);
+        $title    = Ccsd_Tools::protectLatex($title);
+        $authors  = Ccsd_Tools::protectLatex($authors);  // ok with array
+        $citation = Ccsd_Tools::protectLatex($citation);
 
         $unicode = new Ccsd_Tex_Unicode($lang);
         $MultiLangTitle = $unicode ->parseXelatexLingualsCommand($title);
@@ -1864,16 +1693,16 @@ class Hal_Document
         $tex .= 'pdftitle={' . $title. "},%" . PHP_EOL;
         $table = array();
         foreach ($this->getAuthors() as $author) {
-            $table[] = Ccsd_Tools::htmlToTex($author->getFullname(), $doGreek);
+            $table[] = Ccsd_Tools::htmlToTex($author->getFullname());
         }
         $tex .= 'pdfauthor={' . implode(', ', $table) . '},%' . PHP_EOL;
         unset($table);
         $tex .= 'pdfkeywords={';
         foreach ($this->getKeywords() as $kws) {
             if (is_array($kws)) {
-                $tex .= Ccsd_Tools::htmlToTex(implode(', ', $kws), $doGreek);
+                $tex .= implode(', ', array_map('Ccsd_Tools::htmlToTex', $kws));
             } else {
-                $tex .= Ccsd_Tools::htmlToTex($kws, $doGreek);
+                $tex .= Ccsd_Tools::htmlToTex($kws);
             }
         }
         $tex .= '},%' . PHP_EOL;
@@ -1950,13 +1779,11 @@ class Hal_Document
         $tex .= 'Submitted on ' . $this->getSubmittedDate($dateFormat, 'en');
         // There is some documents with only a version 5!!!  Taking count give 1 not 5
         // Plusieurs versions et ce n'est pas la derniere
-        if (count($this->getDocVersions()) >=1) {
-            /** @var int $lastVersion */
-            $lastVersion = max(array_keys($this->getDocVersions()));
-            $lastVersionDate = Hal_Document::getDateVersionFromDocRow($this->getDocVersions()[$lastVersion]);
+        if (count($this->_versions) >=1) {
+            $lastVersion = max(array_keys($this->_versions));
             if ($this->_version < $lastVersion) {
                 $date = new Zend_Date();
-                $date->set($lastVersionDate, 'Y-MM-d H:i:s');
+                $date->set($this->_versions[$lastVersion], 'Y-MM-d H:i:s');
                 $tex .= ' (v' . $this->_version . '), last revised ' . $date->get($dateFormat, 'en') . ' (v' . $lastVersion . ')';
             }
         }
@@ -2013,10 +1840,6 @@ class Hal_Document
      */
     public function mergePDF($resultat, $first, $second) {
         setlocale(LC_CTYPE, "fr_FR.UTF-8"); // escapeshellarg strip les lettres accentuees si on n'est pas dans une locale Utf8
-        if (!file_exists($second)) {
-            // Le fichier principal n'existe pas, la concatenation va echouer...
-            return false;
-        }
         $shellFirst  = escapeshellarg($first) ;
         $shellSecond = escapeshellarg($second);
         $shellResult = escapeshellarg($resultat);
@@ -2041,9 +1864,16 @@ class Hal_Document
             $destdir = $this->getRacineCache();
         }
         if ($this->getFormat() == self::FORMAT_FILE) {
+            if (defined('NOCOVERPAGE')) {
+                $filetocopy = $this->getDefaultFile()->getPath();
+                $rescopy = @copy($filetocopy, $this->getRacineCache() . '/' . $this->_docid . '.pdf');
+                if (!$rescopy) {
+                    Ccsd_Tools::panicMsg(__FILE__,__LINE__, "File $filetocopy n'existe pas!");
+                }
+                return $rescopy;
+            }
             $needsFiles = [];
             $tex = $this -> makeTexCoverPage($needsFiles);
-
             // Creation du Zip pour la compilation de la page de garde
             $zip = new ZipArchive;
             $uniqid = uniqid($this->_docid);
@@ -2173,7 +2003,7 @@ class Hal_Document
      * @param string $format
      * @param string $citation
      */
-    public function setCitation($format = 'ref', $citation = null)
+    public function setCitation($format = 'ref', $citation)
     {
         $this->_citation[$format] = $citation;
     }
@@ -2188,7 +2018,7 @@ class Hal_Document
      */
     public function getCitation($format = 'ref', $reload = false)
     {
-        if ($reload || $this->_citation[$format] === null) {
+        if ($reload || $this->_citation[$format] == null) {
             $metaList = Hal_Referentiels_Metadata::metaList();
             $citation = Hal_Settings::getCitationStructure($this->_typdoc);
             $docLang = strtolower($this->getMeta(Ccsd_Externdoc::META_LANG));
@@ -2234,7 +2064,7 @@ class Hal_Document
                 }
                 if ($meta[1] == 'page') {
                     $value = str_replace('–', '-', $value);
-                    if (preg_match('/^(\?+|-+|\.+|to appear|[a-z]+)$/', $value)) {
+                    if (preg_match('/^(\?+|\-+|\.+|to appear|[a-z]+)$/', $value)) {
                         $value = '';
                     }
                     if ($value != '' && !preg_match('/(^pp)|p|(page$)/', $value)) {
@@ -2248,30 +2078,21 @@ class Hal_Document
                     }
                 }
                 if ($meta[1] == 'publisher') {
-                    if (preg_match('/^(\?+|-+|\.+|none|undef)$/', $value)) {
-                        // Champs mal remplis... on annule la valeur
+                    if (preg_match('/^(\?+|\-+|\.+|none|undef)$/', $value)) {
                         $value = '';
-                    } else {
-                        // Valeur de publisher Ok
-                        // On regarde si publisherLink existe pour mettre un lien
-                        $linkvalue = $this->getMeta('publisherLink');
-                        if ($linkvalue != '') {
-                            $value = '<a target="_blank" href="' . ((!preg_match('@^https?://@', $linkvalue)) ? 'http://' . $linkvalue : $linkvalue) . '">' . $value . '</a>';
-                        }
                     }
                 }
                 if ($meta[1] == 'doi') {
-                    $value = '<a target="_blank" href="'. self::URL_DOI . $value . '">&#x27E8;' . $value . '&#x27E9;</a>';
+                    $value = '<a target="_blank" href="'. self::URL_DOI . $value . '">&#x3008;' . $value . '&#x3009;</a>';
                 }
                 if ($meta[1] == 'nnt') {
-                    $value = '<a target="_blank" href="'. self::URL_THESES . $value . '">&#x27E8;NNT : ' . $value . '&#x27E9;</a>';
+                    $value = '<a target="_blank" href="'. self::URL_THESES . $value . '">&#x3008;NNT : ' . $value . '&#x3009;</a>';
                 }
                 if ($meta[1] == 'swh') {
-                    $value = '<a target="_blank" href="https://archive.softwareheritage.org/browse/' . $value . '">&#x27E8;' . $value . '&#x27E9;</a>';
+                    $value = '<a target="_blank" href="https://archive.softwareheritage.org/browse/' . $value . '">&#x3008;' . $value . '&#x3009;</a>';
                 }
                 if ($meta[1] == 'publisherLink') {
-                    // TODO : A supprimer dans les definitions de citation.  Mettre un lien en clair dans la citation ne semble pas pertinent.
-                    $value = '';
+                    $value = '<a target="_blank" href="' . ((!preg_match('@^https?://@', $value)) ? 'http://' . $value : $value) . '">&#x3008;' . $value . '&#x3009;</a>';
                 }
                 if ($meta[1] == 'journal' && $value instanceof Ccsd_Referentiels_Journal) {
                     $citation = str_replace('{journalPublisher}', $value->PUBLISHER, $citation);
@@ -2284,6 +2105,9 @@ class Hal_Document
                     if (strlen($value) > 4) {
                         $value = date("M Y", mktime(0, 0, 0, substr($value, 5, 2), 1, substr($value, 0, 4)));
                     }
+                }
+                if ($meta[1] == 'comment' || $meta[1] == 'description') {
+                    $value = (strlen($value) > 100) ? substr($value, 0, 97) . '...' : $value;
                 }
 		
                 if (in_array($meta[1], $metaList)) {
@@ -2299,14 +2123,10 @@ class Hal_Document
                 $citation = str_replace('{' . $meta[1] . '}', $value, $citation);
             }
             do {
-                $citation = preg_replace('/\s+([,.])\s+/', ' ', $citation, -1, $count);
+                $citation = preg_replace('/\s+(,|\.)\s+/', ' ', $citation, -1, $count);
             } while ($count > 0);
-            $refCitation = trim(str_replace('..', '.', str_replace(array('()', '[]'), '', preg_replace('/\s+/', ' ', $citation))), " -,.\t\n\r\0\x0B");
-            $this->setCitation('ref', $refCitation);
-
-            // Compute FullCitation
-
-            if ($this->getInstance() != 'hceres' && count($this->getAuthors()) > 0) {
+            $this->_citation['ref'] = trim(str_replace('..', '.', str_replace(array('()', '[]'), '', preg_replace('/\s+/', ' ', $citation))), " -,.\t\n\r\0\x0B");
+            if (count($this->getAuthors()) > 0) {
                 $authorArr = array();
                 $i = 0;
                 foreach ($this->getAuthors() as $author) {
@@ -2326,13 +2146,10 @@ class Hal_Document
             if ($this->getInstance() == 'hceres') {
                 $author = $author . ($author == '' ? '' : '. ') . Zend_Registry::get('Zend_Translate')->translate('typdoc_' . $this->getTypdoc()) ;
             }
-            $fullCitation = $author . ($author == '' ? '' : '. ') . $this->getMainTitle(true) . '. ' . $refCitation;
-
+            $this->_citation['full'] = $author . ($author == '' ? '' : '. ') . $this->getMainTitle(true) . '. ' . $this->_citation['ref'];
             if ($this->getId() != '') {
-                $fullCitation = $fullCitation . '. <a target="_blank" href="' . $this->getUri(true) . '">&#x27E8;' . $this->getId(true) . '&#x27E9;</a>';
+                $this->_citation['full'] .= '. <a target="_blank" href="' . $this->getUri(true) . '">&#x3008;' . $this->getId(true) . '&#x3009;</a>';
             }
-
-            $this->setCitation('full', $fullCitation);
         }
         return $this->_citation[$format];
     }
@@ -2346,43 +2163,27 @@ class Hal_Document
     public function getReuse()
     {
         $aData = array();
-
-        // ajout de l'auteur si ce n'est pas un auteur "collectif"
-        $aAuthors = $this->getAuthors();
-        if (count($aAuthors)) {
-            if (preg_match('/^collectif/i', $aAuthors[0]->getFirstname())) {
-                $aData['auteur'] = '';
-            } else {
-                $aData['auteur'] = Ccsd_Tools::formatAuthor($aAuthors[0]->getLastname(),
-                        $aAuthors[0]->getFirstname()) . ' - ';
+        $aData['auteur'] = '';
+        // ajout de l'auteur avec ses entités de rattachement si ce n'est pas un auteur "collectif"
+        /** @var Hal_Document_Author $author */
+        foreach ($this->getAuthors() as $author) {
+            if (!preg_match('/collectif/i', $author->getFirstname())) {
+                 $aData['auteur'] .= Ccsd_Tools::formatAuthor($author->getFirstname(),
+                        $author->getLastname()) . '. ';
+            }
+            foreach ($author->getStructid() as $structId) {
+                //récupération de la structure
+                $oDocStruct = new Hal_Document_Structure($structId);
+                // ajout du nom de la structure $structure
+                $aData['auteur'] .= $oDocStruct->getStructname() . '. ';
             }
         }
 
         // date de publication
         setlocale(LC_TIME, "fr_FR.utf8");
-        $d = strtotime($this->getReleasedDate());
+        $d = strtotime($this->getProducedDate());
         $aData['datePubli'] = strftime ("%e %B %Y", $d);
-
-        // liste des entites
-        $aStructs = array();
-        foreach ($this->getStructures() as $structure) {
-            $aValues[] = $structure->getStructname();
-            $aStructs = array_merge($aStructs, $structure->getAllParents());
-        }
-
-        foreach ($aStructs as $structure) {
-           $aValues[] =  $structure['struct']->getStructname();
-        }
-
-        if (isset($aValues)) {
-            $aValues = array_unique($aValues);
-            // on enlève la structure de niveau le plus élevé
-            array_pop($aValues);
-            // on commence par la structure de plus haut niveau
-            $aValues = array_reverse($aValues);
-
-            $aData['arboEntites'] = implode(' / ', $aValues);
-        }
+        //$aData['datePubli'] = $this->getProducedDate();
 
         return $aData;
     }
@@ -2526,19 +2327,12 @@ class Hal_Document
     }
 
     /**
-     * Retourne true si un fulltext est en attente de validation pour le document a l'origine de type Notice
+     * Retourne true si un fulltext est en attente de validation
      * @param string $identifiant à vérifier
      * @return boolean true si fulltext en attente de validation false sinon
-     * @todo: renommer cette fonction: valide seulement pour un (docid) identifiant pointant pour une notice
      */
     static public function VerifyFulltextWaiting($identifiant)
     {
-        /* Une notice ne peut avoir qu'une seule ligne dans document
-           Sauf si on a ajoute un document et que le dit document est en moderation
-           Apres lamoderation, il n'y aura plus que un document de format "file"
-
-            Pour le cas qui nous interesse, il suffit de voir si l'identifiant a plusieurs ligne/docid dans DOCUMENT
-        */
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         $sql = $db->select()->from(self::TABLE)->where('IDENTIFIANT = ?', $identifiant);
 
@@ -2646,14 +2440,7 @@ class Hal_Document
      */
     public function getAuthor($id)
     {
-        if (array_key_exists($id, $this->_authors)) {
-            $author = $this->_authors[$id];
-            if ($author instanceof Hal_Document_Author) {
-                return $author;
-            }
-        }
-        // Hum pas d'auteur... c'est plutot mal
-        return null;
+        return ($this->_authors[$id] instanceof Hal_Document_Author) ? $this->_authors[$id] : null;
     }
 
     /**
@@ -2716,11 +2503,10 @@ class Hal_Document
 
     /**
      * Ajout d'un nouvel auteur
-     * les indices des elements ne sont pas touches lors de l'ajout d'un element
      *
      * @param mixed (array | Hal_Document_Author) $data
      * @param boolean $loadFromBase indique si l'ajout de l'auteur se fait au moment du chargement de l'article de la base
-     * @return int L'indice de l'element ajoute
+     * @return int
      */
     public function addAuthor($data, $loadFromBase = false)
     {
@@ -2998,7 +2784,7 @@ class Hal_Document
         }
 
         $portail = Hal_Site::loadSiteFromId($this->getSid());
-        return $portail->getUrl() . '/' . $this->_identifiant . (($version && count($this->getDocVersions()) > 1) ? 'v' . $this->_version : '');
+        return $portail->getUrl() . '/' . $this->_identifiant . (($version && count($this->_versions) > 1) ? 'v' . $this->_version : '');
     }
 
     /**
@@ -3096,8 +2882,6 @@ class Hal_Document
     }
 
     /**
-     * TODO Ne pas utiliser file_exists: cache exist doit rendre le contenu du fichier directment!
-     *      et non pas si exist alors lire car le parallelisme rends le truc caduque.
      * Return document in the selected format
      * @param string $format
      * @param bool $content
@@ -3210,10 +2994,6 @@ class Hal_Document
         if (!is_array($docids)) {
             $docids = array((int)$docids);
         }
-        if (count($docids) > 1000) {
-            // Hum: si le file system est charge, on peut depasse le Maximum execution time de Php
-            ini_set('max_execution_time', 0);
-        }
         if ($format != null && !is_array($format)) {
             $format = array($format);
         }
@@ -3262,69 +3042,40 @@ class Hal_Document
     }
 
     /**
-     * Chargement du document via la TEI sous forme de DOM object
+     * Chargement du document via la TEI
      * @param DOMDocument
      * @param string
      * @param string
      * @return Hal_Document
      */
-    public function loadFromTEI(DOMDocument $xml, $pathImport = null, $instance = 'hal', $teiLoadOptions=[])
+    public function loadFromTEI(DOMDocument $xml, $pathImport = null, $instance = 'hal')
     {
         $tei = new Hal_Document_Tei($this);
-        $tei->setOptions($teiLoadOptions);
         $tei->load($xml, $pathImport, $instance);
 
         return $this;
     }
-    /**
-     * Chargement du document via la TEI sous forme de fichier
-     * @param string $filename
-     * @param string
-     * @param string
-     * @return Hal_Document
-     */
-    public static function loadFromTEIFile($filename, $pathImport = null, $instance = 'hal')
-    {
-        $contentFile = file_get_contents($filename);
-        $content = new DOMDocument();
-        $content->loadXML($contentFile);
-        $content->schemaValidate(__DIR__ . '/Sword/xsd/inner-aofr.xsd');
-
-        $document = new Hal_Document();
-        $document->loadFromTEI($content, $pathImport, $instance);
-
-        return $document;
-    }
 
     /**
      * Retourne l'identifiant OAI du document
-     * @param $oaiVersion string
      */
-    public function getOaiIdentifier($oaiVersion)
+    public function getOaiIdentifier()
     {
-        switch ($oaiVersion) {
-            case "v1": $oaiRepoIdent = "HAL"; break;
-            case "v2": $oaiRepoIdent = "hal.archives-ouvertes.fr"; break;
-            default :
-                Ccsd_Tools::panicMsg(__FILE__,__LINE__, "getOaiIdentifier called with bad oaiversion = $oaiVersion, must be v1 or v2");
-                $oaiRepoIdent = "HAL";
-        }
-        return  'oai:'. $oaiRepoIdent. ':' . $this->_identifiant . 'v' . $this->_version;
+        return 'oai:HAL:' . $this->_identifiant . 'v' . $this->_version;
     }
 
     /**
      * OAI header de l'article
-     * @var $oaiVersion string
      * @return string xml
      */
-    public function getOaiHeader($oaiVersion)
+    public function getOaiHeader()
     {
         if (!$this->isLoaded()) {
             $this->load();
         }
         $xml = new Ccsd_DOMDocument('1.0', 'utf-8');
         $root = $xml->createElement('header');
-        $root->appendChild($xml->createElement('identifier', $this->getOaiIdentifier($oaiVersion)));
+        $root->appendChild($xml->createElement('identifier', $this->getOaiIdentifier()));
         $root->appendChild($xml->createElement('datestamp', substr($this->_modifiedDate, 0, 10)));
 
         foreach ($this->getOaiSet() as $set) {
@@ -3353,7 +3104,7 @@ class Hal_Document
         }
         foreach ($this->_collections as $collection) {
             if ($collection instanceof Hal_Site_Collection) {
-                $sets[] = $collection->getShortname() == 'OPENAIRE' ? 'openaire' : 'collection:' . $collection->getShortname();
+                $sets[] = $collection->getCode() == 'OPENAIRE' ? 'openaire' : 'collection:' . $collection->getCode();
             }
         }
         return $sets;
@@ -3453,6 +3204,9 @@ class Hal_Document
 
             if ($bind['DOCSTATUS'] == self::STATUS_VISIBLE) {
                 $bind['DATEMODER'] = date('Y-m-d H:i:s');
+            }
+
+            if ($bind['DOCSTATUS'] == self::STATUS_VISIBLE) {
                 $index = true;
             }
 
@@ -3588,8 +3342,7 @@ class Hal_Document
             if ($this->getFormat() != self::FORMAT_NOTICE || Hal_Settings::validNotice()) {
                 $mailModerator = Hal_Mail::TPL_ALERT_MODERATOR;
             }
-        } else if ($this->getTypeSubmit() == Hal_Settings::SUBMIT_ADDFILE
-            ||     $this->getTypeSubmit() == Hal_Settings::SUBMIT_ADDANNEX) {
+        } else if ($this->getTypeSubmit() == Hal_Settings::SUBMIT_ADDFILE || $this->getTypeSubmit() == Hal_Settings::SUBMIT_ADDANNEX) {
 
             //Ajout d'un fichier
             $bind = array(
@@ -3626,17 +3379,10 @@ class Hal_Document
             $db->insert(self::TABLE, $bind);
             $this->_docid = $db->lastInsertId(self::TABLE);
 
-            // PROPRIETAIRES ajout du nouveau contributeur si différent de version précédente
-            // boucle pour recréer tous les propriétaire
-            $array_owner = $this->getOwner();
-            foreach( $array_owner as $owner){
-                $this->addProprio($owner);
-            }
-            // JB 18/06/2019 correction ci dessus. Boucle d'ajout de propriété faite uniquement sur contributeur en lieu et place de tous les owners
-            // ticket #61 github
-            //$this->addProprio($this->getContributor('uid'));
+            // PROPRIETAIRES ajout du nouveau contributeur si différent de version précdente
+            $this->addProprio($this->getContributor('uid'));
 
-            $logUid = ($uid != 0) ? $uid : $this->getContributor('uid');
+            $logUid = $uid != 0 ? $uid : $this->getContributor('uid');
             Hal_Document_Logger::log($this->getDocid(), $logUid, Hal_Document_Logger::ACTION_ADDFILE);
 
             //Définition du modèle de mail envoyé au déposant et au modérateur
@@ -3654,8 +3400,7 @@ class Hal_Document
 
             $docstatus =  self::STATUS_BUFFER;
             $transfertArxiv = Hal_Transfert_Arxiv::init_transfert($this);
-            if ($this->_isArxiv || ($transfertArxiv -> getRemoteId() != null)) {
-                // On n'efface pas si un Id est deja present! ou si le transfert est demande
+            if ($this->_isArxiv) {
                 $transfertArxiv -> save();
                 $docstatus =  self::STATUS_TRANSARXIV;
             } else {
@@ -3691,7 +3436,7 @@ class Hal_Document
 
         // -- STRUCTURE
         // a- Suppression des anciennes structures du document
-        $db->query('DELETE FROM autlab USING ' . Hal_Document_Author::TABLE_DOCAUTHSTRUCT . ' autlab, ' . Hal_Document_Author::TABLE . ' aut WHERE autlab.DOCAUTHID = aut.DOCAUTHID AND aut.DOCID = ' . $this->_docid);
+        $db->query('DELETE FROM autlab USING ' . self::TABLE_AUTSTRUCT . ' autlab, ' . self::TABLE_AUTHOR . ' aut WHERE autlab.DOCAUTHID = aut.DOCAUTHID AND aut.DOCID = ' . $this->_docid);
 
         // b- Enregistrement des nouvelles structures
         $structs = array();
@@ -3707,7 +3452,7 @@ class Hal_Document
 
         // -- AUTEURS
         // a- Suppression des anciens auteurs du document
-        $db->delete(Hal_Document_Author::TABLE, 'DOCID = ' . $this->_docid);
+        $db->delete(self::TABLE_AUTHOR, 'DOCID = ' . $this->_docid);
         $db->delete(Hal_Document_Author::TABLE_DOC_ID, 'DOCID = ' . $this->_docid);
         // b- Enregistrement des nouveaux auteurs
         foreach ($this->getAuthors() as $author) {
@@ -3720,7 +3465,7 @@ class Hal_Document
                         'DOCAUTHID' => $docauthid,
                         'STRUCTID' => $structs[$structidx]
                     );
-                    $db->insert(Hal_Document_Author::TABLE_DOCAUTHSTRUCT, $bind);
+                    $db->insert(self::TABLE_AUTSTRUCT, $bind);
                 }
             }
 
@@ -3767,21 +3512,16 @@ class Hal_Document
         }
 
         //Tamponnage pour les portails/collections
-        $site = Hal_Site::getCurrentPortail();
-        /** @var Hal_Site_Settings_Portail $settings */
-        $settings = $site->getSettingsObj();
-        $collectionSid = $settings ->getAssociatedCollId();
-        // Todo replace $id pas obj
-        if ($collectionSid !== 0) {
-            $collection = $settings ->getAssociatedColl();
-            Hal_Document_Collection::add($this->_docid, $collection);
+        $collectionSid = Hal_Site_Settings_Portail::getSidCollection(SITEID);
+        if ($collectionSid !== false) {
+            Hal_Document_Collection::add($this->_docid, $collectionSid);
         }
 
         if ($index) {
             Ccsd_Search_Solr_Indexer::addToIndexQueue(array($this->_docid));
 
             // Puisqu'on ne passe pas par putOnline dans le cas d'une notice mise en ligne directement, on envoie les alertes mails depuis ici
-            if ($this->getFormat() == self::FORMAT_NOTICE && !Hal_Settings::validNotice() && $this->getTypeSubmit() == Hal_Settings::SUBMIT_INIT && $sendMail) {
+            if ($this->getFormat() == self::FORMAT_NOTICE && !Hal_Settings::validNotice() && $this->getTypeSubmit() == Hal_Settings::SUBMIT_INIT) {
                 $this->alertAndShareOwnershipToContributors();
             }
         }
@@ -4034,10 +3774,6 @@ class Hal_Document
         return $status == self::STATUS_MODIFICATION;
     }
 
-    /**
-     * @param int $status
-     * @return bool
-     */
     public function isMySpace($status = null)
     {
         if ($status == null) {
@@ -4114,9 +3850,6 @@ class Hal_Document
         $this->_isSwh = $transfert;
     }
 
-    /**
-     * @return bool
-     */
     public function gotoPMC()
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
@@ -4200,6 +3933,7 @@ class Hal_Document
         $this->_contributor['lastname'] = $user->getLastname();
         $this->_contributor['firstname'] = $user->getFirstname();
         $this->_contributor['fullname'] = Ccsd_Tools::formatUser($user->getFirstname(), $user->getLastname());
+        $this->_contributor['alias'] = $user->getScreen_name();
     }
 
     /**
@@ -4270,14 +4004,6 @@ class Hal_Document
         return $halMeta->replaceMeta($docid, $oldvalue);
     }
 
-    /**
-     * @param int    $docid
-     * @param string $metaname
-     * @param mixed  $metavalue
-     * @param string $metagroup
-     * @param string $oldlang
-     * @return bool|int
-     */
     static public function updateMetaGroup($docid = 0, $metaname = '', $metavalue = null, $metagroup = '', $oldlang = null)
     {
         try {
@@ -4308,13 +4034,6 @@ class Hal_Document
         }
     }
 
-    /**
-     * @param int    $docid
-     * @param string $metaname
-     * @param mixed  $metavalue
-     * @param string $metagroup
-     * @return bool
-     */
     static public function ajoutMeta($docid = 0, $metaname = '', $metavalue = null, $metagroup = null)
     {
         try {
@@ -4345,11 +4064,6 @@ class Hal_Document
         }
     }
 
-    /**
-     * @param string $metaname
-     * @param mixed $metavalue
-     * @return bool
-     */
     static public function existMetaValueFor($metaname, $metavalue)
     {
         if ($metaname == '') {
@@ -4368,12 +4082,6 @@ class Hal_Document
         return (bool)Zend_Db_Table_Abstract::getDefaultAdapter()->fetchOne($select);
     }
 
-    /**
-     * @param int $uid
-     * @param string $type
-     * @param int $structid
-     * @throws Zend_Exception
-     */
     protected function writeOwnership($uid, $type, $structid = 0)
     {
 
@@ -4516,35 +4224,25 @@ class Hal_Document
         if (count($result) >= 1) {
             //Cas de l'ajout d'un fichier au dépôt
             //On supprime les anciennes versions (nettoyage au cas où)
-            try {
-                $newDocid = $this->getDocid();
-                foreach ($result as $docid) {
-                    $old = Hal_Document::find($docid);
-                    if ($old) {
-                        $oldDocid = $old->getDocid();
-                        //Copie des stats de la version supprimée sur la nouvelle
-                        Hal_Document_Visite::transferStat($oldDocid, $newDocid);
+            foreach ($result as $docid) {
+                $old = Hal_Document::find($docid);
+                if ($old) {
+                    //Copie des stats de la version supprimée sur la nouvelle
+                    Hal_Document_Visite::transferStat($old->getDocid(), $this->getDocid());
 
-                        // Copie des logs de la version supprimée
-                        Hal_Document_Logger::copyLogs($oldDocid, $newDocid);
+                    // Copie des logs de la version supprimée
+                    Hal_Document_Logger::copyLogs($docid, $this->_docid);
 
-                        // Copie des métrics
-                        Hal_Stats::moveStats($oldDocid, $newDocid);
+                    // Copie des métrics
+                    Hal_Stats::moveStats($docid, $this->_docid);
 
-                        //Copie les tampons de la version supprimée sur la nouvelle
-                        Hal_Document_Collection::transferColl($oldDocid, $newDocid);
-
-                        // Recuperation des transferts Arxiv/SWH...
-                        Hal_Transfert_Arxiv::changeDocid($oldDocid, $newDocid);
-                        Hal_Transfert_SoftwareHeritage::changeDocid($oldDocid, $newDocid);
+                    //Copie les tampons de la version supprimée sur la nouvelle
+                    Hal_Document_Collection::transferColl($old->getDocid(), $this->getDocid());
 
                     //Suppression de la notice
                     $old->delete($uid, '', false, true);
                     Hal_Document_Logger::log($docid, $uid, Hal_Document_Logger::ACTION_ADDFILE);
                 }
-                }
-            } catch (Exception $e) {
-                Ccsd_Tools::panicMsg(__FILE__,__LINE__, "Lors de la mise en ligne: " .  $e->getMessage());
             }
         }
         if ($this->getVersion() > 1) {
@@ -4571,12 +4269,7 @@ class Hal_Document
             // 2- création des imagettes
             if (defined('APPLICATION_ENV') && APPLICATION_ENV == ENV_PROD) {
                 //Uniquement en production
-                try {
-                    $this->createImagettes();
-                } catch (Exception $e) {
-                    Ccsd_Tools::panicMsg(__FILE__, __LINE__, "Exception in createImagettes for docid: " . $this->getDocid());
-                    // On echoue pas si les imagettes echouent
-                }
+                $this->createImagettes();
             }
 
             // 3- Incrémente le nombre de doc visible
@@ -4704,11 +4397,10 @@ class Hal_Document
      * Annotation du document
      * @param $uid
      * @param $comment
-     * @return bool
      */
     public function annotate($uid, $comment)
     {
-        return Hal_Document_Logger::log($this->getDocid(), $uid, Hal_Document_Logger::ACTION_ANNOTATE, $comment);
+        Hal_Document_Logger::log($this->getDocid(), $uid, Hal_Document_Logger::ACTION_ANNOTATE, $comment);
     }
 
 
@@ -4914,7 +4606,7 @@ class Hal_Document
             'DOCSTATUS' => self::STATUS_MERGED
         );
         if ($db->update(self::TABLE, $bind, 'DOCID = ' . $this->getDocid())) {
-            /* Il faut effacer le NNT, sinon cela cree une impossibilite d'ajouter sur un autre DOCID cette identifiant */
+            /* Il faut effacer le NNT, sinon cela cree une impossibilite d'jouter sur un autre DOCID cette identifiant */
             $db->delete(Hal_Document_Meta_Abstract::TABLE_META, 'DOCID = ' . $this->getDocid() . " AND METANAME='nnt'");
             // 2- Log de l'action
             Hal_Document_Logger::log($this->getDocid(), $uid, Hal_Document_Logger::ACTION_MERGED, "Fusion avec " . $replacedoc -> getId() . ": " . $comment);
@@ -4939,13 +4631,13 @@ class Hal_Document
     }
 
     /**
-     * Mise en Status replace de la Version precedente d'un document
+     * Version prec d'un document
      * @param $uid
      * @param $comment
      * @param bool $sendMail
      * @return bool
      */
-    public function verspre($uid, $comment, $sendMail = false)
+    public function verspre($uid, $comment, $sendMail = true)
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
 
@@ -4961,7 +4653,7 @@ class Hal_Document
             // 4- Mise à jour de l'index (s'il existe)
             Ccsd_Search_Solr_Indexer::addToIndexQueue(array($this->getDocid()), 'hal', 'UPDATE');
             // 5-Envoi du mail au déposant
-            if ($sendMail) {
+            if (false) {
                 foreach ($this->getOwner() as $uidmail) {
                     $users = new Hal_User();
                     $users->find($uidmail);
@@ -4977,15 +4669,13 @@ class Hal_Document
     }
 
     /**
-     * Mise en modification de la version d'un document:
-     *     Chgment de la date + effacement cache + indexation demandee
+     * Nouvelle version d'un document
      * @param $uid
      * @param $comment
      * @param bool $sendMail
      * @return bool
-     * @throws Zend_Db_Adapter_Exception
      */
-    public function versnew($uid, $comment, $sendMail = false)
+    public function versnew($uid, $comment, $sendMail = true)
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
 
@@ -5001,7 +4691,7 @@ class Hal_Document
             // 4- Mise à jour de l'index (s'il existe)
             Ccsd_Search_Solr_Indexer::addToIndexQueue(array($this->getDocid()), 'hal', 'UPDATE');
             // 5-Envoi du mail au déposant
-            if ($sendMail) {
+            if (false) {
                 foreach ($this->getOwner() as $uidmail) {
                     $users = new Hal_User();
                     $users->find($uidmail);
@@ -5023,11 +4713,11 @@ class Hal_Document
      * @param $comment
      * @param bool $sendMail
      * @return bool
-     * @throws Zend_Db_Adapter_Exception
      */
     public function delete($uid = null, $comment = '', $sendMail = true, $reindexdirect = false)
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+
 
         //1- Suppression des données en base
         if (count($this->getVersionsFromId($this->_identifiant)) == 1) {
@@ -5037,8 +4727,8 @@ class Hal_Document
         $db->delete(self::TABLE, 'DOCID = ' . $this->_docid);
         $db->delete(Hal_Document_Metadatas::TABLE_META, 'DOCID = ' . $this->_docid);
         $db->delete('DOC_ARCHIVE', 'DOCID = ' . $this->_docid);
-        $db->query('DELETE FROM autlab USING ' . Hal_Document_Author::TABLE_DOCAUTHSTRUCT . ' autlab, ' . Hal_Document_Author::TABLE . ' aut WHERE autlab.DOCAUTHID = aut.DOCAUTHID AND aut.DOCID = ' . $this->_docid);
-        $db->delete(Hal_Document_Author::TABLE, 'DOCID = ' . $this->_docid);
+        $db->query('DELETE FROM autlab USING ' . self::TABLE_AUTSTRUCT . ' autlab, ' . self::TABLE_AUTHOR . ' aut WHERE autlab.DOCAUTHID = aut.DOCAUTHID AND aut.DOCID = ' . $this->_docid);
+        $db->delete(self::TABLE_AUTHOR, 'DOCID = ' . $this->_docid);
         $db->delete(Hal_Document_Author::TABLE_DOC_ID, 'DOCID = ' . $this->_docid);
         $db->delete('DOC_COMMENT', 'DOCID = ' . $this->_docid);
         $db->delete(Hal_Document_File::TABLE, 'DOCID = ' . $this->_docid);
@@ -5120,74 +4810,71 @@ class Hal_Document
      * @param int    $uid     : identifiant de l'utilisateur qui fait la demande de modification
      * @param string $comment : commmentaire pour le log
      * @param int    $sid     : identifant du portail
-     * @return int
-     * @throws Zend_Db_Adapter_Exception
      */
     public function changeInstance($uid, $comment, $sid = 1)
     {
-        if (! Hal_Moderation::canTransfertHAL($this)) {
-            return 0;
+        if (Hal_Moderation::canTransfertHAL($this)) {
+            $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+
+            // Recherche de l'ancien identifiant
+            $sOldIdent = $this->getId();
+            $iVersion = $this->getVersion();
+
+            // Constitution prefixe du nouvel identifiant
+            $sNewPrefix = Hal_Settings::getDocumentPrefix($sid, $this->getTypDoc());
+
+            //$aVersions = $this->getDocVersions();
+
+            //1- Si même identifiant, changement d'instance
+            if (strncmp($sNewPrefix, $sOldIdent, strlen($sNewPrefix)) == 0) {
+                $bind = [
+                    'SID' => $sid
+                ];
+                $res = $db->update(self::TABLE, $bind, 'IDENTIFIANT = "' . $sOldIdent . '"');
+                // sinon changement d'identifiant du document + instance
+            } else {
+                // Constitution du nouvel identifiant
+                $sNewIdent = $this->generateId($this->getDocid(), $sNewPrefix);
+                $bind = [
+                    'IDENTIFIANT' => $sNewIdent,
+                    'SID' => $sid
+                ];
+                $res = $db->update(self::TABLE, $bind, 'IDENTIFIANT = "' . $sOldIdent . '"');
+                $this->setID($sNewIdent, $iVersion, false);
+
+                // ajout du lien ancien vers nouvel identifiant
+                $this->addSameAs($sOldIdent);
+
+                // modification de l'identifiant du document dans la table DOC_OWNER
+                $oDocOwner = new Hal_Document_Owner();
+                $oDocOwner->updateIdentifiant($sOldIdent, $sNewIdent);
+
+                // modification de l'identifiant du document dans la table DOC_OWNER_CLAIM
+                $oDocOwner->updateClaimIdentifiant($sOldIdent, $sNewIdent);
+
+                // modification de l'identifiant du document dans la table DOC_RELATED
+                $this->updateRelatedIdentifiant($sOldIdent, $sNewIdent);
+
+                // modification de l'identifiant du document dans la table DOC_SAMEAS
+                $this->updateSameAsIdentifiant($sOldIdent, $sNewIdent);
+
+                // modification de l'identifiant du document dans la table USER_LIBRARY_DOC
+                $oUserLibrary = new Hal_User_Library();
+                $oUserLibrary->updateIdentifiant($sOldIdent, $sNewIdent);
+            }
+
+            // 2- Log de l'action
+            Hal_Document_Logger::log($this->getDocid(), $uid, Hal_Document_Logger::ACTION_MOVED, htmlspecialchars($comment));
+
+            // 3- Suppression des fichiers de cache
+            $this->deleteCache();
+
+            // 4- Mise à jour de l'index (s'il existe)
+            Ccsd_Search_Solr_Indexer::addToIndexQueue(array($this->getDocid()), 'hal', 'UPDATE');
+
+            return $res;
+
         }
-
-        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-
-        // Recherche de l'ancien identifiant
-        $sOldIdent = $this->getId();
-        $iVersion = $this->getVersion();
-
-        // Constitution prefixe du nouvel identifiant
-        $sNewPrefix = Hal_Settings::getDocumentPrefix($sid, $this->getTypDoc());
-
-        //$aVersions = $this->getDocVersions();
-
-        //1- Si même identifiant, changement d'instance
-        if (strncmp($sNewPrefix, $sOldIdent, strlen($sNewPrefix)) == 0) {
-            $bind = [
-                'SID' => $sid
-            ];
-            $res = $db->update(self::TABLE, $bind, 'IDENTIFIANT = "' . $sOldIdent . '"');
-            // sinon changement d'identifiant du document + instance
-        } else {
-            // Constitution du nouvel identifiant
-            $sNewIdent = $this->generateId($this->getDocid(), $sNewPrefix);
-            $bind = [
-                'IDENTIFIANT' => $sNewIdent,
-                'SID' => $sid
-            ];
-            $res = $db->update(self::TABLE, $bind, 'IDENTIFIANT = "' . $sOldIdent . '"');
-            $this->setID($sNewIdent, $iVersion, false);
-
-            // ajout du lien ancien vers nouvel identifiant
-            $this->addSameAs($sOldIdent);
-
-            // modification de l'identifiant du document dans la table DOC_OWNER
-            $oDocOwner = new Hal_Document_Owner();
-            $oDocOwner->updateIdentifiant($sOldIdent, $sNewIdent);
-
-            // modification de l'identifiant du document dans la table DOC_OWNER_CLAIM
-            $oDocOwner->updateClaimIdentifiant($sOldIdent, $sNewIdent);
-
-            // modification de l'identifiant du document dans la table DOC_RELATED
-            $this->updateRelatedIdentifiant($sOldIdent, $sNewIdent);
-
-            // modification de l'identifiant du document dans la table DOC_SAMEAS
-            $this->updateSameAsIdentifiant($sOldIdent, $sNewIdent);
-
-            // modification de l'identifiant du document dans la table USER_LIBRARY_DOC
-            $oUserLibrary = new Hal_User_Library();
-            $oUserLibrary->updateIdentifiant($sOldIdent, $sNewIdent);
-        }
-
-        // 2- Log de l'action
-        Hal_Document_Logger::log($this->getDocid(), $uid, Hal_Document_Logger::ACTION_MOVED, htmlspecialchars($comment));
-
-        // 3- Suppression des fichiers de cache
-        $this->deleteCache();
-
-        // 4- Mise à jour de l'index (s'il existe)
-        Ccsd_Search_Solr_Indexer::addToIndexQueue(array($this->getDocid()), 'hal', 'UPDATE');
-
-        return $res;
     }
 
     /**
@@ -5281,19 +4968,6 @@ class Hal_Document
      */
     public function getDocVersions()
     {
-        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-        foreach ($this->_versions as $version) {
-            if (!is_array($version)) { // Ancien cache
-                $sql = $db->select()
-                    ->from(self::TABLE)
-                    ->where('IDENTIFIANT = ?', $this->_identifiant)
-                    ->order('DATESUBMIT ASC');
-                foreach ($db->fetchAll($sql) as $row) {
-                    $this->_versions[$row['VERSION']] = $row;
-                }
-            }
-            break; // on traite juste sur un seul element de tableau!!!
-        }
         return $this->_versions;
     }
 
@@ -5388,9 +5062,6 @@ class Hal_Document
         return $db->fetchCol($sql);
     }
 
-    /**
-     * @return array
-     */
     public function getNbConsult()
     {
         $cacheFile = $this->_docid . '.metrics';
@@ -5440,9 +5111,8 @@ class Hal_Document
     {
         try {
             foreach ($docDeleted->getCollectionIds() as $sid){
-                $site = Hal_Site::loadSiteFromId($sid);
-                Hal_Document_Collection::add($this->getDocid(),$site);
-                Hal_Document_Collection::del($docDeleted->getDocid(),$site);
+                Hal_Document_Collection::add($this->getDocid(),$sid);
+                Hal_Document_Collection::del($docDeleted->getDocid(),$sid);
             }
         } catch (Exception $e) {
             error_log($e->getMessage());
@@ -5471,9 +5141,9 @@ class Hal_Document
 
     /**
      * Change l'identifiant d'un document
-     * @param int $docNewId
-     * @param Hal_Document $docPrecId
-     * @param int $v version
+     * @param $docNewId
+     * @param $docPrecId
+     * @param $v
      */
     public function changeId($docPrecId, $docNewId, $v)
     {
@@ -5483,7 +5153,7 @@ class Hal_Document
                 'IDENTIFIANT' => $docPrecId->getId(),
                 'VERSION' => $v
             );
-            $db->update(self::TABLE, $bind, 'DOCID = ' . $docNewId);
+            $db->update(self::TABLE, $bind, 'DOCID = ' . $docNewId->getdocId());
         } catch (Exception $e) {
         }
     }
@@ -5510,15 +5180,17 @@ class Hal_Document
         if ($meta == 'type'){
             foreach ($getmeta as $typdoc) {
                 foreach ($typdoc as $i => $val){
-                $array[] = array('value' => $i, 'text' => Ccsd_Tools::translate($val));
+                $array[] = array('value' => $i, 'text' => Zend_Registry::get("Zend_Translate")->translate($val));
                 }
             }
         } else {
             foreach ($getmeta as $i => $val) {
-                    $array[] = array('value' => $i, 'text' => Ccsd_Tools::translate($val));
+                    $array[] = array('value' => $i, 'text' => Zend_Registry::get("Zend_Translate")->translate($val));
             }
         }
+
         return Zend_Json::encode($array);
+
     }
 
     /**
@@ -5546,10 +5218,8 @@ class Hal_Document
 
     /**
      * Remettre un document en modération
-     * @param int $docid
-     * @param int $uid
-     * @throws Zend_Db_Adapter_Exception
      * @return void
+     * @throws Exception
      */
     static public function moderate($docid, $uid)
     {
@@ -5557,7 +5227,7 @@ class Hal_Document
 
         $document = new Hal_Document($docid,'',0,true);
 
-        if ($document->getStatus() == Hal_Document::STATUS_VISIBLE) {
+        if ($document->getStatus() != Hal_Document::STATUS_VISIBLE) {
             $db->update(self::TABLE, array('DOCSTATUS' => self::STATUS_BUFFER), 'DOCID = ' . $docid);
 
             Ccsd_Search_Solr_Indexer::addToIndexQueue(array($docid), 'hal', 'DELETE', 'hal', 0);
@@ -5575,17 +5245,31 @@ class Hal_Document
         }
     }
 
-    /**
+    /*
      * Récupération des informations d'un auteur lié aux structures
-     * @param int $docid
-     * @return array
      */
     static public function getAuthorwithIdhal($docid)
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-        $query = 'SELECT DISTINCT refauth.IDHAL FROM `' . Hal_Document_Author::TABLE . '` AS `docauth` INNER JOIN `REF_AUTHOR` AS `refauth` ON refauth.AUTHORID=docauth.AUTHORID WHERE (refauth.IDHAL > 0) AND docauth.DOCID = ' . $docid . ' AND refauth.IDHAL IN (SELECT IDHAL FROM REF_IDHAL_CV)';
+        $query = 'SELECT DISTINCT refauth.IDHAL FROM `' . self::TABLE_AUTHOR . '` AS `docauth` INNER JOIN `REF_AUTHOR` AS `refauth` ON refauth.AUTHORID=docauth.AUTHORID WHERE (refauth.IDHAL > 0) AND docauth.DOCID = ' . $docid . ' AND refauth.IDHAL IN (SELECT IDHAL FROM REF_IDHAL_CV)';
 
         return $db->fetchCol($query);
+    }
+
+
+    /**
+     * Indique si un document est en cours d'envoi sur arXiv
+     * @param Hal_Document $document
+     * @deprecated : pas utilise.  Si utile, la deplacer dans Hal_Transfert_Arxiv.
+     *     A priori, comme
+     * @see gotoArxiv
+     */
+    public function onArxiv()
+    {
+        Ccsd_Tools::panicMsg(__FILE__,__LINE__, 'onArxiv function ne doit pas etre utilisee');
+        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $sql = $db->select()->from(Hal_Transfert_Arxiv::$TABLE, 'DOCID')->where('DOCID = ?', $this->getDocid());
+        return (bool)$db->fetchOne($sql);
     }
 
     /**
@@ -5597,19 +5281,6 @@ class Hal_Document
         $result = [];
 
         return $result;
-    }
-
-    /**
-     * Return le libelle d'un status
-     * @param $status : int
-     * @param $lang
-     * @return string
-     */
-    public static function statusToString ($status, $lang = null)
-    {
-        //Formate la chaîne pour la traduction
-        $status = 'status_'. $status; //exemple : status_111 => Ancienne version
-        return Ccsd_Tools::translate($status, $lang);
     }
 
     /**
@@ -5671,7 +5342,6 @@ class Hal_Document
 
     /**
      * Retourne la liste des Référents Structure
-     * @param bool $forAlert
      * @return array uid => structid
      */
     public function getAdminStructUID($forAlert = false)
@@ -5734,6 +5404,7 @@ class Hal_Document
     public function getHasCopy()
     {
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $array = array();
         $sql =  $db->select()
             ->from(Hal_Document_Meta_Identifier::TABLE_COPY, array('CODE','LOCALID'))
             ->where("DOCID = ?", $this->_docid);
@@ -5753,7 +5424,7 @@ class Hal_Document
     public function isVisibleWithSolr()
     {
         try {
-            $res = unserialize(Hal_Tools::solrCurl('q=halId_s:' . $this->getId(false) . '&rows=0&omitHeader=true&wt=phps', 'hal', 'select', true, true));
+            $res = @unserialize(Hal_Tools::solrCurl('q=halId_s:' . $this->getId(false) . '&rows=0&omitHeader=true&wt=phps', 'hal', 'select', true, true));
         } catch (Exception $e) {
             return false;
         }
@@ -5770,7 +5441,7 @@ class Hal_Document
     public function isIndexedWithSolr()
     {
         try {
-            $res = unserialize(Ccsd_Tools::solrCurl('q=docid:' . $this->getDocid() . '&rows=0&omitHeader=true&wt=phps', 'hal', 'select'));
+            $res = @unserialize(Ccsd_Tools::solrCurl('q=docid:' . $this->getDocid() . '&rows=0&omitHeader=true&wt=phps', 'hal', 'select'));
         } catch (Exception $e) {
             return false;
         }
@@ -5841,45 +5512,4 @@ class Hal_Document
         }
     }
 
-    /**
-     * @param string $lang
-     * @return string
-     */
-    public function getDoctypeIntro($lang = null) {
-
-        $typeDoc = $this->getTypDoc();
-        $intro = 'intro' . $typeDoc;
-
-        $trad = Ccsd_Tools::translate($intro, $lang);
-        if ($trad != $intro) {
-            /** une traduction existe, on l'utilise, sinon, c'est que ce n'est pas défini, on rends vide */
-            return $trad;
-        }
-        return "";
-    }
-
-    /**
-     * Tant qu'on a des row de table document, passer par ces fonctions pour obtenir les valeurs
-     * @param $row
-     * @return string
-     * @deprecated
-     */
-    static public function getDateVersionFromDocRow($row) {
-        return $row['DATESUBMIT'];
-    }
-
-
-    /**
-     * When replace, we meus suppress somr meat
-     * Eg: SWH external Id is just for one version, so, don't copy from one version to another
-     * TODO: PUt this into a SOFTWARE.php
-     */
-    public function resetSomeMetaForTypedocWhenReplace() {
-        /** @var Hal_Document_Meta_Identifier $meta */
-        $meta = $this->getMetaObj('identifier');
-        if ($meta) {
-            $meta->removeGroup(Hal_Transfert_SoftwareHeritage::$IDCODE);
-
-        }
-    }
 }

@@ -8,27 +8,11 @@
  */
 class Hal_Document_Meta_Keyword extends Hal_Document_Meta_Abstract
 {
-    protected $isMultilingue = true;
 
-    protected $_defautlView = 'displayMetaArray.phtml';
-    /**
-     * Hal_Document_Meta_Keyword constructor.
-     * @param string $key
-     * @param string $value
-     * @param string $group
-     * @param string $source
-     * @param int $uid
-     * @param int $status
-     */
     public function __construct($key, $value, $group, $source, $uid, $status)
     {
         parent::__construct($key, $value, $group, $source, $uid, $status);
         $this->_value = array();
-        // Pour les keyword, le groupe est une langue!!! Pas un entier
-        // Si la langue n'est pas presente... on prends anglais.
-        if (!preg_match("/^[a-z]*$/", $group)) {
-            $group = 'en';
-        }
         $this->addValue($value, $group, $source, $uid, $status);
     }
 
@@ -41,7 +25,6 @@ class Hal_Document_Meta_Keyword extends Hal_Document_Meta_Abstract
      */
     public function addValue($value, $group, $source, $uid, $status)
     {
-
         if (is_array($value)) {
             /** Todo: Why not just iterate overs addValue for all array items
              * What is special in first element
@@ -57,7 +40,6 @@ class Hal_Document_Meta_Keyword extends Hal_Document_Meta_Abstract
     }
 
     /**
-     * @param string $filter
      * @return array|string
      */
     public function getValue($filter = '')
@@ -80,13 +62,13 @@ class Hal_Document_Meta_Keyword extends Hal_Document_Meta_Abstract
 
     /**
      * @deprecated : Use getValue
-     * @param string $filter
-     * @return Hal_Document_Meta_Keyword
+     *               This function return incoherent type
+     * @return array
      */
     public function getHalValue($filter = '')
     {
         if ($filter != '') {
-            return array_key_exists($filter, $this->_value) ? $this->_value[$filter] : null;
+            return array_key_exists($filter, $this->_value) ? $this->_value[$filter] : [];
         } else {
             return $this;
         }
@@ -99,6 +81,9 @@ class Hal_Document_Meta_Keyword extends Hal_Document_Meta_Abstract
      */
     public function save($docid, $sid, &$metaids = null)
     {
+        // TO DO : clean soit en faisant plusieurs type de metas
+        $coreMetas = Hal_Settings::getCoreMetas();
+
         foreach ($this->_value as $val) {
             foreach ($val as $meta) {
                 /** @var Hal_Document_Meta_Simple $meta */
@@ -162,12 +147,5 @@ class Hal_Document_Meta_Keyword extends Hal_Document_Meta_Abstract
         }
 
         return "";
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMultiValued() {
-        return true;
     }
 }

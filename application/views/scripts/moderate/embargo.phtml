@@ -35,7 +35,7 @@ if (count($this->documents)) {
     <?php }?>
     </div>
     <form action="/moderate/embargo" method="post" id="list-documents">
-        <table style="padding:0;border-spacing:0;border:0;width:100%" class="table table-striped table-bordered" id="moderate">
+        <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="moderate" width="100%">
             <thead>
             <tr>
                 <th class="middle">
@@ -141,10 +141,10 @@ if (count($this->documents)) {
     }
     ?>
     </div>
-    <script>
+    <script language="JavaScript">
         function getListFiles(elem)
         {
-            var docid = $(elem).closest('.docs').find('.docids').val();
+            docid = $(elem).closest('.docs').find('.docids').val();
             $('.file' + docid).each(function (){
                 if ($(this).is(':visible')) {
                     $(this).hide();
@@ -155,7 +155,7 @@ if (count($this->documents)) {
         }
         function getFileCalendar(id, uid, docid, datelimit, datevisible)
         {
-            var callback = function( data ) {popoverFile("<?php echo $this->translate("Changer l'embargo du fichier");?>", data, id); };
+            var callback = function( data ) {popoverFile("<?php echo $this->translate("Changer l'embargo du fichier");?>", data, id); }
             ajaxrequest('/moderate/ajaxgetfilecalendar', {id:id, uid:uid, docid:docid, datelimit:datelimit, datevisible:datevisible}, callback);
         }
         function popoverFile(title, data, id)

@@ -12,9 +12,6 @@ require_once(__DIR__.'/../Collection.php');
 require_once(__DIR__.'/../../Site.php');
 require_once(__DIR__.'/../../Ini.php');
 
-/**
- * Class Hal_Site_Settings_Portail
- */
 class Hal_Site_Settings_Portail extends Hal_Site_Settings
 {
     const TABLE = 'PORTAIL_SETTINGS';
@@ -42,12 +39,6 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
 
     /** @var string liste sérialisée des types de documents du portail */
     static protected $typdocs = '';
-
-    /** @var bool : indique si le site est patrouille */
-    private $patrolled = false;
-
-    /** @var string */
-    private $googleToken = '';
 
     /**
      * Hal_Site_Settings_Portail constructor.
@@ -79,12 +70,11 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
         $settings->setSubmitAllowed(true);
 
         $db =  Zend_Db_Table_Abstract::getDefaultAdapter();
-        $sid = $site->getSid();
-        $sql = $db->select()->from(self::TABLE, array('SETTING', 'VALUE'))->where('SID = ?', $sid);
+        $sql = $db->select()->from(self::TABLE, array('SETTING', 'VALUE'))->where('SID = ?', $site->getSid());
         foreach ( $db->fetchPairs($sql) as $setting => $value ) {
             switch ($setting) {
                 case 'COLLECTION' :
-                    $settings->setAssociatedsiteId($value);
+                    $settings->setAssociatedsite($value);
                     break;
                 case 'VISIBILITY' :
                     $visibility = $value == 'HIDDEN' ? false : true;
@@ -103,19 +93,7 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
                 case 'MAIN_TYPDOC' :
                     $settings->setMainTypdocs($value);
                     break;
-                case 'PATROL':
-                    // Le site souhaite afficher les fonctionnalite de patrouillage
-                    // Devrait etre remonter a Hal|Site
-                    $settings->setPatrol($value);
-                    break;
-                case 'GOOGLE':
-                    // Le site souhaite afficher les fonctionnalite de patrouillage
-                    // Devrait etre remonter a Hal|Site
-                    $settings->setGoogleToken($value);
-                    break;
                 default :
-                    $portalname = $site->getShortname();
-                    Ccsd_Tools::panicMsg(__FILE__,__LINE__, "Unknow Portal setting: $setting for portal $portalname ($sid)");
                     break;
             }
         }
@@ -126,7 +104,6 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
 
     /**
      * @return int
-     * @throws Zend_Db_Adapter_Exception
      */
     public function save()
     {
@@ -138,23 +115,11 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
         // todo : sauvegarder les fichiers de configuration ??
 
         $res = $db->insert(self::TABLE, ['SID' => $this->getSid(), 'SETTING' => 'PIWIKID', 'VALUE' => $this->getPiwikid()]);
-        $res = $res && $db->insert(self::TABLE, ['SID' => $this->getSid(), 'SETTING' => 'COLLECTION', 'VALUE' => $this->getAssociatedsiteId()]);
+        $res = $res && $db->insert(self::TABLE, ['SID' => $this->getSid(), 'SETTING' => 'COLLECTION', 'VALUE' => $this->getAssociatedsite()]);
         return  $res && $db->insert(self::TABLE, ['SID' => $this->getSid(), 'SETTING' => 'VISIBILITY', 'VALUE' => $this->getVisibility()]);
     }
 
-    /**
-     * @param string $token
-     */
-    public function setGoogleToken($token) {
-        $this->_googleToken = $token;
-    }
 
-    /**
-     * @return string
-     */
-    public function getGoogleToken() {
-        return $this->_googleToken;
-    }
     /**
      * Retourne la liste des fichieres de configuration éditables via l'interface
      * @return array
@@ -181,7 +146,6 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
 
     /**
      * @param Hal_Site_Settings $settings
-     * @throws Zend_Db_Adapter_Exception
      */
     public function duplicate(Hal_Site_Settings $settings)
     {
@@ -210,7 +174,7 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
     {
         return [
             'piwikid' => $this->_piwikid,
-            'collection' => $this->_associatedsiteId
+            'collection' => $this->_associatedsite
         ];
     }
 
@@ -291,14 +255,13 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
     /**
      * On récupère soit les métas données locales pour ce portail soit les metas par défaut si rien de local
      * @return array
-     * @throws Zend_Config_Exception
      */
     public function getConfigMeta()
     {
         $path = SPACE_DATA . '/' . SPACE_PORTAIL . '/' . $this->getSiteShortName() . '/' . CONFIG . 'meta.ini';
 
         if(!is_readable($path)) {
-            $path = Hal_Site_Portail::DEFAULT_CONFIG_PATH . '/meta.ini';
+            $path = DEFAULT_CONFIG_PATH . '/meta.ini';
         }
 
         $ini = new Hal_Ini($path, ['section_default' => 'metas']);
@@ -306,18 +269,32 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
     }
 
     /**
-     * @return Hal_Site_Collection
+     * Indique si un portail est associé à une collection
+     * Si c'est le cas retourne le code de la collection
+     * Sinon retourne false
+     * @deprecated ? devrait appeler getAssociatedColl
+     * @param $sid
+     * @return string
+     */
+    static public function getAssociatedCollection($sid)
+    {
+        // todo ! WHAT ? Est-ce qu'on renverrai pas juste le settings COLLECTION de PORTAIL_SETTINGS ?
+
+        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $sql = $db->select()->from(array('p' => self::TABLE), null)
+            ->from(array('s' => Hal_Site::TABLE), 's.SITE')
+            ->where('p.SID = ?', $sid)
+            ->where('p.SETTING = "COLLECTION"')
+            ->where('p.VALUE = s.SID');
+        return $db->fetchOne($sql);
+    }
+
+    /**
+     * @return int
      */
     public function getAssociatedColl()
     {
         return $this->getAssociatedsite();
-    }
-    /**
-     * @return int
-     */
-    public function getAssociatedCollId()
-    {
-        return $this->getAssociatedsiteId();
     }
 
     /**
@@ -383,6 +360,8 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
     /**
      * Retourn la liste sérialisée des types de documents principaux pour affichage dans les widgets
      *
+     * @param string $setting : liste des types de document sérialisée
+     *
      * @return string
      */
     static public function getMainTypdocs()
@@ -406,7 +385,9 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
     }
 
     /**
-     * Retourne la liste sérialisée des types de documents principaux pour affichage dans les widgets
+     * Retourn la liste sérialisée des types de documents principaux pour affichage dans les widgets
+     *
+     * @param string $setting : liste des types de document sérialisée
      *
      * @return string
      */
@@ -415,26 +396,4 @@ class Hal_Site_Settings_Portail extends Hal_Site_Settings
         return self::$typdocs;
     }
 
-    /**
-     * @param bool $value
-     */
-    public function  setPatrol($value) {
-        $this->patrolled = $value ? true : false;
-    }
-
-    /**
-     * Use isPatrolled instead
-     * Define to be called by getSettings('patrol')
-     * @param bool $value
-     */
-    protected function getPatrol() {
-        return $this->patrolled;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isPatrolled() {
-        return $this->patrolled;
-    }
 }

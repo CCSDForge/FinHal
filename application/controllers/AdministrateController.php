@@ -288,28 +288,25 @@ class AdministrateController extends Hal_Controller_Action {
             }
         }
 
-        $req = $moderation->getModifDocuments();
         if (isset($_GET['queryid'])) {
             $query = 'd.IDENTIFIANT LIKE ?';
             $value = '%' . $_GET['queryid'] . '%';
-            $req->where($query, $value);
-        };
-        if (isset($_GET['queryuid'])) {
+            $this->getDocumentsPagination($moderation->getModifDocuments()->order($order)->where($query, $value));
+        } elseif (isset($_GET['queryuid'])) {
             $query = 'u.SCREEN_NAME LIKE ?';
             $value = '%' . $_GET['queryuid'] . '%';
-            $req->where($query, $value);
-        };
-        if (isset($_GET['querydate'])) {
+            $this->getDocumentsPagination($moderation->getModifDocuments()->order($order)->where($query, $value));
+        } elseif (isset($_GET['querydate'])) {
             $query = 'd.DATESUBMIT LIKE ?';
             $value = '%' . $_GET['querydate'] . '%';
-            $req->where($query, $value);
-        };
-        if (isset($_GET['querypor'])) {
+            $this->getDocumentsPagination($moderation->getModifDocuments()->order($order)->where($query, $value));
+        } elseif (isset($_GET['querypor'])) {
             $query = 's.SITE LIKE ?';
             $value = $_GET['querypor'];
-            $req->where($query, $value);
+            $this->getDocumentsPagination($moderation->getModifDocuments()->order($order)->where($query, $value));
+        } else {
+            $this->getDocumentsPagination($moderation->getModifDocuments()->order($order));
         }
-        $this->getDocumentsPagination($req->order($order));
     }
 
     /**
@@ -798,7 +795,10 @@ class AdministrateController extends Hal_Controller_Action {
             if (is_numeric($id1) && is_numeric($id2)) {
                 // Docid
                 $doc1 = Hal_Document::find($id1);
-                $doc2 = Hal_Document::find($id2);
+                $doc2 = Hal_Document::find($params ['id2']);
+                if ($this->doublonsDocid($doc1, $doc2, $params)) {
+                    return;
+                }
             }
             else {
                 // Identifiant
@@ -820,12 +820,17 @@ class AdministrateController extends Hal_Controller_Action {
                     if ($docVersNew->getFormat() == 'notice' && $docVersPre->getFormat() == 'file') {
                         $this->_helper->FlashMessenger->setNamespace('danger')->addMessage('La notice ' . $docVersNew->getId() . ' ne peut pas être la nouvelle version du fichier ' . $docVersPre->getId() . '.');
                     } else {
+                        $lastVersion = max(array_keys($docVersNew->getDocVersions()));
+                        $v = $lastVersion + 1;
 
-                        // Enregistrement du lien entre docu hierarchisé et docu new
-                        $docVersPre->addSameAs($docVersNew->getId());
+                        // Défini le nouvel identifiant
+                        $docVersNew->changeId($docVersPre, $docVersNew, $v);
 
                         //Transfert les tampons
                         $docVersNew->changeTampon($docVersPre);
+
+                        // Enregistrement du lien entre docu hierarchisé et docu new
+                        $docVersPre->addSameAs($docVersNew->getId());
 
                         // Transfert de propriétaire
                         foreach ($docVersPre->getOwner() as $uidprec) {
@@ -843,30 +848,11 @@ class AdministrateController extends Hal_Controller_Action {
                         $docVersPre->verspre(Hal_Auth::getUid(), 'Ancienne version de ' . $docVersNew->getId(), false);
                         $this->_helper->FlashMessenger->setNamespace('success')->addMessage($docVersNew->getId() . ' est la nouvelle version de ' . $docVersPre->getId() . '.');
 
-                        //Mise à jour des versions
-                        $lastVersion = max(array_keys($docVersPre->getDocVersions()));
+                        // Indexation
+                        Ccsd_Search_Solr_Indexer::addToIndexQueue(array($docVersNew->getDocid()));
 
-                        foreach ($docVersNew->getDocVersions() as $version) {
-                            $docversion = Hal_Document::find($version['DOCID']);
-                            if ($docversion) {
-                                $v = $lastVersion + $docversion->getVersion();
-                                // Défini le nouvel identifiant
-                                $docVersNew->changeId($docVersPre, $docversion->getDocid(), $v);
-
-                                $docversion->deleteCache();
-
-                                Ccsd_Search_Solr_Indexer::addToIndexQueue(array($version['DOCID']), 'hal', 'UPDATE');
-                            }
-                        }
-
-                        foreach ($docVersPre->getDocVersions() as $version) {
-                            $docversion = Hal_Document::find($version['DOCID']);
-                            if ($docversion) {
-                                $docversion->deleteCache();
-
-                                Ccsd_Search_Solr_Indexer::addToIndexQueue(array($version['DOCID']), 'hal', 'UPDATE');
-                            }
-                        }
+                        // Indexation
+                        Ccsd_Search_Solr_Indexer::addToIndexQueue(array($docVersPre->getDocid()));
                     }
                 } elseif (isset($params ['method']) && $params ['method'] == 'fusion' && isset($params ['save'])) {
                     // Fusion des documents
@@ -942,8 +928,7 @@ class AdministrateController extends Hal_Controller_Action {
     
     /**
      * Gestion des doublons dans le cas de la saisie des docid au lieu des identifiants
-     *
-     * Fonction obsolète
+     * 
      * @param $doc1 Hal_Document premier document à dédoublonner
      * @param $doc2 Hal_Document deuxième document à dédoublonner
      * @param $params array résultat de getParams()

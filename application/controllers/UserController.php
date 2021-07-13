@@ -96,19 +96,12 @@ class UserController extends Hal_Controller_Action {
      *
      */
     public function coextAction() {
-        $request = $this->getRequest();
-        $loginVersion = $request->getParam('authType');
-        if ($loginVersion) {
-            $this -> forward("login2");
-        }
-        $token = $request->getParam('code');
-        $url = $request->getParam('url');
+        $token = $this->getRequest()->getParam('code');
+        $url = $this->getRequest()->getParam('url');
 
-        // $localuri = $this->getRequest()->getHttpHost(); //Portail Local
-        $localuri = parse_url(Hal_Site::getCurrentPortail()->getUrl(), PHP_URL_HOST); //Portail Local
+        $localuri = $this->getRequest()->getHttpHost(); //Portail Local
         $urlscheme = parse_url($url, PHP_URL_SCHEME); //Protocol de redirection
         $urlp = parse_url($url, PHP_URL_HOST); //Portail de redirection
-
 
         if ($localuri == $urlp) { //Si les deux portails concordent alors l'authentification est possible
             if ($url != null){
@@ -119,11 +112,6 @@ class UserController extends Hal_Controller_Action {
             }
 
             $data = Hal_User::getOrcidWithToken($token);
-            if (!isset($data['orcid'])) {
-                // Erreur sur la recuperation des info: token Invalid???
-                $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Le token Orcid n'a pas permis la récupération de l'Orcid (Token trop vieux?).");
-                $this->redirect(PREFIX_URL);
-            }
             $uid = Hal_User::getUidFromIdExt($data['orcid'], 'ORCID');
 
             if ($uid === false) {
@@ -153,214 +141,6 @@ class UserController extends Hal_Controller_Action {
     }
 
     /**
-     * Fonction 2.0 de login
-     *
-     * Fait appel aux méthodes spécifiques de gestions d'authentification pour l'adapter passé en paramètre
-     * méthode générique appelable en boucle pour gérer et accumuler toutes les authentifications que l'on
-     * souhaite lier.
-     *
-     * @param string $authType type d'authentification demandé
-     */
-
-
-    public function login2Action(){
-        $request = $this->getRequest();
-        $params = $request->getParams();
-
-        $localUri = $request->getHttpHost(); //local portal
-        $authType = array_key_exists('authType', $params) ? $params['authType'] : '';
-        $url = array_key_exists('url', $params) ? $params['url'] : '';
-        $forceCreate = array_key_exists('forceCreate',$params) ? (bool) $params['forceCreate'] : false ;
-        $key = array_key_exists('key',$params) ? (int) $params['key'] : -1;
-
-        if ($url == '') {
-            // Redirection par defaut: Page d'accueil
-            $url = $localUri;
-        } else if ( $url[0] == '/') {
-            $url = $localUri . $url;
-        }
-        $this->view->url = $url;
-        // else ok l'url donnee n'est pas a retoucher!
-
-        // creation de l'adapteur en fonction du paramètre $authType
-
-        $authAdapter = \Ccsd\Auth\AdapterFactory::getTypedAdapter($authType);
-
-        //gestion spécificique de la redirection de portail au cas où
-        //commenté momentanément le temps de la demo INRA
-        /**
-        $urlRedirect = $authAdapter->getRedirection($params,$localUri);
-        if ($urlRedirect !== NULL ){
-            $this->redirect($urlRedirect);
-            return;
-        }
-        **/
-
-        // appel à la fonction préalable à l'authentif spécifique de l'adapteur
-        if (false === $authAdapter->pre_auth($this)) {
-            // on est sur une page d'auth ou site un site Cas/idp/orcid
-            // On termine l'action pour Zend
-            return;
-        };
-
-        // appel à l'authentification
-        try {
-            $result = $authAdapter->authenticate();
-        } catch (CAS_AuthenticationException $e) {
-            $this->view->message = 'Échec authentification CAS';
-            $this->view->exception = $e;
-            $this->view->description = "Échec de l'authentification avec le serveur CAS";
-            $this->renderScript('error/error.phtml');
-            return;
-        } catch (Exception $e) {
-            $this->view->message = 'Échec authentification';
-            $this->view->exception = $e;
-            $this->view->description = "Échec de l'authentification";
-            $this->renderScript('error/error.phtml');
-            return;
-        }
-
-        // Si erreur arrêt du traitement
-        // Sinon on poursuit les étapes des adapteurs
-
-
-        switch ($result->getCode()) {
-            case Zend_Auth_Result::FAILURE_CREDENTIAL_INVALID:
-            case Zend_Auth_Result::FAILURE_IDENTITY_NOT_FOUND:
-            case Zend_Auth_Result::FAILURE :
-                // auth CAS: on ne devrait jamais arriver là : c'est géré par CAS
-                // Auth Dbtable: on peut y venir.
-                $this->view->message = 'Échec authentification';
-                $this->view->description = implode(' ; ', $result->getMessages());
-                $this->renderScript('error/error.phtml');
-                break;
-
-            case Zend_Auth_Result::SUCCESS :
-                // appel à la fonction postérieure à l'authentification
-                // Recuperation des attributs
-                $successAuth = $authAdapter->post_auth($this, $result);
-                if ($successAuth === null) {
-                    // redirect
-                    return;
-                }
-
-                // appel à la fonction prealable au login
-                // determination du login
-                $loginUser = $authAdapter->pre_login($successAuth);
-
-                /** si deja une session: nous sommes dans le cas d'un login alternatif
-                 *  On appelle juste le alt_login de l'adapter courant
-                 */
-                /** TODO ne devrait pas t-on plutot appeler avec le Hal_User (getUser au lieu de string???) */
-                /** JB : Oui utiliser plutot le hal user ce qui permet d'avoir un enfant du ccsd user */
-                $session = new Hal_Session_Namespace();
-                $succeededAuth = ($session->__get('succeededAuth') === null) ?  array() : $session->__get('succeededAuth');
-                $currentUser = Hal_Auth::getUser();
-
-                if ($currentUser && $loginUser === false) {
-                    $authAdapter->alt_login($currentUser, $successAuth);
-                    /** TODO: on devrait aussi ajoute a succededAuth de la session... Non? */
-                    /** Oui ainsi on ne repassera pas par la phase de post_login si cet algo venait à être rejoué */
-
-                    $succeededAuth[] = [ $authType =>[$successAuth, $currentUser ]];
-                    Zend_Session::regenerateId();
-                    $session->__set('succeededAuth', $succeededAuth);
-                    $this->redirect($url);
-                    return;
-                }
-
-                /**
-                 * Cas du forcage de création de compte
-                 */
-                $autoCreatedUser = false;
-                if ($loginUser === false){
-                    try {
-                        $loginUser = $authAdapter->createUserFromAdapter($successAuth, $forceCreate);
-                        $autoCreatedUser = true;
-                    } catch (Exception $e) {
-                        // Forcage echoue
-                        $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Echec de creation a partir des informations de la federation");
-                    }
-                }
-
-                /**  Mise en session des paramètres d'authentification et de l'user
-                 *   On conserve l'ensemble des authentifications qui ont eu lieues
-                 *  Afin de pouvoir appeller l'ensemble des postlogin sur chacun des Adapter validés
-                 */
-                $succeededAuth[] = [ $authType =>[ $successAuth, $loginUser ]];
-                Zend_Session::regenerateId();
-                $session->__set('succeededAuth', $succeededAuth);
-
-                // Partie LOGIN effectif
-                if ($loginUser) {
-                    //mise en session de l'utilisateur
-                    /**@TODO création du Hal_User à déporter dans les adapteurs quand les adapteurs seront hérités dans
-                     * la library Hal
-                     **/
-
-                    $halUser = Hal_User::createUserFromCcsdUser($loginUser,false);
-                    $halUser->setScreen_name();
-                    $halUser->setLangueid(\Zend_Registry::get('Zend_Locale')->getLanguage());
-                    if (!$autoCreatedUser || ($authType === 'IDP' && IDP_NO_CREATE_FORM)){
-                        // Si pas un nouvel utilisateur (association)
-                        // Ou nouvel utilisateur mais IDP_NO_CREATE_FORM est vrai
-                        // on ne force pas la redirection vers page de profil...
-                        $halUser->save();
-                    }
-                    else {
-                        $halUser->save(true);
-                    }
-
-                    Hal_Auth::setIdentity($halUser);
-
-                    /**
-                     * @var  int $keysuccess (just an index in array
-                     * @var  $successAuthArray
-                     */
-                    foreach ($succeededAuth as $keysuccess=>$successAuthArray) {
-
-                        foreach ($successAuthArray as $type => $attr) {
-                            /** @var string $succUserLogin */
-                            $succUserLogin = $attr[1] ;
-                            /** @var string[] $successAuth */
-                            $successAuth = $attr[0];
-                            if ($loginUser && ($succUserLogin === false)) {
-                                if (!($forceCreate && $keysuccess === $key)) {
-                                    /** In forceCreate case, we already do association... no need to redo */
-                                    // Just one element!!!
-                                    $adapter = \Ccsd\Auth\AdapterFactory::getTypedAdapter($type);
-                                    $adapter->alt_login($loginUser, $successAuth);
-                                }
-                                /** Mise a jour tableau... */
-                                $succeededAuth[$keysuccess][$type][1] = $loginUser;
-                            }
-                        }
-
-                    }
-                    $session->__set('succeededAuth', $succeededAuth);
-
-                    $this->_helper->FlashMessenger->setNamespace('success')->addMessage("Authentification réussie.");
-                    // appel à la fonction postérieure au login
-
-                    // Traitement de la redirection vers page initiale
-                    $this->redirect($url);
-                    return;
-                } else {
-                    Hal_Auth::setIdentity(null);
-                    // Authentification mais pas de login
-                    // On va proposer un login alternatif
-                    $this->view->url = $url;
-                    $this->view->resultAuth = $succeededAuth;
-                    $this->renderScript("user/login2.phtml");
-                    return;
-                }
-                break;
-            default:
-                throw new Exception("Panic: Unexpected value (" . $result->getCode() . ") for code.");
-        }
-    }
-
-    /**
      * Login utilisateur
      * Après login redirige :
      * - sur la page de modification de compte si pas de champs Application HAL
@@ -370,19 +150,13 @@ class UserController extends Hal_Controller_Action {
      * paramètre à CAS
      */
     public function loginAction() {
-        // CAS si non defini ou definit a CAS.
-        $request = $this->getRequest();
-        $loginVersion = $request->getParam('authType');
-        if ($loginVersion) {
-            $this -> forward("login2");
-            return;
-        }
-
+        // CAS si non definit ou definit a CAS.
         $params = $this->_request->getParams();
         $halUser = new Hal_User ();
 
         switch (AUTH_TYPE) {
             case 'DBTABLE':
+
                 if (!isset($params['username'])) {
                     # Il faut renvoyer vers le formulaire de login
                     $form = new Ccsd_User_Form_Accountlogin();
@@ -409,6 +183,7 @@ class UserController extends Hal_Controller_Action {
         }
 
         try {
+
             $result = Hal_Auth::getInstance()->authenticate($authAdapter);
         } catch (CAS_AuthenticationException $e) {
             $this->view->message = 'Échec authentification CAS';
@@ -526,35 +301,6 @@ class UserController extends Hal_Controller_Action {
      * Logout du client
      */
     public function logoutAction() {
-
-        $session = new Hal_Session_Namespace();
-
-
-        $succeededAuth = $session->__get('succeededAuth');
-        if ($succeededAuth) {
-            // on récupère le tableau des authentification réussies
-            // et on logout sur chacun de ces comptes distants.
-            // surement à modifier lors de la transformation du tableau succeededAuth en objet PHP
-            try {
-                foreach ($succeededAuth as $keysuccess => $successAuthArray) {
-                    // Chaque auth
-                    foreach ($successAuthArray as $auth => $attr) {
-                        if ($auth !== 'CAS') {
-                            $session->__set('succeededAuth', []);
-                            $authAdapter = \Ccsd\Auth\AdapterFactory::getTypedAdapter($auth);
-                            $authAdapter->logout($attr);
-                        }
-                    }
-                }
-            } catch (Exception $e) {
-                // On ignore les exceptions ou erreurs de deconnexion
-                Ccsd_Tools::panicMsg(__FILE__,__LINE__, "Exception dans logoutAction: " . $e ->getMessage());
-            } finally {
-                $session->__set('succeededAuth', []);
-            }
-        }
-
-        $session->__set('succeededAuth', []);
         switch (AUTH_TYPE) {
             case 'DBTABLE':
                 $auth = new Hal_Auth_Adapter_DbTable();
@@ -562,6 +308,8 @@ class UserController extends Hal_Controller_Action {
             default:
                 $auth = new Ccsd_Auth_Adapter_Cas ();
         }
+
+        $hostname = false;
         $hostname = Ccsd_Auth_Adapter_Cas::getCurrentHostname();
         $hostname = rtrim($hostname, '/');
         $redirectionUrl = $hostname . '/user/logoutfromcas';
@@ -600,91 +348,134 @@ class UserController extends Hal_Controller_Action {
     }
 
     /**
+     * @param Hal_User $user
+     * @return Ccsd_User_Models_UserTokens|null
+     */
+    public function initUserToken($user) {
+        $userTokenData = array(
+            'UID' => $user->getUid(),
+            'EMAIL' => $user->getEmail()
+        );
+        $userToken = new Ccsd_User_Models_UserTokens($userTokenData);
+        $userToken->generateUserToken();
+        $userToken->setUsage('VALID'); // token pour validation de compte
+
+        $userTokenMapper = new Ccsd_User_Models_UserTokensMapper($userToken);
+        $userTokenSaveResult = $userTokenMapper->save($userToken);
+        if (false === $userTokenSaveResult ) {
+            return null;
+        } else {
+            return $userToken;
+        }
+    }
+
+    /**
+     * @param Hal_User $user
+     * @param string $template
+     * @return bool
+     */
+    public function  sendValidationMail($user, $template, $action) {
+        $userToken = $this->initUserToken($user);
+        if (null == $userToken) {
+            // can't init token
+            return false;
+        }
+
+        $this->view->userEmail = $user->getEmail();
+        $this->view->fullUserName = $user->getScreen_name();
+        $this->view->resultMessage = Ccsd_User_Models_User::ACCOUNT_CREATE_SUCCESS;
+        /**
+         * écriture email
+         */
+        $site = Hal_Site::getCurrentPortail();
+        $webSiteUrl = $site->getUrl();
+        $url = $webSiteUrl . $this->view->url(array(
+                'controller' => 'user',
+                'action' => $action,
+                'uid' => $user->getUid(),
+                'token' => $userToken->getToken()
+            ), null, true);
+
+        $mail = new Hal_Mail ();
+        $mail->prepare($user, $template, array(
+            'TOKEN_VALIDATION_LINK' => $url
+        ));
+
+        $mailStatus = $mail->writeMail();
+        if ($mailStatus !== true) {
+            $this->view->mailResultMessage = "La préparation du message a échoué.";
+        }
+        return true;
+    }
+    /**
      * Création d'un compte utilisateur
      */
     public function createAction() {
-        if (Hal_Auth::isLogged()) {
-            $this->_helper->redirector('index');
+
+        switch (AUTH_TYPE) {
+            case 'DBTABLE':
+                $localAuthAdapter = new Hal_Auth_Adapter_DbTable();
+                break;
+            default:
+                $localAuthAdapter = new Ccsd_Auth_Adapter_Cas ();
+        }
+        $selfCreate = true;
+        if (defined('SELFCREATEACCOUNT') &&  (!SELFCREATEACCOUNT)) {
+            // Pas de create par utilisateur
+            $selfCreate = false;
+            if (!Hal_Auth::isHALAdministrator()) {
+                // Pas le droit de creer un compte
+                $this->forward('error','error', null, ['error_message' => "Vous devez etre administrateur pour creer un compte"]);
+                return;
+            }
+        } else {
+            // Create par utilisateur, mais deja connecter, pas d'autre creation
+            if (Hal_Auth::isLogged()) {
+                $this->_helper->redirector('index');
+            }
         }
 
-        $form = new Ccsd_User_Form_Accountcreate ();
+        $form = $localAuthAdapter -> getUserCreateForm();
         $form->setAction($this->view->url());
         $form->setActions(true)->createSubmitButton("Créer un compte");
+        $this->view->form = $form;
 
         if ($this->getRequest()->isPost()) {
+            // retour des informations
             if ($form->isValid($this->getRequest()->getPost())) {
                 $user = new Hal_User($form->getValues());
-                $user->setValid(0); // compte non valide par défaut
+                $user->setValid(!$selfCreate); // compte non valide par défaut
                 $user->setTime_registered();
                 $user->setScreen_name(Ccsd_Tools::formatUser($user->getLastname(), $user->getFirstname()));
                 $user->setLangueid(Zend_Registry::get('Zend_Locale')->getLanguage());
+                // le mot de passe doit peut etre etre genere
+                $localAuthAdapter->completeUserInfoIfNeeded($user);
                 $userSaveResult = $user->save(true);
 
                 if (false == $userSaveResult) {
                     $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Échec de la création du compte.");
-                    $this->view->form = $form;
-                    $this->render('create');
                     return;
                 }
-
                 $user->setUid($userSaveResult);
-
-                $userTokenData = array(
-                    'UID' => $user->getUid(),
-                    'EMAIL' => $user->getEmail()
-                );
-                $userToken = new Ccsd_User_Models_UserTokens($userTokenData);
-                $userToken->generateUserToken();
-                $userToken->setUsage('VALID'); // token pour validation de compte
-
-                $userTokenMapper = new Ccsd_User_Models_UserTokensMapper($userToken);
-                $userTokenSaveResult = $userTokenMapper->save($userToken);
-
-                if (false == $userTokenSaveResult) {
-                    $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Échec de la création du compte.");
-                    $this->view->form = $form;
-                    $this->render('create');
-                    return;
+                if ($selfCreate) {
+                    // Compte auto cree: envois du mail de validation
+                    $userTokenSaveResult = $this->sendValidationMail($user, Hal_Mail::TPL_ACCOUNT_CREATE,'activate' );
+                    if ($userTokenSaveResult === false) {
+                        // Echec, on retourne sur le formulaire
+                        $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Échec de la création du compte.");
+                        return;
+                    }
+                } else {
+                    // Compte cree par admin
+                    $userTokenSaveResult = $this->sendValidationMail($user, Hal_Mail::TPL_ACCOUNT_INIT,'resetpassword' );;
+                    if ($userTokenSaveResult === false) {
+                        // Echec, on retourne sur le formulaire
+                        $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Échec envois du compte a l'utilisateur");
+                        return;
+                    }
                 }
-
-                $this->view->userEmail = $user->getEmail();
-                $this->view->fullUserName = $user->getScreen_name();
-                $this->view->resultMessage = Ccsd_User_Models_User::ACCOUNT_CREATE_SUCCESS;
-
-                /**
-                 * écriture email
-                 */
-                try {
-                    $portail = Hal_Site::getCurrentPortail();
-                    $webSiteUrl = $portail->getUrl();
-                } catch (Exception $e) {
-                    $webSiteUrl = 'https://' . $_SERVER ['SERVER_NAME'];
-                }
-
-                $url = $webSiteUrl . $this->view->url(array(
-                            'controller' => 'user',
-                            'action' => 'activate',
-                            'uid' => $user->getUid(),
-                            'token' => $userToken->getToken()
-                                ), null, true);
-
-                $mail = new Hal_Mail ();
-                $mail->prepare($user, Hal_Mail::TPL_ACCOUNT_CREATE, array(
-                    'TOKEN_VALIDATION_LINK' => $url
-                ));
-
-                $mailStatus = $mail->writeMail();
-
-                if ($mailStatus !== true) {
-                    $this->view->mailResultMessage = "La préparation du message a échoué.";
-                }
-                $this->render('create');
-
-                return;
             }
         }
-
-        $this->view->form = $form;
     }
 
     /**
@@ -1098,8 +889,7 @@ class UserController extends Hal_Controller_Action {
                  * écriture email
                  */
                 try {
-                    $portail = Hal_Site::getCurrentPortail();
-                    $webSiteUrl = $portail->getUrl();
+                    $webSiteUrl = Zend_Registry::get('website')->getUrl();
                 } catch (Exception $e) {
                     $webSiteUrl = 'https://' . $_SERVER ['SERVER_NAME'];
                 }
@@ -1192,13 +982,10 @@ class UserController extends Hal_Controller_Action {
         if (Hal_Auth::isLogged()) {
             $this->_helper->redirector('index');
         }
-
         // Retour OK
         if ($this->getRequest()->getParam('reset') == 'done') {
-            $this->render('resetpassword');
             return;
         }
-
         $token = $this->getRequest()->getParam('token');
         try {
             $userTokens = new Ccsd_User_Models_UserTokens(array(
@@ -1206,7 +993,6 @@ class UserController extends Hal_Controller_Action {
             ));
         } catch (Exception $e) {
             $this->view->resultMessage = $this->view->message("Erreur : le jeton n'est pas valide.", 'danger');
-            $this->render('resetpassword');
             return;
         }
 
@@ -1216,9 +1002,8 @@ class UserController extends Hal_Controller_Action {
 
         // le client essaie d'utiliser un jeton prévu pour autre chose que les
         // mots de passe
-        if (0 == count($tokenData)) {
+        if (null === $tokenData) {
             $this->view->resultMessage = $this->view->message("Erreur : le jeton n'est pas valide.", 'danger');
-            $this->render('resetpassword');
             return;
         }
 
@@ -1238,15 +1023,18 @@ class UserController extends Hal_Controller_Action {
 
             $tokenData = $userTokensMapper->findByToken($formToken, $userTokens);
 
-            if (0 != count($tokenData)) {
-
+            if (null != $tokenData) {
                 $user = new Ccsd_User_Models_User ();
                 $userMapper = new Ccsd_User_Models_UserMapper ();
-
                 try {
                     $user->setUid($tokenData->getUid());
                     $user->setPassword($form->getValue('PASSWORD'));
                     $user->setTime_modified();
+                    $user->setValid(1);
+                    /** En cas de compte creer par un admin, le changement de mot de passe provoque un compte valid
+                     * L'utilisateur a repondu au mail avec le token, c'est bon!
+                     * Note: un compte invalide est dans ce cas un compte dont le mot de passe n'a pas encore
+                     * ete re-initialise */
                 } catch (Exception $e) {
                     // Todo: trapper proprement ceci!
                 }
@@ -1262,10 +1050,29 @@ class UserController extends Hal_Controller_Action {
 
         $this->view->form = $form;
     }
+
     /**
      * Liste des collections de l'utilisteur
      */
-    public function mycollectionsAction() {
+    public function collectionsAction() {
+        $code = $this->getRequest()->getParam('tampid', false);
+        if (!$code) {
+            $sid = $this->getRequest()->getParam('sid', false);
+            if ($sid) {
+                $coll = Hal_Site::loadSiteFromId((int) $sid);
+                $code = $coll->getSite();
+            }
+        }
+        if ($code != '') {
+            $userCollections = Hal_Auth::getTampon(false);
+            if (array_key_exists(0, $userCollections) || in_array($code, $userCollections) || Hal_Auth::isHALAdministrator()) {
+                $this->view->collection = Hal_Site::exist($code, Hal_Site::TYPE_COLLECTION, true);
+                $this->render('collection');
+                return;
+            } else {
+                $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Vous ne disposez pas des droits pour gérer cette collection");
+            }
+        }
         if (Hal_Auth::isTamponneur() || Hal_Auth::isHALAdministrator()) {
             $sids = Hal_Auth::getUser()->getCollections('sid');
 
@@ -1293,40 +1100,6 @@ class UserController extends Hal_Controller_Action {
                 $this->view->collections = $collections;
             }
         }
-        $this->renderScript('user/collections.phtml');
-    }
-
-    /**
-     *
-     * Si tampid donnee alors gestion de la collection
-     * Si pas de tampid: alors on renvoie vers la liste des collections
-     *
-     * Si admin ou trop de collection alors on permet une recherche
-     *       Si param q: alors on passe en mode recherche des collections
-     * Si collection demande: gestion de la collection
-     */
-    public function collectionsAction() {
-        $code = $this->getRequest()->getParam('tampid', false);
-        if (!$code) {
-            $sid = $this->getRequest()->getParam('sid', false);
-            if ($sid) {
-                $coll = Hal_Site::loadSiteFromId((int) $sid);
-                $code = $coll->getSite();
-            }
-        }
-        if ($code != '') {
-            // Pas de collection particuliere demandee
-            $userCollections = Hal_Auth::getTampon(false);
-            if (array_key_exists(0, $userCollections) || in_array($code, $userCollections) || Hal_Auth::isHALAdministrator()) {
-                $this->view->collection = Hal_Site::exist($code, Hal_Site::TYPE_COLLECTION, true);
-                $this->render('collection');
-                return;
-            } else {
-                $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Vous ne disposez pas des droits pour gérer cette collection");
-                // On rebascule sur la liste/recherche
-            }
-        }
-        $this->mycollectionsAction();
     }
 
     public function ajaxsearchcollectionAction() {
@@ -1647,7 +1420,7 @@ class UserController extends Hal_Controller_Action {
                 $this->view->dcRelation = Hal_Settings::getDcRelation();
             } else {
                 // Erreur
-                $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Le document sélectionné n'existe pas ou vous ne pouvez pas le modifier !");
+                $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Le document sélectionné n'existe pas ou ne pouvez pas le modifier !");
                 $this->redirect('/user/submissions');
                 return;
             }
@@ -1857,32 +1630,14 @@ class UserController extends Hal_Controller_Action {
                 }
             } else if (isset($params ['method']) && $params ['method'] == 'share' && isset($params ['docid'])) {
                 // ajout boucle sur les documents cochés
-                /** @var string|array $docidsArrayorStr */
-                $docidsArrayorStr = $params['docid'];
-                # Hum... On accepte
-                #   - un tableau avec 1 seul element qui contient DES docids separes par des virgules (un array au depart)
-                #   - un tableau de docid                           (un array au depart)
-                #   - une liste de docid separes par de virgules    (pas un array au depart)
-                #   - un seul docid                                 (pas un array au depart)
-                # On transforme cela correctement en un tableau de docid
-                /** @var int[] $docids */
-                if (is_array($docidsArrayorStr)) {
-                    if (preg_match('/,/', $docidsArrayorStr[0])) {
-                        $docids = explode(",", $docidsArrayorStr[0]);
-                    } else {
-                        $docids = $docidsArrayorStr;
-                    }
-                } else {
-                    /** @var string $docids */
-                    if (preg_match('/,/', $docidsArrayorStr)) {
-                        $docids = explode(",", $docidsArrayorStr);
-                    } else {
-                        $docids = [ $docidsArrayorStr ];
-                    }
+                if (preg_match('/,/', $params['docid'][0])) {
+                    $params['docid'] = explode(",", $params['docid'][0], 'array');
                 }
-
+                if (!is_array($params['docid'])) {
+                    $params['docid'] = array($params['docid']);
+                }
                 $ownershipState = null;
-                foreach ($docids as $docid) {
+                foreach ($params['docid'] as $docid) {
                     $document = Hal_Document::find($docid);
                     if ($document === false) {
                         $ownershipState[$docid] = 'inexistant';
@@ -2278,74 +2033,68 @@ class UserController extends Hal_Controller_Action {
     /**
      * Ajout document dans ma bibliothèque
      */
-    public function addinlibraryAction()
-    {
+    public function addinlibraryAction() {
         $this->_helper->layout()->disableLayout();
         $this->_helper->viewRenderer->setNoRender();
-        $request = $this->getRequest();
         $params = $this->getRequest()->getParams();
-        /** @var int|null $shelfid */
-        $shelfid = $request->getParam('shelfid', null);
 
-        if ($shelfid === null) {
-            return;
-        }
-
-        $myLibrary = new Hal_User_Library(array(
-            'uid' => Hal_Auth::getUid()
-        ));
-
-        if ($shelfid == 0 && isset($params ['name'])) {
-            $shelfid = $myLibrary->addShelf(array(
-                'shelfName' => $params ['name']
+        if (isset($params ['shelfid'])) {
+            $myLibrary = new Hal_User_Library(array(
+                'uid' => Hal_Auth::getUid()
             ));
-        }
-        if ($shelfid) {
-            if (isset($params ['identifiant'])) {
-                $nbDocAdded = $myLibrary->addDocument(array(
-                    'docIdentifiant' => $params ['identifiant'],
-                    'shelfId' => $shelfid
+
+            if ($params ['shelfid'] == 0 && isset($params ['name'])) {
+                $params ['shelfid'] = $myLibrary->addShelf(array(
+                    'shelfName' => $params ['name']
                 ));
-                echo Zend_Json::encode(array(
-                    'shelfid' => $shelfid,
-                    'doc' => $nbDocAdded
-                ));
-                exit();
-            } else {
-                if (isset($params ['docid'])) {
-                    if (!is_array($params ['docid'])) {
-                        $params ['docid'] = array(
-                            $params ['docid']
-                        );
-                    }
-                } else if (isset($params ['query'])) {
-                    try {
-                        $result = unserialize(Ccsd_Tools::solrCurl($params ['query'], 'hal', 'apiselect'));
-                    } catch (Exception $exc) {
-                        error_log($exc->getMessage(), 0);
-                    }
-                    $params ['docid'] = array();
-                    if (isset($result ['response'] ['docs']) && is_array($result ['response'] ['docs']) && count($result ['response'] ['docs'])) {
-                        foreach ($result ['response'] ['docs'] as $docid) {
-                            $params ['docid'] [] = $docid ['docid'];
-                        }
-                    }
-                } else {
-                    $params ['docid'] = array();
-                }
-                $res = 0;
-                foreach ($params ['docid'] as $docid) {
-                    $document = Hal_Document::find($docid);
-                    $res += $myLibrary->addDocument(array(
-                        'docIdentifiant' => $document->getId(),
-                        'shelfId' => $shelfid
+            }
+            if ($params ['shelfid']) {
+                if (isset($params ['identifiant'])) {
+                    $nbDocAdded = $myLibrary->addDocument(array(
+                        'docIdentifiant' => $params ['identifiant'],
+                        'shelfId' => $params ['shelfid']
                     ));
+                    echo Zend_Json::encode(array(
+                        'shelfid' => $params ['shelfid'],
+                        'doc' => $nbDocAdded
+                    ));
+                    exit();
+                } else {
+                    if (isset($params ['docid'])) {
+                        if (!is_array($params ['docid'])) {
+                            $params ['docid'] = array(
+                                $params ['docid']
+                            );
+                        }
+                    } else if (isset($params ['query'])) {
+                        try {
+                            $result = unserialize(Ccsd_Tools::solrCurl($params ['query'], 'hal', 'apiselect'));
+                        } catch (Exception $exc) {
+                            error_log($exc->getMessage(), 0);
+                        }
+                        $params ['docid'] = array();
+                        if (isset($result ['response'] ['docs']) && is_array($result ['response'] ['docs']) && count($result ['response'] ['docs'])) {
+                            foreach ($result ['response'] ['docs'] as $docid) {
+                                $params ['docid'] [] = $docid ['docid'];
+                            }
+                        }
+                    } else {
+                        $params ['docid'] = array();
+                    }
+                    $res = 0;
+                    foreach ($params ['docid'] as $docid) {
+                        $document = Hal_Document::find($docid);
+                        $res += $myLibrary->addDocument(array(
+                            'docIdentifiant' => $document->getId(),
+                            'shelfId' => $params ['shelfid']
+                        ));
+                    }
+                    echo Zend_Json::encode(array(
+                        'shelfid' => $params ['shelfid'],
+                        'doc' => $res
+                    ));
+                    exit();
                 }
-                echo Zend_Json::encode(array(
-                    'shelfid' => $shelfid,
-                    'doc' => $res
-                ));
-                exit();
             }
         }
     }
@@ -2378,7 +2127,7 @@ class UserController extends Hal_Controller_Action {
         $url = $this->getRequest()->getParam('url');
         $code = $this->getRequest()->getParam('code');
 
-        $localuri = parse_url(Hal_Site::getCurrentPortail()->getUrl(), PHP_URL_HOST); //Portail Local
+        $localuri = $this->getRequest()->getHttpHost(); //Portail Local
         $urlp = parse_url($url, PHP_URL_HOST); //Hostname du Portail de redirection
         $urls = parse_url($url, PHP_URL_SCHEME); //Protocol du Portail de redirection
 
@@ -2426,7 +2175,7 @@ class UserController extends Hal_Controller_Action {
 
         $ownershipToken = $ownershipMapper->findByToken($token, $ownershipToken);
 
-        if ( ($ownershipToken == null) || ('UNSHARE' != $ownershipToken->getUsage()) ) {
+        if ('UNSHARE' != $ownershipToken->getUsage()) {
             $this->_helper->FlashMessenger->setNamespace('error')->addMessage("Le jeton d'activation n'est pas valide.");
             $this->redirect($this->view->url(array('controller' => 'index'), null, true));
             return;

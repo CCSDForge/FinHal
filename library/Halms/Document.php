@@ -32,6 +32,24 @@ class Halms_Document
     const HALMS_USERNAME = 'HalMS Admin';
     const HALMS_MAIL = "halms@ccsd.cnrs.fr";
 
+    /**
+     * Infos connexion serveur DCL
+     */
+    const DCL_SERVER = "ftp.dclab.com";
+    const DCL_PORT = "22";
+    const DCL_LOGIN = "inserm";
+    const DCL_PWD = "9Jnb4yzJ";
+    const DCL_USERNAME = "DCL";
+    const DCL_MAILS = 'response@dclab.com,dclinserm@dclab.com';
+    const DCL_DIR = "from_dcl";
+
+    const PMC_HOST = 'ftp-private.ncbi.nlm.nih.gov';
+    const PMC_MAIL = 'yannick.barborini@ccsd.cnrs.fr';//'pmc@ncbi.nlm.nih.gov';
+    const PMC_USERNAME = 'PMC';
+    const PMC_USER = 'inserm';
+    const PMC_PWD = 'by7UWOIa';
+
+
     protected $_docid = 0;
 
     protected $_status = null;
@@ -272,7 +290,7 @@ class Halms_Document
         return $res;
     }
 
-    static public function initSFTP($server = DCL_SERVER, $port = DCL_PORT, $login = DCL_LOGIN, $pwd = DCL_PWD)
+    static public function initSFTP($server = self::DCL_SERVER, $port = self::DCL_PORT, $login = self::DCL_LOGIN, $pwd = self::DCL_PWD)
     {
         if (($connexion = ssh2_connect($server, $port)) === false) {
             // connexion serveur echouee
@@ -292,7 +310,7 @@ class Halms_Document
             return ['result' => false, 'msg' => "Probleme de connexion sur le serveur DCL fin de la procedure"];
         }
         try {
-            $files = scandir("ssh2.sftp://" . intval($sftp) . '/' . DCL_DIR. '/');
+            $files = scandir("ssh2.sftp://" . intval($sftp) . '/' . self::DCL_DIR. '/');
         } catch ( Exception $e ) {
             return ['result' => false, 'msg' => $e->getMessage ()];
         }
@@ -339,7 +357,7 @@ class Halms_Document
                 return false;
             }
         }
-        return ssh2_sftp_unlink($this->_sftp, '/' . DCL_DIR . '/' . "halms" . $this->_docid . ".zip");
+        return ssh2_sftp_unlink($this->_sftp, '/' . self::DCL_DIR . '/' . "halms" . $this->_docid . ".zip");
     }
 
     public function downloadDCL()
@@ -354,7 +372,7 @@ class Halms_Document
         $zipDestination = "halms" . $this->_docid . ".zip";
         $zipLocal = $this->_pathdoc . "dcl" . $this->_docid . ".zip";
         try {
-            $content = file_get_contents( "ssh2.sftp://" . intval($this->_sftp) . '/' . DCL_DIR . '/' . $zipDestination );
+            $content = file_get_contents( "ssh2.sftp://" . intval($this->_sftp) . '/' . self::DCL_DIR . '/' . $zipDestination );
             if ($content == false)
                 throw new Exception ( "Probleme récupération du fichier distant : " . $zipDestination );
 
@@ -826,11 +844,11 @@ class Halms_Document
         }
 
         // Mise en place d'une connexion
-        $ftpStream = ftp_connect(PMC_HOST);
+        $ftpStream = ftp_connect(self::PMC_HOST);
         if (!$ftpStream) { return false; }
 
         // Ouverture d'une session
-        $result = ftp_login ($ftpStream, PMC_USER, PMC_PWD);
+        $result = ftp_login ($ftpStream, self::PMC_USER, self::PMC_PWD);
         if (!$result) { return false; }
 
         // turn on passive mode transfers

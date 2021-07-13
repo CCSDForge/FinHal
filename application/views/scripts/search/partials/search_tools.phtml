@@ -92,13 +92,15 @@ $uniqShelfId = uniqid();
 
 			</ul>
         </li>
-        <?php if (Hal_Auth::isLogged() ) { ?>
+        <?php if (Hal_Auth::isLogged() ) {
+                if (Hal_Settings::useShareProperty()) {?>
         <li class=""><a href="javascript:void(0)" onclick="$('#claimOwnershipModal').show();">
                <i class="glyphicon glyphicon-send"></i>&nbsp;<?php echo $this->translate('Demander la propriété')?></a>
         </li>
         <li class=""><a href="javascript:void(0)" onclick="return addOwnership();">
             <i class="glyphicon glyphicon-user"></i>&nbsp;<?php echo $this->translate('Partager la propriété...')?></a>
         </li>
+                    <?php } ?>
         <li class=""><a href="javascript:void(0)" onclick="return copyDoc();">
             <i class="glyphicon glyphicon-file active"></i>&nbsp;<?php echo $this->translate('Utiliser comme modèle')?></a>
         </li>

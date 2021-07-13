@@ -544,9 +544,6 @@
     <xs:element name="abstract">
         <!-- %%abstract -->
         <xs:complexType mixed="true">
-            <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="ns1:p" minOccurs="0"/>
-            </xs:sequence>
             <xs:attribute ref="xml:lang" use="required"/>
         </xs:complexType>
     </xs:element>
@@ -699,8 +696,6 @@
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="ns1:i"/>
             </xs:sequence>
             <xs:attribute name="n" type="xs:string"/>
-            <xs:attribute name="corresp" type="xs:string"/>
-            <!-- l'attribut "p" est obsolete et remplace par l'attribut "corresp" -->
             <xs:attribute name="p" type="xs:string"/>
             <xs:attribute name="status" type="xs:string"/>
             <xs:attribute name="type" use="required" type="xs:string"/>

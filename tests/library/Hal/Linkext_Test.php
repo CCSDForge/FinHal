@@ -33,7 +33,7 @@ class LinkExt_Test extends PHPUnit_Framework_TestCase
      */
     public function loadProvider() {
         return [
-            'test DOI' => [ '10.5194/acp-13-6921-2013', [ 'url' => 'https://doi.org/10.5194/acp-13-6921-2013',  'type' => Hal_LinkExt::TYPE_DOI, 'doitype' => Hal_LinkExt::DOITYPE_OTHER]],
+            'test DOI' => [ '10.5194/acp-13-6921-2013', [ 'url' => 'https://www.atmos-chem-phys.net/13/6921/2013/acp-13-6921-2013.pdf',  'type' => Hal_LinkExt::TYPE_DOI, 'doitype' => Hal_LinkExt::DOITYPE_PMC]],
             'test Arxiv' =>  [ 'cond-mat/0211687' ,     [ 'url' => 'http://arxiv.org/pdf/cond-mat/0211687',  'type' => Hal_LinkExt::TYPE_ARXIV]],
             'test PMC'=> [ 'PMC4914967' ,               [ 'url' => 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4914967/pdf',   'type' => Hal_LinkExt::TYPE_PMC]],
            // 'test other DOI' => [ 'abc' ,              [ 'url' => '' , 'type'=> '']],
@@ -52,4 +52,6 @@ class LinkExt_Test extends PHPUnit_Framework_TestCase
         $linkobj-> retreiveUrl();
         $this->assertEquals($url, $linkobj->getUrl());
     }
+
+
 }

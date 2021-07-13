@@ -300,24 +300,20 @@ function ajaxchangefileMeta(element) {
             group = res[2];
     }
 
-    ajaxrequestsubmit({url: '/submit/ajaxchangefilemeta',
-        data: {key: key, group: group, value: $(element).val()},
-        dataType: 'json',
-        success: function(response){
-            for (var key in response.filerow) {
-                if (response.filerow.hasOwnProperty(key)) {
-                    addOrChangeRow(key, response.filerow[key]);
-                }
+    ajaxrequestsubmit({url: '/submit/ajaxchangefilemeta', data: {key: key, group: group, value: $(element).val()}, success: function(response){
+        for (var key in response.filerow) {
+            if (response.filerow.hasOwnProperty(key)) {
+                addOrChangeRow(key, response.filerow[key]);
             }
-        },
-        error: function(message) {
+        }
+    }, dataType: 'json', error: function(message) {
             try {
                 var response = jQuery.parseJSON(message.responseText);
             } catch (err) { }
 
             showErrorContent("#error-zone-file", response.errorMsg);
             $(element).val(response.maxDate);
-        }});
+    }});
 }
 
 function init(url) {

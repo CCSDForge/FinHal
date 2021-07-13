@@ -17,8 +17,3 @@ $application = new Zend_Application(
 );
 $application->bootstrap()
             ->run();
-
-$db    = Zend_Db_Table_Abstract::getDefaultAdapter();
-$casdb = Ccsd_Db_Adapter_Cas::getAdapter();
-$db->closeConnection();
-$casdb->closeConnection();

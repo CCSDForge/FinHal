@@ -1,13 +1,10 @@
-<?php
-/** @var Hal_View $this */
-?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title><?php echo $this->document->getMainTitle(); ?></title>
-    <script src="https://cdn.jwplayer.com/libraries/jI7CRvpx.js"></script>
     <?php
+        $this->jQuery()->addJavascriptFile('https://cdn.jwplayer.com/libraries/jI7CRvpx.js');
         echo $this->jQuery()->setLocalPath(CCSDLIB . '/js/jquery/min.1.9.1.js')->enable();
     ?>
 </head>

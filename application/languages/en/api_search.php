@@ -43,6 +43,8 @@ return [
     'hal_files_s' => 'URL des fichiers',
     'hal_fileMainAnnex_s' => "URL de l'annexe principale",
     'hal_fileAnnexes_s' => "URL des annexes",
+    'hal_bookCollection_s' => 'Collection de livre',
+    'hal_bookCollection_t' => 'Collection de livre',
     'hal_credit_s' => 'Credits',
     'hal_credit_t' => 'Credits',
     'hal_description_s' => 'Description',
@@ -319,8 +321,8 @@ return [
     'hal_sample_identifiers_id' => '',
     'hal_instance_s' => 'Instance HAL',
     'hal_sample_instance_s' => 'hal-shs',
-    'hal_invitedCommunication_s' => 'Invited communication (0/1)',
-    'hal_invitedCommunication_t' => 'Invited communication (yes/no)',
+    'hal_invitedCommunication_s' => 'Conférence invitée',
+    'hal_invitedCommunication_t' => 'Conférence invitée',
 
     'hal_isbn_id' => 'ISBN',
 
@@ -607,6 +609,8 @@ return [
     'hal_proceedings_t' => 'Conference proceedings',
     'hal_publicationLocation_s' => 'Place of publication',
     'hal_publicationLocation_t' => 'Place of publication',
+    'hal_relator_s' => 'Narrateur',
+    'hal_relator_t' => 'Narrateur',
     'hal_degreeType_s' => 'Type de diplôme',
     'hal_degreeType_t' => 'Type de diplôme',
     'hal_imageType_s' => "Type d'image (codes numériques)",

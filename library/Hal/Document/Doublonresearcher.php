@@ -46,16 +46,13 @@ class Hal_Document_Doublonresearcher
     {
         if (!empty($idcopy)) {
             $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-            $query = 'SELECT ' . ' `copy`.`CODE`, `doc`.`IDENTIFIANT` FROM `' . Hal_Document_Meta_Identifier::TABLE_COPY . '` AS `copy` INNER JOIN `' . Hal_Document::TABLE . '` AS `doc` ON doc.DOCID=copy.DOCID ';
-            $query .= 'WHERE (doc.DOCSTATUS != ' . Hal_Document::STATUS_MERGED . ') AND (doc.DOCSTATUS != ' . Hal_Document::STATUS_DELETED . ') ';
-            $query .= ' AND (';
+            $query = 'SELECT ' . ' `copy`.`CODE`, `doc`.`IDENTIFIANT` FROM `' . Hal_Document_Meta_Identifier::TABLE_COPY . '` AS `copy` INNER JOIN `' . Hal_Document::TABLE . '` AS `doc` ON doc.DOCID=copy.DOCID WHERE (';
             $copy = [];
             foreach ($idcopy as $code => $id) {
                 // On utilise LIKE BINARY pour prendre en compte la case de l'identifiant
                 $copy[] = '(copy.LOCALID LIKE BINARY "' . $id . '" AND copy.CODE = "' . $code . '")';
             }
-            $query .= implode(' OR ', $copy);
-            $query .= ')';
+            $query .= implode(' OR ', $copy) . ')';
             if (!empty($notdocid)) {
                 $query .= ' AND `copy`.`DOCID` NOT IN (' . implode(',', $notdocid) . ')';
             }

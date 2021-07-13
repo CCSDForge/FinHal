@@ -1,24 +1,16 @@
 <?php
 
-/**
- * Class Hal_Website_Header
- */
 class Hal_Website_Header extends Ccsd_Website_Header
 {
-    /**
-     * Hal_Website_Header constructor.
-     * @param Hal_Site $site
-     * @throws Zend_Exception
-     */
-	public function __construct($site)
+
+	public function __construct()
 	{
-		$sid = $site->getSid();
-		$publicDir = $site->getSpace() . 'public/';
-		$publicUrl = $site->getSpaceUrl();
-		$langDir = $site->getSpace() . 'languages/';
-		$layoutDir = $site->getSpace() . LAYOUT .'/';
-		parent::__construct($sid, $publicDir, $publicUrl, $layoutDir, $langDir);
-        $this->_fieldSID = 'SID';
+		$this->_fieldSID = 'SID';
+		$this->_sid = SITEID;
+		$this->_publicDir = SPACE . 'public/';
+		$this->_publicUrl = SPACE_URL;
+		$this->_langDir = SPACE . 'languages/';
+		$this->_layoutDir = SPACE . LAYOUT .'/';
 		$this->_languages = Zend_Registry::get('languages');
 	}
 

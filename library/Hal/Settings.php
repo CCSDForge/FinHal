@@ -31,10 +31,6 @@ class Hal_Settings
 
     /** @const hashing algorithm used for emails */
     const EMAIL_HASH_TYPE = 'md5';
-    /**
-     * @var array
-     */
-    static private $iniFilesCache = [];
 
     /** @var string */
     static private $_appversion;
@@ -48,12 +44,8 @@ class Hal_Settings
      * Language tags
      * @see https://tools.ietf.org/html/rfc3066
      */
-    static private $_languageTags = array('fr' => array('fr_FR.UTF-8', 'fr_FR', 'fr', 'french'), 'en' => array('en_GB.UTF-8', 'en_GB', 'en', 'english'));
+     static private $_languageTags = array('fr' => array('fr_FR.UTF-8', 'fr_FR', 'fr', 'french'), 'en' => array('en_GB.UTF-8', 'en_GB', 'en', 'english'));
 
-    /**
-     * Cache pour la liste des metas du portail principal (hal)
-     */
-    static private $_coreMeta = [];
     /**
      * ----------------------------------------------------------------------------------------------------------------
      * DEPOT
@@ -122,15 +114,15 @@ class Hal_Settings
      * liste des types de dépôts obligeant le dépôt de fichier
      * @var array
      */
-    static protected $_typdocFulltext = array('THESE', 'HDR', 'LECTURE', 'IMG', 'VIDEO', 'SON', 'MAP', 'PRESCONF', 'MEM', 'SOFTWARE', 'ETABTHESE');
+    static protected $_typdocFulltext = array('THESE', 'HDR', 'LECTURE', 'IMG', 'VIDEO', 'SON', 'MAP', 'PRESCONF', 'MEM');
     /**
      * Configuration en fonction du type de dépôt
      * @var array
      */
     static protected $_configTypdoc = array(
         'UNDEFINED' => array(
-            'typdocsAssociated' => array('ART', 'COMM', 'POSTER', 'OUV', 'COUV', 'DOUV', 'REPORT', 'OTHER', 'THESE', 'HDR', 'ETABTHESE'),
-            'citation' => '{date}'
+            'typdocsAssociated' => array('ART', 'COMM', 'POSTER', 'OUV', 'COUV', 'DOUV', 'REPORT', 'OTHER', 'THESE', 'HDR'),
+            'citation' => '{localReference}. {comment}. {date}'
         ),
         'ART' => array(
             'typdocsAssociated' => array('UNDEFINED', 'COMM', 'POSTER', 'OUV', 'COUV', 'DOUV', 'REPORT', 'OTHER'),
@@ -139,7 +131,7 @@ class Hal_Settings
         ),
         'COMM' => array(
             'typdocsAssociated' => array('UNDEFINED', 'ART', 'OUV', 'POSTER', 'COUV', 'DOUV', 'REPORT', 'OTHER'),
-            'citation' => '<i>{conferenceTitle}</i>, {conferenceOrganizer}, {conferenceStartDate}, {city}, {country}. {page}, {doi}'
+            'citation' => '{scientificEditor}. <i>{conferenceTitle}</i>, {conferenceStartDate}, {city}, {country}. {publisher}, {source}, {volume}, {page}, {datePublication}, {serie}. {publisherLink}. {doi}'
         ),
         'POSTER' => array(
             'typdocsAssociated' => array('UNDEFINED', 'ART', 'OUV', 'COMM', 'COUV', 'DOUV', 'REPORT', 'OTHER'),
@@ -162,7 +154,7 @@ class Hal_Settings
         // non utilise pour HalSpm
         'DOUV' => array(
             'typdocsAssociated' => array('UNDEFINED', 'ART', 'COMM', 'POSTER', 'OUV', 'COUV', 'REPORT', 'OTHER'),
-            'citation' => '{scientificEditor}. <i>{conferenceTitle}</i>, {conferenceStartDate}, {city}, {country}. <i>{journal}</i>, {volume}, {publisher}, {page}, {datePublication}, {serie}, {isbn}. {doi}. {publisherLink}'
+            'citation' => '{scientificEditor}. <i>{conferenceTitle}</i>, {conferenceStartDate}, {city}, {country}. {volume}, {publisher}, {page}, {datePublication}, {serie}, {isbn}. {doi}. {publisherLink}'
         ),
         'REPORT' => array(
             'typdocsAssociated' => array('UNDEFINED', 'ART', 'COMM', 'POSTER', 'OUV', 'COUV', 'OTHER'),
@@ -171,7 +163,7 @@ class Hal_Settings
         // non utilise pour HalSpm
         'OTHER' => array(
             'typdocsAssociated' => array('UNDEFINED', 'ART', 'COMM', 'POSTER', 'COUV', 'DOUV', 'REPORT'),
-            'citation' => '<i>{bookTitle}</i>, {date}, {page}. {doi}',
+            'citation' => '{localReference}. {description}. {date}, {page}. {doi}',
             'aut_quality' => array('aut', 'crp', 'edt', 'sad', 'ctb', 'wam', 'pht', 'ann', 'trl', 'cwt', 'ill', 'stm', 'pro', 'ard', 'sds', 'ctg', 'oth', 'spk')
         ),
         // non utilise pour HalSpm
@@ -183,7 +175,7 @@ class Hal_Settings
         ),
         // non utilise pour HalSpm
         'THESE' => array (
-            'typdocsAssociated' => array('HDR', 'ETABTHESE'),
+            'typdocsAssociated' => array('HDR'),
             'fileOrigin' =>  false,
             'arxiv' =>  false,
             'pubmed' =>  false,
@@ -191,17 +183,8 @@ class Hal_Settings
             'citation' => '{domain}. {authorityInstitution}, {date}. {language}. {nnt}'
         ),
         // non utilise pour HalSpm
-        'ETABTHESE' => array (
-            'typdocsAssociated' => array('HDR', 'THESE'),
-            'fileOrigin' =>  false,
-            'arxiv' =>  false,
-            'pubmed' =>  false,
-            'visibility' =>  array("now"),
-            'citation' => '{domain}. {authorityInstitution}, {date}. {language}. {thesisNumber}'
-        ),
-        // non utilise pour HalSpm
         'HDR'=> array (
-            'typdocsAssociated' => array('THESE', 'ETABTHESE'),
+            'typdocsAssociated' => array('THESE'),
             'fileOrigin' =>  false,
             'arxiv' =>  false,
             'pubmed' =>  false,
@@ -530,7 +513,6 @@ class Hal_Settings
     }
 
     /**
-     * @deprecated : use Hal_Site_portail::getTypdocs on Portail object
      * Retourne les types de documents en fonction d'un portail
      *
      * Si dans une collection et pas de fichier de conf utilise la conf du portail par défaut
@@ -867,22 +849,8 @@ class Hal_Settings
      */
     static private function getIniSetting($file, $setting)
     {
-        $iniFile = 'NoIniFilePresent';
-        $site = Hal_Site::getCurrent();
-        if ($site) {
-            $iniFile = $site->getConfigDir() . $file;
-        } else {
-            if (defined('SPACE')) {
-                $iniFile = SPACE . CONFIG . $file;
-            }
-        }
-        if (is_file($iniFile)) {
-            if (array_key_exists($iniFile, self::$iniFilesCache)) {
-                $ini = self::$iniFilesCache[$iniFile];
-            } else {
-                $ini = (new Zend_Config_Ini($iniFile))->toArray();
-                self::$iniFilesCache[$iniFile] = $ini;
-            }
+        if (is_file(SPACE . CONFIG . $file)) {
+            $ini = (new Zend_Config_Ini(SPACE . CONFIG . $file))->toArray();
             if (isset($ini[$setting])) {
                 return $ini[$setting];
             }
@@ -1192,18 +1160,14 @@ class Hal_Settings
      */
     static public function getCoreMetas()
     {
-        if (self::$_coreMeta == []) {
-
-            $out = array();
-            $ini = new Zend_Config_Ini(DEFAULT_CONFIG_ROOT . Hal_Site_Portail::MODULE . '/meta.ini', 'metas');
-            foreach ($ini->elements as $meta => $options) {
-                if ($options->type != 'hr' && !in_array($meta, $out)) {
-                    $out[] = $meta;
-                }
+        $out = array();
+        $ini = new Zend_Config_Ini(DEFAULT_CONFIG_ROOT . Hal_Site_Portail::MODULE . '/meta.ini', 'metas');
+        foreach ($ini->elements as $meta=>$options ) {
+            if ( $options->type != 'hr' && !in_array($meta, $out) ) {
+                $out[] = $meta;
             }
-            self::$_coreMeta = $out;
         }
-        return self::$_coreMeta;
+        return $out;
     }
 
     /**
@@ -1215,23 +1179,14 @@ class Hal_Settings
     static public function getMeta($typdoc)
 
     {
-        $site = Hal_Site_Portail::getCurrentPortail();
-
-        $sid = $site->getSid();
-        if (array_key_exists($sid, self::$iniFilesCache)
-            && array_key_exists($typdoc, self::$iniFilesCache[$sid])) {
-            return self::$iniFilesCache[$sid][$typdoc];
-        }
-        $configDir = $site->getConfigDir();
         /*
          * Chargement de la configuration avec les .ini correspondants
          */
         $chemin1 = DEFAULT_CONFIG_ROOT . Hal_Site_Portail::MODULE . '/' . 'meta.ini';
-        $chemin2 = $configDir . 'meta.ini';
+        $chemin2 = SPACE_DATA . '/' . Hal_Site_Portail::MODULE . '/' . SPACE_NAME . '/' . CONFIG . 'meta.ini';
 
         // Recherche de toutes les metas
-        $metasSpec =  Hal_Ini::file_merge([$chemin1 => [$typdoc], $chemin2 => [$typdoc]], ['section_default' => 'metas']);
-        return $metasSpec;
+        return Hal_Ini::file_merge([$chemin1 => [$typdoc], $chemin2 => [$typdoc]], ['section_default' => 'metas']);
     }
 
     /**
@@ -1245,13 +1200,16 @@ class Hal_Settings
         $cacheFile = Hal_Site_Portail::DEFAULT_CACHE_PATH . '/metas.phps';
         if ( is_file( $cacheFile) ) {
             ob_start();
-            $metas = include($cacheFile);
+            $data = include($cacheFile);
             ob_end_clean();
-            if (is_array($metas)) {
-                return $metas;
+            if ( is_array($data) ) {
+                return $data;
+            } else {
+                return array();
             }
+        } else {
+            return array();
         }
-        return [];
     }
 
     /**
@@ -1407,7 +1365,7 @@ class Hal_Settings
         $class = 'label label-' . $typdoc . ' ';
         if (in_array($typdoc, array('ART','COMM','POSTER','OUV','COUV','DOUV', 'PATENT'))) {
             $class .= 'label-danger';
-        } else if (in_array($typdoc, array('THESE','HDR','LECTURE','ETABTHESE'))) {
+        } else if (in_array($typdoc, array('THESE','HDR','LECTURE'))) {
             $class .= 'label-primary';
         } else if (in_array($typdoc, array('IMG','SON','VIDEO','MAP'))) {
             $class .= 'label-success';
@@ -1440,7 +1398,7 @@ class Hal_Settings
      * @return bool
      */
     public static function usegrobid4meta() {
-        if (defined('USEGROBID4META') && (USEGROBID4META === false)) {
+        if (defined('USEGROBID4META') && (USEGROBID4META == false)) {
             return false;
         }
         // By default, we use Grobid: compatibility
@@ -1451,7 +1409,7 @@ class Hal_Settings
      * @return bool
      */
     public static function usecrossref4meta() {
-        if (defined('USECROSSREF4META') && (USECROSSREF4META === false)) {
+        if (defined('USECROSSREF4META') && (USECROSSREF4META == false)) {
             return false;
         }
         // By default, we use Crossref: compatibility
@@ -1468,4 +1426,39 @@ class Hal_Settings
         // By default, we use Crossref: compatibility
         return true;
     }
+    /**
+     * Return true if we must hide 'share property' and 'ask property' actions
+     * @return bool
+     */
+    public static function useShareProperty() {
+        if (defined('SHAREPROPERTY') &&  (!SHAREPROPERTY)) {
+            return false;
+        }
+        // By default, we allow share and ask property of papaers
+        return true;
+    }
+    /**
+     * Return true if we must hide 'add annex file' actions
+     * @return bool
+     */
+    public static function allowAddAnnex() {
+        if (defined('ALLOWADDANNEX') && (ALLOWADDANNEX == false)) {
+            return false;
+        }
+        // By default, we allow share and ask property of papaers
+        return true;
+    }
+
+    /**
+     * Return true if we can choose the default view for submission
+     * @return bool
+     */
+    public static function chooseDefaultView() {
+        if (defined('CHOOSEDEFAULTVIEW') && (CHOOSEDEFAULTVIEW == false)) {
+            return false;
+        }
+        // By default, we allow share and ask property of papaers
+        return true;
+    }
+
 }

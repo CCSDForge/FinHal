@@ -29,17 +29,10 @@ class Document_Tei_Creator_Test extends PHPUnit_Framework_TestCase
 
     public function testCreator()
     {
-        # $xml = $this->loadFile('art-inpress.xml');
-        $xml = $this->loadFile('preprint.xml');
+        $xml = $this->loadFile('art-inpress.xml');
         $document = new Hal_Document();
         $document -> loadFromTEI($xml);
-        $document->setContributorId(1);
         $tei = $document->createTEI();
         $this->assertEquals($xml->saveXML(), $tei);
-    }
-
-    public function testChangeXmlId() {
-        $this->assertEquals("ref1234-b2", Hal_Document_Tei_Creator::changeXmlIdValue('b2', '1234' ));
-
     }
 }

@@ -12,6 +12,21 @@ class Hal_Form_Element_Identifiant extends Ccsd_Form_Element_MultiTextSimpleLang
 		return 'identifiant/';
 	}
 
+    //Obsolete
+    /** @deprecated
+     * Todo: supress those function
+     */
+	public function getPrefixPath ()
+	{
+        error_log('getPrefixPath ne devrait plus etre appele');
+		$prefixPath = (new ReflectionClass(get_class($this)))->getFileName();
+		 
+		while (dirname ($prefixPath) && !is_dir($prefixPath . '/public')) {
+            $prefixPath = dirname($prefixPath);
+        }
+		return $prefixPath;
+	}
+
     /**
      *
      */

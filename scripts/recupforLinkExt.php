@@ -1,19 +1,23 @@
 <?php
+
 require __DIR__ . "/../library/Hal/Script.php";
 
 /**
- * Class recupLinkExtScript
- * Récupération des Liens Extérieurs (Istex, etc...)
+ * Class doCoverpageScript
+ * Refaire la page de couverture des documents
+ *
  */
 class recupLinkExtScript extends Hal_Script
 {
-    protected $options = [
+    /**
+     */
+    protected $options = array(
         'ref|r' => "Pour extraire les doi des références biblio",
         'from=s' => "Date de début des dépôts à récupérer",
         'docid=i' => "Docid du document à récupérer",
         'continue|c' => "Permet de continuer là où le script s'est arrêté",
         'page=i' => "Pour continuer le script à une certaine page"
-    ];
+    );
 
     /**
      * @param Zend_Console_Getopt $getopt
@@ -28,11 +32,11 @@ class recupLinkExtScript extends Hal_Script
         $this->verbose('> Environnement: ' . APPLICATION_ENV);
         $this->verbose('----------------------------------------');
 
-        $refOption = $getopt->getOption('ref');
-        $docid = $getopt->getOption('docid');
+        $refOption      = $getopt->getOption('ref');
+        $docid          = $getopt->getOption('docid');
         $continueOption = $getopt->getOption('continue');
-        $pageOption = $getopt->getOption('page');
-        $fromOption = $getopt->getOption('from');
+        $pageOption     = $getopt->getOption('page');
+        $fromOption     = $getopt->getOption('from');
         if ($continueOption && $refOption) {
             die("Can't --continue for References, only with Document\n");
         }
@@ -56,24 +60,24 @@ class recupLinkExtScript extends Hal_Script
             $sql = $dbRef->select()->distinct($idFieldName)
                 ->from($table, $idFieldName);
         } else { // Dans les documents
-            $table = ['h' => Hal_Document_Meta_Identifier::TABLE_COPY];
+            $table = array('h' => Hal_Document_Meta_Identifier::TABLE_COPY);
             $idFieldName = 'LOCALID';
             $conditions[] = 'CODE = "' . Hal_LinkExt::TYPE_DOI . '"';
             $idSite = Hal_LinkExt::TYPE_DOI;
             $sql = $db->select()->distinct($idFieldName)
                 ->from($table, $idFieldName);
-            $sql->join(['d' => 'DOCUMENT'], 'h.DOCID=d.DOCID', null);
+            $sql->join(array('d' => 'DOCUMENT'), 'h.DOCID=d.DOCID', null);
             $conditions[] = "d.FORMAT != 'file'";
         }
 
         if ($docid) {
-            $conditions[] = 'd.DOCID = ' . $docid;
+            $conditions[] = 'DOCID = ' . $docid;
         }
 
         // SELECT DISTINCT `h`.`LOCALID`, LINKID FROM `DOC_HASCOPY` AS `h` LEFT JOIN DOC_LINKEXT ON LOCALID=LINKID   WHERE (CODE = "doi")  and LINKID is NULL LIMIT 1000;
         // Reprendre la récupération des liens sans traiter les liens extérieurs déjà traité
         if ($continueOption) {
-            $sql->joinLeft(Hal_LinkExt::TABLE_LINKEXT, $idFieldName . '=LINKID');
+            $sql -> joinLeft(Hal_LinkExt::TABLE_LINKEXT, $idFieldName .'=LINKID');
             $conditions[] = 'LINKID IS NULL';
         }
         // Ajout des conditions WHERE sur la requête
@@ -111,20 +115,17 @@ class recupLinkExtScript extends Hal_Script
                     $metaLinkExt = Hal_LinkExt::load($idvalue, $idSite);
                     switch ($metaLinkExt->retreiveUrl($idSite)) {
                         case Hal_LinkExt::MAJ :
-                            $this->verbose($idvalue . ' : ADDED');
-                            break;
+                             $this->verbose($idvalue  . ' : ADDED');
+                             break;
                         case Hal_LinkExt::SAME :
-                            $this->verbose($idvalue . ' : No change');
-                            break;
+                             $this->verbose($idvalue  . ' : No change');
+                             break;
                         case Hal_LinkExt::NOTFOUND:
                             $this->verbose($idvalue . ' : NOT Found');
                             $metaLinkExt->delete(); // On nettoie les liens n'ayant plus d'URL valide
                             break;
                         case Hal_LinkExt::NOUPD:
                             $this->verbose($idvalue . ' : Unknow pb');
-                            break;
-                        default:
-                            $this->verbose($idvalue . ': ERROR, we got an unexpected value. This is bad. Fix it in database.');
                             break;
                     }
                 }

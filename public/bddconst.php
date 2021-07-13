@@ -64,7 +64,7 @@ function best_define($name, $default, $warn=true) {
         error_log("WARNING: Definition de la constante $name a null");
     }
     if (defined($name)) {
-        return constant($name); }
+        return PWD_PATH; }   // TODO: Hum, c'est abherant, cette valeur!!!
     $env_value = getenv($name);
     if ($env_value !== false) {
         define($name, $env_value);

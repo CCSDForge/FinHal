@@ -132,7 +132,6 @@ class Hal_Document_File
 
     /**
      * Hal_Document_File constructor.
-     * @param array $data
      * @param int $fileid
      */
 	public function __construct($fileid = 0, $data = [])
@@ -271,7 +270,6 @@ class Hal_Document_File
 	
 	/**
 	 * Récupération du chemin vers le fichier
-     * @param bool $omitPathDoc
 	 * @return string
 	 */
 	public function getPath($omitPathDoc = false)
@@ -321,7 +319,6 @@ class Hal_Document_File
 	/**
 	 * Définition de la taille du fichier
 	 * @param int $size
-     * @return int
 	 */
 	public function setSize($size = -1)
 	{
@@ -399,7 +396,6 @@ class Hal_Document_File
     /**
      * @param string $path
      * @return string
-     * @throws ImagickException
      */
     protected function getImageBlob($path)
     {
@@ -416,7 +412,9 @@ class Hal_Document_File
     }
 
     /**
-     * @throws ImagickException
+     * @param $tmpdir
+     * @param $pdf
+     * @param $img
      */
     public function getTmpThumb()
     {
@@ -475,12 +473,7 @@ class Hal_Document_File
 	}
 
     /**
-     * Affecte la valeur de _dateVisible en la validant.
-     * Si la date est superieure au maximum autorise pour le portail,
-     * La date est positionnee a max d'embargo pour le portail
-     *
      * @param string $dateVisible
-     * @return string   // La date reellement positionnee
      */
     public function setDateVisible($dateVisible='')
     {
@@ -493,7 +486,6 @@ class Hal_Document_File
                 $this->_dateVisible = date('Y-m-d');
             }
         }
-        return $this->_dateVisible ;
     }
 
     /**
@@ -571,7 +563,7 @@ class Hal_Document_File
      */
     public function ftpfilename($url) {
         $filename = preg_replace('=ftp://ftp.ccsd.cnrs.fr/+=','',$url);
-        return Ccsd_User_Models_User::CCSD_FTP_PATH . Hal_Auth::getUid() . '/' . $filename;
+        return FTP_DIR . Hal_Auth::getUid() . '/' . $filename;
     }
 
     /**
@@ -749,7 +741,6 @@ class Hal_Document_File
      * @param int $docid
      * @param string $dest
      * @return bool
-     * @throws Zend_Db_Adapter_Exception
      */
     public function save($docid, $dest)
     {
@@ -871,9 +862,6 @@ class Hal_Document_File
         return in_array($this->getExtension(), ['mp4', 'm4v', 'f4v', 'mov']);
     }
 
-    /**
-     * @return bool
-     */
     public function isPdf()
     {
         return 'pdf' == $this->getExtension();
@@ -896,7 +884,6 @@ class Hal_Document_File
             $return['Errors'][] = 'PdfInfo non executable';
         } else {
             $output = [];
-            setlocale(LC_CTYPE, "fr_FR.UTF-8"); // escapeshellarg strip les lettres accentuees si on n'est pas dans une locale Utf8
             exec($cmdPdfinfo." ".escapeshellarg($filename), $output);
             foreach ($output as $iline) {
                 if (preg_match('/^([a-zA-Z ]+):[[:space:]]*([^\s].*)$/', $iline, $match)) {
@@ -911,7 +898,6 @@ class Hal_Document_File
             $return['Errors'][] = 'PdfFonts non executable';
         } else {
             $output = [];
-            setlocale(LC_CTYPE, "fr_FR.UTF-8"); // escapeshellarg strip les lettres accentuees si on n'est pas dans une locale Utf8
             exec($cmdPdffont. " " . escapeshellarg($filename), $output);
             foreach ($output as $line) {
                 $line = preg_split("/\s\s+/", $line);
@@ -933,12 +919,6 @@ class Hal_Document_File
      */
     public function maxEmbargo()
     {
-        $site = Hal_Site::getCurrentPortail();
-        if ($site) {
-            $iniMaxEmbargo = $site->getMaxEmbargo();
-            return $iniMaxEmbargo;
-        }
-        // We never go there, I hope that current portal is always set... but never mind!
         return date('Y-m-d', strtotime('+2 years', strtotime('today UTC')));
     }
 
@@ -948,7 +928,13 @@ class Hal_Document_File
      */
     public function isEmbargoValid()
     {
-        $max = $this->maxEmbargo();
-        return  $this->getDateVisible() <= $max;
+        if (Hal_Site::getCurrent() && Hal_Site::getCurrent()->getSid() == Hal_Site_Portail::SITE_INSERM) {
+            // Inserm mets tres longtemps...
+            return true;
+        }
+        if ($this->getDateVisible() > $this->maxEmbargo()) {
+            return false;
+        }
+        return true;
     }
 }

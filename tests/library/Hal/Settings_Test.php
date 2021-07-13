@@ -56,10 +56,4 @@ class Hal_Settings_Test extends PHPUnit\Framework\TestCase
     public function testgetApplicationVersion() {
         $this->assertRegExp('/^[0-9]+$/', Hal_Settings::getApplicationVersion());
     }
-
-    public function testgetCoreMetas() {
-        $metas = Hal_Settings::getCoreMetas();
-        $this->assertContains('title', $metas);
-        $this->assertNotContains('inra_noSpecia', $metas);
-    }
 }

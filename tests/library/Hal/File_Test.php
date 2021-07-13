@@ -50,25 +50,6 @@ class File_Test extends PHPUnit_Framework_TestCase
         $this->assertEquals('application/pdf', Ccsd_File::getMimeType($file->getPath()));
         
     }
+    
 
-    public function testEmbargo() {
-        $saveSite = Hal_Site::getCurrent();
-        $site = Hal_Site_Portail::loadSiteFromName('inserm');
-        Hal_Site::setCurrent($site);
-        $fileObj = new Hal_Document_File();
-        // Inserm peut mettre "infini"
-        $fileObj->setDateVisible('2099-01-01');
-        $this->assertEquals('2099-01-01', $fileObj->getDateVisible());
-
-        //Dumas ne peut pas mettre infini mais 10 ans
-        $site = Hal_Site_Portail::loadSiteFromName('dumas');
-        Hal_Site::setCurrent($site);
-        $fileObj->setDateVisible('2099-01-01');
-        $this->assertNotEquals('2099-01-01', $fileObj->getDateVisible());
-        $date = date('Y-m-d', strtotime('+8 years', strtotime('today UTC')));
-        $fileObj->setDateVisible($date);
-        $this->assertEquals($date, $fileObj->getDateVisible());
-
-        Hal_Site::setCurrent($saveSite);
-    }
 }

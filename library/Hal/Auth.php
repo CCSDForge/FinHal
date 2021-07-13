@@ -38,11 +38,9 @@ class Hal_Auth extends Ccsd_Auth
         $roles = array();
         if (self::isLogged()) {
             /**
-             * @var \Ccsd\Auth\Adapter\AdapterInterface $adapter
+             * @var Zend_Auth $identity
              */
-            $adapter = self::getInstance();
-            /** @var Hal_User $identity */
-            $identity = $adapter->getIdentity();
+            $identity = self::getInstance()->getIdentity();
             $userRoles = $identity->getRoles();
             if (is_array($userRoles)) {
                 foreach ($userRoles as $roleId => $data) {
@@ -53,16 +51,16 @@ class Hal_Auth extends Ccsd_Auth
                             }
                         }
                     } else if ($roleId == Hal_Acl::ROLE_TAMPONNEUR) {
-                        // Droit sur le site de collection actuel
-                        // Si pas un site de collection, alors pas de droit...
                         if (defined('MODULE') && defined('SPACE_COLLECTION') && MODULE == SPACE_COLLECTION) {
-                            $site = Hal_Site_Collection::getCurrent();
-                            $currentSid = $site->getSid();
-                            foreach ($data as $sid => $val) {
-                                if ($sid == $currentSid || $sid == 'all') {
+                            //collection
+                            foreach($data as $sid => $val) {
+                                if (0 == SITEID || $sid == SITEID || $sid == 'all') {
                                     $roles[] = $roleId;
                                 }
                             }
+                        } else {
+                            //portail
+                            $roles[] = $roleId;
                         }
                     } else {
                         $roles[] = $roleId;
@@ -163,9 +161,8 @@ class Hal_Auth extends Ccsd_Auth
     }
 
     /**
-     * Indique si l'utilisateur connecté a le role de tamponneur
-     * Si l'identifiant d'une collection est donnee, indique si l'utilisateur connecte est tamponneur de cette collection
-     * @param int|string  $sid
+     * Indique si l'utilisateur connecté est tamponneur
+     * @param int $sid
      * @return bool
      */
     static public function isTamponneur($sid = 0)
@@ -181,15 +178,12 @@ class Hal_Auth extends Ccsd_Auth
             return false;
         }
 
-        $whereTamponneur = self::getDetailsRoles(Hal_Acl::ROLE_TAMPONNEUR);
-
-        if ($whereTamponneur) {
-            // A des droit de tamponnage
+        if (self::is(Hal_Acl::ROLE_TAMPONNEUR)) {
             if ($sid !== 0) {
                 if (is_numeric($sid)) {
-                    return array_key_exists($sid, $whereTamponneur);
+                    return array_key_exists($sid, self::getDetailsRoles(Hal_Acl::ROLE_TAMPONNEUR));
                 } else {
-                    return in_array($sid, $whereTamponneur);
+                    return in_array($sid, self::getDetailsRoles(Hal_Acl::ROLE_TAMPONNEUR));
                 }
             }
             return true;
@@ -239,27 +233,6 @@ class Hal_Auth extends Ccsd_Auth
         return false;
     }
 
-    /**
-     * Indique si l'utilisateur est un patrouilleur pour la collection
-     * @param int $sid
-     * @return bool
-     */
-    static public function isPatroller($sid = 0)
-    {
-        return self::isModerateur($sid);
-    }
-
-    /** Renvoie les informations sur le patrouillage: globalement les filtres sur les documents a patrouiller
-     * @return array
-     */
-    static public function getPatrollerDetails()
-    {
-        return self::getModerateurDetails();
-    }
-
-    /** Renvoie les informations sur la moderation: globalement les filtres sur les documents a moderer
-     * @return array
-     */
     static public function getModerateurDetails()
     {
         $res = array();

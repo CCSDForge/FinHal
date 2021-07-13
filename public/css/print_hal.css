@@ -33,7 +33,7 @@ a {
 }
 
 /* Mes partages de propriété */
-.btn-primary, .ui-autocomplete-input, .logo, .footer-contact, .checkbox-docid, .checkbox-docid_FILE, .checkbox-docid_REF, .btn-default, .dropdown-menu, input#docid {
+.btn-primary, .ui-autocomplete-input, .logo, .footer-contact, .checkbox-docid, .checkbox-docid_FILE, .checkbox-docid_REF, .btn-default, .dropdown-menu, radio#docid{
     display : none;
 }
 

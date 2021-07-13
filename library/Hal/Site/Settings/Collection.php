@@ -11,15 +11,12 @@ require_once(__DIR__.'/../../Site.php');
 require_once(__DIR__.'/../../Cache.php');
 require_once(__DIR__.'/../Settings.php');
 
-/**
- * Class Hal_Site_Settings_Collection
- */
 class Hal_Site_Settings_Collection extends Hal_Site_Settings
 {
 
     const TABLE = 'COLLECTION_SETTINGS';
     // TODO: Mettre une fonction getAllSettings() qui concatene les settings de la classe avec les parents
-    static public $SETTINGS_LIST = [ 'asker', 'comment', 'critere', 'languages', 'mode', 'visible' , 'patrolled'];
+    static public $SETTINGS_LIST = [ 'asker', 'comment', 'critere', 'languages', 'mode', 'visible' ];
 
     const MODE_AUTO =   "auto";
     const MODE_MAN =   "manuel";
@@ -34,8 +31,7 @@ class Hal_Site_Settings_Collection extends Hal_Site_Settings
     protected $_comment = '';
     /** @var string  */
     protected $_mode = '';
-    /** @var bool  */
-    protected $_patrolled = false;
+
     /**
      * Hal_Site_Settings_Collection constructor.
      * @param $site
@@ -51,7 +47,7 @@ class Hal_Site_Settings_Collection extends Hal_Site_Settings
         $this->setAsker(Ccsd_Tools::ifsetor($data['asker'], ''));
         $this->setComment(Ccsd_Tools::ifsetor($data['comment'], ''));
         $this->setVisible(Ccsd_Tools::ifsetor($data['visible'], 1));
-        $this->setPatrolled(Ccsd_Tools::ifsetor($data['patrolled'], 0));
+
         // Créer les fichiers de config ?
     }
 
@@ -85,7 +81,6 @@ class Hal_Site_Settings_Collection extends Hal_Site_Settings
 
     /**
      * @return bool
-     * @throws Zend_Db_Adapter_Exception
      */
     public function save()
     {
@@ -115,7 +110,6 @@ class Hal_Site_Settings_Collection extends Hal_Site_Settings
 
     /**
      * @param Hal_Site_Settings $settings
-     * @throws Zend_Db_Adapter_Exception
      */
     public function duplicate(Hal_Site_Settings $settings)
     {
@@ -293,21 +287,19 @@ class Hal_Site_Settings_Collection extends Hal_Site_Settings
     }
 
     /**
-     * @param $bool
+     * @deprecated
+     * @param int $sid
+     * @return string
      */
-    public function setPatrolled($bool) {
-        $this-> _patrolled = $bool;
+    static public function getCollectionMode($sid)
+    {
+        $db =  Zend_Db_Table_Abstract::getDefaultAdapter();
+        $sql = $db->select()->from(Hal_Site_Settings_Collection::TABLE, 'VALUE')->where('SID = ?', $sid)->where('SETTING = "mode"');
+        return $db->fetchOne($sql);
     }
 
     /**
-     * @return bool
-     */
-    public function getPatrolled() {
-        return $this-> _patrolled;
-    }
-
-
-    /** Retourne la liste des collections non visibles
+     * Retourne la liste des collections non visibles
      * @return array
      */
     static public function getNonVisibleCollections()

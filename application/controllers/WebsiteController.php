@@ -48,19 +48,16 @@ class WebsiteController extends Hal_Controller_Action
      */
     public function menuAction()
     {
-        $site = Hal_Site::getCurrent();
-        $siteid = $site->getSid();
-        if ((isset ($this->_session->website) && !is_array($this->_session->website)) || !isset ($this->_session->website [$siteid])) {
+        if ((isset ($this->_session->website) && !is_array($this->_session->website)) || !isset ($this->_session->website [SITEID])) {
             // Récupération de la navigation du portail ou d'une collection
             if (!is_array($this->_session->website)) {
                 $this->_session->website = [];
             }
-            $nav = new Hal_Website_Navigation ($site, [
+            $this->_session->website [SITEID] = new Hal_Website_Navigation ([
                 'languages' => Zend_Registry::get('languages'),
-                'sid' => $siteid
+                'sid' => SITEID
             ]);
-            $nav ->load();
-            $this->_session->website [$siteid] = $nav;
+            $this->_session->website [SITEID]->load();
         }
 
         if ($this->getRequest()->isPost()) {
@@ -83,38 +80,43 @@ class WebsiteController extends Hal_Controller_Action
                 if (isset ($options ['filter']) && is_array($options ['filter'])) {
                     $options ['filter'] = implode(';', $options ['filter']);
                 }
-                $this->_session->website [$siteid]->setPage($pageid, $options);
-                $this->_session->website [$siteid]->getPage($pageid)->initForm();
+                $this->_session->website [SITEID]->setPage($pageid, $options);
+                $this->_session->website [SITEID]->getPage($pageid)->initForm();
 
-                $action = $this->_session->website [$siteid]->getPage($pageid)->getAction();
+                $action = $this->_session->website [SITEID]->getPage($pageid)->getAction();
 
                 if (($options ['type'] == 'Hal_Website_Navigation_Page_Structure') or ($options ['type'] == 'Hal_Website_Navigation_Page_Author') or ($options ['type'] == 'Hal_Website_Navigation_Page_Collections')) {
 
                     if (array_key_exists($action, $pages)) {
                         $pages [$action]++;
                         $valid = false;
-                        $message = "Une seule page du type <b>" . $this->view->translate($this->_session->website [$siteid]->getPage($pageid)->getPageClassLabel()) . ' <i>' . $action . '</i></b> autorisée.';
+                        $message = "Une seule page du type <b>" . $this->view->translate($this->_session->website [SITEID]->getPage($pageid)->getPageClassLabel()) . ' <i>' . $action . '</i></b> autorisée.';
                         $this->_helper->FlashMessenger->setNamespace('danger')->addMessage($message);
                         $this->_helper->FlashMessenger->setNamespace('danger')->addMessage("Les modifications n'ont <b>pas</b> été sauvegardées.");
                     } else {
                         $pages [$action] = 1;
                     }
+
+
                 }
 
-                if ($options ['type'] != 'Hal_Website_Navigation_Page_File' && !$this->_session->website [$siteid]->getPage($pageid)->getForm($pageid)->isValid($options)) {
+                if ($options ['type'] != 'Hal_Website_Navigation_Page_File' && !$this->_session->website [SITEID]->getPage($pageid)->getForm($pageid)->isValid($options)) {
                     $pagesDisplay [$pageid] = true;
                     $valid = false;
                 } else {
                     $pagesDisplay [$pageid] = false;
                 }
             }
+
             //options['type'] = Hal_Website_Navigation_Page_Link / La limite de la valeur pour la page lien est de 255 (BDD)
+
+
             if ($valid) {
                 // Tous les elements sont valides
                 // Enregistrement du menu
-                $this->_session->website [$siteid]->save();
+                $this->_session->website [SITEID]->save();
                 // Création de la navigation du site et des ACL
-                $this->_session->website [$siteid]->createNavigation(SPACE . CONFIG . 'navigation.json');
+                $this->_session->website [SITEID]->createNavigation(SPACE . CONFIG . 'navigation.json');
                 if (is_file(SPACE . CONFIG . 'acl.ini')) {
                     unlink(SPACE . CONFIG . 'acl.ini');
                 }
@@ -204,8 +206,7 @@ class WebsiteController extends Hal_Controller_Action
      */
     public function headerAction()
     {
-        $site = Hal_Site::getCurrent();
-        $header = new Hal_Website_Header ($site);
+        $header = new Hal_Website_Header ();
         if ($this->getRequest()->isPost()) {
             if (isset($_POST['header'])) {
                 $isValid = $header->isValid($this->getRequest()->getPost(), $_FILES);
@@ -229,8 +230,7 @@ class WebsiteController extends Hal_Controller_Action
      */
     public function footerAction()
     {
-        $site = Hal_Site::getCurrent();
-        $footer = new Hal_Website_Footer ($site);
+        $footer = new Hal_Website_Footer ();
 
         if ($this->getRequest()->isPost()) {
             if (isset($_POST['footer'])) {
@@ -247,10 +247,9 @@ class WebsiteController extends Hal_Controller_Action
      */
     public function ajaxheaderAction()
     {
-        $site = Hal_Site::getCurrent();
         $this->_helper->layout()->disableLayout();
         $this->_helper->viewRenderer->setNoRender();
-        $header = new Hal_Website_Header ($site);
+        $header = new Hal_Website_Header ();
         echo $header->getLogoForm($this->getRequest()->getParam('id', '0'));
     }
 

@@ -97,7 +97,6 @@ if (($this->facetsArray) and ( $this->numFound > 0)) {
                                                     $facetValueLabelArray = explode(Ccsd_Search_Solr::SOLR_FACET_SEPARATOR, $facetValueLabel);
                                                     $facetValueLabel = $this->escape($facetValueLabelArray [1]);
 
-
                                                     // Cas particulier auteurs
                                                     // Si on a pas un idHal texte
                                                     if (($facetValueLabelArray [0] == '') && ( $facet['fieldName'] == 'authIdHalFullName_fs')) {
@@ -161,7 +160,8 @@ if (($this->facetsArray) and ( $this->numFound > 0)) {
                                             } // iterate facets
                                             // tri par clé du tableau
                                             if ($facet ['fieldName'] == 'producedDateY_i') {
-                                                krsort($facetList, SORT_NUMERIC);
+                                                /** HAL   krsort($facetList, SORT_NUMERIC);  */
+                                                rsort($facetList); // SPM
                                             } else {
                                                 ksort($facetList);
                                             }

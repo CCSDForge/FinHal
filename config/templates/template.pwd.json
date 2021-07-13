@@ -31,15 +31,8 @@
     "ARCHIVAGE": {
         "HOST": "example.org",
         "PORT": 22,
-        "USER": "halnon",
-        "PWD": "ymous",
-        "SSH_PATH": "/pac/hal/VERS/dave/",
-        "LOG_PATH": "/logs/hal-archivage/",
-        "MAIL_SERVER": "smtp.example.org",
-        "MAIL_USERNAME": "dave@example.org",
-        "MAIL_PWD": "xxxxxx",
-        "MAIL_PROTOCOL": "SSL",
-        "MAIL_ADMINISTRATOR": "hal@example.org"
+        "USER": "anon",
+        "PWD": "ymous"
     },
     "REFBIBLIO":{
         "HOST" : "127.0.0.1",
@@ -53,11 +46,5 @@
         "NAME" : "xxxx",
         "USER" : "xxxx",
         "PWD" : "xxxx"
-    },
-    "FEATURES": {
-        "DOC_SUBMIT": true,
-        "DOC_MODERATE": true,
-        "DOC_CACHE": true,
-        "DOWNTIME_URL": "https://www.example.org/"
     }
 }

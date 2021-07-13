@@ -484,15 +484,7 @@ abstract class Aurehal_Controller_Referentiel extends Hal_Controller_Action
 
                 $this->_helper->layout()->disableLayout();
                 $this->_helper->viewRenderer->setNoRender();
-                /**
-                 * @uses Hal_Rdf_Author
-                 * @uses Hal_Rdf_Anrproject
-                 * @uses Hal_Rdf_Document
-                 * @uses Hal_Rdf_Domain
-                 * @uses Hal_Rdf_Europeanproject
-                 * @uses Hal_Rdf_Idhal
-                 * @uses Hal_Rdf_Journal
-                 */
+
                 $class = "Hal_Rdf_" . ucfirst($this->getRequest()->getControllerName());
                 /** @var Hal_Rdf_Abstract $rdf */
                 $rdf = new $class($id);

@@ -11,21 +11,17 @@ class Hal_Site_Test extends PHPUnit_Framework_TestCase
 
     /**
      * Test de constructions de sites
-     * @param array $params
      * @dataProvider provideConstruction
      */
     public function testConstruction($params)
     {
-        $site = new Hal_Site_Portail($params);
+        $site = new Hal_Site($params);
 
-        $this->assertEquals(Hal_Site::TYPE_PORTAIL, $site->getType());
-        $this->assertEquals('Test', $site->getShortName());
-        $this->assertEquals('Test en cours', $site->getFullName());
+        $this->assertEquals(Hal_Site::TYPE_UNDEFINED, $site->getType());
+        $this->assertEquals('Test', $site->getSite());
+        $this->assertEquals('Test en cours', $site->getName());
     }
 
-    /**
-     * @return array
-     */
     public function provideConstruction()
     {
         return [
@@ -39,9 +35,10 @@ class Hal_Site_Test extends PHPUnit_Framework_TestCase
      */
     public function testValidType()
     {
-        $webSite = new Hal_Site_Collection([]);
+        $webSite = new Hal_Site([]);
+        $webSite->setType('COLLECTION');
         $this->assertEquals(Hal_Site::TYPE_COLLECTION, $webSite->getType());
-        $webSite = new Hal_Site_Portail([]);
+        $webSite->setType('PORTAIL');
         $this->assertEquals(Hal_Site::TYPE_PORTAIL, $webSite->getType());
     }
 
@@ -71,16 +68,12 @@ class Hal_Site_Test extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_integer($webSite->getSid()));
 
         $this->assertEquals($webSite->getSid(), 1);
-    }
 
-    public function testSearch() {
-        $res = Hal_Site::search("INRIA");
-        $resIds = array_map(function ($x) { return $x['SID'];} , $res);
-        $this->assertContains(423, $resIds);
+        $webSite->setSid('mystring');
+        $this->assertEquals($webSite->getSid(), 0);
 
-        $res = Hal_Site::searchObj("INRIA");
-        $resIds = array_map(function ($x) { /** @var Hal_Site $x */return $x->getSid();} , $res);
-        $this->assertContains(423, $resIds);
+        $webSite->setSid("1");
+        $this->assertEquals($webSite->getSid(), 1);
 
     }
 }

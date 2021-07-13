@@ -44,7 +44,7 @@ class Hal_Document_Metadatas_Test extends PHPUnit_Framework_TestCase
 
         $docMetas->addMetasFromArray($result, "grobid", 0);
         $docMetas->save($docid, 0);
-        $docMetas->load($docid);
+        $docMetas->load($docid, null);
         $r = $docMetas->getMeta(null);
         unset($r['LINKEXT']);
         self::assertEquals($result, $r);

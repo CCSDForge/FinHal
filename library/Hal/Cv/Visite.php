@@ -48,7 +48,7 @@ class Hal_Cv_Visite
      */
     public static function get($idHal)
     {
-        $db = Hal_Db_Adapter_Stats::getAdapter(APPLICATION_ENV);
+        $db = Zend_Db_Table_Abstract::getDefaultAdapter();
         $sql = $db->select()
             ->from(self::COUNTER, 'SUM(COUNTER)')
             ->where('IDHAL = ?', (int)$idHal);

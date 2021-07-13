@@ -12,21 +12,10 @@ if (! (isset($this->document) && $this->document instanceof Hal_Document) ) {
     <div class="col-md-8">
 
         <?php // Identifiant de l'article  ?>
-        <?php if ($this->document->getId()) {
-
-            // Filtre le tableau des documents(versions) en supprimant le document actuel
-            $arrayDocVersions = $this->document->getDocVersions();
-            ksort($arrayDocVersions);
-            unset($arrayDocVersions[$this->document->getVersion()]);
-
-            // Vérifie si au moins une version est visible (bool)
-            $canView = !empty(array_filter($arrayDocVersions, function ($var) {
-                return (($var['DOCSTATUS'] == 11 || $var['DOCSTATUS'] == 111) || (Hal_Document_Acl::canView($this->document) && $var['DOCSTATUS'] != 11 && $var['DOCSTATUS'] != 111));
-            }));
-            ?>
+        <?php if ($this->document->getId()) { ?>
             <div class="btn-group dropdown">
                 <button type="button" class="btn btn-danger"><?php echo $this->document->getId(); ?>, <?php echo $this->translate('version') . ' ' . $this->document->getVersion(); ?></button>
-                <?php if (is_array($this->document->getDocVersions()) && count($this->document->getDocVersions()) > 1 && $canView) {
+                <?php if (is_array($this->document->getDocVersions()) && count($this->document->getDocVersions()) > 1) {
                     if (MODULE != SPACE_COLLECTION) {
                         $url = PREFIX_URL;
                     } else {
@@ -37,25 +26,12 @@ if (! (isset($this->document) && $this->document instanceof Hal_Document) ) {
                     <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu pull-right" style="margin:0px" role="menu">
+                    <ul class="dropdown-menu pull-right" role="menu">
                         <?php
-                        foreach ($arrayDocVersions as $version) {
-                            if ($version['VERSION'] == $this->document->getVersion()) { continue; }
-                            if ($version['DOCSTATUS'] != 11 && $version['DOCSTATUS'] != 111) {
-                                if (!Hal_Document_Acl::canView($this->document)) {
-                                    continue;
-                                } else {
-                                    ?>
-                                    <li title="<?php echo $this->document->statusToString($version['DOCSTATUS']);?>"><a style="font-style:italic; color: grey;" href="<?php echo $url . $this->document->getId() . 'v' . $version['VERSION'] ?>"><?php echo $this->translate('version') . ' ' . $version['VERSION']; ?></a>
-                                    </li>
-                                    <?php
-                                    }
-                            } else {
-                                ?>
-                                <li><a href="<?php echo $url . $this->document->getId() . 'v' . $version['VERSION'] ?>"><?php echo $this->translate('version') . ' ' . $version['VERSION']; ?></a></li>
-                                <?php
-                            }
-                         } ?>
+                         foreach (array_keys($this->document->getDocVersions()) as $version) {
+                            if ($version == $this->document->getVersion()) { continue; } ?>
+                            <li><a href="<?php echo $url . $this->document->getId() . 'v' . $version ?>"><?php echo $this->translate('version') . ' ' . $version; ?></a></li>
+                        <?php } ?>
                     </ul>
                 <?php
                 } ?>
@@ -385,6 +361,7 @@ if (! (isset($this->document) && $this->document instanceof Hal_Document) ) {
                     echo $fullType;
                     ?>
                 </div>
+                <div style="margin-left:116px;"><?php echo $this->document->getCitation(); ?></div>
             </div>
             <?php $domains = $this->document->getDomains(); ?>
             <?php if (count($domains)) { ?>
@@ -478,6 +455,9 @@ if (! (isset($this->document) && $this->document instanceof Hal_Document) ) {
             include 'widget-identifiants.phtml';
         } ?>
 
+        <!-- Données de la recherche -->
+        <?php include 'widget-data.phtml'; ?>
+
         <!-- Collections -->
         <?php include 'widget-collections.phtml'; ?>
 
@@ -495,12 +475,6 @@ if (! (isset($this->document) && $this->document instanceof Hal_Document) ) {
 
         <!-- Altmetrics -->
         <?php include 'widget-metrics.phtml'; ?>
-
-        <!-- Research Data -->
-        <?php if ($this->document->getMeta('researchdata')) {
-            include 'widget-researchdata.phtml';
-        }
-        ?>
     </div>
 </div>
 

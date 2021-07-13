@@ -84,7 +84,8 @@ if ($this->document->existFile()) {
                                 $imgSrc = $default->getImagetteUrl();
                             }
                             ?>
-                            <a href="<?php echo $href . $this->document->getUrlMainFile(); ?>" target="_blank">
+                            <!-- Ligne suivante est modifiée le 07/10/2020:  Id="imagedownload" est ajouté au element <a href=...-->
+                            <a href="<?php echo $href . $this->document->getUrlMainFile(); ?>" id="imagedownload" target="_blank">
                                 <img src="<?php echo $imgSrc?>" border="0" class="img-thumbnail"/>
                             </a>
                         </div>
@@ -92,7 +93,8 @@ if ($this->document->existFile()) {
                             <?php if ($embargo) { ?>
                                 <div class="label label-danger" style="white-space: normal; display:inline-block"><i class="glyphicon glyphicon-exclamation-sign"></i>&nbsp;<?php echo $this->translate('Fichier visible le');?> : <strong><?php echo ( $default->getDateVisible() == '9999-12-31' ) ? $this->translate('jamais') : $default->getDateVisible();?></strong></div>
                             <?php } else { ?>
-                                <a href="<?php echo $href . $this->document->getUrlMainFile(); ?>" target="_blank" data-toggle="tooltip" title="<?php echo $default->getName().' - '.$default->getSize(); ?>"><?php echo Ccsd_Tools::truncate($default->getName(), 30); ?></a>
+                                <!-- Ligne suivante est modifiée le 08/10/2020:  Id="filedownload" est ajouté au element <a href=...-->
+                                <a href="<?php echo $href . $this->document->getUrlMainFile(); ?>" id="filedownload" target="_blank" data-toggle="tooltip" title="<?php echo $default->getName().' - '.$default->getSize(); ?>"><?php echo Ccsd_Tools::truncate($default->getName(), 30); ?></a>
                             <?php } ?>
 
                             <?php if ($default->getOrigin()!= '') { ?>
